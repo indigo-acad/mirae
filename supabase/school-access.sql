@@ -23,82 +23,91 @@ revoke all on public.teachers, public.materials, public.assignments from anon, a
 
 -- проверка имени и PIN ученика сайта school
 create or replace function public._school_auth(p_name text, p_pin text)
-returns text language plpgsql security definer set search_path = public, extensions as $$
+returns text as $fn$
 declare r public.progress;
 begin
   select * into r from public.progress where site = 'school' and name = lower(trim(p_name));
   if not found or r.pin_hash <> crypt(p_pin, r.pin_hash) then raise exception 'wrong_pin'; end if;
   return r.name;
-end $$;
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
 
 create or replace function public._school_teacher(p_name text, p_pin text)
-returns text language plpgsql security definer set search_path = public, extensions as $$
+returns text as $fn$
 declare n text;
 begin
   n := public._school_auth(p_name, p_pin);
   if not exists (select 1 from public.teachers where name = n) then raise exception 'not_teacher'; end if;
   return n;
-end $$;
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
 
 create or replace function public.is_teacher(p_name text, p_pin text)
-returns boolean language plpgsql security definer set search_path = public, extensions as $$
+returns boolean as $fn$
 declare n text;
 begin
   n := public._school_auth(p_name, p_pin);
   return exists (select 1 from public.teachers where name = n);
-end $$;
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
 
 -- ученик: свои назначенные материалы
 create or replace function public.my_assignments(p_name text, p_pin text)
-returns jsonb language plpgsql security definer set search_path = public, extensions as $$
+returns jsonb as $fn$
 declare n text;
 begin
   n := public._school_auth(p_name, p_pin);
   return coalesce((select jsonb_agg(jsonb_build_object('id', a.material_id, 'due', a.due, 'note', a.note, 'assigned_at', a.assigned_at) order by a.assigned_at desc)
                    from public.assignments a where a.student = n), '[]'::jsonb);
-end $$;
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
 
 -- преподаватель
 create or replace function public.teacher_students(p_name text, p_pin text)
-returns jsonb language plpgsql security definer set search_path = public, extensions as $$
+returns jsonb as $fn$
 begin
   perform public._school_teacher(p_name, p_pin);
   return coalesce((select jsonb_agg(jsonb_build_object('name', p.name, 'updated_at', p.updated_at,
             'assigned', (select count(*) from public.assignments a where a.student = p.name)) order by p.name)
           from public.progress p where p.site = 'school'), '[]'::jsonb);
-end $$;
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
 
 create or replace function public.teacher_assignments(p_name text, p_pin text, p_student text)
-returns jsonb language plpgsql security definer set search_path = public, extensions as $$
+returns jsonb as $fn$
 begin
   perform public._school_teacher(p_name, p_pin);
   return coalesce((select jsonb_agg(jsonb_build_object('id', a.material_id, 'due', a.due, 'note', a.note) order by a.assigned_at desc)
           from public.assignments a where a.student = lower(trim(p_student))), '[]'::jsonb);
-end $$;
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
 
 create or replace function public.teacher_assign(p_name text, p_pin text, p_student text, p_material text, p_due date, p_note text)
-returns void language plpgsql security definer set search_path = public, extensions as $$
+returns void as $fn$
 begin
   perform public._school_teacher(p_name, p_pin);
   if not exists (select 1 from public.progress where site = 'school' and name = lower(trim(p_student))) then raise exception 'no_student'; end if;
   insert into public.assignments(student, material_id, due, note)
   values (lower(trim(p_student)), p_material, p_due, coalesce(p_note, ''))
   on conflict (student, material_id) do update set due = excluded.due, note = excluded.note;
-end $$;
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
 
 create or replace function public.teacher_unassign(p_name text, p_pin text, p_student text, p_material text)
-returns void language plpgsql security definer set search_path = public, extensions as $$
+returns void as $fn$
 begin
   perform public._school_teacher(p_name, p_pin);
   delete from public.assignments where student = lower(trim(p_student)) and material_id = p_material;
-end $$;
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
 
 create or replace function public.teacher_student_state(p_name text, p_pin text, p_student text)
-returns jsonb language plpgsql security definer set search_path = public, extensions as $$
+returns jsonb as $fn$
 begin
   perform public._school_teacher(p_name, p_pin);
   return (select state from public.progress where site = 'school' and name = lower(trim(p_student)));
-end $$;
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
 
 grant execute on function public.is_teacher(text, text) to anon;
 grant execute on function public.my_assignments(text, text) to anon;
