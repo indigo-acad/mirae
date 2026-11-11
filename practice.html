@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="css/style.css"><title>Доп. упражнения</title></head><body>
+<div id="topbar"></div>
+<header class="band"><div class="in"><small>Отработка</small><h1>Доп. упражнения</h1><p>Бери, если тема не закрепилась</p></div></header>
+<main><div class="card" style="margin-top:14px"><b>Фильтр по уроку</b><div class="opts" id="flt" style="margin-top:8px"></div></div>
+<div id="list" class="grid"></div></main>
+<script src="data/course.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script>
+<script>
+KR.topbar("practice");let cur=new URLSearchParams(location.search).get("l")||"all";
+function draw(){
+ const nos=[...new Set(PRACTICE_TOPICS.map(t=>t.lesson))];
+ document.getElementById("flt").innerHTML=[["all","Все"],...nos.map(n=>[String(n),n+"과"])].map(f=>`<button data-f="${f[0]}" class="${cur===f[0]?"sel":""}">${f[1]}</button>`).join("");
+ const taken=KR.user()?KR.taken():[];
+ document.getElementById("list").innerHTML=PRACTICE_TOPICS.filter(t=>cur==="all"||String(t.lesson)===cur).map(t=>{
+  if(!t.ready)return `<div class="card lcard lock"><div class="no">🔁</div><div class="mid"><b>${t.title}</b><div class="muted">${t.desc}</div></div><span class="badge">Скоро</span></div>`;
+  const p=KR.user()?KR.progress(t.id):{pct:0};const tk=taken.includes(t.id);
+  return `<div class="card"><span class="tag">${t.lesson}과</span><h3 style="margin:2px 0">${t.title}</h3><div class="muted">${t.desc}</div>${KR.bar(p.pct)}
+  <div class="done-row"><a class="btn pri" href="lesson.html?l=${t.id}">Начать</a><button data-take="${t.id}">${tk?"✓ В моих заданиях":"Взять в задания"}</button></div></div>`}).join("");
+}
+document.body.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.f){cur=b.dataset.f;draw()}
+ if(b.dataset.take){if(!KR.user()){location.href="auth.html";return}let a=KR.taken();a=a.includes(b.dataset.take)?a.filter(x=>x!==b.dataset.take):[...a,b.dataset.take];KR.setTaken(a);draw()}});
+draw();
+</script></body></html>

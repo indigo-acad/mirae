@@ -1,0 +1,13 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="css/style.css"><title>Основной курс</title></head><body>
+<div id="topbar"></div>
+<header class="band"><div class="in"><small id="sub"></small><h1 class="ko" id="ct"></h1><p>Основной курс идёт по учебнику, методику потом настроим под себя</p></div></header>
+<main><div id="list" class="grid" style="margin-top:14px"></div></main>
+<script src="data/course.js"></script><script src="data/l12-jiyo.js"></script><script src="js/config.js"></script><script src="js/common.js"></script>
+<script>
+KR.topbar("course");const C=COURSE;document.getElementById("ct").textContent=C.title;document.getElementById("sub").textContent=C.subtitle;
+document.getElementById("list").innerHTML=C.lessons.map(l=>{
+ if(!l.id)return `<div class="card lcard lock"><div class="no">${l.no}</div><div class="mid"><b>${l.no}과</b><div class="muted">Скоро</div></div><span class="badge">🔒</span></div>`;
+ const p=KR.user()?KR.progress(l.id):{pct:0,n:0,tot:0};
+ return `<div class="card"><div class="lcard"><div class="no">${l.no}</div><div class="mid"><b>${l.no}과 · <span class="ko">${l.title}</span></b><div class="muted">${KR.user()?p.n+" из "+p.tot+" блоков":"Войди, чтобы видеть прогресс"}</div>${KR.bar(p.pct)}</div></div>
+ <div class="done-row"><a class="btn pri" href="lesson.html?l=${l.id}">Открыть урок</a><a class="btn" href="practice.html?l=${l.no}">🔁 Доп. упражнения</a></div></div>`}).join("");
+</script></body></html>

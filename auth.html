@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="css/style.css"><title>Вход</title></head><body>
+<div id="topbar"></div>
+<header class="band"><div class="in"><small>한국어</small><h1>Личный кабинет</h1><p>Вход и регистрация</p></div></header>
+<main><div class="card login" style="margin-top:14px">
+<div class="tabs"><button id="tl" class="on">Вход</button><button id="tr">Регистрация</button></div>
+<input id="nm" class="name" placeholder="Имя" autocomplete="off">
+<input id="pin" class="name" type="password" inputmode="numeric" maxlength="8" placeholder="PIN-код (4–8 цифр)" autocomplete="off">
+<input id="em" class="name" type="email" placeholder="Email (по желанию)" style="display:none">
+<p id="msg" class="muted" style="min-height:22px"></p>
+<button class="pri" id="go" style="width:100%">Войти</button>
+<p class="note" style="margin-top:12px">Первый раз? Нажми «Регистрация» и придумай PIN. С тем же именем и PIN можно войти с любого устройства.</p>
+</div></main>
+<script src="js/config.js"></script><script src="js/common.js"></script>
+<script>
+let mode="login";const $=s=>document.querySelector(s);KR.topbar("cabinet");
+function setMode(m){mode=m;$("#tl").classList.toggle("on",m==="login");$("#tr").classList.toggle("on",m==="reg");$("#em").style.display=m==="reg"?"":"none";$("#go").textContent=m==="reg"?"Зарегистрироваться":"Войти";$("#msg").textContent=""}
+$("#tl").onclick=()=>setMode("login");$("#tr").onclick=()=>setMode("reg");
+let busy=false;
+$("#go").onclick=async()=>{if(busy)return;const n=$("#nm").value.trim(),p=$("#pin").value.trim(),m=$("#msg");
+ if(!n||!/^\d{4,8}$/.test(p)){m.textContent="Введи имя и PIN из 4–8 цифр.";return}
+ busy=true;m.textContent="Подождите…";
+ const r=mode==="reg"?await KR.register(n,p,$("#em").value.trim()):await KR.login(n,p);busy=false;
+ if(r.ok){location.href="cabinet.html";return}
+ m.textContent={taken:"Это имя уже занято. Выбери другое или войди.",bad:"Некорректные данные.",none:"Такого ученика нет. Зарегистрируйся.",pin:"Неверный PIN."}[r.err]||"Не получилось. Попробуй ещё раз."};
+document.addEventListener("keydown",e=>{if(e.key==="Enter")$("#go").click()});
+</script></body></html>
