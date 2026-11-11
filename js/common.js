@@ -84,7 +84,7 @@ window.KR={
     const el=document.getElementById("topbar");if(!el)return;const u=U();
     const icon='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-6 8-6s7 1.5 8 6"/></svg>';
     const a=(h,t,k)=>`<a href="${h}" class="${active===k?"on":""}">${t}</a>`;
-    el.innerHTML=`<div class="top"><a class="logo ko" href="index.html">한국어 <span>школа</span></a><nav>${a("course.html","Курс","course")}${a("practice.html","Доп. упражнения","practice")}<a href="${u?"cabinet.html":"auth.html"}" class="acc ${active==="cabinet"?"on":""}" title="Личный кабинет">${icon}<span class="cap">${u?u:"Войти"}</span></a></nav></div>`;
+    el.innerHTML=`<div class="top"><a class="logo" href="index.html">MIRAÉ<span>THE INDIGO LANGUAGE ACADEMY</span></a><nav>${a("course.html","Курс","course")}${a("practice.html","Доп. упражнения","practice")}<a href="${u?"cabinet.html":"auth.html"}" class="acc ${active==="cabinet"?"on":""}" title="Личный кабинет">${icon}<span class="cap">${u?u:"Войти"}</span></a></nav></div>`;
   },
   bar(p){return `<div class="bar"><div style="width:${p}%"></div></div>`}
 };
