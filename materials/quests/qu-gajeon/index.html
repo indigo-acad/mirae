@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>가전제품 — онлайн-задание</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== Настройки отчёта (для GitHub Pages) =====
+   Впишите токен бота и chat_id в CONFIG ниже — тогда результат уйдёт в Telegram.
+   Внутри просмотрщика claude.ai внешние запросы заблокированы, там работает кнопка «Скопировать отчёт». */
+:root{
+  --bg:#f4f1ea; --card:#fffdf8; --ink:#1f2a37; --muted:#6b7280; --line:#e6e0d4;
+  --accent:#2f6f73; --accent-soft:#dcecec; --warm:#e07a5f; --ok:#2e7d4f; --ok-soft:#e3f3e8; --bad:#c0392b; --bad-soft:#fbe5e2;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Nunito","Gowun Dodum",system-ui,sans-serif;line-height:1.55}
+.ko{font-family:"Gowun Dodum","Nunito",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+header.hero{background:var(--accent);color:#fff;border-radius:22px;padding:26px 22px;position:relative;overflow:hidden}
+header.hero h1{margin:0;font-size:30px;font-family:"Gowun Dodum",sans-serif;letter-spacing:.5px}
+header.hero p{margin:6px 0 0;opacity:.9}
+header.hero svg{position:absolute;right:-10px;bottom:-14px;opacity:.18}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:18px}
+h2{margin:0 0 4px;font-size:20px}
+h2 .num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--warm);color:#fff;font-size:15px;margin-right:8px;vertical-align:2px}
+.hint{color:var(--muted);font-size:14px;margin:0 0 14px}
+input[type=text],textarea,select{font:inherit;border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;background:#fff;color:var(--ink)}
+input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+button{font:inherit;font-weight:700;border:0;border-radius:12px;padding:10px 18px;cursor:pointer;background:var(--accent);color:#fff}
+button.ghost{background:var(--accent-soft);color:var(--accent)}
+button:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.score{font-weight:800;margin-left:auto;color:var(--accent)}
+.hidden{display:none!important}
+/* progress */
+.progress{display:flex;gap:6px;margin-top:16px}
+.progress span{flex:1;height:7px;border-radius:9px;background:var(--line)}
+.progress span.done{background:var(--warm)}
+/* task 1 matching */
+.match{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.col{display:flex;flex-direction:column;gap:8px}
+.tile{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;cursor:pointer;user-select:none;transition:.15s}
+.tile.ko{font-size:18px}
+.tile.sel{border-color:var(--accent);background:var(--accent-soft)}
+.tile.done{border-color:var(--ok);background:var(--ok-soft);color:var(--ok);cursor:default}
+.tile.wrong{animation:shake .35s;border-color:var(--bad);background:var(--bad-soft)}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+/* task 2 & 5 choices */
+.q{padding:12px 0;border-bottom:1px dashed var(--line)}
+.q:last-child{border-bottom:0}
+.q .text{font-size:18px;margin-bottom:8px}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opt{border:1.5px solid var(--line);background:#fff;color:var(--ink);font-weight:400;padding:7px 14px;border-radius:999px}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:700}
+.opt.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok);font-weight:700}
+.opt.wrongpick{border-color:var(--bad);background:var(--bad-soft);color:var(--bad);text-decoration:line-through}
+.blank{display:inline-block;min-width:70px;border-bottom:2px solid var(--accent);text-align:center;color:var(--accent);font-weight:700}
+/* task 3 sort */
+.pool{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;padding:10px;border:1.5px dashed var(--line);border-radius:12px;margin-bottom:12px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;cursor:pointer;font-size:17px}
+.chip.sel{border-color:var(--warm);background:#fbe9e3}
+.chip.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.chip.wrongpick{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.bins{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bin{border:1.5px solid var(--line);border-radius:14px;padding:10px;min-height:120px;background:#fff;cursor:pointer}
+.bin h3{margin:0 0 8px;font-size:17px;text-align:center}
+.bin .items{display:flex;flex-wrap:wrap;gap:6px}
+.bin.ready{border-color:var(--warm);background:#fff7f3}
+/* task 4 dialog */
+.dlg p{margin:8px 0;font-size:17px}
+.dlg b{color:var(--warm)}
+.dlg select{padding:4px 6px;font-size:16px}
+.dlg select.right{border-color:var(--ok);background:var(--ok-soft)}
+.dlg select.wrongpick{border-color:var(--bad);background:var(--bad-soft)}
+.bank{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.bank span{background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:3px 10px}
+/* reading */
+.reading{background:#faf6ec;border-left:4px solid var(--warm);border-radius:10px;padding:14px 16px;font-size:17px;margin-bottom:10px}
+.fb{margin-top:10px;font-size:14px;color:var(--muted)}
+/* result */
+.result-big{font-size:46px;font-weight:800;color:var(--accent);margin:4px 0}
+pre.report{white-space:pre-wrap;background:#f6f3ec;border-radius:12px;padding:12px;font-size:14px;font-family:inherit}
+@media (max-width:560px){.bins{grid-template-columns:1fr}.match{gap:8px}.tile{padding:9px}}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+
+<header class="hero">
+  <h1 class="ko">우리 집 가전제품</h1>
+  <p>Онлайн-задание: бытовая техника · уровень 2급</p>
+  <svg width="150" height="150" viewBox="0 0 100 100" fill="#fff" aria-hidden="true">
+    <rect x="18" y="8" width="44" height="84" rx="6"/><rect x="66" y="40" width="28" height="52" rx="5"/>
+  </svg>
+</header>
+
+<!-- START -->
+<section class="card" id="start">
+  <h2>Вход <span class="ko">로그인</span></h2>
+  <p class="hint">Впиши имя и PIN-код из 4 цифр. Первый раз — придумай PIN и запомни его: с ним ты продолжишь задание на любом устройстве. Если ты уже входил(а) в тренажёры, используй те же имя и PIN.</p>
+  <div class="row">
+    <input type="text" id="name" placeholder="Имя" autocomplete="off" style="flex:2;min-width:160px">
+    <input type="password" id="pin" inputmode="numeric" maxlength="8" placeholder="PIN ••••" autocomplete="off" style="flex:1;min-width:110px">
+    <button id="go">Войти</button>
+  </div>
+  <p class="fb" id="login-msg" style="min-height:1.2em"></p>
+</section>
+
+<div id="tasks" class="hidden">
+  <div class="row" style="margin-top:16px">
+    <span class="fb" id="who" style="margin:0"></span>
+    <span class="fb" id="saved" style="margin:0 0 0 auto">💾 Прогресс сохраняется автоматически</span>
+    <button class="ghost" id="reset" style="padding:6px 12px;font-size:14px">Начать заново</button>
+    <button class="ghost" id="logout" style="padding:6px 12px;font-size:14px">Выйти</button>
+  </div>
+  <div class="progress" id="progress"></div>
+
+  <!-- TASK 1 -->
+  <section class="card" data-task="1">
+    <h2><span class="num">1</span><span class="ko">단어 짝 찾기</span></h2>
+    <p class="hint">Найди пары: нажми слово слева, потом перевод справа.</p>
+    <div class="match"><div class="col" id="m-ko"></div><div class="col" id="m-ru"></div></div>
+    <div class="row" style="margin-top:12px"><span class="fb" id="t1-fb">Ошибок: 0</span><span class="score" id="t1-score"></span></div>
+  </section>
+
+  <!-- TASK 2 -->
+  <section class="card" data-task="2">
+    <h2><span class="num">2</span><span class="ko">알맞은 동사를 고르세요</span></h2>
+    <p class="hint">Выбери подходящий глагол.</p>
+    <div id="t2"></div>
+    <div class="row" style="margin-top:12px"><button id="t2-check">Проверить</button><span class="score" id="t2-score"></span></div>
+  </section>
+
+  <!-- TASK 3 -->
+  <section class="card" data-task="3">
+    <h2><span class="num">3</span><span class="ko">어디에 있어요?</span></h2>
+    <p class="hint">Разложи технику по комнатам: нажми слово, потом комнату. Нажми на слово в комнате, чтобы вернуть его.</p>
+    <div class="pool ko" id="pool"></div>
+    <div class="bins ko" id="bins"></div>
+    <div class="row" style="margin-top:12px"><button id="t3-check">Проверить</button><span class="score" id="t3-score"></span></div>
+  </section>
+
+  <!-- TASK 4 -->
+  <section class="card" data-task="4">
+    <h2><span class="num">4</span><span class="ko">가전제품 매장에서</span></h2>
+    <p class="hint">В магазине техники. Заполни пропуски словами из рамки.</p>
+    <div class="bank ko" id="bank"></div>
+    <div class="dlg ko" id="dlg"></div>
+    <div class="row" style="margin-top:12px"><button id="t4-check">Проверить</button><span class="score" id="t4-score"></span></div>
+  </section>
+
+  <!-- TASK 5 -->
+  <section class="card" data-task="5">
+    <h2><span class="num">5</span><span class="ko">읽고 O/X 하세요</span></h2>
+    <p class="hint">Прочитай текст. Верно (O) или неверно (X)?</p>
+    <div class="reading ko">
+      저는 지난달에 새 원룸으로 이사했어요. 원룸에 냉장고, 세탁기, 에어컨이 있어서 따로 살 필요가 없었어요. 하지만 전자레인지와 밥솥은 없어서 인터넷으로 주문했어요. 이틀 후에 배송이 왔어요.<br><br>
+      그런데 어제 세탁기가 고장 났어요. 빨래를 돌렸는데 물이 빠지지 않았어요. 집주인에게 연락했더니 수리 기사님을 불러 주셨어요. 기사님이 오늘 오셔서 30분 만에 고쳐 주셨어요. 수리비는 집주인이 냈어요.<br><br>
+      요즘 날씨가 더워서 에어컨을 매일 켜는데 전기 요금이 걱정이에요.
+    </div>
+    <div id="t5"></div>
+    <div class="row" style="margin-top:12px"><button id="t5-check">Проверить</button><span class="score" id="t5-score"></span></div>
+  </section>
+
+  <!-- TASK 6 -->
+  <section class="card" data-task="6">
+    <h2><span class="num">6</span><span class="ko">우리 집 가전제품을 소개해 보세요</span></h2>
+    <p class="hint">Напиши 3–5 предложений: какая техника есть у тебя дома, чем пользуешься чаще всего, что хочешь купить. Это задание проверит преподаватель.</p>
+    <textarea id="t6" class="ko" rows="5" style="width:100%" placeholder="우리 집에는 ...이/가 있어요. 저는 ...을/를 제일 자주 써요. ..."></textarea>
+    <div class="row" style="margin-top:6px"><span class="fb" id="t6-count">0 자</span></div>
+  </section>
+
+  <section class="card" style="text-align:center">
+    <button id="finish" style="padding:13px 30px;font-size:17px">Завершить и получить результат</button>
+    <p class="fb" id="finish-hint">Сначала нажми «Проверить» в заданиях 2–5 и закончи задание 1.</p>
+  </section>
+</div>
+
+<!-- RESULT -->
+<section class="card hidden" id="result" style="text-align:center">
+  <h2 class="ko">수고했어요! 👏</h2>
+  <div class="result-big" id="total"></div>
+  <div id="breakdown" class="fb"></div>
+  <pre class="report" id="report" style="text-align:left"></pre>
+  <div class="row" style="justify-content:center">
+    <button id="copy">Скопировать отчёт</button>
+    <button class="ghost" id="again">Пройти ещё раз</button>
+    <button class="ghost" id="logout2">Выйти</button>
+  </div>
+  <p class="fb" id="send-status"></p>
+</section>
+
+</div>
+
+<script>
+const SB = { url:"https://nusfkwtmnbhnbnckhrfk.supabase.co", key:"sb_publishable_UmWyFo7ciEc-m9x1ZIfkNw_yeQQAgf8", site:"quest-gajeon" };
+const CONFIG = { TELEGRAM_BOT_TOKEN: "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU", TELEGRAM_CHAT_ID: "347625701" };
+
+const $ = s => document.querySelector(s);
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const results = {}; // task -> {got, max, details}
+let studentName = "";
+
+/* ---------- DATA ---------- */
+const WORDS = [
+  ["냉장고","холодильник"],["세탁기","стиральная машина"],["건조기","сушильная машина"],
+  ["청소기","пылесос"],["전자레인지","микроволновка"],["밥솥","рисоварка"],
+  ["에어컨","кондиционер"],["선풍기","вентилятор"],["다리미","утюг"],
+  ["드라이기","фен"],["식기세척기","посудомоечная машина"],["공기청정기","очиститель воздуха"]
+];
+const T2 = [
+  ["너무 더워요. 에어컨 좀 ___ 주세요.", ["켜","꺼","넣어"], 0],
+  ["빨래가 많아서 세탁기를 ___.", ["다렸어요","돌렸어요","데웠어요"], 1],
+  ["셔츠가 구겨져서 다리미로 ___.", ["말렸어요","씻었어요","다렸어요"], 2],
+  ["머리를 감은 후에 드라이기로 머리를 ___.", ["말려요","다려요","끊어요"], 0],
+  ["음식이 식어서 전자레인지에 ___.", ["얼렸어요","데웠어요","빨았어요"], 1],
+  ["우유는 냉장고에 ___.", ["켜세요","돌리세요","넣으세요"], 2],
+  ["세탁기가 갑자기 안 돌아가요. ___ 것 같아요.", ["고장 난","충전된","설치한"], 0],
+  ["휴대폰 배터리가 없어요. ___ 해야 돼요.", ["수리","충전","배송"], 1],
+  ["집에 먼지가 많아서 청소기를 ___.", ["돌렸어요","다렸어요","데웠어요"], 0],
+  ["외출할 때 텔레비전을 꼭 ___.", ["켜세요","끄세요","넣으세요"], 1]
+];
+const BINS = {
+  "부엌": ["냉장고","전자레인지","밥솥","식기세척기"],
+  "거실": ["텔레비전","에어컨","선풍기","공기청정기"],
+  "세탁실·욕실": ["세탁기","건조기","드라이기","다리미"]
+};
+const BANK = ["냉장고","고장","용량","소음","에너지 효율","할인","배송","설치"];
+const DLG = [
+  ["직원","어서 오세요. 뭘 찾으세요?"],
+  ["손님","{0}를 사려고 해요. 지금 쓰는 게 10년이 돼서 자주 {1}이 나요."],
+  ["직원","가족이 몇 명이세요? 가족이 많으면 {2}이 큰 게 좋아요."],
+  ["손님","네 명이에요. 그리고 밤에 시끄러우면 안 돼요."],
+  ["직원","이 모델은 {3}이 거의 없어요. {4}도 1등급이라서 전기 요금이 적게 나와요."],
+  ["손님","가격은 얼마예요?"],
+  ["직원","원래 200만 원인데 이번 주까지 20% {5}해요."],
+  ["손님","좋네요. {6}은 언제 돼요?"],
+  ["직원","모레 도착하고, 기사님이 {7}도 해 드려요."]
+];
+const T5 = [
+  ["이 사람은 냉장고를 새로 샀어요.", false],
+  ["전자레인지는 인터넷으로 샀어요.", true],
+  ["세탁기에서 물이 빠지지 않았어요.", true],
+  ["수리 기사님은 어제 왔어요.", false],
+  ["수리비는 이 사람이 냈어요.", false],
+  ["이 사람은 전기 요금이 걱정돼요.", true]
+];
+
+/* ---------- PROGRESS ---------- */
+function drawProgress(){
+  const p = $("#progress"); p.innerHTML = "";
+  for (let i=1;i<=5;i++){ const s=document.createElement("span"); if(results[i]) s.className="done"; p.appendChild(s); }
+  const ready = [1,2,3,4,5].every(i=>results[i]);
+  $("#finish").disabled = !ready;
+  $("#finish-hint").classList.toggle("hidden", ready);
+}
+
+/* ---------- TASK 1 ---------- */
+let t1Sel = null, t1Mistakes = 0, t1Done = 0;
+function initT1(){
+  t1Sel=null; t1Mistakes=0; t1Done=0;
+  const ko=$("#m-ko"), ru=$("#m-ru"); ko.innerHTML=""; ru.innerHTML="";
+  $("#t1-fb").textContent="Ошибок: 0"; $("#t1-score").textContent="";
+  shuffle(WORDS).forEach(([k])=>{ const d=document.createElement("div"); d.className="tile ko"; d.textContent=k; d.dataset.k=k; ko.appendChild(d); });
+  shuffle(WORDS).forEach(([k,r])=>{ const d=document.createElement("div"); d.className="tile"; d.textContent=r; d.dataset.k=k; ru.appendChild(d); });
+  ko.onclick = e => { const t=e.target.closest(".tile"); if(!t||t.classList.contains("done")) return;
+    ko.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel")); t.classList.add("sel"); t1Sel=t; };
+  ru.onclick = e => { const t=e.target.closest(".tile"); if(!t||t.classList.contains("done")||!t1Sel) return;
+    if (t.dataset.k===t1Sel.dataset.k){ t.classList.add("done"); t1Sel.classList.remove("sel"); t1Sel.classList.add("done"); t1Sel=null; t1Done++; save();
+      if (t1Done===WORDS.length){ const got=Math.max(0,WORDS.length-t1Mistakes);
+        results[1]={got,max:WORDS.length,details:`ошибок при подборе: ${t1Mistakes}`};
+        $("#t1-score").textContent=`${got} / ${WORDS.length}`; drawProgress(); save(); } }
+    else { t1Mistakes++; $("#t1-fb").textContent="Ошибок: "+t1Mistakes; t.classList.remove("wrong"); void t.offsetWidth; t.classList.add("wrong"); save(); }
+  };
+}
+
+/* ---------- TASK 2 ---------- */
+function choiceBlock(container, items, render){
+  container.innerHTML="";
+  items.forEach((it,i)=>{
+    const q=document.createElement("div"); q.className="q"; q.innerHTML=render(it,i);
+    const opts=document.createElement("div"); opts.className="opts ko";
+    it.opts.forEach((o,j)=>{ const b=document.createElement("button"); b.className="opt"; b.textContent=o; b.dataset.j=j;
+      b.onclick=()=>{ if(q.dataset.locked) return; opts.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); q.dataset.pick=j; save(); };
+      opts.appendChild(b); });
+    q.appendChild(opts); container.appendChild(q);
+  });
+}
+function checkChoices(container, items, taskNo, scoreEl, label){
+  const qs=[...container.querySelectorAll(".q")];
+  if (qs.some(q=>q.dataset.pick===undefined)) { $(scoreEl).textContent="Ответь на все вопросы"; return; }
+  let got=0; const wrong=[];
+  qs.forEach((q,i)=>{ q.dataset.locked=1; const pick=+q.dataset.pick, ans=items[i].ans;
+    q.querySelectorAll(".opt").forEach((b,j)=>{ b.classList.remove("sel"); if(j===ans) b.classList.add("right"); else if(j===pick) b.classList.add("wrongpick"); });
+    if(pick===ans) got++; else wrong.push(`${i+1} (${label(items[i],pick)})`);
+  });
+  results[taskNo]={got,max:items.length,details: wrong.length?"ошибки: "+wrong.join(", "):"без ошибок"};
+  $(scoreEl).textContent=`${got} / ${items.length}`; drawProgress(); save();
+}
+const t2Items = T2.map(([s,opts,ans])=>({s,opts,ans}));
+function initT2(){
+  choiceBlock($("#t2"), t2Items, (it,i)=>`<div class="text ko">${i+1}. ${it.s.replace("___",'<span class="blank">?</span>')}</div>`);
+  $("#t2-score").textContent="";
+}
+$("#t2-check").onclick=()=>checkChoices($("#t2"), t2Items, 2, "#t2-score", (it,p)=>`выбрано «${it.opts[p]}»`);
+
+/* ---------- TASK 3 ---------- */
+let t3Sel=null;
+function initT3(){
+  t3Sel=null; $("#t3-score").textContent="";
+  const pool=$("#pool"), bins=$("#bins"); pool.innerHTML=""; bins.innerHTML="";
+  const all=Object.values(BINS).flat();
+  shuffle(all).forEach(w=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=w; pool.appendChild(c); });
+  Object.keys(BINS).forEach(name=>{ const b=document.createElement("div"); b.className="bin"; b.dataset.bin=name;
+    b.innerHTML=`<h3>${name}</h3><div class="items"></div>`; bins.appendChild(b); });
+  const clearSel=()=>{ document.querySelectorAll(".chip.sel").forEach(x=>x.classList.remove("sel")); bins.querySelectorAll(".bin").forEach(b=>b.classList.remove("ready")); };
+  pool.onclick=e=>{ const c=e.target.closest(".chip"); if(!c||results[3]) return; clearSel(); c.classList.add("sel"); t3Sel=c; bins.querySelectorAll(".bin").forEach(b=>b.classList.add("ready")); };
+  bins.onclick=e=>{ if(results[3]) return;
+    const chip=e.target.closest(".chip");
+    if(chip && !t3Sel){ pool.appendChild(chip); save(); return; }
+    const bin=e.target.closest(".bin"); if(!bin||!t3Sel) return;
+    bin.querySelector(".items").appendChild(t3Sel); clearSel(); t3Sel=null; save(); };
+}
+$("#t3-check").onclick=()=>{
+  if (results[3]) return;
+  if ($("#pool").children.length){ $("#t3-score").textContent="Разложи все слова"; return; }
+  let got=0,total=0; const wrong=[];
+  document.querySelectorAll(".bin").forEach(b=>{ b.querySelectorAll(".chip").forEach(c=>{ total++;
+    if(BINS[b.dataset.bin].includes(c.textContent)){got++;c.classList.add("right");} else {c.classList.add("wrongpick"); wrong.push(`${c.textContent}→${b.dataset.bin}`);} }); });
+  results[3]={got,max:total,details:wrong.length?"ошибки: "+wrong.join(", "):"без ошибок"};
+  $("#t3-score").textContent=`${got} / ${total}`; drawProgress(); save();
+};
+
+/* ---------- TASK 4 ---------- */
+function initT4(){
+  $("#t4-score").textContent="";
+  $("#bank").innerHTML = shuffle(BANK).map(w=>`<span>${w}</span>`).join("");
+  const opts = '<option value="">———</option>'+[...BANK].sort((a,b)=>a.localeCompare(b,"ko")).map(w=>`<option>${w}</option>`).join("");
+  $("#dlg").innerHTML = DLG.map(([who,line])=>`<p><b>${who}:</b> ${line.replace(/\{(\d)\}/g,(m,n)=>`<select data-n="${n}">${opts}</select>`)}</p>`).join("");
+}
+$("#t4-check").onclick=()=>{
+  if (results[4]) return;
+  const sels=[...document.querySelectorAll("#dlg select")];
+  if (sels.some(s=>!s.value)){ $("#t4-score").textContent="Заполни все пропуски"; return; }
+  let got=0; const wrong=[];
+  sels.forEach(s=>{ const ok=s.value===BANK[+s.dataset.n]; s.disabled=true; s.classList.add(ok?"right":"wrongpick");
+    if(ok) got++; else { wrong.push(`${+s.dataset.n+1}: «${s.value}» вместо «${BANK[+s.dataset.n]}»`); s.title="Правильно: "+BANK[+s.dataset.n]; } });
+  results[4]={got,max:sels.length,details:wrong.length?"ошибки: "+wrong.join("; "):"без ошибок"};
+  $("#t4-score").textContent=`${got} / ${sels.length}`+(wrong.length?" · наведи/нажми на красный пропуск":""); drawProgress(); save();
+};
+$("#dlg").addEventListener("change", save);
+
+/* ---------- TASK 5 ---------- */
+const t5Items = T5.map(([s,v])=>({s,opts:["O","X"],ans:v?0:1}));
+function initT5(){
+  choiceBlock($("#t5"), t5Items, (it,i)=>`<div class="text ko">${i+1}. ${it.s}</div>`);
+  $("#t5-score").textContent="";
+}
+$("#t5-check").onclick=()=>checkChoices($("#t5"), t5Items, 5, "#t5-score", (it,p)=>it.opts[p]);
+
+/* ---------- TASK 6 ---------- */
+$("#t6").addEventListener("input",e=>{ $("#t6-count").textContent = e.target.value.replace(/\s/g,"").length+" 자"; save(); });
+
+/* ---------- SAVE / RESTORE ---------- */
+const KEY="gajeon-progress-v1";
+let restoring=false, finished=null;
+function collect(){
+  return {
+    name: studentName,
+    t1: { done:[...document.querySelectorAll("#m-ko .tile.done")].map(t=>t.dataset.k), mistakes:t1Mistakes, checked:!!results[1] },
+    t2: { picks:[...document.querySelectorAll("#t2 .q")].map(q=>q.dataset.pick ?? null), checked:!!results[2] },
+    t3: { placed:Object.fromEntries([...document.querySelectorAll(".bin .chip")].map(c=>[c.textContent,c.closest(".bin").dataset.bin])), checked:!!results[3] },
+    t4: { values:[...document.querySelectorAll("#dlg select")].map(x=>x.value), checked:!!results[4] },
+    t5: { picks:[...document.querySelectorAll("#t5 .q")].map(q=>q.dataset.pick ?? null), checked:!!results[5] },
+    t6: $("#t6").value,
+    finished
+  };
+}
+/* --- облако (Supabase): load_progress / save_progress с проверкой PIN --- */
+let studentPin="", cloudOk=null, cloudTimer=null;
+async function rpc(fn, body){
+  const r=await fetch(`${SB.url}/rest/v1/rpc/${fn}`,{method:"POST",headers:{"Content-Type":"application/json",apikey:SB.key},body:JSON.stringify(body)});
+  const t=await r.text();
+  if(!r.ok){ const e=new Error(/wrong_pin/.test(t)?"wrong_pin":"server"); throw e; }
+  return t?JSON.parse(t):null;
+}
+const cloudLoad = ()=>rpc("load_progress",{p_site:SB.site,p_name:studentName,p_pin:studentPin});
+const cloudSave = st=>rpc("save_progress",{p_site:SB.site,p_name:studentName,p_pin:studentPin,p_state:st});
+function setStatus(){ const el=$("#saved");
+  el.textContent = cloudOk===true ? "☁️✓ Сохранено в облаке" : cloudOk===false ? "⚠️ Сохранено только на этом устройстве" : "💾 Сохраняю…"; }
+
+function save(){
+  if (restoring || !studentName) return;
+  const st=collect();
+  try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e){}
+  cloudOk=null; setStatus();
+  clearTimeout(cloudTimer);
+  cloudTimer=setTimeout(async()=>{ try{ await cloudSave(collect()); cloudOk=true; }catch(e){ cloudOk=false; } setStatus(); },700);
+}
+function loadSaved(){ try { return JSON.parse(localStorage.getItem(KEY)); } catch(e){ return null; } }
+function clearSaved(){ try { localStorage.removeItem(KEY); } catch(e){} }
+const CRED="gajeon-login-v1";
+function saveCred(){ try{ localStorage.setItem(CRED, JSON.stringify({n:studentName,p:studentPin})); }catch(e){} }
+function loadCred(){ try{ return JSON.parse(localStorage.getItem(CRED)); }catch(e){ return null; } }
+function clearCred(){ try{ localStorage.removeItem(CRED); }catch(e){} }
+
+function restorePicks(container, picks){
+  [...container.querySelectorAll(".q")].forEach((q,i)=>{ const p=picks?.[i]; if(p===null||p===undefined) return;
+    q.dataset.pick=p; q.querySelectorAll(".opt")[+p]?.classList.add("sel"); });
+}
+function restore(st){
+  restoring=true;
+  // 1
+  const done=new Set(st.t1?.done||[]);
+  t1Mistakes=st.t1?.mistakes||0; $("#t1-fb").textContent="Ошибок: "+t1Mistakes;
+  document.querySelectorAll("#m-ko .tile, #m-ru .tile").forEach(t=>{ if(done.has(t.dataset.k)) t.classList.add("done"); });
+  t1Done=done.size;
+  if (t1Done===WORDS.length){ const got=Math.max(0,WORDS.length-t1Mistakes);
+    results[1]={got,max:WORDS.length,details:`ошибок при подборе: ${t1Mistakes}`}; $("#t1-score").textContent=`${got} / ${WORDS.length}`; }
+  // 2
+  restorePicks($("#t2"), st.t2?.picks); if (st.t2?.checked) $("#t2-check").click();
+  // 3
+  const placed=st.t3?.placed||{};
+  document.querySelectorAll("#pool .chip").forEach(c=>{ const b=placed[c.textContent]; if(b) document.querySelector(`.bin[data-bin="${b}"] .items`)?.appendChild(c); });
+  if (st.t3?.checked) $("#t3-check").click();
+  // 4
+  const sels=[...document.querySelectorAll("#dlg select")]; (st.t4?.values||[]).forEach((v,i)=>{ if(sels[i]) sels[i].value=v; });
+  if (st.t4?.checked) $("#t4-check").click();
+  // 5
+  restorePicks($("#t5"), st.t5?.picks); if (st.t5?.checked) $("#t5-check").click();
+  // 6
+  $("#t6").value=st.t6||""; $("#t6-count").textContent=$("#t6").value.replace(/\s/g,"").length+" 자";
+  finished=st.finished||null;
+  drawProgress();
+  restoring=false;
+}
+
+/* ---------- FLOW ---------- */
+function initAll(){ for (const k in results) delete results[k]; finished=null; initT1(); initT2(); initT3(); initT4(); initT5(); $("#t6").value=""; $("#t6-count").textContent="0 자"; drawProgress(); }
+function openTasks(){ $("#start").classList.add("hidden"); $("#result").classList.add("hidden"); $("#tasks").classList.remove("hidden"); $("#who").textContent="👤 "+studentName; }
+function enter(st){
+  openTasks(); initAll();
+  if (st) restore(st);
+  if (finished && [1,2,3,4,5].every(i=>results[i])){
+    showResult(buildReport(finished.time));
+    $("#send-status").textContent = finished.sent ? "✅ Отчёт уже был отправлен преподавателю" : "Скопируй отчёт и пришли его преподавателю.";
+  }
+  setStatus();
+}
+async function login(n, p, auto){
+  const msg=$("#login-msg"), btn=$("#go");
+  studentName=n; studentPin=p; msg.textContent="Вхожу…"; btn.disabled=true;
+  const local=loadSaved(); const localMine = local && local.name && local.name.toLowerCase()===n.toLowerCase() ? local : null;
+  let st=null;
+  try{
+    st = await cloudLoad(); cloudOk=true;
+    if (!st && localMine) st=localMine;           // новый в облаке, но есть начатое на этом устройстве
+  }catch(e){
+    if (e.message==="wrong_pin"){ btn.disabled=false; studentName=""; studentPin="";
+      if(auto){ clearCred(); msg.textContent=""; } else msg.textContent="❌ Неверный PIN для этого имени. Попробуй ещё раз."; return; }
+    cloudOk=false; st=localMine;                  // нет связи — работаем локально
+  }
+  btn.disabled=false; msg.textContent="";
+  saveCred();
+  if (st) st.name=n;
+  enter(st);
+  save();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("#go").onclick=()=>{
+  const n=$("#name").value.trim(), p=$("#pin").value.trim();
+  if(!n){ $("#name").focus(); return; }
+  if(!/^\d{4,8}$/.test(p)){ $("#login-msg").textContent="PIN — 4 цифры"; $("#pin").focus(); return; }
+  login(n,p,false);
+};
+$("#name").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#pin").focus(); });
+$("#pin").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#go").click(); });
+function logout(){
+  clearTimeout(cloudTimer); clearCred(); clearSaved();
+  studentName=""; studentPin=""; cloudOk=null;
+  $("#tasks").classList.add("hidden"); $("#result").classList.add("hidden"); $("#start").classList.remove("hidden");
+  $("#name").value=""; $("#pin").value=""; $("#login-msg").textContent="";
+}
+$("#logout").onclick=logout; $("#logout2").onclick=logout;
+
+const TITLES={1:"Пары слов",2:"Глаголы",3:"По комнатам",4:"Диалог в магазине",5:"Текст O/X"};
+function buildReport(time){
+  let got=0,max=0; const lines=[];
+  for(let i=1;i<=5;i++){ const r=results[i]; got+=r.got; max+=r.max; lines.push(`${i}. ${TITLES[i]}: ${r.got}/${r.max} — ${r.details}`); }
+  const pct=Math.round(got/max*100);
+  const essay=$("#t6").value.trim()||"(не написано)";
+  return {got,max,pct,text:`📋 가전제품 — бытовая техника\n👤 ${studentName}\n🕒 ${time}\n\nИтог: ${got}/${max} (${pct}%)\n${lines.join("\n")}\n\n6. Письмо:\n${essay}`};
+}
+function showResult(r){
+  $("#total").textContent=`${r.got} / ${r.max}`;
+  $("#breakdown").textContent = r.pct>=90?"훌륭해요! Отлично!": r.pct>=70?"잘했어요! Хорошо!":"Повтори слова и попробуй ещё раз 💪";
+  $("#report").textContent=r.text;
+  $("#start").classList.add("hidden"); $("#tasks").classList.add("hidden"); $("#result").classList.remove("hidden");
+}
+$("#finish").onclick=async()=>{
+  finished={ time:new Date().toLocaleString("ru-RU"), sent:false };
+  const r=buildReport(finished.time); showResult(r); window.scrollTo({top:0,behavior:"smooth"});
+  const st=$("#send-status"); st.textContent="";
+  if (CONFIG.TELEGRAM_BOT_TOKEN && CONFIG.TELEGRAM_CHAT_ID){
+    try{ const res=await fetch(`https://api.telegram.org/bot${CONFIG.TELEGRAM_BOT_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:CONFIG.TELEGRAM_CHAT_ID,text:r.text})});
+      finished.sent=res.ok; st.textContent = res.ok?"✅ Отчёт отправлен преподавателю":"Не удалось отправить — скопируй отчёт и пришли преподавателю."; }
+    catch(e){ st.textContent="Не удалось отправить — скопируй отчёт и пришли преподавателю."; }
+  } else st.textContent="Скопируй отчёт и пришли его преподавателю.";
+  save();
+};
+$("#copy").onclick=async()=>{ try{ await navigator.clipboard.writeText($("#report").textContent); $("#copy").textContent="Скопировано ✓"; }
+  catch(e){ const r=document.createRange(); r.selectNodeContents($("#report")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); $("#copy").textContent="Выделено — нажми Ctrl+C"; } };
+function startOver(){ clearSaved(); $("#copy").textContent="Скопировать отчёт"; openTasks(); initAll(); save(); window.scrollTo({top:0,behavior:"smooth"}); }
+$("#again").onclick=startOver;
+let resetArmed=false;
+$("#reset").onclick=()=>{
+  if(!resetArmed){ resetArmed=true; $("#reset").textContent="Точно? Ответы сотрутся — нажми ещё раз"; setTimeout(()=>{resetArmed=false;$("#reset").textContent="Начать заново";},4000); return; }
+  resetArmed=false; $("#reset").textContent="Начать заново"; startOver();
+};
+
+/* ---------- ON LOAD: автовход ---------- */
+(function(){ const c=loadCred(); if(c && c.n && c.p){ $("#name").value=c.n; login(c.n,c.p,true); } })();
+</script>
+</body>
+</html>

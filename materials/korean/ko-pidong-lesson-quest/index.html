@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🗝 Квест · 피동</title>
+<style>
+  :root{--ink:#1d2433;--muted:#667085;--line:#e4e7ec;--bg:#f5f6fa;--card:#fff;--accent:#2f5bea;--ok:#1f9d55;--okbg:#e9f8ef;--bad:#d64545;--badbg:#fdeeee}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  .wrap{max-width:820px;margin:0 auto;padding:18px 14px 80px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+  header h1{font-size:20px;margin:0}
+  .who{font-size:14px;color:var(--muted)}
+  .card{background:var(--card);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 2px 10px #0000000d}
+  h2{margin:0 0 6px;font-size:20px}
+  h3{margin:4px 0 6px;font-size:17px}
+  .muted{color:var(--muted);font-size:14px}
+  .ielts{font-weight:700}
+  button{font:inherit;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#eef0f4;color:var(--ink);margin:4px 4px 4px 0}
+  button.primary{background:var(--accent);color:#fff}
+  button.dark{background:var(--ink);color:#fff}
+  button.sm{font-size:14px;padding:6px 12px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text]{font:inherit;padding:9px 11px;border:1.5px solid #c9ced8;border-radius:9px;width:100%}
+  input.gap{width:140px;padding:4px 8px;border:0;border-bottom:2px solid #8a93a6;border-radius:0;background:#fafbfc;text-align:center}
+  input.ok{border-color:var(--ok)!important;background:var(--okbg)!important}
+  input.bad{border-color:var(--bad)!important;background:var(--badbg)!important}
+  .fix{color:var(--ok);font-weight:700;font-size:14px;margin-left:6px}
+  nav{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+  nav button{margin:0;font-size:15px}
+  nav button.active{background:var(--ink);color:#fff}
+  nav .done::after{content:" ✓";color:var(--ok)}
+  nav button.active.done::after{color:#8ff0b5}
+  .sets{display:flex;flex-wrap:wrap;gap:6px}
+  .sets button.active{background:var(--accent);color:#fff}
+  .ex{display:flex;flex-wrap:wrap;gap:6px}
+  .ex button{margin:0}
+  .ex button.done{background:var(--okbg);outline:1.5px solid var(--ok)}
+  .form{border:2px solid var(--ink);border-radius:6px;padding:14px 16px;background:#fff}
+  .form .title{text-align:center;font-weight:700;font-size:17px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:8px}
+  .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .row .lab{min-width:210px;color:#344054}
+  .qn{display:inline-block;min-width:24px;height:24px;line-height:24px;text-align:center;border:1.5px solid var(--ink);border-radius:5px;font-size:13px;font-weight:700;margin-right:4px}
+  .example{color:var(--muted);font-style:italic}
+  .pk button.sel{background:#dfe6ff;outline:2px solid var(--accent)}
+  .pk button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .pk button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  label{display:block;margin-top:6px}
+  details{margin:6px 0} summary{cursor:pointer;padding:4px 0}
+  ul.pb{margin:4px 0 8px;padding-left:20px} ul.pb li{margin:3px 0}
+  .score{font-size:18px;font-weight:700;margin-top:12px}
+  .hidden{display:none!important}
+  .transcript{background:#f3f6ff;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .transcript p{margin:4px 0}
+  mark{background:#ffe58a;padding:0 2px;border-radius:3px}
+  .reading{background:#fffdf5;border:1px solid #efe6c4;border-radius:10px;padding:14px 16px;font-family:Georgia,serif;font-size:16.5px}
+  .reading h4{margin:0 0 6px;text-align:center;font-family:inherit;font-size:19px}
+  .reading h5{margin:12px 0 2px;font-size:16px}
+  .reading p{margin:4px 0}
+  table.tbl{width:100%;border-collapse:collapse;font-size:15px}
+  table.tbl th,table.tbl td{border:1px solid #9aa2b1;padding:7px;vertical-align:top;text-align:left}
+  table.tbl th{background:#f1f3f7}
+  table.tbl td div{margin:3px 0}
+  .flash{perspective:900px;height:180px;margin:12px 0;cursor:pointer;user-select:none}
+  .flash .in{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+  .flash.flip .in{transform:rotateY(180deg)}
+  .flash .side{position:absolute;inset:0;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;font-size:26px;font-weight:700;padding:12px;text-align:center}
+  .flash .front{background:#eef3ff}
+  .flash .back{background:#effaf3;transform:rotateY(180deg)}
+  .flash small{font-size:14px;font-weight:400;color:var(--muted);margin-top:6px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .opts button{margin:0;padding:12px;text-align:left;background:#f1f3f7}
+  .opts button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .opts button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  .bar{height:8px;background:#e7e9ef;border-radius:5px;overflow:hidden;margin:8px 0}
+  .bar div{height:100%;background:var(--accent);width:0;transition:width .3s}
+  .big{font-size:22px;font-weight:700;margin:10px 0}
+  .feedback{min-height:24px;margin-top:8px;font-weight:600}
+  table.res{width:100%;border-collapse:collapse;font-size:15px}
+  table.res td{padding:6px 4px;border-bottom:1px solid var(--line)}
+  .speed{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin-top:6px}
+  @media(max-width:560px){.opts{grid-template-columns:1fr}.row .lab{min-width:100%}table.tbl{font-size:14px}input.gap{width:110px}}
+</style>
+
+<style>
+  .ko{font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+  .map{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 2px}
+  .map span{padding:4px 10px;border-radius:999px;background:#eef0f4;font-size:14px}
+  .map span.done{background:var(--okbg);color:var(--ok)} .map span.cur{background:var(--ink);color:#fff}
+  .keys{font-size:26px;letter-spacing:4px;margin:6px 0}
+  .q{padding:10px 0;border-bottom:1px dashed var(--line)}
+  .q .s{font-size:19px;margin-bottom:6px}
+  .ch button{margin:3px 4px 3px 0}
+  .ch button.sel{background:#dfe6ff;outline:2px solid var(--accent)}
+  .story{background:#fffdf5;border:1px solid #efe6c4;border-radius:10px;padding:12px 14px;font-size:15px}
+  .gem{font-size:40px;text-align:center}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+<div id="login" class="card">
+  <h2>🗝 Квест «Запертая квартира»</h2>
+  <p class="muted">Ты заперт(а) в квартире 김민수 — дверь закрыта на кодовый замок 🔒. В каждой комнате решай задания на слова урока, 피동 и -고 있다 / -아/어 있다. За каждую комнату получаешь слог кода. Собери все слоги и открой дверь! Время — 15 минут.</p>
+  <p>Как тебя зовут?</p>
+  <input type="text" id="nameInput" placeholder="Имя" autocomplete="off" onkeydown="if(event.key==='Enter')start()">
+  <p><button class="primary" onclick="start()">Начать квест →</button></p>
+</div>
+<div id="app" class="hidden">
+  <header><h1>🗝 Квест</h1><div class="who">👤 <span id="who"></span> · <b id="timer">15:00</b></div></header>
+  <div class="card">
+    <div class="map" id="map"></div>
+    <div class="muted">Собранные слоги кода:</div>
+    <div class="keys ko" id="keys"></div>
+  </div>
+  <div class="card" id="stage"></div>
+</div>
+</div>
+<script>
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID = "347625701";
+const MINUTES=15, KEY="pd_quest_v1";
+const $=id=>document.getElementById(id);
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const norm=s=>(s||"").normalize("NFC").replace(/[\s.,!?]/g,"");
+
+/* ============ СТАНЦИИ ============
+   type "choose": в каждом предложении выбрать вариант; type "write": написать ответ; type "odd": выбрать неправильное предложение. */
+const STATIONS=[
+ {name:"🚪 Прихожая", syl:"문", story:"Ты проснулся(лась) в чужой квартире. На двери записка: «Вставь пропущенные слова — получишь первый слог».", type:"choose", tasks:[
+   {s:"출근 시간이라서 차가 너무 ( ).", o:["밀려요","섞여요","보여요"], a:"밀려요", ru:"Час пик — большие пробки."},
+   {s:"처음 가는 동네라서 한 시간 동안 길을 ( ).", o:["헤맸어요","착각했어요","잠갔어요"], a:"헤맸어요", ru:"Район незнакомый — час плутал."},
+   {s:"약속 날짜를 ( ) 하루 일찍 왔어요.", o:["착각해서","알려져서","정해져서"], a:"착각해서", ru:"Перепутал дату и пришёл раньше."},
+   {s:"너무 피곤해서 침대에서 꼼짝 ( ).", o:["못 했어요","안겼어요","쫓겼어요"], a:"못 했어요", ru:"Так устал, что не мог пошевелиться."}]},
+ {name:"🛋 Гостиная", syl:"이", story:"В гостиной телевизор показывает новости. Чтобы выключить его, выбери правильную форму: актив или пассив?", type:"choose", tasks:[
+   {s:"창문으로 남산타워가 ( ).", o:["보여요","봐요"], a:"보여요", ru:"Из окна видна башня Намсан."},
+   {s:"경찰이 도둑을 ( ).", o:["잡았어요","잡혔어요"], a:"잡았어요", ru:"Полицейский поймал вора."},
+   {s:"도둑이 경찰에게 ( ).", o:["잡혔어요","잡았어요"], a:"잡혔어요", ru:"Вор был пойман полицейским."},
+   {s:"이 식당은 맛집으로 ( ) 있어요.", o:["알려져","알려"], a:"알려져", ru:"Этот ресторан известен как вкусный."},
+   {s:"회의 날짜가 드디어 ( ).", o:["정해졌어요","정했어요"], a:"정해졌어요", ru:"Дата встречи наконец определена."}]},
+ {name:"🍳 Кухня", syl:"열", story:"На кухне холодильник с кодовым замком. Код — пассивные формы глаголов. Напиши пассив.", type:"write", tasks:[
+   {s:"섞다 →", a:["섞이다"], ru:"смешиваться"},
+   {s:"쫓다 →", a:["쫓기다"], ru:"быть преследуемым"},
+   {s:"안다 →", a:["안기다"], ru:"быть в объятиях"},
+   {s:"빼앗다 →", a:["빼앗기다"], ru:"быть отобранным"},
+   {s:"열다 →", a:["열리다"], ru:"открываться"}]},
+ {name:"🛏 Спальня", syl:"렸", story:"В спальне дневник 민수. В одном предложении каждой пары ошибка. Найди его!", type:"odd", tasks:[
+   {o:["아기가 엄마 품에 안겼어요.","아기가 엄마 품에 안았어요."], a:1, why:"Ребёнок сам «оказался в объятиях» → пассив 안기다: 안겼어요."},
+   {o:["꿈에서 개에게 쫓았어요.","꿈에서 개에게 쫓겼어요."], a:0, why:"「개에게」 — «кем?» → нужен пассив: 쫓겼어요."},
+   {o:["물과 기름은 섞지 않아요.","물과 기름은 섞이지 않아요."], a:0, why:"Вода и масло смешиваются сами → пассив 섞이다."},
+   {o:["이 가게는 손님이 끊이지 않아요.","이 가게는 손님이 끊지 않아요."], a:1, why:"«Покупатели не переводятся» → 끊이다: 끊이지 않아요."}]},
+ {name:"🧺 Кладовка", syl:"어", story:"В кладовке висит фото комнаты. Опиши, что на нём: -고 있다 или -아/어 있다?", type:"choose", tasks:[
+   {s:"창문이 ( ).", o:["열려 있어요","열고 있어요"], a:"열려 있어요", ru:"Окно открыто."},
+   {s:"민수가 소파에 ( ).", o:["앉아 있어요","앉고 있어요"], a:"앉아 있어요", ru:"Минсу сидит на диване."},
+   {s:"민수는 파란 티셔츠를 ( ).", o:["입고 있어요","입어 있어요"], a:"입고 있어요", ru:"Минсу в синей футболке."},
+   {s:"벽에 시계가 ( ).", o:["걸려 있어요","걸고 있어요"], a:"걸려 있어요", ru:"На стене висят часы."},
+   {s:"텔레비전이 ( ).", o:["켜져 있어요","켜고 있어요"], a:"켜져 있어요", ru:"Телевизор включён."}]},
+ {name:"🔒 Дверь", syl:"요", story:"Последняя загадка перед дверью: подбери слово по смыслу.", type:"choose", tasks:[
+   {s:"호텔 방이 아주 ( ) 기분이 좋았어요.", o:["깔끔해서","애매해서","밀려서"], a:"깔끔해서", ru:"Номер был очень чистым — настроение отличное."},
+   {s:"대답이 너무 ( ) 무슨 뜻인지 모르겠어요.", o:["애매해서","훌륭해서","깔끔해서"], a:"애매해서", ru:"Ответ слишком неясный — не понимаю смысла."},
+   {s:"유학은 비용이 많이 ( ).", o:["들어요","보여요","섞여요"], a:"들어요", ru:"Учёба за границей требует больших расходов."},
+   {s:"다음에 시간 있을 때 얼굴 한번 ( ).", o:["봐요","보여요","밀려요"], a:"봐요", ru:"Когда будет время, давай увидимся."},
+   {s:"나갈 때 문을 꼭 ( ).", o:["잠그세요","안기세요","쫓기세요"], a:"잠그세요", ru:"Уходя, обязательно заприте дверь."}]}
+];
+const CODE="문이 열렸어요";
+
+let S=null;
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} }
+function start(){ const n=$("nameInput").value.trim(); if(!n){ $("nameInput").focus(); return; }
+  let old=null; try{old=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  S=(old&&old.name===n&&!old.sent)?old:{name:n,started:Date.now(),st:0,keys:[],mistakes:[],tries:{}};
+  save(); $("login").classList.add("hidden"); $("app").classList.remove("hidden"); $("who").textContent=n; setInterval(tick,1000); tick(); render(); }
+function left(){ return MINUTES*60-Math.floor(((S.finished||Date.now())-S.started)/1000); }
+function tick(){ const l=Math.max(0,left()); $("timer").textContent=Math.floor(l/60)+":"+String(l%60).padStart(2,"0"); $("timer").style.color=l<=120?"var(--bad)":""; }
+function render(){
+  $("map").innerHTML=STATIONS.map((s,i)=>'<span class="'+(i<S.st?"done":i===S.st?"cur":"")+'">'+(i<S.st?"✓ ":"")+s.name+'</span>').join("")+'<span class="'+(S.st>=STATIONS.length?"cur":"")+'">🗝 Код</span>';
+  $("keys").textContent=STATIONS.map((s,i)=>i<S.st?s.syl:"_").join(" ");
+  if(S.st>=STATIONS.length) return finalStage();
+  const st=STATIONS[S.st]; let h='<h2 style="margin-top:0">'+st.name+'</h2><div class="story">'+esc(st.story)+'</div>';
+  st.tasks.forEach((t,i)=>{ h+='<div class="q">';
+    if(st.type==="choose"){ h+='<div class="s ko">'+(i+1)+'. '+esc(t.s).replace("( )",'<b style="color:var(--accent)">(&nbsp;?&nbsp;)</b>')+'</div><div class="ch" data-i="'+i+'">'+shuffle(t.o).map(o=>'<button class="ko">'+esc(o)+'</button>').join("")+'</div>'; }
+    else if(st.type==="write"){ h+='<div class="s ko">'+(i+1)+'. '+esc(t.s)+' <input type="text" class="gap ko" lang="ko" data-i="'+i+'" autocomplete="off" style="width:150px"> <span class="muted" style="font-size:13px">('+esc(t.ru)+')</span></div>'; }
+    else { h+='<div class="muted">'+(i+1)+'. Где ошибка?</div><div class="ch" data-i="'+i+'">'+t.o.map((o,k)=>'<button class="ko" data-k="'+k+'" style="display:block;width:100%;text-align:left">'+esc(o)+'</button>').join("")+'</div>'; }
+    h+='</div>'; });
+  h+='<p><button class="primary" onclick="check()">Проверить станцию →</button></p><div class="feedback" id="fb"></div>';
+  $("stage").innerHTML=h;
+  $("stage").querySelectorAll(".ch").forEach(box=>box.querySelectorAll("button").forEach(b=>b.onclick=()=>{ box.querySelectorAll("button").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); }));
+}
+function check(){ const st=STATIONS[S.st]; let wrong=[];
+  st.tasks.forEach((t,i)=>{ let ok, given;
+    if(st.type==="write"){ const inp=$("stage").querySelector('input[data-i="'+i+'"]'); given=inp.value.trim(); ok=t.a.some(a=>norm(a)===norm(given)); inp.className="gap ko "+(ok?"ok":"bad"); }
+    else { const sel=$("stage").querySelector('.ch[data-i="'+i+'"] .sel'); given=sel?(st.type==="odd"?sel.dataset.k:sel.textContent):null;
+      ok=st.type==="odd"?(+given===t.a):(given===t.a); $("stage").querySelectorAll('.ch[data-i="'+i+'"] button').forEach(b=>{ b.classList.remove("ok","bad"); }); if(sel) sel.classList.add(ok?"ok":"bad"); }
+    if(!ok) wrong.push(i+1); });
+  const key=S.st; S.tries[key]=(S.tries[key]||0)+1;
+  if(wrong.length){ S.mistakes.push(st.name+": вопросы "+wrong.join(", ")+" (попытка "+S.tries[key]+")"); save();
+    $("fb").innerHTML="🔒 Замок не открылся. Неверно: "+wrong.join(", ")+". Исправь и проверь ещё раз."; return; }
+  const extra=st.type==="odd"?'<div class="muted" style="margin-top:6px">'+st.tasks.map(t=>"• "+esc(t.why)).join("<br>")+'</div>':"";
+  $("fb").innerHTML='🔓 Получен слог: <b class="ko" style="font-size:24px">'+st.syl+'</b>'+extra+'<p><button class="primary" onclick="nextSt()">Дальше →</button></p>';
+  $("stage").querySelector('.primary').disabled=true; }
+function nextSt(){ S.st++; S.keys.push(STATIONS[S.st-1].syl); save(); render(); window.scrollTo(0,0); }
+function finalStage(){
+  if(S.finished) return doneStage();
+  $("stage").innerHTML='<h2 style="margin-top:0">🔒 Кодовый замок</h2><div class="story">Ты собрал(а) все слоги! Составь из них фразу — что сейчас случится с дверью? (Подсказка: пассив!)</div><div class="keys ko" style="text-align:center">'+shuffle(STATIONS.map(s=>s.syl)).join(" · ")+'</div><input type="text" id="code" class="ko" lang="ko" placeholder="Код" autocomplete="off" onkeydown="if(event.key===\'Enter\'&&!event.isComposing)tryCode()"><p><button class="primary" onclick="tryCode()">Открыть дверь 🗝</button></p><div class="feedback" id="fb"></div>'; }
+function tryCode(){ if(norm($("code").value)===norm(CODE)){ S.finished=Date.now(); save(); doneStage(); } else { S.mistakes.push("Код: "+$("code").value); save(); $("fb").textContent="Не подходит… Подсказка: «Дверь открылась» — 문이 + пассив от 열다 в прошедшем времени."; } }
+function doneStage(){ const sec=Math.round((S.finished-S.started)/1000);
+  $("stage").innerHTML='<div class="gem">🎉🚪</div><h2 style="text-align:center">문이 열렸어요! Ты свободен(на)! 🎉</h2><p style="text-align:center">Время: <b>'+Math.floor(sec/60)+' мин '+(sec%60)+' сек</b> · ошибок: <b>'+S.mistakes.length+'</b></p><p style="text-align:center"><button class="primary" id="sendBtn" onclick="send()">📨 Отправить учителю</button></p><div class="feedback" id="fb" style="text-align:center"></div>'; }
+async function send(){ const sec=Math.round((S.finished-S.started)/1000);
+  const t="🗝 <b>Квест · 피동</b>\n👤 "+esc(S.name)+"\n⏱ "+Math.floor(sec/60)+" мин "+(sec%60)+" сек"+(sec>MINUTES*60?" (дольше 15 мин)":"")+"\n❌ Ошибок: "+S.mistakes.length+(S.mistakes.length?"\n"+S.mistakes.map(m=>"   • "+esc(m)).join("\n"):"");
+  $("sendBtn").disabled=true; $("fb").textContent="Отправляю…";
+  try{ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:t,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description);
+    $("fb").textContent="✅ Отправлено! 잘했어요!"; S.sent=true; save(); }
+  catch(e){ $("sendBtn").disabled=false; $("fb").textContent="Не получилось отправить: "+e.message; } }
+(function(){ const m=location.hash.match(/^#auto=(.+)$/); if(!m) return;
+  try{ const a=JSON.parse(decodeURIComponent(escape(atob(m[1])))); history.replaceState(null,"",location.pathname+location.search); $("nameInput").value=a.n; }catch(e){} })();
+</script>
+</body>
+</html>

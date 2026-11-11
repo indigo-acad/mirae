@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homework · Work, people &amp; feelings</title>
+<style>
+  :root{--ink:#1d2433;--muted:#667085;--line:#e4e7ec;--bg:#f5f6fa;--card:#fff;--accent:#2f5bea;--ok:#1f9d55;--okbg:#e9f8ef;--bad:#d64545;--badbg:#fdeeee}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  .wrap{max-width:820px;margin:0 auto;padding:18px 14px 80px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+  header h1{font-size:20px;margin:0}
+  .who{font-size:14px;color:var(--muted)}
+  .card{background:var(--card);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 2px 10px #0000000d}
+  h2{margin:0 0 6px;font-size:20px}
+  h3{margin:4px 0 6px;font-size:17px}
+  .muted{color:var(--muted);font-size:14px}
+  .ielts{font-weight:700}
+  button{font:inherit;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#eef0f4;color:var(--ink);margin:4px 4px 4px 0}
+  button.primary{background:var(--accent);color:#fff}
+  button.dark{background:var(--ink);color:#fff}
+  button.sm{font-size:14px;padding:6px 12px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text]{font:inherit;padding:9px 11px;border:1.5px solid #c9ced8;border-radius:9px;width:100%}
+  input.gap{width:140px;padding:4px 8px;border:0;border-bottom:2px solid #8a93a6;border-radius:0;background:#fafbfc;text-align:center}
+  input.ok{border-color:var(--ok)!important;background:var(--okbg)!important}
+  input.bad{border-color:var(--bad)!important;background:var(--badbg)!important}
+  .fix{color:var(--ok);font-weight:700;font-size:14px;margin-left:6px}
+  nav{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+  nav button{margin:0;font-size:15px}
+  nav button.active{background:var(--ink);color:#fff}
+  nav .done::after{content:" ✓";color:var(--ok)}
+  nav button.active.done::after{color:#8ff0b5}
+  .sets{display:flex;flex-wrap:wrap;gap:6px}
+  .sets button.active{background:var(--accent);color:#fff}
+  .ex{display:flex;flex-wrap:wrap;gap:6px}
+  .ex button{margin:0}
+  .ex button.done{background:var(--okbg);outline:1.5px solid var(--ok)}
+  .form{border:2px solid var(--ink);border-radius:6px;padding:14px 16px;background:#fff}
+  .form .title{text-align:center;font-weight:700;font-size:17px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:8px}
+  .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .row .lab{min-width:210px;color:#344054}
+  .qn{display:inline-block;min-width:24px;height:24px;line-height:24px;text-align:center;border:1.5px solid var(--ink);border-radius:5px;font-size:13px;font-weight:700;margin-right:4px}
+  .example{color:var(--muted);font-style:italic}
+  .pk button.sel{background:#dfe6ff;outline:2px solid var(--accent)}
+  .pk button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .pk button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  label{display:block;margin-top:6px}
+  details{margin:6px 0} summary{cursor:pointer;padding:4px 0}
+  ul.pb{margin:4px 0 8px;padding-left:20px} ul.pb li{margin:3px 0}
+  .score{font-size:18px;font-weight:700;margin-top:12px}
+  .hidden{display:none!important}
+  .transcript{background:#f3f6ff;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .transcript p{margin:4px 0}
+  mark{background:#ffe58a;padding:0 2px;border-radius:3px}
+  .reading{background:#fffdf5;border:1px solid #efe6c4;border-radius:10px;padding:14px 16px;font-family:Georgia,serif;font-size:16.5px}
+  .reading h4{margin:0 0 6px;text-align:center;font-family:inherit;font-size:19px}
+  .reading h5{margin:12px 0 2px;font-size:16px}
+  .reading p{margin:4px 0}
+  table.tbl{width:100%;border-collapse:collapse;font-size:15px}
+  table.tbl th,table.tbl td{border:1px solid #9aa2b1;padding:7px;vertical-align:top;text-align:left}
+  table.tbl th{background:#f1f3f7}
+  table.tbl td div{margin:3px 0}
+  .flash{perspective:900px;height:180px;margin:12px 0;cursor:pointer;user-select:none}
+  .flash .in{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+  .flash.flip .in{transform:rotateY(180deg)}
+  .flash .side{position:absolute;inset:0;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;font-size:26px;font-weight:700;padding:12px;text-align:center}
+  .flash .front{background:#eef3ff}
+  .flash .back{background:#effaf3;transform:rotateY(180deg)}
+  .flash small{font-size:14px;font-weight:400;color:var(--muted);margin-top:6px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .opts button{margin:0;padding:12px;text-align:left;background:#f1f3f7}
+  .opts button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .opts button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  .bar{height:8px;background:#e7e9ef;border-radius:5px;overflow:hidden;margin:8px 0}
+  .bar div{height:100%;background:var(--accent);width:0;transition:width .3s}
+  .big{font-size:22px;font-weight:700;margin:10px 0}
+  .feedback{min-height:24px;margin-top:8px;font-weight:600}
+  table.res{width:100%;border-collapse:collapse;font-size:15px}
+  table.res td{padding:6px 4px;border-bottom:1px solid var(--line)}
+  .speed{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin-top:6px}
+  @media(max-width:560px){.opts{grid-template-columns:1fr}.row .lab{min-width:100%}table.tbl{font-size:14px}input.gap{width:110px}}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+<div id="login" class="card">
+  <h2>📒 Homework</h2>
+  <p class="muted">Topic: <b>Work, people &amp; feelings</b>. A quick vocabulary review, then exercises from your coursebook.</p>
+  <p>What's your name?</p>
+  <input type="text" id="nameInput" placeholder="Your name" autocomplete="off" onkeydown="if(event.key==='Enter')start()">
+  <p><button class="primary" onclick="start()">Start →</button></p>
+</div>
+<div id="app" class="hidden">
+  <header><h1>Homework · Work &amp; feelings</h1><div class="who">👤 <span id="who"></span></div></header>
+<section id="tab-vocab">
+  <div class="card">
+    <p class="muted" style="margin-top:0">Go step by step: the next step opens when you finish this one. Mistakes come back at the end of each step. If you misspell a word, you need to type it correctly once.</p>
+    <div class="bar"><div id="vBar"></div></div>
+    <div id="vProg" class="muted"></div>
+    <div class="speed">🔊 Voice speed <input type="range" id="rate" min="0.6" max="1.1" step="0.05" value="0.85"> <span id="rateVal">0.85</span></div>
+  </div>
+  <div class="card" id="stage">
+    <div class="muted" id="sStep"></div>
+    <h3 id="sTitle"></h3>
+    <p class="muted" id="sHint"></p>
+    <div id="cardsBox" class="hidden">
+      <div class="flash" id="flash" style="height:220px" onclick="this.classList.toggle('flip')">
+        <div class="in">
+          <div class="side front"><span id="fFront"></span><small id="fPos"></small></div>
+          <div class="side back"><span id="fBack"></span><small id="fEx" style="font-style:italic"></small></div>
+        </div>
+      </div>
+      <button onclick="flashMove(-1)">←</button><button class="dark" onclick="say(CW[fi].en)">🔊</button><button onclick="flashMove(1)">→</button>
+      <span class="muted" id="fCount"></span>
+      <p><button class="primary" id="cardsDone" onclick="finishCards()" disabled>I've seen all the cards — next →</button></p>
+    </div>
+    <div id="drillBox" class="hidden">
+      <div class="bar"><div id="dBar"></div></div>
+      <div class="big" id="dPrompt"></div>
+      <div class="opts" id="dOpts"></div>
+      <div id="dWrite" class="hidden">
+        <input type="text" id="dIn" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')dCheck()">
+        <button class="primary" onclick="dCheck()">Check</button>
+      </div>
+      <div class="feedback" id="dFb"></div>
+    </div>
+    <div id="nextBox" class="hidden"><button class="primary" onclick="goCurrent()">Next →</button></div>
+  </div>
+  <div class="card">
+    <h3>📨 Send to your teacher</h3>
+    <p class="muted">You can send your results after each session — your progress is saved in this browser.</p>
+    <button class="primary" id="sendBtn" onclick="sendResults()">Send results</button>
+    <div class="feedback" id="sendFb"></div>
+    <textarea id="copyBox" class="hidden" style="width:100%;height:180px;font:13px monospace;margin-top:8px"></textarea>
+  </div>
+  <div class="card">
+    <h3>Your progress</h3>
+    <p class="muted">✓ — done (click to do it again), ▶ — now, 🔒 — locked for now.</p>
+    <div id="path"></div>
+  </div>
+</section>
+</div>
+</div>
+<script>
+/* ============ НАСТРОЙКИ TELEGRAM ============ */
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID = "347625701";
+
+/* ============ ЛЕКСИКА ============
+   Каждое слово: en, pos, ru, def (определение по-английски), ex (пример — слово en должно стоять в нём точно в такой форме).
+   Наборы учителя ставятся ПЕРВЫМИ (пока пусто — ждём материалы). */
+const SETS = [
+ {id:"F1", name:"1 · Feelings (1)", words:[
+  {en:"worried", pos:"adj", ru:"обеспокоенный", def:"thinking that something bad might happen", ex:"I was worried about my exam."},
+  {en:"jealous", pos:"adj", ru:"завидующий, ревнивый", def:"unhappy because someone has something you want", ex:"I'm jealous of your new house!"},
+  {en:"sleepy", pos:"adj", ru:"сонный", def:"tired and wanting to sleep", ex:"I always feel sleepy after lunch."},
+  {en:"silly", pos:"adj", ru:"глупый, дурацкий", def:"not sensible or serious", ex:"That was a silly mistake."},
+  {en:"upset", pos:"adj", ru:"расстроенный", def:"unhappy because something bad happened", ex:"She was upset when she lost her phone."},
+  {en:"calm", pos:"adj", ru:"спокойный", def:"relaxed, not worried or angry", ex:"Stay calm and listen to me."},
+  {en:"nervous", pos:"adj", ru:"нервничающий", def:"a bit afraid before something important", ex:"I'm always nervous before an interview."},
+  {en:"terrified", pos:"adj", ru:"в ужасе, очень напуганный", def:"extremely frightened", ex:"My brother is terrified of spiders."},
+  {en:"proud", pos:"adj", ru:"гордый, гордящийся", def:"pleased about something you or someone close to you did", ex:"Her parents are very proud of her."},
+  {en:"exhausted", pos:"adj", ru:"измотанный", def:"extremely tired", ex:"After the marathon I was exhausted."},
+  {en:"angry", pos:"adj", ru:"злой, сердитый", def:"feeling strong emotion when something is wrong or unfair", ex:"My boss was angry because I was late."},
+  {en:"bored", pos:"adj", ru:"скучающий", def:"not interested because nothing is happening", ex:"The children were bored at the museum."}
+ ]},
+ {id:"F2", name:"2 · -ed / -ing adjectives", words:[
+  {en:"embarrassed", pos:"adj", ru:"смущённый (о человеке)", def:"how you feel when you look silly in front of people", ex:"I was embarrassed when I fell over."},
+  {en:"embarrassing", pos:"adj", ru:"неловкий, постыдный (о ситуации)", def:"making you feel silly in front of people", ex:"It was an embarrassing photo."},
+  {en:"surprised", pos:"adj", ru:"удивлённый", def:"how you feel when something unexpected happens", ex:"I was surprised to see him there."},
+  {en:"surprising", pos:"adj", ru:"удивительный, неожиданный", def:"unexpected; making people feel surprise", ex:"The result was surprising."},
+  {en:"excited", pos:"adj", ru:"взволнованный (радостно)", def:"very happy and full of energy about something", ex:"The kids are excited about the holiday."},
+  {en:"exciting", pos:"adj", ru:"захватывающий", def:"making you feel very happy and full of energy", ex:"It was an exciting match."},
+  {en:"disappointed", pos:"adj", ru:"разочарованный", def:"sad because something was not as good as you hoped", ex:"I was disappointed with my score."},
+  {en:"disappointing", pos:"adj", ru:"разочаровывающий", def:"not as good as you hoped", ex:"The film was disappointing."},
+  {en:"annoyed", pos:"adj", ru:"раздражённый", def:"a little angry", ex:"I get annoyed when people are late."},
+  {en:"annoying", pos:"adj", ru:"раздражающий", def:"making you a little angry", ex:"That noise is really annoying."},
+  {en:"frightened", pos:"adj", ru:"испуганный", def:"afraid", ex:"The little boy was frightened of the dark."},
+  {en:"amazing", pos:"adj", ru:"потрясающий", def:"extremely good or surprising", ex:"The view from the top was amazing."}
+ ]}
+];
+
+/* Упражнения из учебника. type: write — вписать слово, mc — выбрать. */
+const BOOK = {
+ b5a:{name:"Coursebook 5A · Add the missing vowels", type:"write", hint:"Write the whole word with the missing vowels (a, e, i, o, u).",
+  items:[
+   {p:"1. It's important to <b>g_t</b> on well with your colleagues.", a:["get"]},
+   {p:"1. It's important to get on <b>w_ll</b> with your colleagues.", a:["well"]},
+   {p:"1. It's important to get on well with your <b>c_ll__g_s</b>.", a:["colleagues"]},
+   {p:"2. I'm a teacher, and in my <b>pr_f_ss__n</b>, you need to be very patient.", a:["profession"]},
+   {p:"2. I'm a teacher, and in my profession, you need to be very <b>p_t__nt</b>.", a:["patient"]},
+   {p:"3. I <b>l__k</b> up to my grandparents – I respect them.", a:["look"]},
+   {p:"3. I look up <b>t_</b> my grandparents – I respect them.", a:["to"]},
+   {p:"3. I look up to my <b>gr_ndp_r_nts</b> – I respect them.", a:["grandparents"]},
+   {p:"4. The most important quality of a <b>p_rtn_r</b> is that they're funny!", a:["partner"]},
+   {p:"4. The most important quality of a partner is that they're <b>f_nny</b>!", a:["funny"]},
+   {p:"5. In my country it's difficult for a <b>m_s_c__n</b> to work full-time even if they're good!", a:["musician"]},
+   {p:"5. In my country it's difficult for a musician to work <b>f_ll-t_m_</b> even if they're good!", a:["full-time","full time"]},
+   {p:"6. A <b>f_n_nc__l</b> consultant must be reliable.", a:["financial"]},
+   {p:"6. A financial <b>c_ns_lt_nt</b> must be reliable.", a:["consultant"]},
+   {p:"6. A financial consultant must be <b>r_l__bl_</b>.", a:["reliable"]}]},
+ b6a:{name:"Coursebook 6A · VSO (choose the word)", type:"mc", hint:"The VSO text, sentence by sentence. Choose the correct option: A, B or C.",
+  items:[
+   {p:"VSO (Voluntary Service Overseas) is an organisation that sends people to foreign countries to work as <b>(1) ____</b>.", o:["volunteers","part time","salaries"], a:"volunteers"},
+   {p:"They work on community projects and spend time <b>(2) ____</b> about the culture and language of the host country.", o:["to learn","learn","learning"], a:"learning"},
+   {p:"<b>(3) ____</b> a lot of them help to build houses or public buildings or work in education or healthcare.", o:["Enough","Quite","Very"], a:"Quite"},
+   {p:"The <b>(4) ____</b> they earn is small, but it's enough to live in the country.", o:["finances","dollars","wage"], a:"wage"},
+   {p:"The people on the programme <b>(5) ____</b> end up becoming close friends.", o:["often","ever","at the moment"], a:"often"},
+   {p:"The people on the programme often end up becoming <b>(6) ____</b> friends.", o:["tight","close","near"], a:"close"},
+   {p:"When they return to their country, their time abroad is like a <b>(7) ____</b> that they have gained.", o:["job","qualification","course"], a:"qualification"},
+   {p:"The skills they have learnt can help in many different <b>(8) ____</b>.", o:["work","employment","careers"], a:"careers"},
+   {p:"An employee who has been <b>(9) ____</b> for organising a project in another country often has an open mind and good problem-solving skills.", o:["responsible","in charge","managing"], a:"responsible"},
+   {p:"‘A lot of what I <b>(10) ____</b> about the world comes from my time living in Mozambique. It was amazing.’", o:["am knowing","knew","know"], a:"know"}]},
+ b1a:{name:"Coursebook 1A · Choose the correct adjective", type:"mc", hint:"Choose the correct adjective. -ed = how a person feels; -ing = what a thing or situation is like.",
+  items:[
+   {p:"As you can see from this really <b>(1) ____</b> photo…", o:["embarrassed","embarrassing"], a:"embarrassing"},
+   {p:"…my surprise birthday party was very <b>(2) ____</b>!", o:["surprised","surprising"], a:"surprising"},
+   {p:"I was <b>(3) ____</b> to see you all.", o:["exciting","excited"], a:"excited"},
+   {p:"I was <b>(4) ____</b> that I couldn't be there.", o:["disappointed","disappointing"], a:"disappointed"},
+   {p:"I asked my boss for the evening off, but he said no. He can be <b>(5) ____</b> like that!", o:["annoyed","annoying"], a:"annoying"},
+   {p:"It was a really quiet and <b>(6) ____</b> night of work, too.", o:["boring","bored"], a:"boring"},
+   {p:"Inna said she was <b>(7) ____</b> for weeks that she was going to say something.", o:["frightened","frightening"], a:"frightened"},
+   {p:"It's <b>(8) ____</b> that she didn't because she can't usually keep a secret!", o:["amazed","amazing"], a:"amazing"}]},
+ b1b:{name:"Coursebook B · Complete the adjectives", type:"write", hint:"Write the whole adjective. Some letters are given.",
+  items:[
+   {p:"1. I was <b>w________</b> that I'd give a bad presentation, but I didn't.", a:["worried"]},
+   {p:"2. Your home is so nice. I'm <b>j___l___</b>.", a:["jealous"]},
+   {p:"3. I want to go to bed. I'm <b>s___p_</b>.", a:["sleepy"]},
+   {p:"4. This is a <b>s___y</b> idea that won't work at all.", a:["silly"]},
+   {p:"5. Felipe was really <b>u_s__</b> when he lost his job.", a:["upset"]},
+   {p:"6. Stay <b>c__m</b> everyone. It's not a real fire alarm.", a:["calm"]},
+   {p:"7. I was <b>n_____s</b> before the exam, but once it started, I relaxed.", a:["nervous"]},
+   {p:"8. I'm not just scared. I'm <b>t__r_____</b>!", a:["terrified"]},
+   {p:"9. Lola's worked so hard on her singing. You must be really <b>p_ou_</b> of her.", a:["proud"]},
+   {p:"10. I didn't sleep well. I'm <b>e__h_____</b>.", a:["exhausted"]}]},
+ b1c:{name:"Coursebook C · Complete the conversation", type:"mc", hint:"Choose a word from the box: angry, bored, calm, exhausted, nervous, proud, silly, terrified.",
+  items:[
+   {p:"Mari: How was your drama competition?<br>Adi: Good. I was scared at first – <b>(1) ____</b> in fact!", o:["terrified","calm","bored"], a:"terrified"},
+   {p:"Adi: But once we started, I wasn't <b>(2) ____</b>. I felt relaxed.", o:["proud","nervous","silly"], a:"nervous"},
+   {p:"Mari: Great! Were you tired after?<br>Adi: Yes, <b>(3) ____</b>!", o:["exhausted","angry","silly"], a:"exhausted"},
+   {p:"Adi: My group didn't win, but I wasn't <b>(4) ____</b>.", o:["proud","angry","calm"], a:"angry"},
+   {p:"Adi: We did well and I'm <b>(5) ____</b> of that.", o:["bored","nervous","proud"], a:"proud"}]}
+};
+
+/* ============ ЛОГИКА ============ */
+let STATE={name:"",started:null,vocab:{}};
+const $=id=>document.getElementById(id);
+const KEY="hw_feelings_state_v2";
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){} }
+function load(){ try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.name) STATE=s;}catch(e){} }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function norm(s){ return (s||"").toLowerCase().replace(/[’']/g,"").replace(/[£$!?,]/g,"").replace(/\s+/g," ").replace(/\.$/,"").trim(); }
+function isRight(val, answers, mode){
+  if(mode==="num"){ const v=(val||"").replace(/[^0-9]/g,""); return v!=="" && answers.some(a=>a.replace(/[^0-9]/g,"")===v); }
+  if(mode==="code"){ const c=x=>(x||"").toLowerCase().replace(/[^a-z0-9]/g,""); const v=c(val); return v!=="" && answers.some(a=>c(a)===v); }
+  const v=norm(val); return v!=="" && answers.some(a=>norm(a)===v);
+}
+
+/* голос */
+let voices=[];
+function loadVoices(){ voices=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang)); }
+if("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+function pickVoice(n){ const gb=voices.filter(v=>/en-GB/i.test(v.lang)); const pool=gb.length>1?gb:voices; return pool.length?pool[n%pool.length]:null; }
+function rate(){ return parseFloat($("rate").value); }
+function utter(text,vi,pitch){ const u=new SpeechSynthesisUtterance(text); const v=pickVoice(vi||0); if(v){u.voice=v;u.lang=v.lang;}else u.lang="en-GB"; u.rate=rate(); u.pitch=pitch||1; return u; }
+function noTTS(){ if("speechSynthesis" in window) return false; alert("Your browser can't read words aloud. Please open this site in Chrome or Safari."); return true; }
+function say(text,slow){ if(noTTS())return; speechSynthesis.cancel(); const u=utter(text,0,1); if(slow)u.rate=Math.min(rate(),0.8); speechSynthesis.speak(u); }
+
+
+function start(){
+  const n=$("nameInput").value.trim(); if(!n){$("nameInput").focus();return;}
+  if(STATE.name!==n) STATE={name:n,started:Date.now(),vocab:{}};
+  save(); $("login").classList.add("hidden"); $("app").classList.remove("hidden"); $("who").textContent=STATE.name; goCurrent();
+}
+$("rate").oninput=()=>$("rateVal").textContent=$("rate").value;
+
+/* шаги */
+const STEP_TYPES=[
+  {t:"cards", name:"Карточки"},
+  {t:"tr",    name:"Выбери перевод"},
+  {t:"def",   name:"Слово по определению"},
+  {t:"ctx",   name:"✍️ Вставь в предложение"},
+  {t:"gaps",  name:"✍️ Вставь пропущенные буквы"},
+  {t:"lis",   name:"✍️ Послушай и напиши"},
+  {t:"wr",    name:"✍️ Напиши по переводу (без подсказок)"}
+];
+const STEPS=[];
+const ORDER=["b5a","b6a","F1","b1b","b1c","F2","b1a"];
+const HW_TYPES=STEP_TYPES.filter(x=>["tr","wr"].includes(x.t)).map(x=>x.t==="tr"?{t:"tr",name:"Review: match the meaning"}:{t:"wr",name:"✍️ Write the word"});
+ORDER.forEach(o=>{ const st=SETS.find(x=>x.id===o); if(st) HW_TYPES.forEach(x=>STEPS.push({key:st.id+":"+x.t,set:st,t:x.t,name:x.name})); else STEPS.push({key:"book:"+o,t:"book",book:o,name:"📘 "+BOOK[o].name}); });
+
+function base(en){ return en.replace(/^the /,""); }
+function curIdx(){ const i=STEPS.findIndex(s=>!STATE.vocab[s.key]); return i<0?STEPS.length:i; }
+function renderPath(){
+  const ci=curIdx(), done=STEPS.filter(s=>STATE.vocab[s.key]).length;
+  $("vBar").style.width=(100*done/STEPS.length)+"%"; $("vProg").textContent="Steps completed: "+done+" of "+STEPS.length;
+  let h="",last=null;
+  STEPS.forEach((s,i)=>{
+    const g=s.set?s.set.name:"Coursebook";
+    if(g!==last){ if(last!==null)h+="</div>"; h+='<div style="margin:10px 0 4px;font-weight:700">'+esc(g)+'</div><div class="ex">'; last=g; }
+    const st=STATE.vocab[s.key]?"done":i===ci?"cur":"lock";
+    h+='<button class="sm '+(st==="done"?"done":"")+'" '+(st==="lock"?"disabled":"")+' onclick="openStep('+i+')">'+(st==="done"?"✓ ":st==="cur"?"▶ ":"🔒 ")+esc(s.name)+'</button>';
+  });
+  $("path").innerHTML=h+"</div>";
+}
+function goCurrent(){ openStep(curIdx()); }
+function openStep(i){
+  speechSynthesis.cancel();
+  ["cardsBox","drillBox","nextBox"].forEach(x=>$(x).classList.add("hidden"));
+  if(i>=STEPS.length){ $("sStep").textContent=""; $("sTitle").textContent="🎉 All done!"; $("sHint").innerHTML="Now click «Send results» below."; renderPath(); return; }
+  const s=STEPS[i];
+  $("sStep").textContent="Step "+(i+1)+" of "+STEPS.length+(s.set?" · "+s.set.name:"");
+  $("sTitle").textContent=s.name;
+  if(s.t==="cards") startCards(s); else runDrill(s);
+  renderPath(); $("stage").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* карточки */
+let CW=[],fi=0,seen=new Set(),cardsStep=null;
+function startCards(s){ cardsStep=s; CW=s.set.words; fi=0; seen=new Set();
+  $("sHint").textContent="Нажми на карточку, чтобы увидеть перевод и пример. Послушай каждое слово 🔊 и произнеси вслух. Пролистай все карточки.";
+  $("cardsBox").classList.remove("hidden"); flashShow(); }
+function flashShow(){ const w=CW[fi]; seen.add(fi); $("flash").classList.remove("flip");
+  $("fFront").textContent=w.en; $("fPos").textContent=w.pos+" · "+w.def; $("fBack").textContent=w.ru; $("fEx").textContent=w.ex;
+  $("fCount").textContent=(fi+1)+" / "+CW.length+"  (просмотрено "+seen.size+")"; $("cardsDone").disabled=seen.size<CW.length; }
+function flashMove(d){ fi=(fi+d+CW.length)%CW.length; flashShow(); }
+function finishCards(){ STATE.vocab[cardsStep.key]={name:cardsStep.name,seen:true}; save(); goCurrent(); }
+
+/* задания */
+function mask(word){
+  const idx=[]; [...word].forEach((c,i)=>{ if(/[a-z]/i.test(c)&&i>0&&!/[ -]/.test(word[i-1])) idx.push(i); });
+  const k=Math.max(1,Math.round(idx.length*0.5)); const hide=new Set(shuffle(idx).slice(0,k));
+  return [...word].map((c,i)=>c===" "?"&nbsp;&nbsp;":hide.has(i)?"_":esc(c)).join(" ");
+}
+function ctxPrompt(w){
+  const re=new RegExp(w.en.replace(/[-]/g,"\\-"),"i"); const m=w.ex.match(re); if(!m) return null;
+  const blank=w.en.split(" ").map(p=>[...p].map((c,i)=>i===0?c:c==="-"?"-":"_").join(" ")).join("   ");
+  return esc(w.ex.slice(0,m.index))+'<b style="white-space:pre-wrap;font-family:monospace">'+esc(blank)+'</b>'+esc(w.ex.slice(m.index+m[0].length));
+}
+function buildItems(s){
+  const W=s.set?s.set.words:null;
+  const others=(w,f)=>shuffle(W.filter(x=>x!==w)).slice(0,3).map(f);
+  const ru=w=>esc(w.ru)+" <span class='muted' style='font-size:15px'>("+w.pos+")</span>";
+  switch(s.t){
+  case "tr": return {type:"mc",hint:"Listen to the word and choose its meaning.",items:W.map(w=>({prompt:esc(w.en),sayText:w.en,opts:shuffle([w.def,...others(w,x=>x.def)]),ans:w.def,after:w.en+" = "+w.def,word:w.en}))};
+  case "def": return {type:"mc",hint:"Прочитай определение и выбери слово. Именно так IELTS перефразирует лексику в Reading и Listening.",items:W.map(w=>({prompt:"<span style='font-size:19px'>"+esc(w.def)+"</span>",opts:shuffle([w.en,...others(w,x=>x.en)]),ans:w.en,after:w.en+" = "+w.def,word:w.en}))};
+  case "ctx": return {type:"write",hint:"Вставь слово/фразу в предложение. Даны первые буквы, каждая черточка = одна буква.",items:W.filter(w=>ctxPrompt(w)).map(w=>({prompt:"<span style='font-size:19px;font-weight:500'>"+ctxPrompt(w)+"</span>",ans:[w.en],word:w.en,sayText:w.ex,after:w.ru}))};
+  case "gaps": return {type:"write",hint:"Напиши слово целиком, вставив пропущенные буквы.",items:W.map(w=>({prompt:ru(w)+"<div style='font-family:monospace;font-size:24px;margin-top:8px'>"+mask(w.en)+"</div>",ans:[w.en],word:w.en,sayText:w.en}))};
+  case "lis": return {type:"write",autoSay:true,hint:"Послушай и напиши. 🔊 — ещё раз.",items:W.map(w=>({prompt:"🎧 <span class='muted' style='font-size:15px'>("+w.en.length+" знаков)</span>",ans:[w.en],word:w.en,sayText:w.en,after:w.ru}))};
+  case "wr": return {type:"write",hint:"Read the meaning and write the word. Spelling matters!",items:W.map(w=>({prompt:"<span style='font-size:19px'>"+esc(w.def)+"</span> <span class='muted' style='font-size:15px'>("+w.pos+", starts with «"+w.en[0]+"», "+w.en.length+" characters)</span>",ans:[w.en],word:w.en,sayText:w.en}))};
+  case "book": { const B=BOOK[s.book]; return {type:B.type,hint:B.hint,ordered:true,items:B.items.map(it=>B.type==="mc"?{prompt:"<span style='font-size:19px;font-weight:500'>"+it.p+"</span>",opts:it.o,ans:it.a,after:it.a,word:it.a}:{prompt:"<span style='font-size:19px;font-weight:500'>"+it.p+"</span>",ans:it.a,word:it.a[0]})}; }
+  }
+}
+let D=null;
+function runDrill(s){ const b=buildItems(s);
+  D={step:s,type:b.type,autoSay:b.autoSay,items:b.items,queue:b.ordered?b.items.map((_,i)=>i):shuffle(b.items.map((_,i)=>i)),total:b.items.length,first:0,done:0,wrong:new Set(),mistakes:[],cur:null,lock:false,retype:null};
+  $("sHint").textContent=b.hint; $("drillBox").classList.remove("hidden"); dNext(); }
+function dNext(){
+  D.lock=false; D.retype=null; $("dBar").style.width=(100*D.done/D.total)+"%"; $("dFb").innerHTML=""; $("dOpts").innerHTML="";
+  if(!D.queue.length){
+    $("dPrompt").innerHTML="✅ Done! Correct first time: "+D.first+" / "+D.total+(D.mistakes.length?"<div class='muted' style='font-size:15px;font-weight:400'>Review these: "+D.mistakes.map(m=>esc(m.split(" (")[0])).join(", ")+"</div>":"");
+    $("dWrite").classList.add("hidden");
+    STATE.vocab[D.step.key]={name:D.step.name,score:D.first,total:D.total,mistakes:D.mistakes}; save(); renderPath(); $("nextBox").classList.remove("hidden"); return;
+  }
+  D.cur=D.queue.shift(); const it=D.items[D.cur];
+  const sayBtn=it.sayText&&(D.type==="mc"||D.autoSay)?` <button class="dark sm" onclick="say(${esc(JSON.stringify(it.sayText))})">🔊</button>`:"";
+  $("dPrompt").innerHTML=it.prompt+sayBtn;
+  if(D.type==="mc"){ $("dWrite").classList.add("hidden"); it.opts.forEach(o=>{const b=document.createElement("button"); b.textContent=o; b.onclick=()=>dPick(b,o); $("dOpts").appendChild(b);}); }
+  else{ $("dWrite").classList.remove("hidden"); $("dIn").value=""; $("dIn").className=""; $("dIn").focus(); if(D.autoSay) say(it.sayText); }
+}
+function dResult(ok,given){ const it=D.items[D.cur];
+  if(ok){ if(!D.wrong.has(D.cur)) D.first++; D.done++; }
+  else{ if(!D.wrong.has(D.cur)){ D.wrong.add(D.cur); D.mistakes.push(it.word+" (student wrote: "+(given||"—")+")"); } D.queue.push(D.cur); } }
+function dPick(btn,o){ if(D.lock)return; D.lock=true; const it=D.items[D.cur]; const ok=o===it.ans;
+  [...$("dOpts").children].forEach(b=>{b.disabled=true; if(b.textContent===it.ans) b.classList.add("ok");}); if(!ok) btn.classList.add("bad");
+  dResult(ok,o); $("dFb").innerHTML=(ok?"👍 ":"✗ ")+esc(it.after||"")+(ok?"":"<br><span class='muted'>You'll see this again.</span>");
+  if(it.sayText&&!ok) say(it.sayText); setTimeout(dNext, ok?900:2600); }
+function dCheck(){
+  if(D.lock)return; const it=D.items[D.cur]; const v=$("dIn").value; if(!v.trim())return;
+  if(D.retype){ if(isRight(v,it.ans)){ D.lock=true; $("dIn").className="ok"; $("dFb").innerHTML="👍 That's right now. You'll see it again at the end."; setTimeout(dNext,1100); }
+    else{ $("dIn").className="bad"; $("dFb").innerHTML="Not quite. Type exactly: <b>"+esc(it.word)+"</b>"; } return; }
+  const ok=isRight(v,it.ans); $("dIn").className=ok?"ok":"bad"; dResult(ok,v); say(it.word);
+  if(ok){ D.lock=true; $("dFb").innerHTML="👍 "+esc(it.word)+(it.after?" — "+esc(it.after):""); setTimeout(dNext,1000); }
+  else{ D.retype=true; $("dFb").innerHTML="Correct answer: <b style='font-size:20px'>"+esc(it.word)+"</b><br>Type it correctly and click «Check»."; $("dIn").value=""; $("dIn").focus(); }
+}
+
+/* отчёт */
+const SHORT={tr:"meaning",def:"definition",ctx:"in context",gaps:"letters",lis:"listening",wr:"spelling"};
+function buildReport(){
+  const mins=Math.max(1,Math.round((Date.now()-STATE.started)/60000));
+  let t="📝 <b>Homework · Work, people &amp; feelings</b>\n👤 "+esc(STATE.name)+"\n🕒 "+new Date().toLocaleString("en-GB")+" · ≈"+mins+" min\n📚 Steps completed: "+STEPS.filter(s=>STATE.vocab[s.key]).length+" of "+STEPS.length+"\n";
+  SETS.forEach(st=>{
+    const got=STEPS.filter(x=>x.set===st&&x.t!=="cards"&&STATE.vocab[x.key]);
+    if(!got.length){ t+="\n<b>"+esc(st.name)+"</b>: not started"; return; }
+    const sc=got.reduce((a,x)=>a+STATE.vocab[x.key].score,0), tt=got.reduce((a,x)=>a+STATE.vocab[x.key].total,0);
+    t+="\n<b>"+esc(st.name)+"</b>: "+sc+"/"+tt+"\n   "+esc(got.map(x=>SHORT[x.t]+" "+STATE.vocab[x.key].score+"/"+STATE.vocab[x.key].total).join(" · "));
+    got.forEach(x=>STATE.vocab[x.key].mistakes.forEach(m=>t+="\n   ✗ "+esc(SHORT[x.t]+": "+m)));
+  });
+  STEPS.filter(x=>x.t==="book").forEach(x=>{ const v=STATE.vocab[x.key]; t+="\n\n<b>"+esc(BOOK[x.book].name)+"</b>: "+(v?v.score+"/"+v.total:"not done"); if(v) v.mistakes.forEach(m=>t+="\n   ✗ "+esc(m)); });
+  return t;
+}
+function chunks(text){ const out=[]; let cur=""; text.split("\n").forEach(l=>{ if((cur+"\n"+l).length>3800){ out.push(cur); cur=l; } else cur=cur?cur+"\n"+l:l; }); if(cur)out.push(cur); return out; }
+async function sendResults(){
+  const text=buildReport(); $("sendBtn").disabled=true; $("sendFb").textContent="Sending…";
+  try{ for(const part of chunks(text)){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+    $("sendFb").textContent="✅ Sent! Well done!"; $("sendBtn").disabled=false; }
+  catch(e){ $("sendBtn").disabled=false; $("sendFb").textContent="Couldn't send ("+e.message+"). Copy the text and send it to your teacher:"; const b=$("copyBox"); b.value=text.replace(/<\/?b>/g,""); b.classList.remove("hidden"); b.select(); }
+}
+
+load(); if(STATE.name) $("nameInput").value=STATE.name;
+</script>
+</body>
+</html>

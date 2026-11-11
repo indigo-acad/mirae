@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Корейский · слова</title>
+<style>
+  :root{--ink:#1d2433;--muted:#667085;--bg:#f5f6fa;--accent:#2f5bea;--bad:#d64545}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  .card{background:#fff;border-radius:16px;padding:20px;margin:18px auto;max-width:520px;box-shadow:0 2px 10px #0000000d}
+  input{font:inherit;padding:9px 11px;border:1.5px solid #c9ced8;border-radius:9px;width:100%}
+  button{font:inherit;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#eef0f4;color:var(--ink)}
+  button.primary{background:var(--accent);color:#fff}
+  .muted{color:var(--muted);font-size:14px}
+  #app{display:none;flex-direction:column;height:100%}
+  nav{display:flex;gap:6px;padding:8px;background:var(--bg);border-bottom:1px solid #e4e7ec;flex-wrap:nowrap;align-items:center;overflow-x:auto}
+  nav button{font-size:14px;padding:8px 11px;white-space:nowrap}
+  @media(max-width:440px){nav .who{display:none}}
+  nav button.active{background:var(--ink);color:#fff}
+  nav .who{margin-left:auto;font-size:13px;color:var(--muted)}
+  iframe{flex:1;width:100%;border:0;display:none;background:var(--bg)}
+  iframe.on{display:block}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div id="login" class="card">
+  <h2 style="margin-top:0">🇰🇷 Группа 2724 · 어휘</h2>
+  <p class="muted">Слова урока (вместе с работой над ошибками), повторение программы 서울대 한국어+ по 1급 и 2급 и игры со словами.</p>
+  <p>Как тебя зовут?</p>
+  <input type="text" id="n" placeholder="Имя" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('p').focus()">
+  <p style="margin-bottom:4px">PIN-код (4 цифры)</p>
+  <input type="password" id="p" inputmode="numeric" maxlength="8" placeholder="••••" style="max-width:160px" onkeydown="if(event.key==='Enter')go()">
+  <p class="muted">Первый раз — придумай PIN и запомни. С ним прогресс откроется на любом устройстве.</p>
+  <div id="fb" style="color:var(--bad);min-height:22px"></div>
+  <button class="primary" onclick="go()">Начать →</button>
+</div>
+<div id="app">
+  <nav>
+    <button data-t="0" class="active" onclick="tab(0)">📚 Слова урока</button>
+    <button data-t="1" onclick="tab(1)">🔁 Повторение</button>
+    <button data-t="2" onclick="tab(2)">🎮 Игры</button>
+    <span class="who" id="who"></span>
+  </nav>
+  <iframe id="f0" class="on" title="Слова урока"></iframe>
+  <iframe id="f1" title="Повторение программы"></iframe>
+  <iframe id="f2" title="Игры со словами"></iframe>
+</div>
+<script>
+/* ============ НАСТРОЙКА: какой тренажёр в первой вкладке ============ */
+const LESSON_URL  = "lesson/index.html?v=1794338284";   // слова текущего урока
+const PROGRAM_URL = "../snu/index.html?g=2724&cur=g2724_lesson_v1&steps=20&v=1794338284";      // повторение программы
+const GAMES_URL   = "games/index.html?v=1794338284";
+const EXTRA_URL   = "";    // игры со словами
+const K="g2724_tabs_login";
+const $=id=>document.getElementById(id);
+try{ const s=JSON.parse(localStorage.getItem(K)); if(s){ $("n").value=s.n; $("p").value=s.p; } }catch(e){}
+function enc(o){ return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
+function go(){
+  const n=$("n").value.trim(), p=$("p").value.trim();
+  if(!n){ $("n").focus(); return; }
+  if(!/^\d{4,8}$/.test(p)){ $("fb").textContent="Введи PIN из 4 цифр."; $("p").focus(); return; }
+  try{ localStorage.setItem(K,JSON.stringify({n,p})); }catch(e){}
+  const a="#auto="+enc({n,p});
+  $("f0").src=LESSON_URL+a; $("f1").dataset.src=PROGRAM_URL+a; $("f2").dataset.src=GAMES_URL+a;
+  $("login").style.display="none"; $("app").style.display="flex"; $("who").textContent="👤 "+n;
+}
+function tab(i){
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",+b.dataset.t===i));
+  [0,1,2].forEach(k=>$("f"+k).classList.toggle("on",k===i));
+  const f=$("f"+i); if((!f.src||i===2)&&f.dataset.src) f.src=f.dataset.src;   // вкладки грузятся по желанию; игры — заново, чтобы взять свежие трудные слова
+}
+</script>
+</body>
+</html>

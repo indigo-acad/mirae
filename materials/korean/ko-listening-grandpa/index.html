@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한국어 듣기 연습 — 할아버지 댁에서</title>
+<style>
+  body{font-family:Arial,"Noto Sans KR",sans-serif;max-width:850px;margin:0 auto;padding:24px;background:#f7f7fb;color:#222;line-height:1.7}
+  .card{background:white;border-radius:18px;padding:24px;margin:16px 0;box-shadow:0 3px 14px #00000012}
+  h1{margin-top:0}
+  .intro{color:#555}
+  button{border:0;border-radius:10px;padding:11px 16px;font-size:16px;cursor:pointer;margin:5px}
+  .play{background:#222;color:white}
+  .check{background:#eee}
+  .reset{background:#eee}
+  .line{margin:13px 0;font-size:20px}
+  input{width:120px;border:0;border-bottom:2px solid #777;font-size:19px;padding:3px 5px;text-align:center}
+  input.correct{border-color:#2e9b55;background:#eaf8ef}
+  input.wrong{border-color:#d33;background:#fff0f0}
+  .feedback{font-size:18px;font-weight:bold;margin-top:16px}
+  .answers{display:none;margin-top:15px;padding:15px;background:#f1f5ff;border-radius:10px}
+  .tip{font-size:14px;color:#666}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="card">
+  <h1>🎧 한국어 듣기 연습</h1>
+  <p class="intro">«할아버지 댁에서» — послушайте диалог и заполните 5 пропусков.</p>
+  <button class="play" onclick="playAll()">▶ 전체 듣기</button>
+  <button class="reset" onclick="stopSpeech()">⏹ 정지</button>
+  <p class="tip">Для воспроизведения используется корейский голос вашего браузера/устройства.</p>
+</div>
+
+<div class="card">
+  <h2>📝 빈칸 채우기</h2>
+  <div class="line">민수: 할아버지 댁에 가면 조심해야 할 게 많아.</div>
+  <div class="line">지은: 어떤 거?</div>
+  <div class="line">민수: 일단 들어갈 때 <input id="a1" autocomplete="off"> 벗어야 돼. 그리고 할아버지를 보면 <input id="a2" autocomplete="off"> 인사해야 돼.</div>
+  <div class="line">지은: 나 저번에 실수했어. 할아버지한테 물건 드릴 때 <input id="a3" autocomplete="off"> 드렸거든.</div>
+  <div class="line">민수: 안 돼! 어른한테는 항상 <input id="a4" autocomplete="off"> 드려야지.</div>
+  <div class="line">지은: 알겠어. 그리고 밥 먹을 때도 조심해야 돼?</div>
+  <div class="line">민수: 응, <input id="a5" autocomplete="off"> 먹으면 안 돼. 그리고 어른이 먼저 수저 드실 때까지 기다려야 돼.</div>
+
+  <button class="check" onclick="checkAnswers()">✅ 정답 확인</button>
+  <button class="reset" onclick="resetAnswers()">↻ 다시 하기</button>
+  <div id="feedback" class="feedback"></div>
+  <div id="answers" class="answers">
+    <strong>정답:</strong><br>
+    1. 신발을<br>
+    2. 고개를 숙여서<br>
+    3. 한 손으로<br>
+    4. 두 손으로<br>
+    5. 밥그릇 들고
+  </div>
+</div>
+
+<script>
+const dialogue = [
+"민수: 할아버지 댁에 가면 조심해야 할 게 많아.",
+"지은: 어떤 거?",
+"민수: 일단 들어갈 때 신발을 벗어야 돼. 그리고 할아버지를 보면 고개를 숙여서 인사해야 돼.",
+"지은: 나 저번에 실수했어. 할아버지한테 물건 드릴 때 한 손으로 드렸거든.",
+"민수: 안 돼! 어른한테는 항상 두 손으로 드려야지.",
+"지은: 알겠어. 그리고 밥 먹을 때도 조심해야 돼?",
+"민수: 응, 밥그릇 들고 먹으면 안 돼. 그리고 어른이 먼저 수저 드실 때까지 기다려야 돼."
+];
+
+function speak(text){
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "ko-KR";
+  u.rate = 0.88;
+  u.pitch = 1;
+  speechSynthesis.speak(u);
+}
+function playAll(){
+  speechSynthesis.cancel();
+  dialogue.forEach((text,i)=>{
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang="ko-KR"; u.rate=0.88; u.pitch=1;
+    speechSynthesis.speak(u);
+  });
+}
+function stopSpeech(){speechSynthesis.cancel();}
+
+const answers = ["신발을","고개를 숙여서","한 손으로","두 손으로","밥그릇 들고"];
+
+function normalize(s){return s.trim().replace(/\s+/g,"");}
+function checkAnswers(){
+  let score=0;
+  answers.forEach((ans,i)=>{
+    const el=document.getElementById("a"+(i+1));
+    const ok=normalize(el.value)===normalize(ans);
+    el.classList.toggle("correct",ok);
+    el.classList.toggle("wrong",!ok);
+    if(ok) score++;
+  });
+  document.getElementById("feedback").textContent =
+    score===5 ? "🎉 모두 맞았어요! 5 / 5" : `결과: ${score} / 5 — 틀린 답을 다시 들어 보세요.`;
+  document.getElementById("answers").style.display="block";
+}
+function resetAnswers(){
+  for(let i=1;i<=5;i++){
+    const el=document.getElementById("a"+i);
+    el.value=""; el.classList.remove("correct","wrong");
+  }
+  document.getElementById("feedback").textContent="";
+  document.getElementById("answers").style.display="none";
+  stopSpeech();
+}
+</script>
+</body>
+</html>

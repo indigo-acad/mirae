@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>서울대 한국어+ · повторение слов</title>
+<style>
+  :root{--ink:#1d2433;--muted:#667085;--line:#e4e7ec;--bg:#f5f6fa;--card:#fff;--accent:#2f5bea;--ok:#1f9d55;--okbg:#e9f8ef;--bad:#d64545;--badbg:#fdeeee}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  .wrap{max-width:820px;margin:0 auto;padding:18px 14px 80px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+  header h1{font-size:20px;margin:0}
+  .who{font-size:14px;color:var(--muted)}
+  .card{background:var(--card);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 2px 10px #0000000d}
+  h2{margin:0 0 6px;font-size:20px}
+  h3{margin:4px 0 6px;font-size:17px}
+  .muted{color:var(--muted);font-size:14px}
+  .ielts{font-weight:700}
+  button{font:inherit;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#eef0f4;color:var(--ink);margin:4px 4px 4px 0}
+  button.primary{background:var(--accent);color:#fff}
+  button.dark{background:var(--ink);color:#fff}
+  button.sm{font-size:14px;padding:6px 12px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text]{font:inherit;padding:9px 11px;border:1.5px solid #c9ced8;border-radius:9px;width:100%}
+  input.gap{width:140px;padding:4px 8px;border:0;border-bottom:2px solid #8a93a6;border-radius:0;background:#fafbfc;text-align:center}
+  input.ok{border-color:var(--ok)!important;background:var(--okbg)!important}
+  input.bad{border-color:var(--bad)!important;background:var(--badbg)!important}
+  .fix{color:var(--ok);font-weight:700;font-size:14px;margin-left:6px}
+  nav{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+  nav button{margin:0;font-size:15px}
+  nav button.active{background:var(--ink);color:#fff}
+  nav .done::after{content:" ✓";color:var(--ok)}
+  nav button.active.done::after{color:#8ff0b5}
+  .sets{display:flex;flex-wrap:wrap;gap:6px}
+  .sets button.active{background:var(--accent);color:#fff}
+  .ex{display:flex;flex-wrap:wrap;gap:6px}
+  .ex button{margin:0}
+  .ex button.done{background:var(--okbg);outline:1.5px solid var(--ok)}
+  .form{border:2px solid var(--ink);border-radius:6px;padding:14px 16px;background:#fff}
+  .form .title{text-align:center;font-weight:700;font-size:17px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:8px}
+  .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .row .lab{min-width:210px;color:#344054}
+  .qn{display:inline-block;min-width:24px;height:24px;line-height:24px;text-align:center;border:1.5px solid var(--ink);border-radius:5px;font-size:13px;font-weight:700;margin-right:4px}
+  .example{color:var(--muted);font-style:italic}
+  .pk button.sel{background:#dfe6ff;outline:2px solid var(--accent)}
+  .pk button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .pk button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  label{display:block;margin-top:6px}
+  details{margin:6px 0} summary{cursor:pointer;padding:4px 0}
+  ul.pb{margin:4px 0 8px;padding-left:20px} ul.pb li{margin:3px 0}
+  .score{font-size:18px;font-weight:700;margin-top:12px}
+  .hidden{display:none!important}
+  .transcript{background:#f3f6ff;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .transcript p{margin:4px 0}
+  mark{background:#ffe58a;padding:0 2px;border-radius:3px}
+  .reading{background:#fffdf5;border:1px solid #efe6c4;border-radius:10px;padding:14px 16px;font-family:Georgia,serif;font-size:16.5px}
+  .reading h4{margin:0 0 6px;text-align:center;font-family:inherit;font-size:19px}
+  .reading h5{margin:12px 0 2px;font-size:16px}
+  .reading p{margin:4px 0}
+  table.tbl{width:100%;border-collapse:collapse;font-size:15px}
+  table.tbl th,table.tbl td{border:1px solid #9aa2b1;padding:7px;vertical-align:top;text-align:left}
+  table.tbl th{background:#f1f3f7}
+  table.tbl td div{margin:3px 0}
+  .flash{perspective:900px;height:180px;margin:12px 0;cursor:pointer;user-select:none}
+  .flash .in{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+  .flash.flip .in{transform:rotateY(180deg)}
+  .flash .side{position:absolute;inset:0;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;font-size:26px;font-weight:700;padding:12px;text-align:center}
+  .flash .front{background:#eef3ff}
+  .flash .back{background:#effaf3;transform:rotateY(180deg)}
+  .flash small{font-size:14px;font-weight:400;color:var(--muted);margin-top:6px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .opts button{margin:0;padding:12px;text-align:left;background:#f1f3f7}
+  .opts button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .opts button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  .bar{height:8px;background:#e7e9ef;border-radius:5px;overflow:hidden;margin:8px 0}
+  .bar div{height:100%;background:var(--accent);width:0;transition:width .3s}
+  .big{font-size:22px;font-weight:700;margin:10px 0}
+  .feedback{min-height:24px;margin-top:8px;font-weight:600}
+  table.res{width:100%;border-collapse:collapse;font-size:15px}
+  table.res td{padding:6px 4px;border-bottom:1px solid var(--line)}
+  .speed{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin-top:6px}
+  @media(max-width:560px){.opts{grid-template-columns:1fr}.row .lab{min-width:100%}table.tbl{font-size:14px}input.gap{width:110px}}
+</style>
+
+<style>
+  .ko{font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+  .flash .side{font-size:30px}
+  .les{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .les .nm{min-width:86px;font-weight:700}
+  .les .bar{flex:1;margin:0}
+  .les .pc{min-width:44px;text-align:right;font-size:14px;color:var(--muted)}
+  .les button{margin:0}
+  .book{margin:14px 0 2px;font-weight:700;color:var(--muted);font-size:14px}
+  .bar div.full{background:var(--ok)}
+  .steps button.next{outline:2px solid var(--accent)}
+  .big-bar{height:14px;border-radius:8px}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+<div id="login" class="card">
+  <h2>🇰🇷 서울대 한국어+ · повторение слов</h2>
+  <p class="muted">Все слова программы 1A, 1B и 2A по урокам. Выбирай урок, проходи задания — шкала покажет, сколько слов уже выучено.</p>
+  <p class="muted">⌨️ Для письменных заданий нужна корейская раскладка.</p>
+  <p>Как тебя зовут?</p>
+  <input type="text" id="nameInput" placeholder="Имя" autocomplete="off" onkeydown="if(event.key==='Enter')$('pinInput').focus()">
+  <div id="pinRow"><p style="margin-bottom:4px">PIN-код (4 цифры)</p>
+  <input type="password" id="pinInput" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off" style="max-width:160px" onkeydown="if(event.key==='Enter')start()">
+  <p class="muted" style="margin-top:4px">Первый раз — придумай PIN и запомни. С этим именем и PIN прогресс откроется на любом устройстве.</p></div>
+  <div class="feedback" id="loginFb" style="color:var(--bad)"></div>
+  <p><button class="primary" onclick="start()">Начать →</button></p>
+</div>
+
+<div id="app" class="hidden">
+  <header><h1>서울대+ · 어휘</h1><div class="who">👤 <span id="who"></span> <span id="cloud"></span></div></header>
+
+  <!-- главная: шкалы по урокам -->
+  <section id="home">
+    <div class="card">
+      <h3 style="margin-top:0">📈 Прогресс</h3>
+      <div id="levels"></div>
+      <div style="margin-top:10px;font-weight:700">Вся программа</div>
+      <div class="bar big-bar"><div id="allBar"></div></div>
+      <div class="muted" id="allTxt"></div>
+      <p class="muted" style="font-size:13px;margin:6px 0 0">Слово считается выученным, когда последний раз ты написал(а) его правильно и не ошибся(лась) в переводе.</p>
+      <div class="speed">🔊 Скорость <input type="range" id="rate" min="0.5" max="1.1" step="0.05" value="0.85"> <span id="rateVal">0.85</span></div>
+      <div class="speed">🗣 Голос <select id="voiceSel" onchange="try{localStorage.setItem('topik_voice',voices[this.value].name)}catch(e){}; say('안녕하세요')" style="font:inherit;font-size:14px;max-width:240px"></select></div>
+    </div>
+    <div class="card" id="reviewCard">
+      <h3 style="margin-top:0">🔁 Слова на повторить <span class="muted" style="font-weight:400">(по желанию)</span></h3>
+      <p class="muted" id="reviewTxt"></p>
+      <button class="primary" id="reviewBtn" onclick="startReview()">Повторить</button>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Уроки</h3>
+      <div class="ex" style="margin-bottom:6px"><button class="sm" id="lv1" onclick="setLevel(1)">1급 (1A · 1B)</button><button class="sm" id="lv2" onclick="setLevel(2)">2급 (2A)</button></div>
+      <p class="muted" style="margin-top:0">Выбирай любой урок, в любом порядке.</p>
+      <div id="lessons"></div>
+    </div>
+    <div class="card">
+      <h3>📨 Отправить учителю</h3>
+      <p class="muted">Учитель увидит прогресс по урокам и слова на повторить.</p>
+      <button class="primary" id="sendBtn" onclick="sendResults()">Отправить результаты</button>
+      <div class="feedback" id="sendFb"></div>
+      <textarea id="copyBox" class="hidden" style="width:100%;height:180px;font:13px monospace;margin-top:8px"></textarea>
+    </div>
+  </section>
+
+  <!-- урок -->
+  <section id="lesson" class="hidden">
+    <div class="card">
+      <button class="sm" onclick="goHome()">← Все уроки</button>
+      <h2 id="lTitle" style="margin-top:8px"></h2>
+      <div class="bar"><div id="lBar"></div></div>
+      <div class="muted" id="lTxt"></div>
+      <div class="ex steps" id="lSteps" style="margin-top:10px"></div>
+      <details style="margin-top:10px"><summary><b>📖 Слова урока</b></summary><div id="lWords"></div></details>
+    </div>
+    <div class="card" id="stage">
+      <div class="muted" id="sStep"></div>
+      <h3 id="sTitle"></h3>
+      <p class="muted" id="sHint"></p>
+      <div id="cardsBox" class="hidden">
+        <div class="flash" id="flash" style="height:200px" onclick="this.classList.toggle('flip')">
+          <div class="in">
+            <div class="side front"><span id="fFront" class="ko"></span></div>
+            <div class="side back"><span id="fBack" style="font-size:24px"></span></div>
+          </div>
+        </div>
+        <button onclick="flashMove(-1)">←</button><button class="dark" onclick="say(CW[fi].ko)">🔊</button><button onclick="flashMove(1)">→</button>
+        <span class="muted" id="fCount"></span>
+        <p><button class="primary" id="cardsDone" onclick="finishCards()" disabled>Посмотрел(а) все карточки →</button></p>
+      </div>
+      <div id="drillBox" class="hidden">
+        <div class="bar"><div id="dBar"></div></div>
+        <div class="big" id="dPrompt"></div>
+        <div class="opts" id="dOpts"></div>
+        <div id="dWrite" class="hidden">
+          <input type="text" id="dIn" class="ko" lang="ko" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter'&&!event.isComposing)dCheck()">
+          <button class="primary" onclick="dCheck()">Проверить</button>
+          <button class="sm" onclick="dHint()">💡 Первый слог</button>
+        </div>
+        <div id="dSpeak" class="hidden">
+          <button class="primary" id="micBtn" onclick="listen()" style="font-size:18px;padding:12px 20px">🎤 Нажми и скажи</button>
+          <button class="sm" onclick="say(D.items[D.cur].w.ko)">🔊 Послушать образец</button>
+          <button class="sm" id="skipBtn" onclick="spSkip()">Пропустить</button>
+        </div>
+        <div class="feedback" id="dFb"></div>
+      </div>
+      <div id="nextBox" class="hidden"><button class="primary" id="nextBtn" onclick="afterStep()">Дальше →</button></div>
+    </div>
+  </section>
+</div>
+</div>
+<script>
+/* ============ НАСТРОЙКИ ============ */
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID = "347625701";
+const SB_URL = "https://nusfkwtmnbhnbnckhrfk.supabase.co";
+const SB_KEY = "sb_publishable_UmWyFo7ciEc-m9x1ZIfkNw_yeQQAgf8";
+const SB_ON  = SB_URL.startsWith("https://");
+const GROUP = new URLSearchParams(location.search).get("g");
+const KEY = "snu_program_v1"+(GROUP?"_"+GROUP:"");   // у каждой группы свой прогресс, чтобы одинаковые имена не мешали
+
+/* ============ ПРОГРАММА 서울대 한국어+ ============
+   Каждый урок: id, book, n (номер 단원), words: [ko, ru, alt?]. alt — другие правильные варианты написания. */
+const L=(book,n,words)=>({id:book+"-"+n,book,n,name:book+" · "+n+"과",words:words.map(w=>({ko:w[0],ru:w[1],alt:w[2]||[]}))});
+const N1=" (кор. счёт)", N2=" (кит. счёт)";
+const LESSONS=[
+L("1A",1,[["한국","Корея"],["미국","США"],["중국","Китай"],["일본","Япония"],["프랑스","Франция"],["러시아","Россия"],["브라질","Бразилия"],["말레이시아","Малайзия"],["몽골","Монголия"],["베트남","Вьетнам"],["나라","страна"],["사람","человек"],
+ ["선생님","учитель"],["학생","ученик, студент"],["기자","журналист"],["의사","врач"],["배우","актёр"],["대학생","студент университета"],["회사원","офисный работник"],["가수","певец"],["프로그래머","программист"],["요리사","повар"],["운동선수","спортсмен"]]),
+L("1A",2,[["교실","класс (аудитория)"],["창문","окно"],["책상","письменный стол"],["의자","стул"],["책","книга"],["볼펜","шариковая ручка"],["필통","пенал"],["가방","сумка"],["시계","часы"],["공책","тетрадь"],["컴퓨터","компьютер"],["휴대폰","мобильный телефон"],["지우개","ластик"],["연필","карандаш"],
+ ["집","дом"],["방","комната"],["화장실","туалет"],["부엌","кухня"],["침대","кровать"],["노트북","ноутбук"],["세탁기","стиральная машина"],["냉장고","холодильник"],["텔레비전","телевизор"],["에어컨","кондиционер"]]),
+L("1A",3,[["음식","еда"],["빵","хлеб"],["샌드위치","сэндвич"],["과일","фрукты"],["사과","яблоко"],["딸기","клубника"],["수박","арбуз"],["음료수","напиток"],["물","вода"],["우유","молоко"],["커피","кофе"],["차","чай"],["주스","сок"],
+ ["하나","один"+N1],["둘","два"+N1],["셋","три"+N1],["넷","четыре"+N1],["다섯","пять"+N1],["여섯","шесть"+N1],["일곱","семь"+N1],["여덟","восемь"+N1],["아홉","девять"+N1],["열","десять"+N1],
+ ["여기","здесь"],["저기","вон там"],["거기","там"],["앞","перед, спереди"],["뒤","за, сзади"],["옆","рядом, сбоку"],["위","на, наверху"],["아래","под, внизу",["밑"]],["안","внутри"],["밖","снаружи"]]),
+L("1A",4,[["보다","смотреть"],["좋아하다","любить, нравиться"],["사다","покупать"],["만나다","встречаться"],["먹다","есть"],["아르바이트하다","подрабатывать"],["전화하다","звонить"],["읽다","читать"],["일하다","работать"],["마시다","пить"],["공부하다","учиться, заниматься"],["배우다","изучать (у кого-то), учиться чему-то"],["운동하다","заниматься спортом"],
+ ["학교","школа"],["병원","больница"],["약국","аптека"],["도서관","библиотека"],["식당","столовая, ресторан"],["우체국","почта"],["영화관","кинотеатр"],["서점","книжный магазин"],["공원","парк"],["백화점","универмаг"],["회사","компания, фирма"],["은행","банк"],["스포츠 센터","спортивный центр"],["시장","рынок"]]),
+L("1A",5,[["맛있다","вкусный"],["맛없다","невкусный"],["재미있다","интересный"],["재미없다","неинтересный, скучный"],["깨끗하다","чистый"],["좋다","хороший"],["싸다","дешёвый"],["비싸다","дорогой"],["많다","много (есть)"],["친절하다","приветливый, любезный"],
+ ["김밥","кимпаб"],["불고기","пулькоги"],["비빔밥","пибимпаб"],["냉면","нэнмён (холодная лапша)"],["김치","кимчи"],["김치찌개","кимчи-ччигэ (рагу с кимчи)"],["갈비탕","кальбитхан (суп из рёбрышек)"],["삼겹살","самгёпсаль (свиная грудинка)"],["떡볶이","токпокки"],
+ ["일","1"+N2],["이","2"+N2],["삼","3"+N2],["사","4"+N2],["오","5"+N2],["육","6"+N2],["칠","7"+N2],["팔","8"+N2],["구","9"+N2],["십","10"+N2],["이십","20"+N2],["삼십","30"+N2],["사십","40"+N2],["오십","50"+N2],["육십","60"+N2],["칠십","70"+N2],["팔십","80"+N2],["구십","90"+N2],["백","100"],["천","1000"],["만","10 000"]]),
+L("1A",6,[["월요일","понедельник"],["화요일","вторник"],["수요일","среда"],["목요일","четверг"],["금요일","пятница"],["토요일","суббота"],["일요일","воскресенье"],["평일","будни"],["주말","выходные"],["어제","вчера"],["오늘","сегодня"],["내일","завтра"],
+ ["지난주","прошлая неделя"],["이번 주","эта неделя"],["다음 주","следующая неделя"],["아침","утро; завтрак"],["점심","обед; полдень"],["저녁","вечер; ужин"],["시간","время"],
+ ["일월","январь"],["이월","февраль"],["삼월","март"],["사월","апрель"],["오월","май"],["유월","июнь"],["칠월","июль"],["팔월","август"],["구월","сентябрь"],["시월","октябрь"],["십일월","ноябрь"],["십이월","декабрь"],
+ ["월","месяц (в датах)"],["일","число (в датах)"],["며칠","какое число; несколько дней"],["청소하다","убираться"],["구경하다","осматривать, глазеть"],["등산하다","ходить в горы"],["산책하다","гулять"],["사진을 찍다","фотографировать"],["쇼핑하다","ходить по магазинам"],["빨래하다","стирать"]]),
+L("1A",7,[["세수하다","умываться"],["일어나다","вставать, просыпаться"],["이를 닦다","чистить зубы"],["화장하다","краситься"],["옷을 입다","одеваться"],["샤워하다","принимать душ"],["요리하다","готовить еду"],["이야기하다","разговаривать"],["빨리","быстро"],["천천히","медленно"],["조금","немного"],["많이","много (нареч.)"],["늦게","поздно"],["일찍","рано"],
+ ["수업이 끝나다","урок заканчивается"],["시험이 끝나다","экзамен заканчивается"],["여행하다","путешествовать"],["캠핑을 하다","ходить в поход с палаткой"],["축구하다","играть в футбол"],["농구하다","играть в баскетбол"],["야구하다","играть в бейсбол"],["골프를 치다","играть в гольф"],["테니스를 치다","играть в теннис"],["수영하다","плавать"]]),
+L("1A",8,[["날씨","погода"],["맑다","ясный"],["흐리다","пасмурный"],["따뜻하다","тёплый"],["비가 오다","идёт дождь"],["시원하다","прохладный, свежий"],["눈이 오다","идёт снег"],["바람이 불다","дует ветер"],["계절","время года"],["봄","весна"],["여름","лето"],["가을","осень"],["겨울","зима"],
+ ["춥다","холодный"],["덥다","жаркий"],["어렵다","трудный"],["쉽다","лёгкий, несложный"],["무겁다","тяжёлый"],["가볍다","лёгкий (по весу)"],["맵다","острый"],["무섭다","страшный"],["귀엽다","милый"]]),
+L("1B",9,[["아프다","болеть; больно"],["바쁘다","занятой"],["예쁘다","красивый"],["나쁘다","плохой"],["배고프다","голодный"],["쓰다","писать; горький"],["끄다","выключать"],["얼굴","лицо"],["눈","глаз"],["코","нос"],["입","рот"],["귀","ухо"],
+ ["몸","тело"],["머리","голова; волосы"],["목","шея; горло"],["가슴","грудь"],["배","живот"],["허리","поясница, талия"],["다리","нога"],["손","кисть руки"],["발","ступня"],["팔","рука (от плеча)"],["어깨","плечо"],["무릎","колено"],
+ ["감기에 걸리다","простудиться"],["기침을 하다","кашлять"],["열이 나다","поднимается температура"],["콧물이 나오다","течёт из носа"],["목이 아프다","болит горло"],["건강에 좋다","полезно для здоровья"],["건강에 나쁘다","вредно для здоровья"],["손을 씻다","мыть руки"],["푹 쉬다","как следует отдохнуть"],["담배를 피우다","курить"]]),
+L("1B",10,[["잘하다","хорошо уметь"],["못하다","плохо уметь, не уметь"],["회사에 다니다","работать в компании"],["계획","план"],["메일을 보내다","отправлять письмо (e-mail)"],["메일을 받다","получать письмо (e-mail)"],["열심히","усердно"],["잘","хорошо (нареч.)"],["제일","самый"],["오전","до полудня"],["오후","после полудня"],
+ ["피아노를 치다","играть на пианино"],["기타를 치다","играть на гитаре"],["게임을 하다","играть в игры"],["그림을 그리다","рисовать"],["자전거를 타다","кататься на велосипеде"],["스키를 타다","кататься на лыжах"],["친구를 사귀다","заводить друзей"],["연습하다","практиковаться"],
+ ["작년","прошлый год"],["올해","этот год"],["내년","следующий год"],["지난달","прошлый месяц"],["이번 달","этот месяц"],["다음 달","следующий месяц"]]),
+L("1B",11,[["내리다","выходить (из транспорта)"],["타다","садиться (в транспорт), ехать"],["갈아타다","делать пересадку"],["배","корабль"],["비행기","самолёт"],["지하철","метро"],["버스","автобус"],["택시","такси"],["기차","поезд"],["지하철역","станция метро"],["버스 정류장","автобусная остановка"],["공항","аэропорт"],["터미널","автовокзал, терминал"],
+ ["가깝다","близкий"],["멀다","далёкий"],["걸리다","занимать (время)"],["기다리다","ждать"],["오른쪽","правая сторона"],["왼쪽","левая сторона"],["이쪽","эта сторона, сюда"],["그쪽","та сторона, туда"],["저쪽","вон та сторона"],["건너편","другая сторона (улицы)"],["건물","здание"],["박물관","музей"],["전시회","выставка"]]),
+L("1B",12,[["전화를 받다","отвечать на звонок"],["메시지를 받다","получать сообщение"],["메시지를 보내다","отправлять сообщение"],["공","ноль (в номерах)"],["사무실","офис"],["전화번호","номер телефона"],["영상 통화","видеозвонок"],["대답","ответ"],["찾아보다","искать, поискать"],["여보세요","алло"],["실례지만 누구세요","извините, а кто это?"],
+ ["준비하다","готовиться"],["시험을 보다","сдавать экзамен"],["점수가 좋다","хорошие баллы"],["기분이 좋다","хорошее настроение"],["친구하고 놀다","играть, гулять с другом"],["늦잠을 자다","проспать, спать допоздна"],["길이 막히다","дорога забита, пробка"],["부탁이 있다","есть просьба"],["죄송하다","извините (вежливо)"],["그저께","позавчера"],["모레","послезавтра"]]),
+L("1B",13,[["키가 크다","высокий (о росте)"],["키가 작다","низкий (о росте)"],["길다","длинный"],["짧다","короткий"],["높다","высокий"],["낮다","низкий"],["멋있다","стильный, классный"],["입다","надевать (одежду)"],["신다","надевать (обувь)"],["쓰다","надевать (шапку, очки)"],["벗다","снимать"],
+ ["바지","брюки"],["치마","юбка"],["코트","пальто"],["티셔츠","футболка"],["원피스","платье"],["한복","ханбок"],["운동화","кроссовки"],["구두","туфли"],["편하다","удобный"],["불편하다","неудобный"],["두껍다","толстый"],["얇다","тонкий"]]),
+L("1B",14,[["초대하다","приглашать"],["축하하다","поздравлять"],["기쁘다","радостный"],["선물을 주다","дарить подарок"],["선물을 받다","получать подарок"],["식사하다","есть, трапезничать"],["파티하다","устраивать вечеринку"],["양복을 입다","надевать костюм"],["늦다","опаздывать; поздний"],
+ ["혼자","один, в одиночку"],["함께","вместе"],["근처","поблизости, окрестности"],["춤추다","танцевать"],["친하다","близкий, дружный"],["지내다","проводить время, поживать"],["들어가다","входить (туда)"],["들어오다","входить (сюда)"],["울다","плакать"],["웃다","смеяться"]]),
+L("1B",15,[["할아버지","дедушка"],["할머니","бабушка"],["아버지","отец"],["어머니","мать"],["남편","муж"],["아내","жена"],["아들","сын"],["딸","дочь"],["언니","старшая сестра (у девушки)"],["오빠","старший брат (у девушки)"],["누나","старшая сестра (у парня)"],["형","старший брат (у парня)"],["동생","младший брат или сестра"],["나","я"],["가족","семья"],["부모님","родители"],
+ ["생신","день рождения (почтит.)"],["댁","дом (почтит.)"],["연세","возраст (почтит.)"],["성함","имя (почтит.)"],["분","человек (почтит.)"],["계시다","быть, находиться (почтит.)"],["드시다","есть, пить (почтит.)"],["주무시다","спать (почтит.)"],["걷다","ходить пешком"],["듣다","слушать"],
+ ["스물","20"+N1],["서른","30"+N1],["마흔","40"+N1],["쉰","50"+N1],["예순","60"+N1],["일흔","70"+N1],["여든","80"+N1],["아흔","90"+N1]]),
+L("1B",16,[["호텔","гостиница"],["여권","паспорт"],["보이다","быть видным; показывать"],["빌리다","брать на время, одалживать"],["돈을 바꾸다","менять деньги"],["돈을 찾다","снимать деньги"],["출발하다","отправляться"],["도착하다","прибывать"],["돌아오다","возвращаться (сюда)"],["돌아가다","возвращаться (туда)"],
+ ["한가하다","свободный (о времени)"],["조용하다","тихий"],["아름답다","прекрасный"],["특별하다","особенный"],["복잡하다","сложный; многолюдный"],["유명하다","известный"],["안내","информация, справка"],["적다","мало; записывать"]]),
+L("2A",1,[["성명","имя и фамилия"],["국적","гражданство"],["생년월일","дата рождения"],["성별","пол"],["연락처","контакты"],["이메일","электронная почта"],["목적","цель"],["취미","хобби"],["입학하다","поступать (в учебное заведение)"],["취직하다","устраиваться на работу"],["사업하다","заниматься бизнесом"],
+ ["동쪽","восток"],["서쪽","запад"],["남쪽","юг"],["북쪽","север"],["강","река"],["호수","озеро"],["도시","город"],["시골","деревня, провинция"],["섬","остров"],["아주","очень"],["별로","не особо (+ отрицание)"],["전혀","совсем (не)"]]),
+L("2A",2,[["독서","чтение"],["외국어 공부","изучение иностранных языков"],["영화 감상","просмотр фильмов"],["음악 감상","слушание музыки"],["낚시","рыбалка"],["조깅","пробежка"],["스쿠버 다이빙","дайвинг"],["웹툰을 보다","читать вебтуны"],["인형을 모으다","собирать кукол"],["인터넷 쇼핑을 하다","делать покупки в интернете"],["동영상을 만들다","снимать видео"],["SNS를 하다","сидеть в соцсетях",["에스엔에스를 하다"]],
+ ["동호회","клуб по интересам"],["회원","член (клуба)"],["모집하다","набирать (участников)"],["신청하다","подавать заявку"],["가입하다","вступать"],["모임을 하다","проводить встречу"],["회비를 내다","платить членский взнос"],["매일","каждый день"],["매주","каждую неделю"],["매달","каждый месяц"],["매년","каждый год"]]),
+L("2A",3,[["바닷가","морской берег"],["전통 시장","традиционный рынок"],["관광지","туристическое место"],["미술관","художественный музей"],["동물원","зоопарк"],["전통문화","традиционная культура"],["경치가 아름답다","красивый пейзаж"],["음식이 다양하다","разнообразная еда"],["공기가 맑다","чистый воздух"],["숙소가 깨끗하다","чистое жильё"],
+ ["알아보다","узнавать, выяснять"],["계획을 세우다","составлять план"],["예매하다","покупать билеты заранее"],["예약하다","бронировать"],["짐을 싸다","собирать вещи"],["하루","один день"],["이틀","два дня"],["사흘","три дня"],["나흘","четыре дня"],["열흘","десять дней"],["박","ночь (в поездке: 2박 3일)"],["시간","час (длительность)"],["달","месяц (한 달)"],["주일","неделя",["주"]],["개월","месяц (1개월)"],["년","год"]]),
+L("2A",4,[["가격이 싸다","низкая цена"],["가격이 비싸다","высокая цена"],["색깔이 밝다","светлый цвет"],["색깔이 어둡다","тёмный цвет"],["사이즈가 크다","большой размер"],["사이즈가 작다","маленький размер"],["길이가 길다","длинный (по длине)"],["길이가 짧다","короткий (по длине)"],["굽이 높다","высокий каблук"],["굽이 낮다","низкий каблук"],["디자인이 화려하다","яркий, броский дизайн"],["디자인이 단순하다","простой дизайн"],
+ ["사이즈가 잘 맞다","размер подходит"],["사이즈가 안 맞다","размер не подходит"],["마음에 들다","нравиться"],["마음에 안 들다","не нравиться"],["잘 어울리다","идёт, к лицу"],["안 어울리다","не идёт, не к лицу"],
+ ["상품","товар"],["배송비","стоимость доставки"],["장바구니","корзина покупок"],["할인하다","делать скидку"],["선택하다","выбирать"],["구매하다","покупать (приобретать)"],["주문하다","заказывать"],["문의하다","обращаться с вопросом"],["교환하다","обменивать"],["환불하다","возвращать деньги"]]),
+L("2A",5,[["상자","коробка"],["우표를 붙이다","наклеивать марку"],["우편번호를 쓰다","писать индекс"],["번호표를 뽑다","брать талон очереди"],["엽서를 보내다","отправлять открытку",["엽서를 부치다"]],["소포를 보내다","отправлять посылку",["소포를 부치다"]],["소포를 포장하다","упаковывать посылку"],["봉투에 넣다","класть в конверт"],
+ ["통장","сберкнижка, счёт"],["체크카드","дебетовая карта"],["신용카드","кредитная карта"],["신분증을 내다","предъявлять удостоверение личности"],["신청서를 쓰다","заполнять заявление"],["서명하다","расписываться"],["비밀번호를 누르다","вводить пароль (ПИН)"],["입금","внесение денег"],["출금","снятие денег"],["환전","обмен валюты"],["송금","денежный перевод"],["이체","перевод между счетами"],["돈을 넣다","класть деньги"],["돈을 보내다","отправлять деньги"]]),
+L("2A",6,[["정리하다","приводить в порядок"],["닦다","протирать, чистить"],["세탁기를 돌리다","запускать стиральную машину"],["옷을 빨다","стирать одежду"],["청소기를 돌리다","пылесосить"],["설거지하다","мыть посуду"],["그릇을 씻다","мыть миски, тарелки"],["컵","чашка, стакан"],["숟가락","ложка"],["젓가락","палочки"],["쓰레기를 버리다","выбрасывать мусор"],["음식물 쓰레기","пищевые отходы"],["일반 쓰레기","обычный мусор"],["재활용 쓰레기","мусор на переработку"],
+ ["나가다","выходить (отсюда)"],["나오다","выходить (сюда, наружу)"],["화장을 지우다","смывать макияж"],["머리를 감다","мыть голову"],["목욕하다","принимать ванну"],["예습하다","готовиться к уроку заранее"],["수업을 듣다","посещать занятия"],["복습하다","повторять пройденное"],["낮잠을 자다","спать днём"],["일기를 쓰다","вести дневник"],["통화를 하다","разговаривать по телефону"]]),
+L("2A",7,[["지하도","подземный переход"],["신호등","светофор"],["횡단보도","пешеходный переход"],["사거리","перекрёсток"],["육교","надземный переход"],["직진하다","ехать прямо"],["좌회전하다","поворачивать налево (на машине)"],["우회전하다","поворачивать направо (на машине)"],["유턴하다","разворачиваться"],["지나다","проходить (мимо)"],["세우다","останавливать (машину)"],
+ ["왼쪽으로 돌아가다","повернуть налево (пешком)"],["오른쪽으로 돌아가다","повернуть направо (пешком)"],["쭉 가다","идти прямо"],["건너다","переходить (дорогу)"],["출구","выход"],["입구","вход"],["주차장","парковка"],["맞은편","противоположная сторона"],["호선","линия (метро)"]]),
+L("2A",8,[["이사하다","переезжать"],["환영하다","приветствовать, встречать"],["떠나다","уезжать"],["집들이","новоселье"],["환영회","приветственная вечеринка"],["송별회","прощальная вечеринка"],["날짜","дата"],["장소","место"],["정하다","решать, назначать"],["모이다","собираться"],
+ ["초대장을 쓰다","писать приглашение"],["장을 보다","покупать продукты"],["방을 장식하다","украшать комнату"],["선물을 고르다","выбирать подарок"],["가져가다","уносить с собой"],["가져오다","приносить с собой"],["간식","перекус"],["음료","напиток"],["풍선","воздушный шарик"],["촛불을 켜다","зажигать свечи"],["촛불을 끄다","задувать свечи"],["케이크를 자르다","резать торт"],["선물을 풀다","распаковывать подарок"],["박수를 치다","хлопать в ладоши"]]),
+L("2A",9,[["입맛이 없다","нет аппетита"],["잠을 잘 못 자다","плохо спать"],["기운이 없다","нет сил"],["머리가 빠지다","выпадают волосы"],["살이 찌다","поправляться"],["살이 빠지다","худеть"],["소화제","средство для пищеварения"],["감기약","лекарство от простуды"],["두통약","лекарство от головной боли"],["연고","мазь"],["안약","глазные капли"],["파스","обезболивающий пластырь"],["반창고","лейкопластырь"],["바르다","мазать, наносить"],
+ ["내과","терапия (отделение)"],["피부과","дерматология"],["치과","стоматология"],["이비인후과","ЛОР-отделение"],["정형외과","травматология, ортопедия"],["안과","офтальмология"],["소화가 안 되다","плохо переваривается"],["배탈이 나다","расстройство желудка"],["토하다","тошнить, рвать"],["다치다","пораниться, получить травму"],["뭐가 나다","высыпать (прыщи, сыпь)"],["붓다","опухать"],["어지럽다","кружится голова"],["눈이 잘 안 보이다","плохо видеть"]])
+];
+
+
+/* ============ ОБЩЕЕ ============ */
+const $=id=>document.getElementById(id);
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function norm(s){ return (s||"").normalize("NFC").toLowerCase().replace(/[\s.,!?·~()]/g,""); }
+function isRight(v,w){ const x=norm(v); return x!=="" && [w.ko,...w.alt].some(a=>norm(a)===x); }
+const related=(a,b)=>(a.ko.length>1&&b.ko.includes(a.ko))||(b.ko.length>1&&a.ko.includes(b.ko));
+LESSONS.forEach(l=>l.words.forEach(w=>{ w.key=l.id+"|"+w.ko; w.les=l; }));
+const ALLW=LESSONS.flatMap(l=>l.words);
+
+/* состояние: words[key] = {tr:1|0, wr:1|0}; steps["1A-1:tr"] = {score,total} */
+let STATE={name:"",started:null,words:{},steps:{},log:[]};
+let PIN="";
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(STATE)); if(PIN) localStorage.setItem(KEY+"_pin",PIN);}catch(e){} cloudSave(); }
+function load(){ try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.name) STATE=s; PIN=localStorage.getItem(KEY+"_pin")||"";}catch(e){} }
+async function rpc(fn,args){ const r=await fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"},body:JSON.stringify(args)});
+  const t=await r.text(); if(!r.ok){ let m=t; try{m=JSON.parse(t).message}catch(e){} throw new Error(m); } return t?JSON.parse(t):null; }
+let cloudT=null;
+function cloudMark(s){ $("cloud").textContent=s; }
+function cloudSave(){ if(!SB_ON||!PIN||!STATE.name) return; clearTimeout(cloudT); cloudMark("☁️…");
+  cloudT=setTimeout(async()=>{ try{ await rpc("save_progress",{p_site:KEY,p_name:STATE.name,p_pin:PIN,p_state:STATE}); cloudMark("☁️✓"); }catch(e){ cloudMark("⚠️ не сохранено в облако"); } },1200); }
+
+/* голос */
+let voices=[];
+function vRank(v){ const n=v.name; return /Natural|Online|Neural|SunHi|InJoon|Hyunsu/i.test(n)?0:/Google|Yuna|Siri|Premium|Enhanced|Improved/i.test(n)?1:2; }
+function loadVoices(){ voices=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang)).sort((a,b)=>vRank(a)-vRank(b));
+  const sel=$("voiceSel"); let saved=null; try{saved=localStorage.getItem("topik_voice")}catch(e){}
+  sel.innerHTML=voices.length?voices.map((v,i)=>'<option value="'+i+'">'+esc(v.name)+'</option>').join(""):'<option>корейский голос не найден</option>';
+  const k=voices.findIndex(v=>v.name===saved); if(k>=0) sel.value=k; }
+if("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+function say(text){ if(!("speechSynthesis" in window)) return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); const cv=voices[parseInt($("voiceSel").value)]||voices[0]; if(cv){u.voice=cv;u.lang=cv.lang;} else u.lang="ko-KR"; u.rate=parseFloat($("rate").value); speechSynthesis.speak(u); }
+$("rate").oninput=()=>$("rateVal").textContent=$("rate").value;
+
+/* ============ ВХОД ============ */
+if(!SB_ON) $("pinRow").classList.add("hidden");
+async function start(){
+  const n=$("nameInput").value.trim(); if(!n){$("nameInput").focus();return;}
+  const fresh=()=>({name:n,started:Date.now(),words:{},steps:{},log:[]});
+  if(SB_ON){
+    const pin=$("pinInput").value.trim(); if(!/^\d{4,8}$/.test(pin)){ $("loginFb").textContent="Введи PIN из 4 цифр."; return; }
+    $("loginFb").style.color="var(--muted)"; $("loginFb").textContent="Загружаю…";
+    try{ const remote=await rpc("load_progress",{p_site:KEY,p_name:n,p_pin:pin});
+      if(remote&&remote.words){ STATE=remote; STATE.name=n; } else if((STATE.name||"").toLowerCase()!==n.toLowerCase()) STATE=fresh();
+      PIN=pin; $("loginFb").textContent="";
+    }catch(e){ $("loginFb").style.color="var(--bad)";
+      if(/wrong_pin/.test(e.message)){ $("loginFb").textContent="Неверный PIN для этого имени. Если это не ты — добавь к имени фамилию."; return; }
+      $("loginFb").textContent="Нет связи с сервером — прогресс сохранится только на этом устройстве."; PIN=""; if(STATE.name!==n) STATE=fresh(); }
+  } else if(STATE.name!==n) STATE=fresh();
+  STATE.log=STATE.log||[]; save();
+  $("login").classList.add("hidden"); $("app").classList.remove("hidden"); $("who").textContent=STATE.name; goHome(); loadCurrent();
+}
+
+/* ============ ПРОГРЕСС ============ */
+const learned=w=>{ const s=STATE.words[w.key]; return !!s&&s.wr===1&&s.tr!==0; };
+const toReview=w=>{ const s=STATE.words[w.key]; return !!s&&(s.wr===0||s.tr===0); };
+function pct(ws){ return ws.length?Math.round(100*ws.filter(learned).length/ws.length):0; }
+function goHome(){
+  if("speechSynthesis" in window) speechSynthesis.cancel();
+  $("lesson").classList.add("hidden"); $("home").classList.remove("hidden");
+  const p=pct(ALLW), k=ALLW.filter(learned).length;
+  $("allBar").style.width=p+"%"; $("allBar").classList.toggle("full",p===100); $("allTxt").textContent="Выучено слов: "+k+" из "+ALLW.length+" ("+p+"%)";
+  const rv=ALLW.filter(toReview);
+  $("reviewTxt").textContent=rv.length?"Слов с ошибками: "+rv.length+". Можно прогнать их ещё раз — до 20 за раз.":"Пока нет слов с ошибками. Они появятся здесь сами, если ошибёшься в уроке.";
+  $("reviewBtn").disabled=!rv.length;
+  renderLevels();
+  let h="",book=null; const lv=STATE.level||1; $("lv1").className="sm"+(lv===1?" primary":""); $("lv2").className="sm"+(lv===2?" primary":"");
+  LESSONS.forEach((l,i)=>{ if(levelOf(l)!==lv) return; if(l.book!==book){ h+='<div class="book">'+l.book+'</div>'; book=l.book; }
+    const q=pct(l.words), touched=l.words.some(w=>STATE.words[w.key])||Object.keys(STATE.steps).some(k=>k.startsWith(l.id+":"));
+    h+='<div class="les"><span class="nm">'+l.n+'과</span><div class="bar"><div class="'+(q===100?"full":"")+'" style="width:'+q+'%"></div></div><span class="pc">'+q+'%</span><button class="sm '+(touched?"":"primary")+'" onclick="openLesson('+i+')">'+(touched?"Открыть":"Начать")+'</button></div>'; });
+  $("lessons").innerHTML=h; window.scrollTo(0,0);
+}
+
+/* уровни и текущий урок */
+const levelOf=l=>l.book[0]==="1"?1:2;
+function setLevel(v){ STATE.level=v; save(); goHome(); }
+const QS=new URLSearchParams(location.search);
+const CURRENT={key:QS.get("cur")||"topik_school_state_v1", total:+QS.get("steps")||8};   // тренажёр из вкладки «Слова урока»: ключ и число шагов (можно задать в адресе)
+let curLesson=null;
+function readCurrent(s){ return s&&s.vocab?{done:Math.min(Object.keys(s.vocab).length,CURRENT.total),total:CURRENT.total}:null; }
+async function loadCurrent(){
+  try{ const s=JSON.parse(localStorage.getItem(CURRENT.key)); if(s&&s.name&&s.name.toLowerCase()===STATE.name.toLowerCase()) curLesson=readCurrent(s); }catch(e){}
+  if(SB_ON&&PIN){ try{ const s=await rpc("load_progress",{p_site:CURRENT.key,p_name:STATE.name,p_pin:PIN}); if(s) curLesson=readCurrent(s); }catch(e){} }
+  if(!$("home").classList.contains("hidden")) renderLevels(); }
+function bar(label,p,sub){ return '<div class="les"><span class="nm" style="min-width:118px">'+label+'</span><div class="bar"><div class="'+(p===100?"full":"")+'" style="width:'+p+'%"></div></div><span class="pc">'+p+'%</span></div>'+(sub?'<div class="muted" style="font-size:12px;margin:2px 0 4px">'+sub+'</div>':''); }
+function renderLevels(){ let h="";
+  [["1A","1급 · 1A"],["1B","1급 · 1B"],["2A","2급 · 2A"]].forEach(([b,lab])=>{ const ws=LESSONS.filter(l=>l.book===b).flatMap(l=>l.words); h+=bar(lab,pct(ws),ws.filter(learned).length+" из "+ws.length+" слов"); });
+  const c=curLesson; h+=bar("📚 Текущий урок",c?Math.round(100*c.done/c.total):0,c?"шагов пройдено: "+c.done+" из "+c.total:"ещё не начат — вкладка «Слова урока»");
+  $("levels").innerHTML=h; }
+
+/* ============ УРОК ============ */
+const STEP_TYPES=[{t:"cards",name:"Карточки"},{t:"tr",name:"Выбери перевод"},{t:"rev",name:"Выбери слово"},{t:"wr",name:"✍️ Напиши по-корейски"}];
+let CUR=null; // {lesson, step}
+function openLesson(i){ CUR={l:LESSONS[i]}; $("home").classList.add("hidden"); $("lesson").classList.remove("hidden");
+  $("lTitle").textContent=CUR.l.name;
+  $("lWords").innerHTML='<table class="res">'+CUR.l.words.map(w=>'<tr><td style="width:34px"><button class="sm" style="margin:0;padding:4px 8px" onclick="say('+esc(JSON.stringify(w.ko))+')">🔊</button></td><td class="ko" style="font-weight:600">'+esc(w.ko)+'</td><td>'+esc(w.ru)+'</td><td>'+(learned(w)?"✅":toReview(w)?"🔁":"")+'</td></tr>').join("")+'</table>';
+  lessonHeader(); const nx=STEP_TYPES.findIndex(s=>!STATE.steps[CUR.l.id+":"+s.t]); openStep(nx<0?0:nx); }
+function lessonHeader(){ const l=CUR.l, q=pct(l.words);
+  $("lBar").style.width=q+"%"; $("lBar").classList.toggle("full",q===100); $("lTxt").textContent="Выучено: "+l.words.filter(learned).length+" из "+l.words.length+" ("+q+"%)";
+  const nx=STEP_TYPES.findIndex(s=>!STATE.steps[l.id+":"+s.t]);
+  $("lSteps").innerHTML=STEP_TYPES.map((s,i)=>{ const r=STATE.steps[l.id+":"+s.t];
+    return '<button class="sm '+(r?"done ":"")+(i===nx?"next":"")+'" onclick="openStep('+i+')">'+(r?"✓ ":"")+esc(s.name)+(r&&r.total?" · "+r.score+"/"+r.total:"")+'</button>'; }).join("")
+    +(SR?'<button class="sm '+(STATE.steps[l.id+":say"]?"done":"")+'" onclick="openSpeak()">'+(STATE.steps[l.id+":say"]?"✓ ":"")+'🎤 Произношение (по желанию)'+(STATE.steps[l.id+":say"]?" · "+STATE.steps[l.id+":say"].score+"/"+STATE.steps[l.id+":say"].total:"")+'</button>':''); }
+function openStep(i){
+  if("speechSynthesis" in window) speechSynthesis.cancel();
+  ["cardsBox","drillBox","nextBox"].forEach(x=>$(x).classList.add("hidden"));
+  const s=STEP_TYPES[i]; CUR.step=s; CUR.i=i; CUR.review=false;
+  $("sStep").textContent=CUR.l.name+" · шаг "+(i+1)+" из 4"; $("sTitle").textContent=s.name;
+  if(s.t==="cards") startCards(CUR.l.words); else runDrill(buildItems(s.t,CUR.l.words));
+  $("stage").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function afterStep(){ if(CUR.review){ goHome(); return; } lessonHeader(); const nx=STEP_TYPES.findIndex(s=>!STATE.steps[CUR.l.id+":"+s.t]); if(nx<0){ goHome(); } else openStep(nx); }
+
+/* карточки */
+let CW=[],fi=0,seen=new Set();
+function startCards(ws){ CW=ws; fi=0; seen=new Set(); $("sHint").textContent="Нажми на карточку — увидишь перевод. Пролистай все.";
+  $("cardsBox").classList.remove("hidden"); flashShow(); }
+function flashShow(){ const w=CW[fi]; seen.add(fi); $("flash").classList.remove("flip"); $("fFront").textContent=w.ko; $("fBack").textContent=w.ru;
+  $("fCount").textContent=(fi+1)+" / "+CW.length+" (просмотрено "+seen.size+")"; $("cardsDone").disabled=seen.size<CW.length; say(w.ko); }
+function flashMove(d){ fi=(fi+d+CW.length)%CW.length; flashShow(); }
+function finishCards(){ STATE.steps[CUR.l.id+":cards"]={seen:true}; save(); afterStep(); }
+
+/* задания */
+function buildItems(t,W){
+  const pool=W.length>=6?W:ALLW;
+  const others=(w,f)=>shuffle(pool.filter(x=>x!==w&&!related(x,w)&&f(x)!==f(w))).filter((x,i,a)=>a.findIndex(y=>f(y)===f(x))===i).slice(0,3).map(f);
+  if(t==="tr") return {t,type:"mc",hint:"Послушай слово и выбери перевод.",items:W.map(w=>({w,prompt:'<span class="ko">'+esc(w.ko)+'</span>',sayText:w.ko,opts:shuffle([w.ru,...others(w,x=>x.ru)]),ans:w.ru}))};
+  if(t==="rev") return {t,type:"mc",hint:"Выбери корейское слово.",items:W.map(w=>({w,prompt:esc(w.ru),opts:shuffle([w.ko,...others(w,x=>x.ko)]),ans:w.ko,ko:true}))};
+  return {t,type:"write",hint:"Напиши слово по-корейски. Пробелы не важны.",items:W.map(w=>({w,prompt:esc(w.ru)}))};
+}
+let D=null;
+function later(ms){ const d=D; setTimeout(()=>{ if(D===d) dNext(); },ms); }
+function runDrill(b){ D={...b,queue:shuffle(b.items.map((_,i)=>i)),total:b.items.length,first:0,done:0,wrong:new Set(),mistakes:[],cur:null,lock:false,retype:false};
+  $("sHint").textContent=b.hint; $("drillBox").classList.remove("hidden"); dNext(); }
+function mark(w,t,ok){ if(t==="say") return; const s=STATE.words[w.key]||(STATE.words[w.key]={});
+  if(t==="wr"){ s.wr=ok?1:0; if(ok&&s.tr===0) s.tr=1; } else { if(t==="tr"||t==="rev") s.tr=ok?1:0; } }
+function dNext(){
+  D.lock=false; D.retype=false; $("dBar").style.width=(100*D.done/D.total)+"%"; $("dFb").innerHTML=""; $("dOpts").innerHTML="";
+  if(!D.queue.length){
+    $("dWrite").classList.add("hidden");
+    $("dPrompt").innerHTML="✅ Готово! С первого раза: "+D.first+" / "+D.total+(D.mistakes.length?"<div class='muted ko' style='font-size:15px;font-weight:400'>Ошибки: "+D.mistakes.map(m=>esc(m.w)).join(", ")+"</div>":"");
+    const name=CUR.review?"🔁 Повторение":CUR.l.name+" · "+CUR.step.name;
+    $("dSpeak").classList.add("hidden");
+    if(!CUR.review) STATE.steps[CUR.l.id+":"+D.t]={score:D.first,total:D.total};
+    STATE.log.push({at:Date.now(),name,score:D.first,total:D.total,mistakes:D.mistakes.map(m=>m.w+" ("+m.given+")")}); STATE.log=STATE.log.slice(-40);
+    save(); if(!CUR.review) lessonHeader(); $("nextBtn").textContent=CUR.review?"← К урокам":"Дальше →"; $("nextBox").classList.remove("hidden"); return; }
+  D.cur=D.queue.shift(); const it=D.items[D.cur];
+  $("dPrompt").innerHTML=it.prompt+(it.sayText?` <button class="dark sm" onclick="say(${esc(JSON.stringify(it.sayText))})">🔊</button>`:"");
+  $("dSpeak").classList.toggle("hidden",D.type!=="speak"); tries=0; if(D.type==="speak"){ $("dWrite").classList.add("hidden"); $("skipBtn").textContent="Пропустить"; return; }
+  if(D.type==="mc"){ $("dWrite").classList.add("hidden"); it.opts.forEach(o=>{ const b=document.createElement("button"); b.textContent=o; if(it.ko) b.className="ko"; b.onclick=()=>dPick(b,o); $("dOpts").appendChild(b); }); if(it.sayText) say(it.sayText); }
+  else { $("dWrite").classList.remove("hidden"); $("dIn").value=""; $("dIn").className="ko"; $("dIn").focus(); }
+}
+function dResult(ok,given){ const it=D.items[D.cur];
+  if(ok){ if(!D.wrong.has(D.cur)){ D.first++; mark(it.w,D.t,true); } D.done++; }
+  else { if(!D.wrong.has(D.cur)){ D.wrong.add(D.cur); D.mistakes.push({w:it.w.ko,given:given||"—"}); mark(it.w,D.t,false); } D.queue.push(D.cur); } }
+function dPick(btn,o){ if(D.lock)return; D.lock=true; const it=D.items[D.cur], ok=o===it.ans;
+  [...$("dOpts").children].forEach(b=>{ b.disabled=true; if(b.textContent===it.ans) b.classList.add("ok"); }); if(!ok) btn.classList.add("bad");
+  dResult(ok,o); $("dFb").innerHTML=(ok?"👍 ":"✗ ")+'<span class="ko">'+esc(it.w.ko)+'</span> — '+esc(it.w.ru)+(ok?"":"<br><span class='muted'>Будет ещё раз.</span>");
+  if(!it.sayText) say(it.w.ko); later( ok?900:2400); }
+function dHint(){ if(!D||D.lock) return; $("dFb").innerHTML='Начинается на: <b class="ko" style="font-size:20px">'+esc(D.items[D.cur].w.ko[0])+'…</b>'; $("dIn").focus(); }
+function dCheck(){ if(D.lock) return; const it=D.items[D.cur], v=$("dIn").value; if(!v.trim()) return;
+  if(D.retype){ if(isRight(v,it.w)){ D.lock=true; $("dIn").className="ko ok"; $("dFb").innerHTML="👍 Теперь правильно. Будет ещё раз в конце."; later(1100); }
+    else { $("dIn").className="ko bad"; $("dFb").innerHTML='Напиши точно: <b class="ko">'+esc(it.w.ko)+'</b>'; } return; }
+  const ok=isRight(v,it.w); $("dIn").className="ko "+(ok?"ok":"bad"); dResult(ok,v); say(it.w.ko);
+  if(ok){ D.lock=true; $("dFb").innerHTML='👍 <span class="ko">'+esc(it.w.ko)+'</span> — '+esc(it.w.ru); later(1000); }
+  else { D.retype=true; $("dFb").innerHTML='Правильно: <b class="ko" style="font-size:22px">'+esc(it.w.ko)+'</b><br>Перепечатай правильно и нажми «Проверить».'; $("dIn").value=""; $("dIn").focus(); } }
+
+/* ============ ПРОИЗНОШЕНИЕ (по желанию) ============ */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function openSpeak(){ if("speechSynthesis" in window) speechSynthesis.cancel(); ["cardsBox","drillBox","nextBox"].forEach(x=>$(x).classList.add("hidden"));
+  CUR.step={t:"say",name:"🎤 Произношение"}; CUR.review=false;
+  $("sStep").textContent=CUR.l.name+" · по желанию"; $("sTitle").textContent="🎤 Произнеси слово";
+  runDrill({t:"say",type:"speak",hint:"Нажми 🎤 и чётко скажи слово по-корейски. Браузер спросит доступ к микрофону — разреши. Если не получается 3 раза, можно пропустить.",
+    items:shuffle(CUR.l.words).map(w=>({w,prompt:'<span class="ko">'+esc(w.ko)+'</span><div class="muted" style="font-size:15px;font-weight:400">'+esc(w.ru)+'</div>'}))});
+  $("stage").scrollIntoView({behavior:"smooth",block:"start"}); }
+let rec=null, tries=0;
+function listen(){ if(!SR||D.lock) return; if(rec){ try{rec.abort()}catch(e){} }
+  rec=new SR(); rec.lang="ko-KR"; rec.interimResults=false; rec.maxAlternatives=5;
+  $("micBtn").textContent="🎙 Слушаю…"; $("micBtn").disabled=true; $("dFb").textContent="";
+  rec.onresult=e=>{ const alts=[...e.results[0]].map(a=>a.transcript); const it=D.items[D.cur];
+    const ok=alts.some(a=>isRight(a,it.w)||norm(a).includes(norm(it.w.ko)));
+    if(ok){ tries=0; dResult(true,alts[0]); D.lock=true; $("dFb").innerHTML='👍 Отлично! Услышал: <b class="ko">'+esc(alts[0])+'</b>'; later(1100); }
+    else { tries++; if(tries===1) dResult(false,alts[0]), D.queue.pop(); $("dFb").innerHTML='Услышал: <b class="ko">'+esc(alts[0])+'</b>. Попробуй ещё раз — послушай образец 🔊.'; } };
+  rec.onerror=e=>{ $("dFb").textContent=e.error==="not-allowed"?"Нет доступа к микрофону. Разреши его в настройках браузера.":e.error==="no-speech"?"Ничего не услышал. Нажми 🎤 и скажи погромче.":"Ошибка распознавания: "+e.error; };
+  rec.onend=()=>{ $("micBtn").textContent="🎤 Нажми и скажи"; $("micBtn").disabled=false; };
+  rec.start(); }
+function spSkip(){ if(D.lock) return; const it=D.items[D.cur]; if(tries===0) dResult(false,"пропуск"), D.queue.pop(); tries=0; D.done++; dNext(); }
+
+/* ============ ПОВТОРЕНИЕ (по желанию) ============ */
+function startReview(){ const rv=shuffle(ALLW.filter(toReview)).slice(0,20); if(!rv.length) return;
+  CUR={l:{name:"🔁 Слова на повторить",id:"review",words:rv},review:true,step:{name:"Повторение"}};
+  $("home").classList.add("hidden"); $("lesson").classList.remove("hidden"); $("lTitle").textContent="🔁 Слова на повторить";
+  $("lBar").style.width="0"; $("lTxt").textContent="Слов в этом круге: "+rv.length+". Напиши каждое правильно — и оно уйдёт из списка.";
+  $("lSteps").innerHTML=""; $("lWords").innerHTML='<table class="res">'+rv.map(w=>'<tr><td class="ko" style="font-weight:600">'+esc(w.ko)+'</td><td>'+esc(w.ru)+'</td><td class="muted">'+w.les.name+'</td></tr>').join("")+'</table>';
+  ["cardsBox","nextBox"].forEach(x=>$(x).classList.add("hidden")); $("sStep").textContent=""; $("sTitle").textContent="✍️ Напиши по-корейски";
+  runDrill(buildItems("wr",rv)); }
+
+/* ============ ОТЧЁТ ============ */
+function buildReport(){
+  let t="📝 <b>서울대+ · повторение слов</b>\n👤 "+esc(STATE.name)+"\n🕒 "+new Date().toLocaleString("ru-RU")+"\n📈 Вся программа: <b>"+pct(ALLW)+"%</b> ("+ALLW.filter(learned).length+"/"+ALLW.length+")\n"+["1A","1B","2A"].map(b=>{ const ws=LESSONS.filter(l=>l.book===b).flatMap(l=>l.words); return "   "+b+": "+pct(ws)+"%"; }).join("\n")+(curLesson?"\n   Текущий урок: шагов "+curLesson.done+"/"+curLesson.total:"")+"\n";
+  let book=null; LESSONS.forEach(l=>{
+    const q=pct(l.words), done=STEP_TYPES.filter(s=>STATE.steps[l.id+":"+s.t]).length; if(!done&&!q) return;
+    if(l.book!==book){ t+="\n<b>"+l.book+"</b>"; book=l.book; }
+    t+="\n  "+l.n+"과: "+q+"% · шагов "+done+"/4"; });
+  const rv=ALLW.filter(toReview); t+="\n\n🔁 <b>На повторить ("+rv.length+")</b>"+(rv.length?"\n"+esc(rv.map(w=>w.ko).join(", ")):": нет");
+  const since=STATE.lastSent||0, recent=(STATE.log||[]).filter(x=>x.at>since);
+  if(recent.length){ t+="\n\n🗂 <b>С прошлой отправки</b>"; recent.forEach(x=>{ t+="\n"+esc(x.name)+": "+x.score+"/"+x.total; x.mistakes.forEach(m=>t+="\n   ✗ "+esc(m)); }); }
+  return t; }
+function chunks(text){ const out=[]; let cur=""; text.split("\n").forEach(l=>{ if((cur+"\n"+l).length>3800){ out.push(cur); cur=l; } else cur=cur?cur+"\n"+l:l; }); if(cur)out.push(cur); return out; }
+async function sendResults(){ const text=buildReport(); $("sendBtn").disabled=true; $("sendFb").textContent="Отправляю…";
+  try{ for(const part of chunks(text)){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+    $("sendFb").textContent="✅ Отправлено! 잘했어요!"; STATE.lastSent=Date.now(); save(); }
+  catch(e){ $("sendFb").textContent="Не получилось отправить ("+e.message+"). Скопируй текст и отправь вручную:"; const b=$("copyBox"); b.value=text.replace(/<\/?b>/g,""); b.classList.remove("hidden"); b.select(); }
+  $("sendBtn").disabled=false; }
+
+load(); if(STATE.name) $("nameInput").value=STATE.name; if(PIN) $("pinInput").value=PIN;
+
+/* автовход из общей страницы с вкладками (#auto=...) */
+(function(){ const m=location.hash.match(/^#auto=(.+)$/); if(!m) return;
+  try{ const a=JSON.parse(decodeURIComponent(escape(atob(m[1])))); history.replaceState(null,"",location.pathname+location.search);
+    $("nameInput").value=a.n; if($("pinInput")) $("pinInput").value=a.p; setTimeout(()=>start(),50); }catch(e){} })();
+</script>
+</body>
+</html>

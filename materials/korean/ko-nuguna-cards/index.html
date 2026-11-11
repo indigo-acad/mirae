@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🃏 누구나 · 언제나 · 어디나 · 무엇이나 — 문장 카드 게임</title>
+<style>
+  :root{--ink:#1d2433;--muted:#667085;--line:#e4e7ec;--bg:#f3f1f8;--card:#fff;--accent:#6a1fc2;--accent2:#efe6fb;--ok:#1f9d55;--okbg:#e9f8ef;--bad:#d64545;--badbg:#fdeeee;--warn:#b7791f;--warnbg:#fff7e6}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,"Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  .wrap{max-width:760px;margin:0 auto;padding:18px 14px 80px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  header h1{font-size:19px;margin:0}
+  .muted{color:var(--muted);font-size:14px}
+  .box{background:var(--card);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 2px 10px #0000000d}
+  button{font:inherit;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#eef0f4;color:var(--ink);margin:4px 4px 4px 0}
+  button.primary{background:var(--accent);color:#fff}
+  button.hint{background:var(--warnbg);color:var(--warn)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text],textarea{font:inherit;padding:10px 12px;border:1.5px solid #c9ced8;border-radius:10px;width:100%}
+  textarea{min-height:70px;resize:vertical;font-size:18px}
+  .hidden{display:none!important}
+  .progress{height:8px;background:#e5e0ef;border-radius:8px;overflow:hidden;margin:6px 0 2px}
+  .progress div{height:100%;background:var(--accent);transition:width .3s}
+  .cards{display:flex;gap:16px;justify-content:center;margin:10px 0 6px;flex-wrap:wrap}
+  .flip{width:210px;height:130px;perspective:800px}
+  .inner{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+  .flip.open .inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;font-weight:700;text-align:center;padding:10px}
+  .back{background:repeating-linear-gradient(45deg,#6a1fc2,#6a1fc2 10px,#7a35cf 10px,#7a35cf 20px);color:#fff;font-size:30px}
+  .front{transform:rotateY(180deg);background:#fff;border:3px solid var(--accent);font-size:28px}
+  .front.word{border-color:#e08a00}
+  .front small{display:block;font-size:13px;font-weight:400;color:var(--muted)}
+  .plus{align-self:center;font-size:30px;color:var(--muted)}
+  .fb{margin-top:10px;padding:10px 12px;border-radius:10px;font-size:16px}
+  .fb.ok{background:var(--okbg);color:#145c34}
+  .fb.bad{background:var(--badbg);color:#8b1f1f}
+  .fb.tip{background:var(--warnbg);color:#7a4f0d}
+  .stars{font-size:22px;letter-spacing:2px}
+  ul.list{padding-left:18px} ul.list li{margin:6px 0;font-size:17px}
+  .model{font-size:17px}
+  .say{background:none;padding:2px 6px;margin:0 0 0 4px}
+  table.rules{border-collapse:collapse;width:100%;font-size:15px}
+  table.rules td{border-bottom:1px solid var(--line);padding:6px 4px}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+<header><h1>🃏 문장 카드 게임</h1><div class="muted" id="who"></div></header>
+<div class="muted">3급 5과 · 누구나 · 언제나 · 어디나 · 무엇이나 + 음식과 조리법</div>
+
+<!-- 시작 -->
+<div class="box" id="startBox">
+  <h2 style="margin-top:0">시작해 볼까요?</h2>
+  <p>카드 두 장을 뽑아요. <b>보라색 카드</b>는 문법, <b>주황색 카드</b>는 음식 단어예요.<br>
+  두 카드를 모두 써서 문장을 하나 만드세요. 어려우면 💡 힌트를 보세요.<br>
+  힌트를 안 보면 ⭐⭐⭐, 힌트를 하나 볼 때마다 ⭐가 하나씩 줄어요. 힌트는 1 → 2 → 3 순서로 열려요. 문장은 모두 8개예요.</p>
+  <table class="rules">
+    <tr><td><b>누구나</b></td><td>누구에게나 · 누구하고나</td></tr>
+    <tr><td><b>어디나</b></td><td>어디에나 · 어디에서나(어디서나)</td></tr>
+    <tr><td><b>무엇이나</b></td><td>무엇에나 · 뭐나</td></tr>
+    <tr><td colspan="2" class="muted">무슨 / 어떤 / 어느 + 나 ✕</td></tr>
+  </table>
+  <p style="margin-bottom:6px">이름을 쓰세요.</p>
+  <input type="text" id="nameInput" placeholder="이름" autocomplete="off" onkeydown="if(event.key==='Enter')start()">
+  <button class="primary" style="margin-top:10px" onclick="start()">카드 뽑기 ▶</button>
+</div>
+
+<!-- 게임 -->
+<div class="box hidden" id="gameBox">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <b id="roundLbl"></b><span class="stars" id="totalStars"></span>
+  </div>
+  <div class="progress"><div id="bar" style="width:0"></div></div>
+  <div class="cards">
+    <div class="flip" id="c1"><div class="inner"><div class="face back">?</div><div class="face front" id="g"></div></div></div>
+    <div class="plus">+</div>
+    <div class="flip" id="c2"><div class="inner"><div class="face back">?</div><div class="face front word" id="w"></div></div></div>
+  </div>
+  <p class="muted" style="text-align:center;margin:0 0 8px">두 카드를 모두 넣어서 문장을 만드세요.</p>
+  <textarea id="ans" placeholder="여기에 문장을 쓰세요."></textarea>
+  <div>
+    <button class="primary" id="checkBtn" onclick="check()">확인하기</button>
+    <button class="hint" id="h1" onclick="hint(1)">💡 힌트 1 · 질문</button>
+    <button class="hint" id="h2" onclick="hint(2)">💡 힌트 2 · 틀</button>
+    <button class="hint" id="h3" onclick="hint(3)">💡 힌트 3 · 예문</button>
+    <button id="swapBtn" onclick="swap()">🔄 카드 바꾸기 (<span id="swapN"></span>)</button>
+  </div>
+  <div id="hints"></div>
+  <div id="fb"></div>
+  <button class="primary hidden" id="nextBtn" onclick="next()">다음 카드 ▶</button>
+</div>
+
+<!-- 끝 -->
+<div class="box hidden" id="endBox">
+  <h2 style="margin-top:0">수고했어요! 🎉</h2>
+  <p>모은 별: <span class="stars" id="endStars"></span></p>
+  <h3>내가 만든 문장</h3>
+  <ul class="list" id="myList"></ul>
+  <button class="primary" id="sendBtn" onclick="sendResults()">선생님에게 보내기 ✉️</button>
+  <button onclick="restart()">다시 하기</button>
+  <div class="muted" id="sendFb"></div>
+  <textarea id="copyBox" class="hidden" style="min-height:160px;font-size:14px"></textarea>
+</div>
+</div>
+
+<script>
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID = "347625701";
+const ROUNDS = 8, SWAPS = 3, KEY = "nuguna5gwa_v1";
+
+// 문법 카드
+const G = {
+  "누구나":  {re:/누구(에게|한테|하고|와|랑|)나/, q:"누가 그래요? 사람에 대해 생각해 보세요."},
+  "언제나":  {re:/언제나/, q:"언제 그래요? 자주, 항상 그래요?"},
+  "어디나":  {re:/어디(에서|서|에|)나/, q:"어디에서 그래요? 장소에 대해 생각해 보세요."},
+  "무엇이나":{re:/(무엇(이|에|하고|과|)나|뭐(든지|나)|뭐에나)/, q:"무엇을? 어떤 음식이든지 다 그래요?"}
+};
+// 단어 카드: 어간
+const W = {
+  "끓이다":["끓"], "출출하다":["출출"], "바삭하다":["바삭"], "튀기다":["튀기","튀겨","튀긴","튀길"],
+  "매콤하다":["매콤"], "입이 심심하다":["심심"], "쫄깃하다":["쫄깃"], "김치":["김치"],
+  "굽다":["굽","구워","구운","구우","구울"], "고소하다":["고소"], "비비다":["비비","비벼","비빈","비빌"],
+  "삶다":["삶"], "싱겁다":["싱겁","싱거"], "볶다":["볶"], "느끼하다":["느끼"],
+  "질기다":["질기","질겨","질긴"], "떡볶이":["떡볶이"], "찌다":["찌","쪄","찐","찔"],
+  "썰다":["썰","써","썬"], "연하다":["연하","연해","연한"], "라면":["라면"], "달걀":["달걀","계란"]
+};
+// 카드 조합: [문법, 단어, 힌트1 질문, 힌트2 틀, 예문]
+const POOL = [
+ ["누구나","끓이다","라면은 누가 끓일 수 있어요? 어려워요?","라면은 ____ 쉽게 ____ 수 있어요.","라면은 누구나 쉽게 끓일 수 있어요."],
+ ["언제나","출출하다","보통 몇 시에 배가 고파요?","저는 밤 11시가 되면 ____ ____.","저는 밤 11시가 되면 언제나 출출해요."],
+ ["어디나","바삭하다","한국에서는 어디에서 치킨을 먹을 수 있어요?","한국에서는 ____ ____ 치킨을 먹을 수 있어요.","한국에서는 어디에서나 바삭한 치킨을 먹을 수 있어요."],
+ ["무엇이나","튀기다","어머니는 무엇을 튀겨요? 다 맛있어요?","우리 엄마는 ____ ____ 맛있게 만들어요.","우리 엄마는 무엇이나 튀겨서 맛있게 만들어요."],
+ ["누구나","매콤하다","떡볶이는 누가 좋아해요?","____ 떡볶이는 ____ 좋아해요.","매콤한 떡볶이는 누구나 좋아해요."],
+ ["언제나","입이 심심하다","공부할 때 무엇을 먹고 싶어요?","저는 공부할 때 ____ ____.","저는 공부할 때 언제나 입이 심심해요."],
+ ["무엇이나","쫄깃하다","어떤 식감을 좋아해요?","저는 떡처럼 ____ 음식이면 ____ 좋아해요.","저는 떡처럼 쫄깃한 음식이면 무엇이나 좋아해요."],
+ ["어디나","김치","한국 식당에 가면 무엇이 꼭 있어요?","한국 식당에는 ____ ____이/가 있어요.","한국 식당에는 어디나 김치가 있어요."],
+ ["누구나","굽다","삼겹살은 만들기 어려워요?","삼겹살은 ____ 쉽게 ____ 수 있어요.","삼겹살은 누구나 쉽게 구울 수 있어요."],
+ ["언제나","고소하다","할머니가 만든 나물은 맛이 어때요?","할머니가 만든 나물은 ____ ____.","할머니가 만든 나물은 언제나 고소해요."],
+ ["무엇이나","비비다","비빔밥에는 무엇을 넣어요?","밥에 ____ 넣고 ____ 비빔밥이 돼요.","밥에 무엇이나 넣고 비비면 비빔밥이 돼요."],
+ ["어디나","출출하다","출출할 때 어디에 가요? 편의점은 어디에 있어요?","출출할 때는 ____ 있는 편의점에 가요.","출출할 때는 어디에나 있는 편의점에 가요."],
+ ["누구나","삶다","달걀을 삶는 것은 어려워요?","달걀은 ____ ____ 수 있어요.","달걀은 누구나 쉽게 삶을 수 있어요."],
+ ["언제나","싱겁다","여러분이 만든 국은 맛이 어때요?","제가 만든 국은 ____ 좀 ____.","제가 만든 국은 언제나 좀 싱거워요."],
+ ["무엇이나","볶다","김치와 같이 무엇을 볶으면 맛있어요?","김치와 같이 ____ ____ 맛있어요.","김치와 같이 볶으면 무엇이나 맛있어요."],
+ ["누구나","느끼하다","느끼한 음식을 많이 먹으면 무엇이 생각나요?","____ 음식을 많이 먹으면 ____ 김치가 생각나요.","느끼한 음식을 많이 먹으면 누구나 김치가 생각나요."],
+ ["언제나","질기다","아빠가 구운 고기는 어때요?","우리 아빠가 구운 고기는 ____ ____.","우리 아빠가 구운 고기는 언제나 질겨요."],
+ ["어디나","떡볶이","학교 앞에는 무엇이 있어요?","학교 앞에는 ____ ____ 가게가 있어요.","학교 앞에는 어디나 떡볶이 가게가 있어요."],
+ ["무엇이나","찌다","찜기가 있으면 무엇을 찔 수 있어요?","찜기가 있으면 ____ 쉽게 ____ 수 있어요.","찜기가 있으면 무엇이나 쉽게 찔 수 있어요."],
+ ["누구나","썰다","양파를 썰 때 어떻게 돼요?","양파를 ____ 때는 ____ 눈물이 나요.","양파를 썰 때는 누구나 눈물이 나요."],
+ ["누구나","연하다","오래 삶은 고기는 어때요? 인기가 많아요?","오래 삶은 고기는 ____서 ____ 인기가 많아요. (누구에게나)","오래 삶은 고기는 연해서 누구에게나 인기가 많아요."],
+ ["어디나","매콤하다","요즘 매콤한 음식을 어디에서 팔아요?","요즘은 ____ ____ 음식을 팔아요.","요즘은 어디에서나 매콤한 음식을 팔아요."],
+ ["언제나","라면","캠핑 갈 때 무엇을 가져가요?","캠핑 갈 때 저는 ____ ____을/를 가져가요.","캠핑 갈 때 저는 언제나 라면을 가져가요."],
+ ["무엇이나","달걀","무엇에 달걀을 넣으면 맛있어요?","달걀은 ____ 잘 어울려요. 라면에도, 밥에도요.","달걀은 무엇에나 잘 어울려요. 라면에도, 밥에도요."]
+];
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+let S=null;
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} }
+function load(){ try{return JSON.parse(localStorage.getItem(KEY));}catch(e){return null;} }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function start(){
+  const n=$("nameInput").value.trim(); if(!n){ $("nameInput").focus(); return; }
+  S={name:n, deck:shuffle(POOL.map((_,i)=>i)), pos:0, round:0, swaps:SWAPS, hints:0, done:[], started:Date.now(), sent:false};
+  save(); showGame();
+}
+function restart(){ try{localStorage.removeItem(KEY);}catch(e){} location.reload(); }
+function cur(){ return POOL[S.deck[S.pos]]; }
+function showGame(){
+  $("startBox").classList.add("hidden"); $("endBox").classList.add("hidden"); $("gameBox").classList.remove("hidden");
+  $("who").textContent="👤 "+S.name; deal();
+}
+function deal(){
+  const c=cur();
+  $("c1").classList.remove("open"); $("c2").classList.remove("open");
+  setTimeout(()=>{ $("g").innerHTML=c[0]+"<small>문법</small>"; $("w").innerHTML=c[1]+"<small>단어</small>"; },250);
+  setTimeout(()=>$("c1").classList.add("open"),400); setTimeout(()=>$("c2").classList.add("open"),750);
+  S.hints=0; $("ans").value=""; $("ans").disabled=false; $("hints").innerHTML=""; $("fb").innerHTML="";
+  $("h1").disabled=false; $("h2").disabled=true; $("h3").disabled=true; $("checkBtn").disabled=false;
+  $("nextBtn").classList.add("hidden"); $("swapBtn").disabled=S.swaps<=0; $("swapN").textContent=S.swaps;
+  $("roundLbl").textContent=(S.round+1)+" / "+ROUNDS+" 번째 문장";
+  $("bar").style.width=(S.round/ROUNDS*100)+"%";
+  $("totalStars").textContent="⭐ "+S.done.reduce((a,d)=>a+d.stars,0);
+  setTimeout(()=>$("ans").focus(),900);
+}
+function swap(){ if(S.swaps<=0) return; S.swaps--; S.pos++; if(S.pos>=S.deck.length){S.deck=shuffle(S.deck);S.pos=0;} save(); deal(); }
+function hint(n){
+  const c=cur(); const txt={1:"💬 "+c[2]+"  ("+G[c[0]].q+")",2:"🧩 "+c[3],3:"📝 "+c[4]+' <button class="say" onclick="say(\''+c[4].replace(/'/g,"")+'\')">🔊</button>'}[n];
+  if($("h"+n).disabled) return;
+  $("h"+n).disabled=true; S.hints++; if(n<3) $("h"+(n+1)).disabled=false;
+  $("hints").insertAdjacentHTML("beforeend",'<div class="fb tip">'+txt+'</div>');
+  save();
+}
+function say(t){ try{ const u=new SpeechSynthesisUtterance(t); u.lang="ko-KR"; u.rate=.9; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} }
+
+function check(){
+  const c=cur(); const a=$("ans").value.trim(); const errs=[];
+  if(a.length<6){ fb("bad","문장을 끝까지 써 보세요."); return; }
+  if(/(무슨|어떤|어느)\s*[가-힣]*?(이)?나(\s|$|[.!?])/.test(a)) errs.push("‘무슨·어떤·어느 + 나’는 쓸 수 없어요. → <b>무엇이나</b>");
+  if(/누구나(에게|한테|하고|와|랑)/.test(a)) errs.push("조사 다음에 ‘나’를 붙여요. → <b>누구에게나</b>");
+  if(/어디나(에서|에|서)/.test(a)) errs.push("조사 다음에 ‘나’를 붙여요. → <b>어디에서나 / 어디에나</b>");
+  if(/무엇나|뭐엇이나/.test(a)) errs.push("받침이 있으니까 → <b>무엇이나</b>");
+  if(/무엇이나(에|하고|과)/.test(a)) errs.push("조사 다음에 ‘나’를 붙여요. → <b>무엇에나</b>");
+  if(errs.length){ fb("bad","거의 다 됐어요! 다시 한번 보세요.<br>"+errs.join("<br>")); return; }
+  if(!G[c[0]].re.test(a)){ fb("bad","‘<b>"+c[0]+"</b>’를 문장에 넣어 보세요."); return; }
+  if(!W[c[1]].some(s=>a.includes(s))){ fb("bad","‘<b>"+c[1]+"</b>’를 문장에 넣어 보세요. 모양을 바꿔도 돼요."); return; }
+  if(!/(요|다|니다|죠|네요|래요)[.!?~]*$/.test(a)){ fb("bad","문장 끝을 확인해 보세요. (-아요/어요, -ㅂ니다)"); return; }
+  const stars=Math.max(0,3-S.hints);
+  S.done.push({g:c[0],w:c[1],a:a,stars:stars,hints:S.hints,model:c[4]});
+  S.round++; S.pos++; if(S.pos>=S.deck.length){S.deck=shuffle(S.deck);S.pos=0;}
+  save();
+  fb("ok","좋아요! 👍 "+"⭐".repeat(stars)+(stars===0?"(힌트를 다 봤어요)":"")+
+     '<br><span class="model">예문: '+esc(c[4])+' <button class="say" onclick="say(\''+c[4].replace(/'/g,"")+'\')">🔊</button></span>'+
+     '<br><span class="muted">선생님이 마지막에 문장을 한 번 더 확인해요.</span>');
+  $("ans").disabled=true; $("checkBtn").disabled=true; ["h1","h2","h3"].forEach(id=>$(id).disabled=true); $("swapBtn").disabled=true;
+  $("nextBtn").classList.remove("hidden"); $("bar").style.width=(S.round/ROUNDS*100)+"%";
+  $("totalStars").textContent="⭐ "+S.done.reduce((x,d)=>x+d.stars,0);
+  if(S.round>=ROUNDS) $("nextBtn").textContent="결과 보기 ▶";
+}
+function fb(cls,html){ $("fb").innerHTML='<div class="fb '+cls+'">'+html+'</div>'; }
+function next(){ if(S.round>=ROUNDS) return end(); deal(); }
+function end(){
+  $("gameBox").classList.add("hidden"); $("endBox").classList.remove("hidden");
+  const tot=S.done.reduce((a,d)=>a+d.stars,0);
+  $("endStars").textContent="⭐ "+tot+" / "+ROUNDS*3;
+  $("myList").innerHTML=S.done.map(d=>'<li><b>['+esc(d.g)+' + '+esc(d.w)+']</b> '+esc(d.a)+' '+"⭐".repeat(d.stars)+'</li>').join("");
+  if(S.sent){ $("sendBtn").disabled=true; $("sendFb").textContent="✅ 이미 보냈어요."; }
+}
+function buildReport(){
+  const secs=Math.round((Date.now()-S.started)/1000);
+  let t="🃏 <b>문장 카드 게임 · 누구나/언제나/어디나/무엇이나</b>\n👤 "+esc(S.name)+"\n🕒 "+new Date(S.started).toLocaleString("ru-RU")+" · "+Math.floor(secs/60)+" мин\n⭐ "+S.done.reduce((a,d)=>a+d.stars,0)+" / "+ROUNDS*3+"\n";
+  S.done.forEach((d,i)=>{ t+="\n"+(i+1)+". ["+esc(d.g)+" + "+esc(d.w)+"] "+esc(d.a)+"\n    подсказок: "+d.hints+" · пример: "+esc(d.model); });
+  return t;
+}
+function chunks(text){ const out=[]; let cur=""; text.split("\n").forEach(l=>{ if((cur+"\n"+l).length>3800){ out.push(cur); cur=l; } else cur=cur?cur+"\n"+l:l; }); if(cur)out.push(cur); return out; }
+async function sendResults(){
+  const text=buildReport(); $("sendBtn").disabled=true; $("sendFb").textContent="보내는 중…";
+  try{ for(const part of chunks(text)){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+    $("sendFb").textContent="✅ 보냈어요! 수고했어요!"; S.sent=true; save(); }
+  catch(e){ $("sendBtn").disabled=false; $("sendFb").textContent="보내지 못했어요 ("+e.message+"). 아래 내용을 복사해서 선생님에게 보내세요:"; const b=$("copyBox"); b.value=text.replace(/<\/?b>/g,""); b.classList.remove("hidden"); b.select(); }
+}
+// 이어하기
+(function(){ const s=load(); if(s&&s.name){ S=s; if(S.round>=ROUNDS){ $("startBox").classList.add("hidden"); $("who").textContent="👤 "+S.name; end(); } else showGame(); } })();
+</script>
+</body>
+</html>

@@ -43,6 +43,15 @@ async function doPush(){
   try{const remote=await cloud.load(u,pin);const m=mergeState(collect(),remote||{});apply(m);await cloud.save(u,pin,m);setStatus("ok")}
   catch(e){setStatus("off")}
 }
+async function api(fn,extra){return cloud.rpc(fn,Object.assign({p_name:U(),p_pin:localStorage.getItem("kr_pin")||""},extra||{}))}
+async function loadCtx(){
+  const u=U();let ctx=J("kr_ctx:"+u,null)||{teacher:false,items:[],ok:false};
+  if(cloud.on&&u){
+    try{const t=await api("is_teacher");const items=t?[]:(await api("my_assignments"))||[];ctx={teacher:!!t,items,ok:true};localStorage.setItem("kr_ctx:"+u,JSON.stringify(ctx))}
+    catch(e){ctx=Object.assign({},ctx,{ok:false})}
+  }
+  window.KR.ctx=ctx;return ctx;
+}
 function finish(n,pin){localStorage.setItem("kr_user",n);localStorage.setItem("kr_pin",pin)}
 
 window.KR={
@@ -79,12 +88,18 @@ window.KR={
     if(local&&local.pin===pin){finish(n,pin);setStatus("off");return{ok:1,offline:1}}
     return{err:local?"pin":"none"};
   },
-  logout(){localStorage.removeItem("kr_user");localStorage.removeItem("kr_pin")},
+  api,
+  load:loadCtx,
+  ctx:{teacher:false,items:[],ok:false},
+  can(id){const x=window.KR.ctx;return !!(x&&(x.teacher||(x.items||[]).some(i=>i.id===id)))},
+  assignedInfo(id){return ((window.KR.ctx||{}).items||[]).find(i=>i.id===id)},
+  logout(){const u=U();localStorage.removeItem("kr_user");localStorage.removeItem("kr_pin");localStorage.removeItem("kr_ctx:"+u)},
   topbar(active){
     const el=document.getElementById("topbar");if(!el)return;const u=U();
     const icon='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-6 8-6s7 1.5 8 6"/></svg>';
     const a=(h,t,k)=>`<a href="${h}" class="${active===k?"on":""}">${t}</a>`;
-    el.innerHTML=`<div class="top"><a class="logo" href="index.html">MIRAÉ<span>THE INDIGO LANGUAGE ACADEMY</span></a><nav>${a("course.html","Курс","course")}${a("practice.html","Доп. упражнения","practice")}<a href="${u?"cabinet.html":"auth.html"}" class="acc ${active==="cabinet"?"on":""}" title="Личный кабинет">${icon}<span class="cap">${u?u:"Войти"}</span></a></nav></div>`;
+    const cx=(u&&J("kr_ctx:"+u,null))||{};const tl=cx.teacher?a("teacher.html","Ученики","teacher"):"";
+    el.innerHTML=`<div class="top"><a class="logo" href="index.html">MIRAÉ<span>THE INDIGO LANGUAGE ACADEMY</span></a><nav>${a("course.html","Курс","course")}${a("practice.html","Доп. упражнения","practice")}${tl}<a href="${u?"cabinet.html":"auth.html"}" class="acc ${active==="cabinet"?"on":""}" title="Личный кабинет">${icon}<span class="cap">${u?u:"Войти"}</span></a></nav></div>`;
   },
   bar(p){return `<div class="bar"><div style="width:${p}%"></div></div>`}
 };

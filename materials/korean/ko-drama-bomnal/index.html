@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>봄날의 너 · 인터랙티브 드라마</title>
+<style>
+:root{--bg:#1b1424;--bg2:#2a1d36;--card:#fffaf7;--ink:#2a2130;--muted:#7a6f80;--acc:#e0527e;--acc2:#ffb3c7;--ok:#178a4f;--okbg:#dcf5e6;--bad:#c0392b;--badbg:#fde3e0;--line:#ecdfe4;--sel:#ffe3ec}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg2)) fixed;color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;min-height:100vh}
+.wrap{max-width:680px;margin:0 auto;padding:14px 12px 50px}
+.hidden{display:none!important}
+.card{background:var(--card);border-radius:18px;padding:18px 16px;margin-top:12px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+h1{color:#fff;font-size:30px;margin:14px 0 2px;letter-spacing:.5px} .sub{color:var(--acc2);margin:0 0 6px}
+.muted{color:var(--muted);font-size:14px}
+button{font:inherit;cursor:pointer;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:11px 12px}
+.main{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:700;width:100%;margin-top:14px}
+.main:disabled{opacity:.45;cursor:default}
+input,textarea{font:inherit;width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;margin-top:8px;background:#fff}
+textarea{min-height:140px;resize:vertical}
+.heroes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.hero{text-align:center;padding:14px 8px}
+.hero .e{font-size:36px} .hero b{display:block;font-size:20px}
+.hero.sel{border-color:var(--acc);background:var(--sel)}
+.top{display:flex;justify-content:space-between;align-items:center;color:#f3dbe4;font-size:14px;gap:8px;margin-top:4px}
+.heart{font-weight:700;color:var(--acc2)}
+.bar{height:6px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden;margin:8px 0 0}
+.bar>i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.ep{color:#fff;text-align:center;padding:40px 10px 10px}
+.ep .no{color:var(--acc2);font-size:15px;letter-spacing:3px}
+.ep .tt{font-size:34px;font-weight:800;margin:6px 0}
+.ep .ru{color:#e9d7df}
+.narr{font-style:italic;color:#5c5163;border-left:3px solid var(--acc2);padding:2px 0 2px 10px;margin-bottom:12px;font-size:15px}
+.line{display:flex;gap:10px;align-items:flex-start;margin:8px 0}
+.ava{width:40px;height:40px;border-radius:50%;background:var(--sel);display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+.bub{background:#f4ecf0;border-radius:4px 14px 14px 14px;padding:8px 12px;font-size:18px}
+.bub .who{font-size:12px;color:var(--acc);font-weight:700;display:block}
+.me .bub{background:var(--sel)}
+.gap{display:inline-block;min-width:60px;border-bottom:2px solid var(--acc);color:var(--acc);font-weight:700;text-align:center}
+.q{font-weight:600;margin:12px 0 4px;font-size:15px;color:#4a3f52}
+.opts{display:grid;gap:8px;margin-top:8px}
+.opts button{text-align:left;font-size:17px}
+button.ok{background:var(--okbg)!important;border-color:var(--ok)!important}
+button.bad{background:var(--badbg)!important;border-color:var(--bad)!important}
+.fb{margin-top:12px;padding:10px 12px;border-radius:12px;font-size:15px}
+.fb.good{background:var(--okbg)} .fb.wrong{background:var(--badbg)}
+.base{display:inline-block;background:#f4ecf0;border-radius:8px;padding:2px 8px;font-size:15px;margin-top:6px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.col{display:grid;gap:8px;align-content:start}
+.col button{text-align:left;min-height:46px;font-size:15px}
+.col button.ko{font-size:17px}
+.col button.sel{background:var(--sel);border-color:var(--acc)}
+.col button.gone{opacity:.3;pointer-events:none;background:var(--okbg);border-color:var(--ok)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips button{font-size:17px;padding:9px 12px}
+.ansline{min-height:56px;border:2px dashed var(--line);border-radius:12px;padding:6px;display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ansline button{background:var(--sel);border-color:var(--acc);font-size:17px;padding:7px 10px}
+.segs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.segs button{font-size:18px;padding:8px 10px}
+.end{text-align:center;color:#fff;padding:20px 8px}
+.end .big{font-size:56px} .end .tt{font-size:28px;font-weight:800;margin:4px 0}
+.row{border-top:1px solid var(--line);padding:7px 0;font-size:15px}
+.teaser{color:var(--acc2);text-align:center;margin-top:14px;font-style:italic}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+
+<!-- вход -->
+<div id="start">
+  <h1>봄날의 너</h1>
+  <p class="sub">인터랙티브 드라마 7화 · 13~15단원 + 3급 복습</p>
+  <div class="card">
+    <div>여러분이 드라마의 주인공이에요! 장면마다 주인공 대신 대답해 주세요. 정답을 맞히면 <b style="color:var(--acc)">♥ 설렘 지수</b>가 올라가고, 설렘 지수에 따라 결말이 달라져요. 6화와 7화는 조금 어려워요. 3급에서 배운 문법이 모두 필요해요.</div>
+    <div class="muted" style="margin-top:8px">약 35~40분 걸려요. 이름과 비밀번호로 들어오면 휴대폰, 컴퓨터 등 어느 기기에서든 이어서 할 수 있어요. 다 끝나면 결과가 선생님께 가요.</div>
+    <div style="margin-top:14px">이름</div>
+    <input id="nameInput" placeholder="이름" autocomplete="off" onkeydown="if(event.key==='Enter')$('pinInput').focus()">
+    <div style="margin-top:12px">비밀번호 (숫자 4자리)</div>
+    <input id="pinInput" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off" style="max-width:160px" onkeydown="if(event.key==='Enter')login()">
+    <div class="muted" style="margin-top:4px">처음이면 비밀번호를 새로 만들고 꼭 기억하세요. 다른 기기에서도 같은 이름과 비밀번호로 들어오면 돼요.</div>
+    <div id="loginFb" style="margin-top:8px;color:var(--bad);font-size:15px"></div>
+    <button class="main" id="loginBtn" onclick="login()">들어가기 ▶</button>
+  </div>
+</div>
+
+<!-- выбор героя -->
+<div id="pick" class="hidden">
+  <h1>남자 주인공</h1>
+  <p class="sub">누구와 이야기를 시작할까요?</p>
+  <div class="card">
+    <div class="heroes">
+      <button class="hero" data-h="도윤" onclick="pickHero(this)"><span class="e">🌙</span><b>도윤</b><span class="muted">조용하고 말이 적지만 눈빛으로 다 말하는 사람</span></button>
+      <button class="hero" data-h="민호" onclick="pickHero(this)"><span class="e">☀️</span><b>민호</b><span class="muted">밝고 시끄럽고, 긴장할 때도 농담을 하는 사람</span></button>
+    </div>
+    <button class="main" id="goBtn" onclick="begin()" disabled>1화 보기 ▶</button>
+  </div>
+</div>
+
+<!-- игра -->
+<div id="play" class="hidden">
+  <div class="top"><span id="epInfo"></span><span><span id="cloud" style="margin-right:8px"></span><span class="heart" id="heart">♥ 0</span></span></div>
+  <div class="bar"><i id="prog"></i></div>
+  <div id="stage"></div>
+</div>
+
+<!-- финал -->
+<div id="final" class="hidden">
+  <div id="ending"></div>
+  <div class="card">
+    <div id="summary"></div>
+    <div id="sendFb" class="muted" style="margin-top:12px"></div>
+    <textarea id="copyBox" class="hidden" readonly></textarea>
+    <button id="copyBtn" class="hidden" onclick="copyReport()">복사하기</button>
+    <button class="main" id="sendBtn" onclick="sendResults()">선생님께 보내기</button>
+    <button style="width:100%;margin-top:10px" onclick="restart()">처음부터 다시 하기</button>
+  </div>
+</div>
+
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const KEY="drama_bomnal_v1";
+const TG_TOKEN="9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU", TG_CHAT_ID="347625701";
+const SB_URL="https://nusfkwtmnbhnbnckhrfk.supabase.co", SB_KEY="sb_publishable_UmWyFo7ciEc-m9x1ZIfkNw_yeQQAgf8";
+
+const AVA={ME:"🙋‍♀️",JA:"👩🏻",MOM:"👵",BOSS:"🧑‍💼",SIS:"👩🏻‍🦰"};
+/*
+ Типы: mc (выбор), type (ввод), match (пары), order (сборка предложения), fix (найти ошибку), write (свободный ответ, без оценки).
+ Реплики: [кто, текст]; ___ — пропуск. {H} — герой, {N} — имя ученицы.
+*/
+const EPS=[
+{no:1,tt:"소개팅",ru:"처음 만난 날",unit:"13단원",
+ narr:"나는 스물여덟 살, 서울에서 회사에 다녀요. 친구 지아는 한 달째 소개팅을 해 보라고 해요.",
+ tasks:[
+  {t:"mc",lines:[["JA","너도 이제 연애해야지. 결혼은 언제 할 거야?"],["ME","결혼___ 아직 멀었어."]],q:"알맞은 것을 고르세요.",opts:["하려면","하면서","하느라고","했더니"],a:0,ex:"동-으려면 멀었다: 어떤 일을 하기까지 아직 시간이 많이 남았을 때 써요."},
+  {t:"mc",lines:[["JA","우리 엄마 때는 부모님이 소개해 준 사람하고 결혼하는 ___이 많았대."]],q:"알맞은 단어를 고르세요.",opts:["중매결혼","연애결혼","소개팅","청혼"],a:0,ex:"중매결혼: 부모님이나 다른 사람의 소개로 만나서 하는 결혼. 연애결혼: 연애를 하다가 하는 결혼."},
+  {t:"match",q:"지아가 소개팅 상대에 대해 이야기해요. 알맞은 뜻을 연결하세요.",pairs:[["매력이 있다","사람의 마음을 끄는 힘이 있다"],["말이 잘 통하다","생각이 비슷해서 대화가 잘 되다"],["인상이 좋다","처음 봤을 때 느낌이 좋다"],["마음씨가 착하다","마음이 따뜻하고 친절하다"],["조건이 맞다","직업, 나이 등이 서로 원하는 것과 맞다"]]},
+  {t:"mc",lines:[["ME","나 소개팅이 너무 오랜만이라 걱정돼…"],["JA","왜 걱정해? 너는 성격도 좋고 예쁘___."]],q:"지아가 당연한 사실을 말해요.",opts:["잖아","을걸","었더니","느라고"],a:0,ex:"-잖아(요): 상대방도 이미 아는 사실을 다시 말할 때 써요."},
+  {t:"type",lines:[["NAR","카페에 {H} 씨가 들어왔어요. 가슴이 두근거리지만 아무렇지 않은 얼굴을 해요."],["ME","가슴이 두근거렸지만 안 ___."]],base:"떨리다 + -는 척하다 (과거, -어요)",ans:["떨리는 척했어요","떨리는척했어요"],ex:"동-는 척하다: 사실은 그렇지 않은데 그런 것처럼 행동할 때 써요."},
+  {t:"mc",lines:[["H","{N} 씨하고 이야기를 ___ 더 재미있어요."]],q:"알맞은 것을 고르세요.",opts:["하면 할수록","하면 하면서","하려면 할수록","할수록 하면"],a:0,ex:"-으면 -을수록: 앞의 일이 많아지면 뒤의 일도 더 그렇게 될 때 써요."},
+  {t:"order",q:"밤에 지아에게 문자를 보내요. 문장을 만드세요.",chips:["사실은","처음 봤을 때","첫눈에","반했어"],ans:["사실은 처음 봤을 때 첫눈에 반했어","처음 봤을 때 사실은 첫눈에 반했어"]}
+ ],teaser:"밤 11시 40분, 문자가 왔어요. 「내일 또 만날래요?」"},
+
+{no:2,tt:"설레는 데이트",ru:"두근두근 첫 데이트",unit:"13단원",
+ narr:"첫 데이트! 영화를 보고 강변을 걸었어요. 어색한 순간도 많았지만 정말 설렜어요.",
+ tasks:[
+  {t:"match",q:"알맞은 말을 연결하세요.",pairs:[["손을","잡다"],["팔짱을","끼다"],["어깨에","기대다"],["얼굴이","빨개지다"],["사랑이","식다"]]},
+  {t:"mc",lines:[["NAR","영화관에서 두 사람은 ___ 앉았어요."]],q:"두 사람은 어떻게 앉았어요?",opts:["나란히","첫눈에","골고루","정신없이"],a:0,ex:"나란히 앉다: 옆에 같이 앉다."},
+  {t:"mc",lines:[["NAR","무서운 장면에서 {H} 씨가 갑자기 손을 잡았어요. 그래서…"]],q:"주인공은 어떻게 됐어요?",opts:["얼굴이 빨개졌어요","사랑이 식었어요","공해가 심했어요","힘이 셌어요"],a:0,ex:"얼굴이 빨개지다: 부끄럽거나 설레서 얼굴이 붉어지다."},
+  {t:"mc",lines:[["NAR","너무 긴장해서 손이 차가워졌어요. 그런데…"],["ME","춥지만 안 ___ 했어요."]],q:"알맞은 형태를 고르세요. (춥다 — 형용사)",opts:["추운 척","춥는 척","추울 척","추웠 척"],a:0,ex:"형-은 척하다 → 안 추운 척했어요. 동사는 동-는 척하다를 써요."},
+  {t:"type",lines:[["JA","그 사람 어때?"],["ME","만나면 ___ 더 좋아져."]],base:"만나다 + -을수록",ans:["만날수록"],ex:"만나면 만날수록: 많이 만날수록 더 좋아진다는 뜻이에요."},
+  {t:"mc",lines:[["H","{N} 씨, 사실 처음 만났을 때부터 좋아했어요. 저랑 사귈래요?"]],q:"{H} 씨가 지금 무엇을 했어요?",opts:["고백했어요","청혼했어요","이별했어요","선봤어요"],a:0,ex:"고백하다: 좋아하는 마음을 말하다. 청혼하다: 결혼하자고 말하다."},
+  {t:"mc",lines:[["H","왜 이렇게 대답을 늦게 해요? 😅"],["ME","갑자기 물어보니까 놀랐___!"]],q:"주인공이 변명해요.",opts:["잖아요","을걸요","었더니요","느라고요"],a:0,ex:"놀랐잖아요!: 갑자기 물어봤으니까 당연히 놀랐다는 뜻이에요."}
+ ],teaser:"한 달 후 {H} 씨가 말했어요. 「이번 주말에 고향에 가는데… 같이 갈래요?」"},
+
+{no:3,tt:"그의 고향",ru:"10년 만의 고향",unit:"14단원",
+ narr:"{H} 씨는 10년 동안 고향에 못 갔어요. 버스에서 내리자마자 그 자리에 멈춰 섰어요.",
+ tasks:[
+  {t:"mc",lines:[["H","와… 10년 만에 왔더니 동네를 ___."]],q:"동네가 너무 많이 변했어요.",opts:["몰라보겠어요","나타났어요","낡았어요","따분했어요"],a:0,ex:"몰라보다: 많이 변해서 알아보지 못하다."},
+  {t:"match",q:"고향의 옛날 모습과 지금 모습이에요. 알맞은 뜻을 연결하세요.",pairs:[["평화롭다","조용하고 편안하다"],["활기차다","힘이 넘치고 생기가 있다"],["따분하다","재미없고 지루하다"],["공해가 심하다","공기나 물이 많이 더럽다"],["볼거리가 다양하다","구경할 것이 많다"]]},
+  {t:"type",lines:[["H","여기가 제가 어렸을 때 자주 ___ 떡볶이 가게예요."]],base:"가다 + -었던 (또는 -던)",ans:["갔던","가던"],ex:"동-었던: 과거의 일을 떠올릴 때 써요. 자주 하던 일이니까 '가던'(7단원)도 맞아요."},
+  {t:"mc",lines:[["H","예전에는 여기에 아무것도 없었어요."],["ME","지금은 시골도 ___ 편의 시설이 잘되어 있네요."]],q:"알맞은 것을 고르세요.",opts:["도시만큼","도시라도","도시였던","도시잖아"],a:0,ex:"명만큼: '~와 같은 정도로'라는 뜻이에요."},
+  {t:"mc",lines:[["NAR","{H} 씨 어머니 댁으로 가요."],["ME","어머님이 많이 기다리실까요?"],["H","아마 벌써 음식을 잔뜩 ___."]],q:"추측해요.",opts:["하셨을걸요","하셨더니","하시느라고","하시려면"],a:0,ex:"-을걸(요): '아마 그럴 거예요'라고 추측할 때 써요."},
+  {t:"mc",lines:[["MOM","옛날에 있던 논과 밭은 다 ___ 큰 아파트가 ___."]],q:"알맞은 단어를 고르세요.",opts:["사라지고 — 생겼어","생기고 — 사라졌어","나타나고 — 낡았어","발전하고 — 몰라봤어"],a:0,ex:"사라지다: 없어지다. 생기다: 없던 것이 새로 나타나다."},
+  {t:"type",lines:[["MOM","서울은 공기가 안 좋잖아. 건강을 위해서 매일 운동을 ___ 안 돼."]],base:"하다 + -지 않으면",ans:["하지 않으면"],ex:"-지 않으면 안 되다: '꼭 해야 한다'는 뜻이에요."},
+  {t:"mc",lines:[["ME","{H} 씨가 어렸을 때 이렇게 조용한 곳에서 살았다니… ___."]],q:"주인공은 그 모습을 머릿속에 그릴 수 없어요.",opts:["상상이 안 돼요","여유가 있어요","시간 가는 줄 몰라요","공기가 좋아요"],a:0,ex:"상상이 안 되다: 머릿속에 그림이 그려지지 않다."}
+ ],teaser:"서울에 돌아오자마자 팀장님이 큰 프로젝트를 맡기셨어요. 마감은 바로 다음 주!"},
+
+{no:4,tt:"몸이 보내는 신호",ru:"몸이 아파요",unit:"15단원",
+ narr:"2주 동안 밤마다 노트북 앞에 앉아 있었어요. 점심 대신 커피를 마시고, 운동은 한 번도 안 했어요.",
+ tasks:[
+  {t:"mc",lines:[["ME","어젯밤에 보고서를 쓰___ 한숨도 못 잤어요."]],q:"알맞은 것을 고르세요.",opts:["느라고","었더니","려면","잖아요"],a:0,ex:"동-느라(고): 어떤 일을 하는 것 때문에 다른 일을 못 했을 때 써요."},
+  {t:"match",q:"몸이 이상해요. 알맞은 뜻을 연결하세요.",pairs:[["숨이 차다","숨쉬기가 힘들다"],["쥐가 나다","근육이 갑자기 굳어서 아프다"],["어지럽다","머리가 빙빙 도는 것 같다"],["땀이 나다","더울 때 몸에서 물이 나오다"],["힘이 없다","몸에 기운이 없다"]]},
+  {t:"mc",lines:[["NAR","엘리베이터가 고장 났어요. 3층까지 걸어서 올라갔는데…"],["ME","겨우 3층인데 벌써 숨이 ___."]],q:"알맞은 말을 고르세요.",opts:["차요","나요","생겨요","빠져요"],a:0,ex:"숨이 차다: 숨쉬기가 힘들다."},
+  {t:"type",lines:[["ME","운동은 안 하고 매일 밤 야식만 ___ 살이 쪘어요. 😭"]],base:"먹다 + -었더니",ans:["먹었더니"],ex:"동-었더니: 내가 한 일 때문에 생긴 결과를 말할 때 써요."},
+  {t:"mc",lines:[["H","운동할 시간이 없으면 점심시간에 ___ 해요."]],q:"{H} 씨의 조언이에요.",opts:["산책이라도","산책만큼","산책이었던","산책잖아"],a:0,ex:"명이라도: 가장 좋은 것은 아니지만 그것만이라도 하라는 뜻이에요."},
+  {t:"order",q:"한 달 후, {H} 씨에게 자랑해요. 문장을 만드세요.",chips:["꾸준히","운동을","했더니","체력이","좋아졌어요"],ans:["꾸준히 운동을 했더니 체력이 좋아졌어요","운동을 꾸준히 했더니 체력이 좋아졌어요"]},
+  {t:"type",lines:[["NAR","그런데 병원에서 의사 선생님이 허리를 더 일찍 관리했어야 한다고 했어요."],["ME","진작 스트레칭을 ___."]],base:"시작하다 + -었어야 했는데",ans:["시작했어야 했는데","시작했어야 했어요","시작했어야 했다"],ex:"-었어야 하다: 하지 않은 일을 후회할 때 써요."},
+  {t:"mc",lines:[["ME","요즘은 몸이 ___ 아침에 일어나는 게 힘들지 않아요."]],q:"요즘 몸이 어때요?",opts:["가벼워서","무거워서","어지러워서","뻐근해서"],a:0,ex:"몸이 가볍다: 몸에 힘이 있고 편하다."}
+ ],teaser:"몸은 좋아졌어요. 그런데 왠지 마음이 무거워요…"},
+
+{no:5,tt:"마음의 여유",ru:"마음이 힘들 때",unit:"15단원",
+ narr:"팀장님이 사람들 앞에서 주인공의 보고서를 비판했어요. 저녁에 주인공은 혼자 빈 사무실에 앉아 있어요.",
+ tasks:[
+  {t:"match",q:"주인공의 마음은 어때요? 알맞은 뜻을 연결하세요.",pairs:[["스트레스가 쌓이다","스트레스가 점점 많아지다"],["기운이 나다","힘이 생기다"],["상처를 받다","다른 사람의 말 때문에 마음이 아프다"],["지치다","너무 힘들어서 더 할 힘이 없다"],["우울하다","기분이 가라앉고 슬프다"]]},
+  {t:"mc",lines:[["BOSS","이 보고서 다시 써 와요. 이게 뭐예요?"],["NAR","팀장님 말에 ___ 받았어요."]],q:"알맞은 말을 고르세요.",opts:["상처를","스트레스가","기운을","여유를"],a:0,ex:"상처를 받다: 다른 사람의 말 때문에 마음이 아프다."},
+  {t:"mc",lines:[["ME","일이 너무 많아서 집중이 ___."]],q:"알맞은 말을 고르세요.",opts:["안 돼요","안 생겨요","안 나요","안 쌓여요"],a:0,ex:"집중이 안 되다: 한 가지 일에 마음을 모을 수 없다."},
+  {t:"mc",lines:[["H","힘들 때는 저한테 이야기해요. 혼자 참으면 스트레스가 더 ___."]],q:"스트레스는 어떻게 돼요?",opts:["쌓여요","풀려요","생겨요","차요"],a:0,ex:"스트레스가 쌓이다 ↔ 스트레스가 풀리다."},
+  {t:"type",lines:[["NAR","주말에 {H} 씨가 바다에 데려갔어요."],["ME","바다에 ___ 마음이 편안해졌어요."]],base:"가다 + -었더니",ans:["갔더니"],ex:"갔더니: 바다에 간 결과로 마음이 편안해졌다는 뜻이에요."},
+  {t:"mc",lines:[["ME","오늘은 일찍 퇴근해서 마음에 여유가 ___."]],q:"알맞은 말을 고르세요.",opts:["생겼어요","쌓였어요","찼어요","났어요"],a:0,ex:"마음에 여유가 생기다: 마음이 급하지 않고 편해지다."},
+  {t:"fix",q:"주인공의 일기에 의미가 이상한 부분이 하나 있어요. 눌러 보세요.",segs:["친구와","이야기를","했더니","스트레스가","쌓였어요."],bad:4,fix:"풀렸어요",ex:"친구와 이야기를 했으니까 스트레스가 풀렸어요가 자연스러워요."}
+ ],teaser:"지아에게서 전화가 왔어요. 「너 그거 알아? 우리 회사 사람이 {H} 씨가 어떤 여자랑 반지 가게에 들어가는 걸 봤대!」"},
+
+{no:6,tt:"오해",ru:"반지와 그 여자",unit:"13~15단원 + 3급",hard:true,
+ narr:"반지? 다른 여자? 주인공은 밤새 한숨도 못 잤어요. 이번 화에서는 3급에서 배운 문법이 모두 필요해요.",
+ tasks:[
+  {t:"mc",lines:[["JA","회사 동료가 {H} 씨를 반지 가게 앞에서 ___."]],q:"지아가 다른 사람의 말을 전해요.",opts:["봤대","봤재","봤냬","봤으래"],a:0,ex:"-대(요) = -다고 해(요) (2단원): 봤다고 해 → 봤대."},
+  {t:"type",lines:[["NAR","주인공이 {H} 씨에게 물어봤어요. 「어제 누구를 만났어요?」 그리고 지아에게 이야기해요."],["ME","어제 누구를 ___ 물어봤어."]],base:"만나다 + -냐고 (과거)",ans:["만났냐고","만났느냐고"],ex:"간접 의문 (3단원): 동-냐고 묻다 → 만났냐고 물어봤어."},
+  {t:"mc",lines:[["ME","그런데 대답할 때 표정이 좀 이상하___."]],q:"주인공이 직접 본 것을 말해요.",opts:["더라고","다고","잖아","을걸"],a:0,ex:"-더라고(요) (8단원): 내가 직접 보거나 느낀 것을 다른 사람에게 전할 때 써요."},
+  {t:"mc",lines:[["ME","혹시 헤어지자고 ___ 너무 무서워."]],q:"걱정해요.",opts:["할까 봐","하자마자","하느라고","했더니"],a:0,ex:"-을까 봐(서) (3단원): 나쁜 일이 생길 것 같아서 걱정할 때 써요."},
+  {t:"fix",q:"{H} 씨가 같이 만나자고 제안했어요. 틀린 부분을 찾으세요.",segs:["그 사람이","내일","같이","만나라고","했어요."],bad:3,fix:"만나자고",ex:"제안은 -자고 하다 (2단원), 명령은 -으라고 하다 (3단원)."},
+  {t:"type",lines:[["NAR","다음 날, 주인공은 카페로 가는 길에 두 사람을 봤어요."],["ME","카페에 ___ 길에서 두 사람을 봤어요."]],base:"가다 + -다가",ans:["가다가"],ex:"-다(가) (9단원): 어떤 일을 하는 중에 다른 일이 생길 때 써요."},
+  {t:"mc",lines:[["ME","너무 놀라서 들고 있던 커피를 ___ 뻔했어요."]],q:"거의 그렇게 될 뻔했어요.",opts:["쏟을","쏟은","쏟는","쏟았을"],a:0,ex:"-을 뻔하다 (8단원): 거의 그렇게 될 뻔했지만 실제로는 안 됐을 때 써요."},
+  {t:"mc",lines:[["H","{N} 씨? 여기 왜…? 아, 이쪽은 우리 누나예요!"],["ME","네? 누나___?"]],q:"놀라서 다시 물어봐요.",opts:["라고요","다고요","냐고요","자고요"],a:0,ex:"되묻기 (9단원): 명사는 명이라고요? → 누나라고요?"},
+  {t:"mc",lines:[["SIS","제가 동생 반지 고르는 걸 도와줬어요. 상자는 가방 안에 ___ 있어요. 😉"]],q:"피동 + -어 있다",opts:["담겨","담아","담기고","담을"],a:0,ex:"피동 (4단원) 담기다 + -어 있다 → 담겨 있어요."}
+ ],teaser:"반지는… 주인공을 위한 것이었어요! 토요일에 {H} 씨가 저녁을 먹자고 했어요. 「꼭 예쁘게 입고 와요.」"},
+
+{no:7,tt:"그날의 대답",ru:"마지막 화",unit:"3급 총복습",hard:true,
+ narr:"루프탑 레스토랑, 서울의 불빛, 그리고 많이 긴장한 {H} 씨.",
+ tasks:[
+  {t:"mc",lines:[["NAR","{H} 씨가 일주일 내내 바쁘___ 오늘은 꽃을 들고 왔어요."]],q:"다른 사람의 변화를 말해요.",opts:["더니","었더니","느라고","다가"],a:0,ex:"-더니 (10단원): 다른 사람을 보고 느낀 변화를 말할 때 써요. 내 경험은 -었더니."},
+  {t:"type",lines:[["NAR","{H} 씨가 작은 상자를 꺼냈어요."],["H","{N} 씨한테 꼭 ___ 주고 싶은 게 있어요."]],base:"보다 → 사동 + -어",ans:["보여"],ex:"사동 (10단원): 보다 → 보이다 → 보여 주다."},
+  {t:"mc",lines:[["NAR","상자를 열___ 안에 반지가 있었어요."]],q:"상자를 연 후에 알게 됐어요.",opts:["고 보니","을 걸","을 만해서","는 편이라"],a:0,ex:"-고 보니 (11단원): 어떤 일을 한 후에 새로운 사실을 알게 됐을 때 써요."},
+  {t:"mc",lines:[["SIS","(누나의 문자) 걔가 오늘 날씨가 ___ 꽃집 앞에서 한 시간이나 줄을 섰대요! 😂"]],q:"알맞은 것을 고르세요.",opts:["추운데도","추웠더니","추울수록","추운 척"],a:0,ex:"형-은데도 (11단원): 앞의 상황과 상관없이 뒤의 일을 할 때 써요."},
+  {t:"type",lines:[["H","아무리 ___ 매일 {N} 씨하고 같이 저녁을 먹고 싶어요."]],base:"바쁘다 + 아무리 -어도",ans:["바빠도"],ex:"아무리 -어도 (12단원): 어떤 상황이라도 상관없다는 뜻이에요."},
+  {t:"mc",lines:[["ME","(속으로) 아… 오늘 더 예쁜 원피스를 입고 ___."]],q:"후회해요.",opts:["올 걸 그랬어요","오는 편이에요","올 만해요","오나 봐요"],a:0,ex:"-을 걸 (그랬다) (11단원): 하지 않은 일을 아쉬워할 때 써요."},
+  {t:"mc",lines:[["ME","(속으로) 손이 떨리는 걸 보니까 이 사람도 많이 긴장했___."]],q:"보고 추측해요.",opts:["나 봐요","을 줄 몰랐어요","거든요","어야 해요"],a:0,ex:"동-나 보다 (6단원): 보거나 들은 것으로 추측할 때 써요."},
+  {t:"mc",lines:[["ME","(속으로) 이 사람이 오늘 ___ 정말 몰랐어요."]],q:"전혀 생각하지 못했어요.",opts:["청혼할 줄","청혼하는 척","청혼하려면","청혼했던"],a:0,ex:"-을 줄 모르다 (5단원): 그렇게 될 거라고 생각하지 못했을 때 써요."},
+  {t:"order",q:"{H} 씨가 긴장해서 농담을 해요. 문장을 만드세요.",chips:["아프지 않도록","매일","운동하게","할 거예요","당신이"],ans:["당신이 아프지 않도록 매일 운동하게 할 거예요","아프지 않도록 당신이 매일 운동하게 할 거예요","아프지 않도록 매일 당신이 운동하게 할 거예요"],ex:"-도록 (8단원) + -게 하다 (12단원)."},
+  {t:"write",q:"마지막 장면이에요. {H} 씨에게 대답해 주세요! 주인공이 되어 3~4문장을 써 보세요. (처음 만난 날, 달라진 것, 지금 마음 등) 다음 문법 중에서 <b>3개 이상</b> 꼭 사용하세요: -었더니, -느라고, -으면 -을수록, -는 척하다, -었던, -잖아요, 아무리 -어도, -을 줄 몰랐다, -더라고요, -나 보다."}
+ ]}
+];
+
+/* ---------- состояние и облако ---------- */
+let S=null, PIN="";
+const TOTAL=EPS.reduce((a,e)=>a+e.tasks.filter(t=>t.t!=="write").length,0);
+const sub=s=>String(s).replace(/\{H\}/g,S.hero).replace(/\{N\}/g,S.name);
+async function rpc(fn,args){ const r=await fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"},body:JSON.stringify(args)});
+  const t=await r.text(); if(!r.ok){ let m=t; try{m=JSON.parse(t).message}catch(e){} throw new Error(m); } return t?JSON.parse(t):null; }
+let cloudT=null;
+function cloudMark(s){ const c=$("cloud"); if(c) c.textContent=s; }
+function save(){
+  try{ localStorage.setItem(KEY+"_"+S.name.toLowerCase(),JSON.stringify(S)); localStorage.setItem(KEY+"_last",JSON.stringify({name:S.name,pin:PIN})); }catch(e){}
+  if(!PIN) return; clearTimeout(cloudT); cloudMark("☁️…");
+  cloudT=setTimeout(async()=>{ try{ await rpc("save_progress",{p_site:KEY,p_name:S.name,p_pin:PIN,p_state:S}); cloudMark("☁️✓"); }catch(e){ cloudMark("⚠️"); } },800);
+}
+function localState(n){ try{ return JSON.parse(localStorage.getItem(KEY+"_"+n.toLowerCase())||"null"); }catch(e){ return null; } }
+(function init(){ try{ const l=JSON.parse(localStorage.getItem(KEY+"_last")||"null"); if(l){ $("nameInput").value=l.name||""; $("pinInput").value=l.pin||""; } }catch(e){} })();
+
+async function login(){
+  const n=$("nameInput").value.trim(), pin=$("pinInput").value.trim(), fb=$("loginFb");
+  if(!n){ $("nameInput").focus(); return; }
+  if(!/^\d{4,8}$/.test(pin)){ fb.textContent="비밀번호를 숫자 4자리로 입력하세요."; $("pinInput").focus(); return; }
+  fb.style.color="var(--muted)"; fb.textContent="불러오는 중…"; $("loginBtn").disabled=true;
+  let remote=null;
+  try{ remote=await rpc("load_progress",{p_site:KEY,p_name:n,p_pin:pin}); PIN=pin; fb.textContent=""; }
+  catch(e){
+    $("loginBtn").disabled=false; fb.style.color="var(--bad)";
+    if(/wrong_pin/.test(e.message)){ fb.textContent="이 이름의 비밀번호가 맞지 않아요. 다른 사람이라면 이름 뒤에 성을 붙여 주세요."; return; }
+    fb.textContent="서버에 연결할 수 없어요. 지금은 이 기기에만 저장돼요."; PIN="";
+    await new Promise(r=>setTimeout(r,1500));
+  }
+  $("loginBtn").disabled=false;
+  const loc=localState(n);
+  // берём более продвинутое состояние
+  const cand=[remote,loc].filter(x=>x&&x.log&&x.hero);
+  cand.sort((a,b)=>(b.done?999:b.log.length)-(a.done?999:a.log.length));
+  S=cand[0]||null;
+  if(S){ S.name=n; save(); go(); }
+  else { S={name:n,hero:"",ep:0,ti:-1,heart:0,log:[],write:"",t0:Date.now(),done:false,sent:false}; showPick(); }
+}
+function showPick(){ $("start").classList.add("hidden"); $("final").classList.add("hidden"); $("play").classList.add("hidden"); $("pick").classList.remove("hidden"); window.scrollTo(0,0); }
+function pickHero(b){ document.querySelectorAll(".hero").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); S.hero=b.dataset.h; $("goBtn").disabled=false; }
+function begin(){ if(!S.hero) return; S.t0=Date.now(); save(); go(); }
+function go(){
+  ["start","pick","final"].forEach(i=>$(i).classList.add("hidden"));
+  if(S.done){ finale(); return; }
+  $("play").classList.remove("hidden"); hud();
+  if(S.ti<0) epCard(); else task();
+}
+function restart(){
+  if(!confirm("처음부터 다시 할까요? 지금 결과는 지워져요.")) return;
+  S={name:S.name,hero:"",ep:0,ti:-1,heart:0,log:[],write:"",t0:Date.now(),done:false,sent:false}; save(); showPick();
+}
+function hud(){
+  const ep=EPS[S.ep];
+  $("epInfo").textContent=`${ep.no}화 · ${ep.tt}`;
+  $("heart").textContent=`♥ ${S.heart}/${TOTAL}`;
+  $("prog").style.width=Math.round(S.log.length/TOTAL*100)+"%";
+}
+
+/* ---------- титр серии ---------- */
+function epCard(){
+  const ep=EPS[S.ep]; hud();
+  $("stage").innerHTML=`<div class="ep"><div class="no">제${ep.no}화 · ${ep.unit}</div><div class="tt">${ep.tt}</div><div class="ru">${ep.ru}</div></div>
+   <div class="card"><div class="narr">${esc(sub(ep.narr))}</div>${ep.hard?'<div class="muted">🔥 조금 어려운 에피소드예요</div>':''}
+   <button class="main" onclick="S.ti=0;save();task()">보기 ▶</button></div>`;
+  window.scrollTo(0,0);
+}
+
+/* ---------- реплики ---------- */
+function linesHTML(lines){
+  return (lines||[]).map(([w,t])=>{
+    const txt=esc(sub(t)).replace(/___/g,'<span class="gap">&nbsp;?&nbsp;</span>');
+    if(w==="NAR") return `<div class="narr">${txt}</div>`;
+    const name=w==="ME"?S.name:w==="H"?S.hero:w==="JA"?"지아":w==="MOM"?(S.hero+" 씨 어머니"):w==="BOSS"?"팀장님":w==="SIS"?(S.hero+" 씨 누나"):"";
+    const ava=w==="H"?(S.hero==="도윤"?"🌙":"☀️"):AVA[w];
+    return `<div class="line ${w==="ME"?"me":""}"><div class="ava">${ava}</div><div class="bub"><span class="who">${esc(name)}</span>${txt}</div></div>`;
+  }).join("");
+}
+
+/* ---------- задания ---------- */
+let CUR=null;
+function task(){
+  const ep=EPS[S.ep], t=ep.tasks[S.ti]; CUR={t}; hud();
+  let h=`<div class="card"><div class="muted">장면 ${S.ti+1} / ${ep.tasks.length}</div>${linesHTML(t.lines)}`;
+  if(t.q) h+=`<div class="q">${sub(t.q)}</div>`;
+  if(t.t==="mc"){
+    h+=`<div class="opts">${shuffle(t.opts.map((o,i)=>i)).map(i=>`<button data-i="${i}" onclick="pickMC(this)">${esc(sub(t.opts[i]))}</button>`).join("")}</div>`;
+  } else if(t.t==="type"){
+    h+=`<div class="base">💡 ${esc(t.base)}</div><input id="typeIn" autocomplete="off" autocapitalize="off" placeholder="한국어로 쓰세요" onkeydown="if(event.key==='Enter')checkType()"><button class="main" id="chk" onclick="checkType()">확인</button>`;
+  } else if(t.t==="match"){
+    const L=shuffle(t.pairs.map((p,i)=>i)), R=shuffle(t.pairs.map((p,i)=>i));
+    h+=`<div class="cols"><div class="col">${L.map(i=>`<button class="ko" data-s="L" data-i="${i}" onclick="pickM(this)">${esc(t.pairs[i][0])}</button>`).join("")}</div>
+        <div class="col">${R.map(i=>`<button data-s="R" data-i="${i}" onclick="pickM(this)">${esc(t.pairs[i][1])}</button>`).join("")}</div></div>`;
+    CUR.left=t.pairs.length; CUR.pick=null; CUR.wrong=[];
+  } else if(t.t==="order"){
+    CUR.built=[];
+    h+=`<div class="ansline" id="ansLine"></div><div class="chips" id="chips">${shuffle(t.chips.map((c,i)=>i)).map(i=>`<button data-i="${i}" onclick="addChip(this)">${esc(t.chips[i])}</button>`).join("")}</div>
+        <div class="muted" style="margin-top:6px">단어를 눌러서 문장을 만드세요. 다시 누르면 빠져요.</div>
+        <button class="main" id="chk" onclick="checkOrder()" disabled>확인</button>`;
+  } else if(t.t==="fix"){
+    h+=`<div class="segs">${t.segs.map((s,i)=>`<button data-i="${i}" onclick="pickFix(this)">${esc(s)}</button>`).join("")}</div>`;
+  } else if(t.t==="write"){
+    h+=`<textarea id="wr" placeholder="여기에 쓰세요…" oninput="S.write=this.value;$('chk').disabled=this.value.trim().length<20;clearTimeout(window._wt);window._wt=setTimeout(save,1500)">${esc(S.write||"")}</textarea>
+        <button class="main" id="chk" onclick="submitWrite()" ${S.write&&S.write.trim().length>=20?"":"disabled"}>대답하기 💍</button>`;
+  }
+  h+=`<div id="fb"></div></div>`;
+  $("stage").innerHTML=h; window.scrollTo(0,0);
+  if(t.t==="type") setTimeout(()=>$("typeIn").focus(),50);
+}
+function fillGap(txt){ const gs=document.querySelectorAll(".gap"), ps=String(txt).split(" — "); if(gs.length>1&&ps.length===gs.length) gs.forEach((g,i)=>g.textContent=ps[i]); else if(gs[0]) gs[0].textContent=txt; }
+function feedback(ok, extra){
+  const t=CUR.t, ex=t.ex?`<div style="margin-top:4px">${esc(t.ex)}</div>`:"";
+  $("fb").innerHTML=`<div class="fb ${ok?"good":"wrong"}"><b>${ok?"♥ 정답! "+["완벽해요!","설레요!","좋아요!","대박!"][Math.floor(Math.random()*4)]:"아쉬워요…"}</b>${extra||""}${ex}</div>
+    <button class="main" onclick="next()">${S.ti===EPS[S.ep].tasks.length-1?"다음 ▶":"다음 장면 ▶"}</button>`;
+}
+function record(ok, ans, right){ S.log.push({ep:S.ep,ti:S.ti,ok,ans,right}); if(ok) S.heart++; save(); hud(); }
+function pickMC(b){
+  const t=CUR.t, i=+b.dataset.i, ok=i===t.a;
+  document.querySelectorAll(".opts button").forEach(x=>{ x.disabled=true; if(+x.dataset.i===t.a) x.classList.add("ok"); });
+  if(!ok) b.classList.add("bad");
+  fillGap(sub(t.opts[t.a]));
+  record(ok, sub(t.opts[i]), sub(t.opts[t.a]));
+  feedback(ok, ok?"":`<div>정답: <b>${esc(sub(t.opts[t.a]))}</b></div>`);
+}
+const norm=s=>s.normalize("NFC").replace(/[.?!…,~]/g,"").replace(/\s+/g," ").trim();
+const nosp=s=>norm(s).replace(/\s/g,"");
+function checkType(){
+  const t=CUR.t, v=$("typeIn").value; if(!v.trim()) return;
+  const ok=t.ans.some(a=>nosp(a)===nosp(v));
+  $("typeIn").disabled=true; $("chk").remove();
+  $("typeIn").style.borderColor=ok?"var(--ok)":"var(--bad)"; $("typeIn").style.background=ok?"var(--okbg)":"var(--badbg)";
+  fillGap(ok?norm(v):t.ans[0]);
+  record(ok, norm(v), t.ans[0]);
+  feedback(ok, ok?"":`<div>정답: <b>${esc(t.ans[0])}</b>${t.ans.length>1?` <span class="muted">(${esc(t.ans.slice(1).join(", "))}도 맞아요)</span>`:""}</div>`);
+}
+function pickM(b){
+  const t=CUR.t;
+  if(!CUR.pick || CUR.pick.dataset.s===b.dataset.s){ document.querySelectorAll(`.col button[data-s="${b.dataset.s}"]`).forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); CUR.pick=b; return; }
+  const a=CUR.pick; CUR.pick=null; a.classList.remove("sel");
+  if(a.dataset.i===b.dataset.i){
+    a.classList.add("gone"); b.classList.add("gone"); CUR.left--;
+    if(!CUR.left){ const ok=CUR.wrong.length===0;
+      record(ok, ok?"все пары верно":"ошибки: "+CUR.wrong.join("; "), "");
+      feedback(ok, ok?"":`<div>틀린 연결: ${esc(CUR.wrong.join("; "))}</div>`); }
+  } else {
+    a.classList.add("bad"); b.classList.add("bad");
+    const L=a.dataset.s==="L"?a:b, R=a.dataset.s==="L"?b:a;
+    const w=t.pairs[+L.dataset.i][0]+" ≠ "+t.pairs[+R.dataset.i][1]; if(!CUR.wrong.includes(w)) CUR.wrong.push(w);
+    setTimeout(()=>{a.classList.remove("bad");b.classList.remove("bad");},500);
+  }
+}
+function addChip(b){ CUR.built.push(+b.dataset.i); b.classList.add("hidden"); drawOrder(); }
+function delChip(k){ const i=CUR.built.splice(k,1)[0]; document.querySelector(`#chips button[data-i="${i}"]`).classList.remove("hidden"); drawOrder(); }
+function drawOrder(){ const t=CUR.t; $("ansLine").innerHTML=CUR.built.map((i,k)=>`<button onclick="delChip(${k})">${esc(t.chips[i])}</button>`).join(""); $("chk").disabled=CUR.built.length!==t.chips.length; }
+function checkOrder(){
+  const t=CUR.t, v=CUR.built.map(i=>t.chips[i]).join(" "), ok=t.ans.some(a=>nosp(a)===nosp(v));
+  $("chk").remove(); document.querySelectorAll("#ansLine button,#chips button").forEach(x=>{x.disabled=true;});
+  document.querySelectorAll("#ansLine button").forEach(x=>x.classList.add(ok?"ok":"bad"));
+  record(ok, v, t.ans[0]);
+  feedback(ok, ok?"":`<div>정답: <b>${esc(t.ans[0])}</b></div>`);
+}
+function pickFix(b){
+  const t=CUR.t, i=+b.dataset.i, ok=i===t.bad;
+  document.querySelectorAll(".segs button").forEach(x=>{ x.disabled=true; if(+x.dataset.i===t.bad){ x.classList.add("ok"); x.innerHTML=`<s>${esc(t.segs[t.bad])}</s> → <b>${esc(t.fix)}</b>`; } });
+  if(!ok) b.classList.add("bad");
+  record(ok, "выбрано: "+t.segs[i], t.segs[t.bad]+" → "+t.fix);
+  feedback(ok, "");
+}
+function submitWrite(){ S.write=$("wr").value.trim(); if(S.write.length<20) return; next(); }
+function next(){
+  const ep=EPS[S.ep];
+  if(S.ti<ep.tasks.length-1){ S.ti++; save(); task(); return; }
+  if(S.ep===EPS.length-1){ S.done=true; S.t1=Date.now(); save(); $("play").classList.add("hidden"); finale(); return; }
+  const ok=S.log.filter(l=>l.ep===S.ep&&l.ok).length, tot=ep.tasks.filter(t=>t.t!=="write").length;
+  S.ep++; S.ti=-1; save();
+  $("stage").innerHTML=`<div class="ep"><div class="no">제${ep.no}화 끝</div><div class="tt">♥ ${ok} / ${tot}</div></div>
+    <div class="card"><div class="teaser">다음 화 예고…</div><div style="text-align:center;margin-top:6px">${esc(sub(ep.teaser||""))}</div>
+    <button class="main" onclick="epCard()">${ep.no+1}화 보기 ▶</button></div>`;
+  window.scrollTo(0,0);
+}
+
+/* ---------- финал ---------- */
+const fmt=ms=>{const s=Math.round(ms/1000);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};
+function ending(){
+  const p=S.heart/TOTAL;
+  if(p>=0.85) return {e:"💍",tt:"해피엔딩",txt:"주인공이 「네!」라고 대답했어요. {H} 씨는 너무 기뻐서 반지를 떨어뜨릴 뻔했어요. 레스토랑의 모든 사람이 박수를 쳤어요. 축하해요!"};
+  if(p>=0.65) return {e:"🌸",tt:"열린 결말",txt:"주인공은 「조금만 더 생각해 볼게요」라고 대답했어요. {H} 씨는 웃으면서 「기다릴게요」라고 했어요. 시즌 2를 기대해 주세요!"};
+  return {e:"🌧",tt:"아쉬운 결말",txt:"저녁을 먹다가 팀장님한테서 전화가 왔어요… 데이트가 끝나 버렸어요. 하지만 괜찮아요! 틀린 부분을 복습하고 다시 도전해 보세요."};
+}
+function finale(){
+  $("final").classList.remove("hidden");
+  const en=ending(), pct=Math.round(S.heart/TOTAL*100);
+  $("ending").innerHTML=`<div class="end"><div class="big">${en.e}</div><div class="tt">${en.tt}</div><div>${esc(sub(en.txt))}</div></div>`;
+  $("summary").innerHTML=`<div style="text-align:center"><div class="muted">${esc(S.name)} 씨, 드라마를 끝까지 봤어요!</div><div style="font-size:40px;font-weight:800;color:var(--acc)">${pct}%</div>
+    <div class="muted">♥ ${S.heart} / ${TOTAL} (첫 번째 시도에서 맞힌 문제)</div></div>`+
+    EPS.map((e,k)=>{const ls=S.log.filter(l=>l.ep===k);return `<div class="row">${e.no}화 · ${e.tt}: <b>${ls.filter(l=>l.ok).length}/${ls.length}</b></div>`;}).join("")+
+    (S.log.some(l=>!l.ok)?`<div style="margin-top:10px"><b>다시 볼 문법과 어휘</b></div>`+S.log.filter(l=>!l.ok).map(l=>{const t=EPS[l.ep].tasks[l.ti];return `<div class="row">${EPS[l.ep].no}화 · ${t.t==="match"?"어휘 연결":`<b>${esc(l.right)}</b>`}${t.ex?`<div class="muted">${esc(t.ex)}</div>`:""}</div>`;}).join(""):"");
+  window.scrollTo(0,0);
+  if(!S.sent) sendResults(); else { $("sendFb").textContent="✅ 결과를 이미 선생님께 보냈어요."; $("sendBtn").textContent="선생님께 다시 보내기"; }
+}
+function buildReport(){
+  const d=new Date(), dt=d.toLocaleDateString("ru-RU")+" "+d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
+  const pct=Math.round(S.heart/TOTAL*100), en=ending();
+  let r=`🎬 <b>Дорама «봄날의 너» · 13–15단원 + 3급</b>\n👤 ${esc(S.name)} (герой: ${esc(S.hero)})\n📅 ${dt} · ⏱ ${fmt((S.t1||Date.now())-S.t0)}\n\n✅ <b>${S.heart}/${TOTAL} (${pct}%)</b> · концовка: ${en.e} ${en.tt}\n`;
+  EPS.forEach((e,k)=>{const ls=S.log.filter(l=>l.ep===k); r+=`${e.no}화 ${e.tt}${e.hard?" 🔥":""}: ${ls.filter(l=>l.ok).length}/${ls.length}\n`;});
+  r+=`\n<b>Все ответы:</b>`;
+  EPS.forEach((e,k)=>{
+    r+=`\n\n<b>${e.no}화 · ${e.tt}</b>`;
+    S.log.filter(l=>l.ep===k).forEach(l=>{
+      const t=e.tasks[l.ti];
+      const ctx=t.t==="match"?"пары: "+t.pairs.map(p=>p[0]).join(", "):t.t==="order"?"порядок слов":t.t==="fix"?"найти ошибку: "+t.segs.join(" "):sub((t.lines||[]).map(x=>x[1]).filter(x=>x.includes("___"))[0]||((t.lines||[]).slice(-1)[0]||["",""])[1]);
+      r+=`\n${l.ti+1}. ${l.ok?"✅":"❌"} ${esc(ctx)}\n   → ${esc(l.ans)}${!l.ok&&l.right?` (надо: ${esc(l.right)})`:""}`;
+    });
+  });
+  r+=`\n\n✍️ <b>Финальный ответ героини:</b>\n${esc(S.write||"—")}`;
+  return r;
+}
+let REPORT="";
+async function sendResults(){
+  REPORT=buildReport(); const fb=$("sendFb"), btn=$("sendBtn"); btn.disabled=true; fb.textContent="선생님께 보내는 중…";
+  try{
+    const parts=[]; let rest=REPORT; while(rest.length){ let cut=rest.length>3800?rest.lastIndexOf("\n",3800):rest.length; if(cut<=0) cut=3800; parts.push(rest.slice(0,cut)); rest=rest.slice(cut); }
+    for(const p of parts){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:p,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description||"error"); }
+    fb.textContent="✅ 선생님께 보냈어요! 수고했어요!"; btn.textContent="선생님께 다시 보내기"; S.sent=true; save();
+  }catch(e){
+    fb.textContent="보내지 못했어요 ("+e.message+"). 아래 내용을 복사해서 선생님께 보내 주세요:";
+    const b=$("copyBox"); b.value=REPORT.replace(/<[^>]+>/g,"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&").replace(/&quot;/g,'"'); b.classList.remove("hidden"); $("copyBtn").classList.remove("hidden");
+  }
+  btn.disabled=false;
+}
+function copyReport(){ const b=$("copyBox"); b.select(); try{ navigator.clipboard.writeText(b.value).then(()=>$("copyBtn").textContent="복사했어요 ✓",()=>document.execCommand("copy")); }catch(e){ document.execCommand("copy"); } }
+</script>
+</body>
+</html>

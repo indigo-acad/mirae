@@ -1,0 +1,69 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"><title>Ученики · MIRAÉ</title></head><body>
+<div id="topbar"></div>
+<header class="band"><div class="in"><small>Преподаватель</small><h1>Ученики и задания</h1><p>Назначай материалы: ученик увидит только их</p></div></header>
+<main id="m"></main>
+<script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script>
+<script>
+var $=function(s){return document.querySelector(s)};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+var MAP={};MATERIALS.forEach(function(m){MAP[m.id]=m});
+var cur=null,students=[],assigned=[],filt='all',sel={};
+function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.style.color=ok?'#2f6b43':'#b9473b'}}
+function lessonProgress(state){
+  var out=[];var P=(state&&state.progress)||{};
+  [['l12-jiyo','12과 · -지요?'],['p12-jiyo-1','Отработка -지요']].forEach(function(x){
+    var L=window.LESSONS[x[0]];if(!L)return;var p=P[x[0]]||{},n=0,t=0;
+    L.sections.forEach(function(s){s.blocks.forEach(function(b,i){t++;var q=p[s.id+'-'+i];if(q&&q.done)n++})});
+    out.push('<div class="line" style="justify-content:space-between"><span>'+esc(x[1])+'</span><span class="muted">'+n+' из '+t+'</span></div>');
+  });
+  return out.join('');
+}
+async function boot(){
+  if(!KR.require())return;KR.topbar('teacher');
+  var ctx=await KR.load();KR.topbar('teacher');
+  if(!ctx.ok){$('#m').innerHTML='<div class="card"><p>Нет связи с сервером. Панель преподавателя работает только онлайн.</p></div>';return}
+  if(!ctx.teacher){$('#m').innerHTML='<div class="card"><h3>Только для преподавателя</h3><p class="muted">Этот раздел открыт для аккаунта преподавателя.</p></div>';return}
+  try{students=await KR.api('teacher_students')||[]}catch(e){$('#m').innerHTML='<div class="card"><p>Не удалось загрузить учеников.</p></div>';return}
+  draw();
+}
+function draw(){
+  var h='<div class="card"><h3>Ученики</h3>';
+  var list=students.filter(function(s){return s.name!==KR.user()});
+  if(!list.length)h+='<p class="muted">Пока никто не зарегистрировался. Ученики регистрируются на странице «Личный кабинет».</p>';
+  h+='<div class="opts">'+list.map(function(s){return '<button data-st="'+esc(s.name)+'" class="'+(cur===s.name?'sel':'')+' cap">'+esc(s.name)+' · '+s.assigned+'</button>'}).join('')+'</div></div>';
+  if(cur)h+='<div id="stud"></div>';
+  h+='<p id="msg" class="muted" style="color:var(--silver)"></p>';
+  $('#m').innerHTML=h;
+  if(cur)drawStudent();
+}
+async function drawStudent(){
+  var as=[],st=null;
+  try{as=await KR.api('teacher_assignments',{p_student:cur})||[];st=await KR.api('teacher_student_state',{p_student:cur})}catch(e){}
+  assigned=as;var have={};as.forEach(function(a){have[a.id]=1});
+  var h='<div class="card"><h3 class="cap">'+esc(cur)+'</h3><b>Назначено</b>';
+  if(!as.length)h+='<p class="muted">Пока ничего не назначено.</p>';
+  h+=as.map(function(a){var m=MAP[a.id]||{title:a.id,kind:''};
+    return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><button data-un="'+esc(a.id)+'">Убрать</button></div>'}).join('');
+  h+='<p style="margin:12px 0 4px"><b>Прогресс по урокам сайта</b></p>'+lessonProgress(st)+'<p class="note" style="margin-top:8px">Тренажёры и игры хранят прогресс внутри себя, здесь он пока не виден.</p></div>';
+  h+='<div class="card"><h3>Назначить материалы</h3><div class="opts" id="flt"><button data-f="all" class="'+(filt==='all'?'sel':'')+'">Все</button>'+Object.keys(SECTIONS).map(function(k){return '<button data-f="'+k+'" class="'+(filt===k?'sel':'')+'">'+esc(SECTIONS[k])+'</button>'}).join('')+'</div><div style="margin-top:8px;max-height:340px;overflow:auto">';
+  MATERIALS.filter(function(m){return !have[m.id]&&(filt==='all'||m.section===filt)}).forEach(function(m){
+    h+='<label class="line" style="align-items:center;cursor:pointer"><input type="checkbox" data-m="'+esc(m.id)+'" '+(sel[m.id]?'checked':'')+'><span style="flex:1">'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>'});
+  h+='</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><input id="due" type="date" class="name" style="flex:1;min-width:150px;margin:0"><input id="note" class="name" placeholder="Комментарий (по желанию)" style="flex:2;min-width:180px;margin:0"></div><div class="done-row"><span class="muted" id="cnt"></span><button class="pri" id="go">Назначить выбранные</button></div></div>';
+  $('#stud').innerHTML=h;count();
+}
+function count(){var n=Object.keys(sel).filter(function(k){return sel[k]}).length;var e=$('#cnt');if(e)e.textContent=n?('Выбрано: '+n):''}
+document.addEventListener('click',async function(e){
+  var b=e.target.closest('button');if(!b)return;
+  if(b.dataset.st){cur=b.dataset.st;sel={};draw()}
+  else if(b.dataset.f){filt=b.dataset.f;drawStudent()}
+  else if(b.dataset.un){try{await KR.api('teacher_unassign',{p_student:cur,p_material:b.dataset.un});students=await KR.api('teacher_students')||students;draw();msg('Убрано',true)}catch(x){msg('Не получилось убрать')}}
+  else if(b.id==='go'){
+    var ids=Object.keys(sel).filter(function(k){return sel[k]});if(!ids.length){msg('Выбери хотя бы один материал');return}
+    var due=$('#due').value||null,note=$('#note').value||'';b.disabled=true;
+    try{for(var i=0;i<ids.length;i++)await KR.api('teacher_assign',{p_student:cur,p_material:ids[i],p_due:due,p_note:note});sel={};students=await KR.api('teacher_students')||students;draw();msg('Назначено: '+ids.length,true)}
+    catch(x){msg('Не получилось назначить. Проверь, что SQL выполнен.');b.disabled=false}
+  }
+});
+document.addEventListener('change',function(e){var t=e.target;if(t.dataset&&t.dataset.m){sel[t.dataset.m]=t.checked;count()}});
+boot();
+</script></body></html>

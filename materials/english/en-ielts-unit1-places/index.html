@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS Practice — Unit 1: Places</title>
+<style>
+  :root{--ink:#1d2433;--muted:#667085;--line:#e4e7ec;--bg:#f5f6fa;--card:#fff;--accent:#2f5bea;--ok:#1f9d55;--okbg:#e9f8ef;--bad:#d64545;--badbg:#fdeeee}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  .wrap{max-width:820px;margin:0 auto;padding:18px 14px 80px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+  header h1{font-size:20px;margin:0}
+  .who{font-size:14px;color:var(--muted)}
+  .card{background:var(--card);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 2px 10px #0000000d}
+  h2{margin:0 0 6px;font-size:20px}
+  h3{margin:4px 0 6px;font-size:17px}
+  .muted{color:var(--muted);font-size:14px}
+  .ielts{font-weight:700}
+  button{font:inherit;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#eef0f4;color:var(--ink);margin:4px 4px 4px 0}
+  button.primary{background:var(--accent);color:#fff}
+  button.dark{background:var(--ink);color:#fff}
+  button.sm{font-size:14px;padding:6px 12px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text]{font:inherit;padding:9px 11px;border:1.5px solid #c9ced8;border-radius:9px;width:100%}
+  input.gap{width:140px;padding:4px 8px;border:0;border-bottom:2px solid #8a93a6;border-radius:0;background:#fafbfc;text-align:center}
+  input.ok{border-color:var(--ok)!important;background:var(--okbg)!important}
+  input.bad{border-color:var(--bad)!important;background:var(--badbg)!important}
+  .fix{color:var(--ok);font-weight:700;font-size:14px;margin-left:6px}
+  nav{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+  nav button{margin:0;font-size:15px}
+  nav button.active{background:var(--ink);color:#fff}
+  nav .done::after{content:" ✓";color:var(--ok)}
+  nav button.active.done::after{color:#8ff0b5}
+  .sets{display:flex;flex-wrap:wrap;gap:6px}
+  .sets button.active{background:var(--accent);color:#fff}
+  .ex{display:flex;flex-wrap:wrap;gap:6px}
+  .ex button{margin:0}
+  .ex button.done{background:var(--okbg);outline:1.5px solid var(--ok)}
+  .form{border:2px solid var(--ink);border-radius:6px;padding:14px 16px;background:#fff}
+  .form .title{text-align:center;font-weight:700;font-size:17px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:8px}
+  .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .row .lab{min-width:210px;color:#344054}
+  .qn{display:inline-block;min-width:24px;height:24px;line-height:24px;text-align:center;border:1.5px solid var(--ink);border-radius:5px;font-size:13px;font-weight:700;margin-right:4px}
+  .example{color:var(--muted);font-style:italic}
+  .pk button.sel{background:#dfe6ff;outline:2px solid var(--accent)}
+  .pk button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .pk button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  .score{font-size:18px;font-weight:700;margin-top:12px}
+  .hidden{display:none!important}
+  .transcript{background:#f3f6ff;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .transcript p{margin:4px 0}
+  mark{background:#ffe58a;padding:0 2px;border-radius:3px}
+  .reading{background:#fffdf5;border:1px solid #efe6c4;border-radius:10px;padding:14px 16px;font-family:Georgia,serif;font-size:16.5px}
+  .reading h4{margin:0 0 6px;text-align:center;font-family:inherit;font-size:19px}
+  .reading h5{margin:12px 0 2px;font-size:16px}
+  .reading p{margin:4px 0}
+  table.tbl{width:100%;border-collapse:collapse;font-size:15px}
+  table.tbl th,table.tbl td{border:1px solid #9aa2b1;padding:7px;vertical-align:top;text-align:left}
+  table.tbl th{background:#f1f3f7}
+  table.tbl td div{margin:3px 0}
+  .flash{perspective:900px;height:180px;margin:12px 0;cursor:pointer;user-select:none}
+  .flash .in{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+  .flash.flip .in{transform:rotateY(180deg)}
+  .flash .side{position:absolute;inset:0;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;font-size:26px;font-weight:700;padding:12px;text-align:center}
+  .flash .front{background:#eef3ff}
+  .flash .back{background:#effaf3;transform:rotateY(180deg)}
+  .flash small{font-size:14px;font-weight:400;color:var(--muted);margin-top:6px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .opts button{margin:0;padding:12px;text-align:left;background:#f1f3f7}
+  .opts button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .opts button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  .bar{height:8px;background:#e7e9ef;border-radius:5px;overflow:hidden;margin:8px 0}
+  .bar div{height:100%;background:var(--accent);width:0;transition:width .3s}
+  .big{font-size:22px;font-weight:700;margin:10px 0}
+  .feedback{min-height:24px;margin-top:8px;font-weight:600}
+  table.res{width:100%;border-collapse:collapse;font-size:15px}
+  table.res td{padding:6px 4px;border-bottom:1px solid var(--line)}
+  .speed{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin-top:6px}
+  @media(max-width:560px){.opts{grid-template-columns:1fr}.row .lab{min-width:100%}table.tbl{font-size:14px}input.gap{width:110px}}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+
+<div id="login" class="card">
+  <h2>👋 IELTS Practice</h2>
+  <p class="muted">Unit 1 · <b>Places &amp; neighbourhoods</b>: лексика, Listening Part 1, Reading.</p>
+  <p>Как тебя зовут?</p>
+  <input type="text" id="nameInput" placeholder="Имя" autocomplete="off" onkeydown="if(event.key==='Enter')start()">
+  <p><button class="primary" onclick="start()">Начать →</button></p>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>IELTS Practice · Unit 1</h1>
+    <div class="who">👤 <span id="who"></span></div>
+  </header>
+  <nav id="nav">
+    <button data-tab="vocab" class="active">1. Лексика</button>
+    <button data-tab="listening">2. Listening</button>
+    <button data-tab="reading">3. Reading</button>
+    <button data-tab="finish">4. Отправить</button>
+  </nav>
+
+  <!-- ЛЕКСИКА -->
+  <section id="tab-vocab">
+    <div class="card">
+      <h2>📚 Лексика</h2>
+      <p class="muted">Иди строго по шагам: следующий шаг откроется, когда закончишь текущий. Ошибки возвращаются в конце шага. Если в написании ошибёшься, нужно один раз перепечатать слово правильно.</p>
+      <div class="bar"><div id="vBar"></div></div>
+      <div id="vProg" class="muted"></div>
+      <div class="speed">🔊 Скорость голоса <input type="range" id="rate" min="0.6" max="1.1" step="0.05" value="0.85"> <span id="rateVal">0.85</span></div>
+    </div>
+
+    <div class="card" id="stage">
+      <div class="muted" id="sStep"></div>
+      <h3 id="sTitle"></h3>
+      <p class="muted" id="sHint"></p>
+
+      <div id="cardsBox" class="hidden">
+        <div class="flash" id="flash" onclick="this.classList.toggle('flip')">
+          <div class="in">
+            <div class="side front"><span id="fFront"></span><small id="fPos"></small></div>
+            <div class="side back"><span id="fBack"></span><small id="fEx"></small></div>
+          </div>
+        </div>
+        <button onclick="flashMove(-1)">←</button>
+        <button class="dark" onclick="say(CW[fi].en)">🔊</button>
+        <button onclick="flashMove(1)">→</button>
+        <span class="muted" id="fCount"></span>
+        <p><button class="primary" id="cardsDone" onclick="finishCards()" disabled>Посмотрела все карточки — дальше →</button></p>
+      </div>
+
+      <div id="drillBox" class="hidden">
+        <div class="bar"><div id="dBar"></div></div>
+        <div class="big" id="dPrompt"></div>
+        <div class="opts" id="dOpts"></div>
+        <div id="dWrite" class="hidden">
+          <input type="text" id="dIn" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')dCheck()">
+          <button class="primary" onclick="dCheck()">Проверить</button>
+        </div>
+        <div class="feedback" id="dFb"></div>
+      </div>
+      <div id="nextBox" class="hidden"><button class="primary" onclick="goCurrent()">Дальше →</button></div>
+    </div>
+
+    <div class="card">
+      <h3>Весь путь</h3>
+      <p class="muted">✓ — сделано (можно нажать и повторить), ▶ — сейчас, 🔒 — пока закрыто.</p>
+      <div id="path"></div>
+    </div>
+  </section>
+
+  <!-- LISTENING -->
+  <section id="tab-listening" class="hidden">
+    <div class="card">
+      <h2>🎧 Listening — Part 1</h2>
+      <p class="muted">Три задания, от простого к сложному. Перед каждым прослушиванием <b>сначала прочитай вопросы</b> и подумай, что нужно услышать: день недели, цену, число, слово по буквам или индекс. Каждый текст можно прослушать <b>2 раза</b> (на экзамене — 1).</p>
+      <div class="speed">🔊 Скорость голоса <input type="range" id="rate2" min="0.6" max="1.1" step="0.05" value="0.85" oninput="$('rate').value=this.value;$('rateVal').textContent=this.value"></div>
+    </div>
+    <div id="tbTasks"></div>
+    <div id="lTasks"></div>
+  </section>
+
+  <!-- READING -->
+  <section id="tab-reading" class="hidden">
+    <div id="rdTasks"></div>
+  </section>
+
+  <!-- ОТПРАВКА -->
+  <section id="tab-finish" class="hidden">
+    <div class="card">
+      <h2>📨 Итоги</h2>
+      <table class="res" id="resTable"></table>
+      <p class="muted" id="resNote"></p>
+      <button class="primary" id="sendBtn" onclick="sendResults()">Отправить учителю</button>
+      <div class="feedback" id="sendFb"></div>
+      <textarea id="copyBox" class="hidden" style="width:100%;height:180px;font:13px monospace;margin-top:8px"></textarea>
+    </div>
+  </section>
+</div>
+</div>
+
+<script>
+/* ============ НАСТРОЙКИ TELEGRAM ============ */
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";   // "1234567890:AAH...."
+const TG_CHAT_ID = "347625701";   // "123456789"
+
+/* ============ ЛЕКСИКА ============ */
+const SETS = [
+ {id:"A", name:"A · Места", words:[
+  {en:"capital", pos:"n", ru:"столица", def:"the most important city in a country, where the government is", ex:"London is the capital of the UK."},
+  {en:"coast", pos:"n", ru:"побережье", def:"the land next to the sea", ex:"We drove along the coast."},
+  {en:"the countryside", pos:"n", ru:"сельская местность", def:"land outside towns, with farms, fields and forests", ex:"My grandparents live in the countryside."},
+  {en:"the seaside", pos:"n", ru:"море, морской курорт", def:"a place by the sea where people go on holiday", ex:"In summer we go to the seaside."},
+  {en:"border", pos:"n", ru:"граница", def:"the line between two countries", ex:"The town is near the border with Finland."},
+  {en:"province", pos:"n", ru:"провинция", def:"one of the big areas that some countries are divided into", ex:"Canada has ten provinces."},
+  {en:"suburb", pos:"n", ru:"пригород", def:"an area where people live, outside the centre of a city", ex:"We live in a quiet suburb."},
+  {en:"the outskirts", pos:"n", ru:"окраина", def:"the outer parts of a city or town", ex:"The airport is on the outskirts of the city."},
+  {en:"inner city", pos:"n", ru:"центральные (бедные) районы", def:"the area near the city centre, often old and with social problems", ex:"Some inner city areas are poor."},
+  {en:"neighbourhood", pos:"n", ru:"район (где живут)", def:"an area of a town where people live", ex:"It's a friendly neighbourhood."},
+  {en:"housing estate", pos:"n", ru:"жилой микрорайон", def:"a large group of houses built at the same time", ex:"He grew up on a housing estate."},
+  {en:"woodland", pos:"n", ru:"лес, лесистая местность", def:"an area with a lot of trees", ex:"There is woodland behind our house."},
+  {en:"architecture", pos:"n", ru:"архитектура", def:"the design and style of buildings", ex:"Paris has beautiful architecture."},
+  {en:"surroundings", pos:"n", ru:"окрестности, окружение", def:"the place around you and the things in it", ex:"The hotel has lovely surroundings."}
+ ]},
+ {id:"B", name:"B · Люди и жизнь", words:[
+  {en:"resident", pos:"n", ru:"житель", def:"a person whose home is in a particular place", ex:"The city has 200,000 residents."},
+  {en:"inhabitants", pos:"n", ru:"жители, население", def:"all the people or animals that live in a town, country or area", ex:"The inhabitants are very friendly."},
+  {en:"locals", pos:"n", ru:"местные жители", def:"people from this area, not tourists or visitors", ex:"Ask the locals for a good café."},
+  {en:"community", pos:"n", ru:"сообщество, местные жители", def:"all the people living in one area", ex:"Our community is very close."},
+  {en:"council", pos:"n", ru:"городской совет, администрация", def:"the group of people elected to run a town and its services", ex:"The council is building a new park."},
+  {en:"immigrant", pos:"n", ru:"иммигрант", def:"a person who comes to live in a different country", ex:"Many immigrants live in this city."},
+  {en:"working class", pos:"n", ru:"рабочий класс", def:"people with little money who usually do physical work", ex:"It was a working class area."},
+  {en:"middle class", pos:"n", ru:"средний класс", def:"educated people with good jobs, not very rich and not poor", ex:"Doctors and teachers are middle class."},
+  {en:"affluent", pos:"adj", ru:"богатый, состоятельный", def:"having a lot of money", ex:"It's an affluent suburb."},
+  {en:"farming", pos:"n", ru:"сельское хозяйство", def:"working on a farm", ex:"Farming is important in this province."},
+  {en:"rent", pos:"v", ru:"снимать, арендовать", def:"to pay money to use a flat or house", ex:"I rent a flat in the city centre."},
+  {en:"explore", pos:"v", ru:"исследовать, осматривать", def:"to go around a new place to see what is there", ex:"Let's explore the old town."},
+  {en:"lifestyle", pos:"n", ru:"образ жизни", def:"the way a person lives", ex:"She has a relaxed lifestyle."}
+ ]},
+ {id:"C", name:"C · Какое место?", words:[
+  {en:"safe", pos:"adj", ru:"безопасный", def:"not dangerous", ex:"This area is safe at night."},
+  {en:"rough", pos:"adj", ru:"опасный, неблагополучный", def:"(about an area) dangerous or violent", ex:"Don't walk there — it's a rough neighbourhood."},
+  {en:"run-down", pos:"adj", ru:"запущенный, обветшалый", def:"in very bad condition", ex:"The old buildings are run-down."},
+  {en:"trendy", pos:"adj", ru:"модный", def:"fashionable now", ex:"There are lots of trendy cafés."},
+  {en:"crowded", pos:"adj", ru:"переполненный, людный", def:"with too many people", ex:"The streets are crowded in summer."},
+  {en:"industrial", pos:"adj", ru:"промышленный", def:"with a lot of factories", ex:"It's an industrial city."},
+  {en:"relaxed", pos:"adj", ru:"спокойный, неторопливый", def:"calm, not stressful", ex:"Life here is very relaxed."},
+  {en:"tiny", pos:"adj", ru:"крошечный", def:"very, very small", ex:"I live in a tiny flat."},
+  {en:"lively", pos:"adj", ru:"оживлённый, весёлый", def:"full of people and activity", ex:"The city is lively at night."},
+  {en:"pretty", pos:"adj", ru:"милый, красивый", def:"nice to look at", ex:"It's a pretty village."},
+  {en:"spectacular", pos:"adj", ru:"захватывающий, потрясающий", def:"very exciting to look at", ex:"The mountains give spectacular views."},
+  {en:"tasty", pos:"adj", ru:"вкусный", def:"with a good flavour", ex:"The food is tasty and cheap."},
+  {en:"diverse", pos:"adj", ru:"разнообразный, многонациональный", def:"with many different types of people or things", ex:"London has a diverse population."},
+  {en:"scenery", pos:"n", ru:"пейзаж, виды", def:"the natural things you see in the countryside: hills, rivers, trees", ex:"The scenery in Scotland is beautiful."}
+ ]},
+ {id:"D", name:"D · Key vocabulary", words:[
+  {en:"reputation", pos:"n", ru:"репутация", def:"what people think about a person or place", ex:"The city has a bad reputation."},
+  {en:"crime", pos:"n", ru:"преступность", def:"illegal actions, for example stealing", ex:"The crime rate is high."},
+  {en:"conclude", pos:"v", ru:"делать вывод", def:"to decide that something is true after you think about it", ex:"You might conclude that the city is dangerous."},
+  {en:"impact", pos:"n", ru:"воздействие, влияние", def:"a strong effect on something", ex:"Tourism has a big impact on the city."},
+  {en:"influence", pos:"v", ru:"влиять", def:"to change how someone thinks or acts", ex:"News stories influence people."},
+  {en:"reaction", pos:"n", ru:"реакция", def:"what you feel, say or do because of something", ex:"My first reaction was 'Wow!'"},
+  {en:"rank", pos:"v", ru:"занимать место (в рейтинге)", def:"to have a position in a list", ex:"The city ranks third in the world."},
+  {en:"surround", pos:"v", ru:"окружать", def:"to be all around something", ex:"Mountains surround the town."},
+  {en:"festival", pos:"n", ru:"фестиваль, праздник", def:"a special event when people celebrate something", ex:"There are colourful festivals every year."},
+  {en:"village", pos:"n", ru:"деревня, село", def:"a very small town in the countryside", ex:"We stayed in a small village."},
+  {en:"rate", pos:"n", ru:"уровень, показатель", def:"how often something happens, for example how much crime there is", ex:"The city has a high crime rate."},
+  {en:"apartment", pos:"n", ru:"квартира", def:"a flat (American English)", ex:"They live in a small apartment."}
+ ]},
+ {id:"E", name:"E · Торговый центр", words:[
+  {en:"shopping centre", pos:"n", ru:"торговый центр", def:"a big building with a lot of shops", ex:"A new shopping centre opened in our town."},
+  {en:"department store", pos:"n", ru:"универмаг", def:"a big shop that sells many different things on different floors", ex:"Green's department store is on the first floor."},
+  {en:"supermarket", pos:"n", ru:"супермаркет", def:"a big shop where you buy food", ex:"The supermarket is open until 10pm."},
+  {en:"pharmacy", pos:"n", ru:"аптека", def:"a shop where you buy medicine", ex:"The pharmacy is next to the bank."},
+  {en:"jewellery", pos:"n", ru:"ювелирные украшения", def:"rings, necklaces and other things you wear to look beautiful", ex:"She works in a jewellery shop."},
+  {en:"entrance", pos:"n", ru:"вход", def:"the door or place where you go in", ex:"Meet me at the entrance from the car park."},
+  {en:"ground floor", pos:"n", ru:"первый этаж", def:"the floor of a building at the same level as the street", ex:"The café is on the ground floor."},
+  {en:"first floor", pos:"n", ru:"второй этаж (брит.)", def:"in British English: the floor above the ground floor", ex:"The restaurants are on the first floor."},
+  {en:"car park", pos:"n", ru:"парковка", def:"a place where you can leave your car", ex:"There is a free car park."},
+  {en:"opening hours", pos:"n", ru:"часы работы", def:"the times when a shop or building is open", ex:"Opening hours: 10am to 6pm."},
+  {en:"opposite", pos:"prep", ru:"напротив", def:"on the other side of the street or room, facing something", ex:"The cinema is opposite the supermarket."},
+  {en:"next to", pos:"prep", ru:"рядом с", def:"very close, at the side of something", ex:"The toilets are next to the café."},
+  {en:"between", pos:"prep", ru:"между", def:"with one thing on one side and another thing on the other side", ex:"The bank is between the shoe shop and the pharmacy."},
+  {en:"on the left of", pos:"prep", ru:"слева от", def:"on the left side of something", ex:"The bookshop is on the left of the entrance."}
+ ]}
+];
+
+const PREPS = [
+  {s:"My grandparents live ___ the countryside.", o:["in","on","by"], a:"in"},
+  {s:"Our flat is ___ the outskirts of the city.", o:["in","on","at"], a:"on"},
+  {s:"They have a small house ___ the sea. You can see the water from the window.", o:["by","in","on"], a:"by"},
+  {s:"A lot of families live ___ the suburbs.", o:["on","in","at"], a:"in"},
+  {s:"Our hotel was ___ the city centre, so we walked everywhere.", o:["on","by","in"], a:"in"},
+  {s:"Brighton is a town ___ the south coast of England.", o:["in","on","at"], a:"on"},
+  {s:"There is a beautiful lake ___ the mountains.", o:["on","in","by"], a:"in"},
+  {s:"I'd like to live ___ a big park. Not in it — just close to it.", o:["near","on","in"], a:"near"},
+  {s:"He grew up ___ a housing estate in Manchester.", o:["on","at","by"], a:"on"},
+  {s:"Every summer we spend two weeks ___ the seaside.", o:["at","on","in"], a:"at"},
+  {s:"The café is ___ the ground floor.", o:["on","in","at"], a:"on"},
+  {s:"The bank is ___ the shoe shop and the pharmacy.", o:["between","opposite","next"], a:"between"},
+  {s:"The cinema is ___ to the supermarket.", o:["next","opposite","between"], a:"next"},
+  {s:"The shop is on the left ___ the entrance.", o:["of","to","from"], a:"of"}
+];
+
+const POS = ["festivals:n","friendly:adj","food:n","tasty:adj","inhabitants:n","lively:adj","pretty:adj","scenery:n","spectacular:adj","villages:n","apartments:n","crowded:adj","city:n","industrial:adj","lifestyle:n","relaxed:adj","streets:n","tiny:adj","affluent:adj","suburb:n","trendy:adj","woodland:n","run-down:adj","community:n","safe:adj","architecture:n"];
+
+const DICTATION = [
+  {label:"Фамилия по буквам", say:"C, A, R, T, E, R", ans:"carter"},
+  {label:"Фамилия по буквам", say:"M, I, T, C, H, E, L, L. Double L at the end.", ans:"mitchell"},
+  {label:"Название улицы по буквам", say:"Hillside. H, I, double L, S, I, D, E.", ans:"hillside", hint:"double L = LL"},
+  {label:"Индекс (postcode)", say:"B, N, two... four, A, T", ans:"bn24at", code:true},
+  {label:"Номер телефона", say:"oh, seven, seven, double oh, ... nine, one, four, ... three, eight, two", ans:"07700914382", num:true},
+  {label:"Число", say:"thirteen", ans:"13", num:true},
+  {label:"Число", say:"thirty", ans:"30", num:true},
+  {label:"Цена", say:"eight hundred and fifty pounds", ans:"850", num:true},
+  {label:"Дата", say:"the twenty-first of October", ans:"21 october", alt:["21st october","october 21","october 21st","21 oct"]}
+];
+
+/* ============ LISTENING ============ */
+/* audio: ссылка на дорожку. Можно вставить ссылку из SoundCloud (как у Track 11) или прямую ссылку на mp3.
+   Пока пусто — текст читает голос браузера. */
+const LTASKS = [
+ {id:"warm", audio:"", kind:"pick", name:"Задание 1. Разминка: что ты слышишь?",
+  instr:"Нажми 🔊 и выбери то, что услышала. Здесь можно слушать сколько угодно раз.",
+  items:[
+   {say:"The shop opens at seven a.m.", o:["7am","10am","11am"], a:"7am"},
+   {say:"Late night shopping is on Thursday.", o:["Tuesday","Thursday","Wednesday"], a:"Thursday"},
+   {say:"A coffee costs two pounds fifty.", o:["£2.50","£3.50","£2.15"], a:"£2.50"},
+   {say:"Take bus number six, three, five.", o:["356","635","653"], a:"635"},
+   {say:"It's thirteen minutes from the station.", o:["13","30","33"], a:"13"},
+   {say:"The ticket is fifteen pounds.", o:["£15.00","£50.00","£5.00"], a:"£15.00"},
+   {say:"The postcode is M, fourteen, nine, E, G.", o:["M14 9EG","N14 9EJ","M40 9EG"], a:"M14 9EG"},
+   {say:"My name is Joanna. That's J, O, A, double N, A.", o:["Joana","Johanna","Joanna"], a:"Joanna"},
+   {say:"We close at six p.m. on Wednesdays.", o:["Wednesdays, 6pm","Wednesdays, 8pm","Tuesdays, 6pm"], a:"Wednesdays, 6pm"},
+   {say:"Parking costs three pounds an hour... sorry, three pounds fifty.", o:["£3.00","£3.50","£5.30"], a:"£3.50"}
+  ]},
+ {id:"info", audio:"audio/library.mp3", kind:"form", name:"Задание 2. Information about a new library",
+  instr:"Complete the notes below. Write <b>ONE WORD AND/OR A NUMBER</b> for each answer.",
+  tip:"Как упражнение 08 в учебнике: женщина рассказывает о новом здании. Посмотри: в №1 будет фамилия по буквам, в №2 — часть индекса, в №5 — цена.",
+  title:"WESTPORT CENTRAL LIBRARY — information",
+  rows:[
+   {q:1, label:"Name of architect:", pre:"Peter", ans:["hartley"]},
+   {q:2, label:"Address and postcode:", pre:"15 Station Road, WP3", ans:["7rd"], mode:"code"},
+   {q:3, label:"Opening hours (Mon–Fri): 9am to", ans:["7pm","7","7.00pm","7:00pm"], mode:"code"},
+   {q:4, label:"Closed on:", ans:["sunday","sundays"]},
+   {q:5, label:"Membership for visitors:", pre:"£", post:"a year", ans:["12.50","12.5"], mode:"num"},
+   {q:6, label:"By bus: number", ans:["37"], mode:"num"},
+   {q:7, label:"By underground: only", post:"minutes from the town centre", ans:["10","ten"]},
+   {q:8, label:"Café: on the", post:"floor", ans:["first","1st"]}
+  ],
+  who:{A:"Speaker"},
+  script:[
+   ["A","Good morning, everyone, and welcome to Westport's new Central Library. I'd like to give you some information about the building."],
+   ["A","The library was designed by the architect Peter [[Hartley]]. That's H, A, R, T, L, E, Y."],
+   ["A","The address is fifteen Station Road, and the postcode is W, P, three... [[seven, R, D]]."],
+   ["A","From Monday to Friday we're open from nine a.m. to [[seven p.m.]] On Saturdays we close earlier, at five."],
+   ["A","Please remember that the library is closed on [[Sundays]]."],
+   ["A","Membership is free for local residents. Visitors pay [[twelve pounds fifty]] a year."],
+   ["A","Now, transport. There is no car park, so please don't come by car. Number seventy-three buses stop near here, but the best bus is number [[thirty-seven]]. It stops right outside."],
+   ["A","Or you can take the underground. It only takes [[ten]] minutes from the town centre."],
+   ["A","And finally, there is a lovely café. It isn't on the ground floor. It's on the [[first]] floor, next to the children's books. Enjoy your visit!"]
+  ],
+  traps:"Ловушки: «on Saturdays we close at five» (а спрашивают про будни), «seventy-three… but the best bus is thirty-seven», «it isn't on the ground floor»."},
+ {id:"form", audio:"audio/renting-flat.mp3", kind:"form", name:"Задание 3. Exam practice: renting a flat",
+  instr:"Complete the form below. Write <b>ONE WORD AND/OR A NUMBER</b> for each answer.",
+  tip:"Как в настоящем IELTS Part 1: разговор по телефону, личная информация и слова из Unit 1. Осторожно: Дэниел иногда передумывает!",
+  title:"HOMEFINDER RENTALS — Client details",
+  example:{label:"Looking for:", answer:"a flat to rent"},
+  rows:[
+   {label:"First name:", pre:"Daniel", fixed:true},
+   {q:1,  label:"Surname:", ans:["carter"]},
+   {q:2,  label:"Phone number:", pre:"07700", ans:["914382"], mode:"num"},
+   {q:3,  label:"Occupation:", ans:["engineer","an engineer"]},
+   {q:4,  label:"Preferred area: the", ans:["suburbs","suburb"]},
+   {q:5,  label:"Would like to be near the", ans:["coast"]},
+   {q:6,  label:"Number of bedrooms:", ans:["2","two"]},
+   {q:7,  label:"Maximum rent:", pre:"£", post:"per month", ans:["850"], mode:"num"},
+   {q:8,  label:"The area must be", ans:["safe"]},
+   {q:9,  label:"The building must not be", ans:["run-down","rundown","run down"]},
+   {q:10, label:"Can move in from: 1st", ans:["december","dec"]}
+  ],
+  who:{A:"Sarah",B:"Daniel"},
+  script:[
+   ["A","Good afternoon, Homefinder Rentals, Sarah speaking. How can I help you?"],
+   ["B","Hi. I'm moving to Westport next month, and I want to rent a flat."],
+   ["A","No problem. I'll just take some details. What's your name, please?"],
+   ["B","Daniel [[Carter]]."],
+   ["A","Can you spell your surname for me?"],
+   ["B","Sure. C, A, R, T, E, R."],
+   ["A","Thank you. And can I have a phone number?"],
+   ["B","Yes. It's oh, seven, seven, double oh... [[nine, one, four, three, eight, two]]."],
+   ["A","Great. And what do you do, Daniel?"],
+   ["B","I'm an [[engineer]]. I'm starting a new job at the port."],
+   ["A","Lovely. So, where in Westport would you like to live? A lot of our clients want the city centre."],
+   ["B","Hmm, the centre is very crowded and noisy. I'd prefer to live in the [[suburbs]]."],
+   ["A","OK. Is there anything you'd like to be near? Some people like woodland, for walking."],
+   ["B","Woodland is nice, but for me the [[coast]] is more important. I love swimming in the sea."],
+   ["A","And how many bedrooms do you need?"],
+   ["B","Just one... oh, actually, my brother sometimes visits me. So [[two]], please."],
+   ["A","Two bedrooms. And what's the most you can pay in rent each month?"],
+   ["B","I was thinking nine hundred pounds, but no, that's too much for me. Let's say [[eight hundred and fifty]]."],
+   ["A","Eight hundred and fifty. Fine. Is anything else important for you?"],
+   ["B","Yes. I don't want to live in a rough neighbourhood. The area must be [[safe]]."],
+   ["A","Of course. Some of our cheaper flats are in quite old buildings. Is that OK?"],
+   ["B","Old is fine. But please, not [[run-down]]. I don't want a building in bad condition."],
+   ["A","I understand. And when can you move in?"],
+   ["B","From the first of [[December]]."],
+   ["A","Perfect. I'll email you some flats tomorrow. Thank you, Daniel."],
+   ["B","Thanks a lot. Bye!"]
+  ],
+  traps:"Ловушки: «woodland… but the coast», «just one… so two», «nine hundred… no… eight hundred and fifty». В IELTS правильный ответ часто звучит ПОСЛЕ того, как человек передумал."}
+];
+
+/* ============ УЧЕБНИК: Mindset, Unit 6 (Track 11, 12) ============ */
+/* Ключи: впиши правильные ответы — тогда включится автопроверка. Пока пусто, ответы просто уходят учителю. */
+const TB_KEY = {
+  ex07: ["10am","6pm","8pm","Wednesday","Thursday","635","729","£2.00","£3.50"],
+  ex08: {1:"Gadzen", 2:"WT3 5BX", 3:"Thursday|Thursdays", 4:"2|two", 5:"15|fifteen|15 minutes|fifteen minutes"},
+  ex10: {1:"F", 2:"C", 3:"A", 4:"E", 5:"B", 6:"D"}
+};
+const TB = {
+  sc11:"https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A715141990&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false",
+  sc12:"https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A715141975&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false",
+  ex07:["7am","10am","6pm","8pm","Tuesday","Wednesday","Thursday","356","635","790","729","£2.00","£2.50","£3.00","£3.50","£15.00"],
+  ex08:[
+    {q:1,label:"Name of architect who designed Northfields:",pre:"John"},
+    {q:2,label:"Address and postcode:",pre:"Forest Drive,"},
+    {label:"Opening hours:",pre:"10am to 6pm",fixed:true},
+    {q:3,label:"Late night shopping until 8pm on"},
+    {label:"By car:",pre:"free car park",fixed:true},
+    {q:4,label:"By bus: there are",post:"buses"},
+    {q:5,label:"Underground: from the town centre it only takes"}
+  ],
+  ex09opts:["next to","on the left of","opposite","between","on the right of"],
+  ex09key:["on the left of","on the right of","opposite","next to","between"],
+  ex10:["cinema","supermarket","Green's department store","pharmacy","book store","mobile phone shop"],
+  diag:"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCABpAqMDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7JOCCD0rN+xaICc2tjnv8i1oyf6tvpXjV67G6nzIfvnHPvXznEGbxy1QbgpXO/A4R4htKVrHqbWehnpb2I/4AtH2PRf8AnjZ/98rXkZdwOJG/OlR3PG9sj3r5iPGcf+fCPS/siX85639i0X/njZ/98rUqaXpbruSztmHqEFeQeY6kncxx79a9S8Hy/wDFO2vrt617GTcQ0swrOnOmo2Rx4zBTw0VLmuXv7I07/nyg/wC/YoOk6b/z5W//AH7FWTLjjNN833r6T2uGvbT7jz71O5ANI03/AJ8bf/v2KP7I03/nxt/+/Y/wqyJgKR59qFtvQZxQquGvbT7hOVRdSv8A2Rpv/Pjb/wDfsUf2Rpv/AD42/wD37FfJ+r/tlXFhql3ZDwZE/kTPEG+0n5tpIz09q7n4BftGTfE7xu3hyTw2mnAWzz+aJ933ccY/GtpQppXcUHtJ9z3f+ydNH/Ljbf8AfsUf2Tp3/Pjb/wDfsVYMopyyjFYqrhn2C8+5V/sjTf8Anxt/+/Yo/sjTf+fG2/79irJmFAlBoVTDN20C8+5W/snTf+fG2/79io5tP0eEAzWtpGD03IorRByM1x3xRbFha8/8tD/KscxrU8JhZV1FOxrh4yq1FC+5tG30D/nnYf8AfK0eRoB/5Z2H/fK15EWO75TTlJKnc1fFx4vu/wCCj2P7Jf8AOz1z7PoP/POx/wC+VpYrTQ5XCRw2TsegCrmvIGbCnDE1u+A5MeIbTJz97+VbYTipYivGk6SSb3IrZW6cHPneh6V/ZGm/8+Nv/wB+xR/ZGmf8+Fv/AN+xVky46UCavsva4W9kkeLefcrHR9MP/Lhbf9+xSf2RpgH/AB4W/wD37FWGmxR5xpe1wu2gXn3K39jaX/z4W3/fsUp0fTCP+PC3/wC/YqxJPtUHHWvkDxh+1z4i0PxZqujReGNOlSxu5IA7Stlgpxk1rTWHqXUUg5p9z62/sbTO1hbD/tmKP7F0r/oH2v8A37FfN/wC/aX1r4j/ABItPC974fsrKGeOVzLHIxYFFJ719MCc9wKVR4ak7SS+4E5vqV/7F0v/AKB1r/37FJ/Yul/9A61/79irXnHGaGuAorN1cInsvuHep3Kv9i6X/wBA61/79il/sXSu+nW3/fsVcSUNgDrUh6VvThQqK8Yr7ieea6mQ9hoCMVa2sVI6gquaaLPw9/zwsPyWvNvGLkeJLxQSMv0rIDsucscdvavh8VxTChWlT9itHY92llUqkFLnep7D9i8Pf8+9h+S0n2Pw7/zw0/8AJa8fDnrvNHmnpuNYPjCCf8BGiyd/8/GezRaXosy7orKzceqoDT/7F0r/AKB1r/37Fc58NJ8aNKMf8tT/ACrqWuMDrmvq8FmGEr0I1JRSb8jxa9OdKo4X2If7F0r/AKB1r/37FJ/Yulf9A61/79ip/tYrh/jp4/uvh78NdR8V2dlFeS2jRARSMVU7nC9R9a7Y1sJKSikrvyMrz7nZf2LpX/QOtv8Av2KP7G0v/oHW2f8ArmK+Nh+2d4nMLTr4LsDCjBWcSvtBPQE+tfQn7OXxRvfij4Il1++06GxkS6aARxMWGABzz9a2qww9Jc0or7hc0+56J/Yul/8AQPtf+/Ypf7F0v/oHW3/fsVZMxpPPPrXP9YwfZfcO9TuV/wCxdL/6B9t/37FIdF0rvp9t/wB8CrDXGOtC3Ck80vbYK9rL7hc0+5XGjaV1GnWwI6HyxV5U2jtUZmA6CpI33jOK6aU6HN7iJlzPdjhS0jHAzULTgHGK0q4inSdpOwkmyeioRNntik8/2rN46gt5D5WT0VD53tTWuMEfL1pfX6H8wcjLFFfKXif9ri50jxlqPhyDwV9sktLuS2QpcHdJtJGcY9q3fgp+04fiL8QrTwo3hcaf58crmXz9xUopbGMe1dLqJR5uhNj6QoqBZw3ajzxnpXP9eob8xXKyeioTNjtQZwP4f1oeNoL7QcrJqKhExP8ADSG4AOMUPHUV1DlZPRUPnjpikM/zBQKf12je3MLlZPRQBxUcsmzHGa3nUjBc0thElFQib1FJ5/8As1h9co7XK5WT0VD5/wDs1HPdeXC8mzO1S35Cj67R25g5WWqK+V7z9rOeHVrjT4PBhneGV0GycksFJycY9s11nwV/aGf4i+OE8Nnw4tiHgkl83z9xG0ZxiuhzSV2Kx75RUIm4zilEw9K5/rtH+YfKyWiovN9qQTqaf1yj/MHKyaiofPHpmjzhjOKX12he3MHKyU9KqXHQ1KZ+OlVJ5sjpR9do/wAwuVlK871kXdaty4bisq7rohNTV4isZj/eNFD/AHjRVAejyf6tvpXjF8M3cxx/Gc/nXs8n+rb6V4zecXU2f7x/nXwPHN+Sl8z3ck+KQukfZG1GIXiu8JYBlTg81f8AGGn22m6ssNmrLGYww3NkgnNY9uVS6iZiQA4J+ma2PGF9b6hqvm2zFoxEq5xjkda+MoTpvAVE0ua6t3PWqKf1iNtrMxeSpNeoeED/AMU9a/7teY/dB9q9O8Hrjw9a/wC7Xbw05fWZW7HHm6/dL1NY80L0oPtTJZYoQvmyIm4hV3HGT6V9tDmcmeBfQc3Wklb9030NLxnB602df3TfQ0QlLn0B6o/JjxW+7xPqh9LybH/fZr3P9g0/8XmkPpp0v8xXhXilQPE+qjI/4/Jv/QzXuX7BTf8AF6ZF9NNl/mK+lxH8F+hitz7496FpueaVa+YjzXNwanIelI45pUGKKfNzA9i1F9wVx/xSP+gWvH/LQ/yrr4fuVyHxSH/Evtf+uh/lXo55f+yp+hpgf95iedDPmgHhTXX6LB4ecWeni3e8uLjIlkBI2H6elcgxxxiuu8LXWi2NjJLJeFb2RT84TPl+w96/OMicVXana3W/6ep9BjlLkur38jn9ctUsdVuLSNtyoxAPtV3wVx4itP8AgX8qztUERv5WgnadC2Q7cFq0fBXzeI7X/gX8jXLSS/tBcui5jar/ALs79j009aDmlbg0gIPpX38VaZ8qmBXjNNyRTye1M9qWvMCDPTNflf8AFpj/AMLO8S8kZ1Kbp/vmv1OY/LkV+WHxZ5+J/iQntqU3/oZr2Mr+KRlM9F/YlVz8f9Lzj5ba4/8ARZr9CZHWKNpZXVEXlmY4AFfnr+xGf+L/AGnD/p3uf/RZr60+Nl7rc+rWXhux1eOwtdQtpBP5ijace56VpXwcsZjI0ou2gKajG7Nvxb8XPC2hboLeZtVuvmAitj8oKjJy54H615ZqHxc8Ta/rdnawSJpllLcRIY4OXIPJy55/LFcXJ4YmOmalqJ1a3K2MzxGMYzIcAFl9sEVftfAtxba9Ywx+IbVZiguI5OCilQMA89a+po5BhKEH1l5mH1i70PrexPEQySdvJrRP3TXI/DK8vtQ8J6fc6lci4uiGWSQKFDYJGcD6V1rcKa8DCU3TUovozWTueOeMi3/CS3hH981Q0xLRr2P7dIy2+fn2jJI9BV7xkceJ7vP/AD0NVdHNgNQT+0lY27cHaeRX49irPMJbfF12+Z9nS/3denQ6LWtP0ibw02oWlnJZ7ZAsbMcmUVyRX06etdle3ekWXh25sYb43nnHMS44jFcdyQMDFa54qSqwcbXtrbuZ4BTcXva+lz0H4cL/AMSeX/rqf5V04XFcx8OT/wASSY/9NT/KunLDAr6TLnH6tT9DwcZ/HkK/TpXi37ZxA/Z58QZ7vb/+jlr2gsDXjH7aOP8AhnrXsdpLf/0ctexh+X6xG3c5Hsfn7bi0Hh65Y6jKtwbiPZZgHZIuGy59xwPxr7h/YHH/ABZ25PY6lL/IV8QRfaD4SuCbGH7P9sj3XX8attbCD2Iyfwr7g/YJyfg5MfTUpR+gr28za9jr3MofEfRB6UKpNIelKrcV81Jx5lY3vcXbt560nfNI7Y701Wy1NyTkSTEd6ntP9VVYtz1qxZnMX4162XyTrEz2JJv9WapEZena5fR6bpkt5KpZI8ZA9yB/WuUfxvYrn9xKa489x2HoVoxqSs7GuHw9WrFuCudZjimDk1yo8dWBH/HvJSDxvYjn7PJXjVM2wTa986VgcR/Kdbt4pkqkDPpXNQ+NrKWVYxbygswX866QsClb08bQrr91K5jUo1KTtNWPzB+Ipsz8atf+23EtrB/a8++aLO9BubkYrtf2Ktn/AA0LpRTJX7PdEE9x5Zrj/HC3X/C9da+wxQz3P9sT+XHNjYx3Nwc11v7F7n/hobTAwCt5F1kDpnyzX2U9MO/Q4/tH6HqOTzQQfWmoxOeaFbAr5Vzi0bjxkjg9KaSHHDAgelQ30bXFjNCkrwtIhUOnVcjrXg2ieJPEHwq8VtoPi24mvtBvZS1tfPkmMk+v8xVTqRtY9HAZbPGxkqT99aqPV97H0CD0x0rO1/XNJ0O2N3q1/BZwgZ3SvjP0HeuF+GPxBvvFfjDxHpUkVuLPT2/0aWI5LruIBP4CvLfHh1TxNFqWo6prcLrp08sENuVVXClu3f8AGvYyvL1mErXslucWYUKuXz9nWXvf5nfeLfjZp1sskPh+ye7mUuvnT5SNSFz06n9KZ8EPF+v+KfF95JrF95qLbKyQxgLGmfQf415VceB3/t+DTTr9q32mBrgyhhtHAUg89SMV0PwnsNR0XWotQ0/WolV71LOaLALOgYDj2r66tk2Fo4Z+zV5d2eRDESlOz2PqQHgVDOc1KOBiuf1/xDZ6bei2n37tu7hc8V8xmuIp4fD81R2R3UacqkrRVzUAz3pMc9a5w+MNMzjZNn/dpB4u00H5o5R/wGvk5ZvhOZe+ju+pV7fCdLUN8P8AQpz/ANM2/lWF/wAJfpZ/hlH/AAGrEGt2up2t3HbBwVhYncMdq2oZlhqtRRjK7ZE8NVgryjofnGz23/CXagbq8lsk864ImhzuB+fA47E4B9jXp/7FI/4vZCcn/jwuMfkK8ys/tR8aX32FbdpQ91/r8Fdu19344zj3xXpv7FH/ACWpc8Y06f8ApX2GIdqDfkcS1Z90px+NMYc0gJNDZJr5Nzuk7HQkOycY7Vh+J/FmheGTaLrN9HbG7lEUW7uT3PoPeto9Oa5r4h+FdH8VeH5bHVVSNFUvHOcAxN/eyacqzVjowkKMq0VXb5ettzpllikiEiOpRhkMDwRQpDc5yK+Tdf8AFviHwr4d1HwJe6g11GMGwvrebJCg9Mg5x/Kvo34WySzfD7RZZJWlke0Qs7sSScdSTR7S8tD1s1yCrl1CNeUrxk7R81vc6Rsgd6rzA4zmrLDjrVSY5B44ojN854DKc33qz7urUt1arcrbmeITPnZGWG44GTx9Kq3dfU4G/sU2YS3Mx/vGih/vGiuwk9Hk+430rxi+OL2f5SRvP869oIyMGuauPDGkyTuxhfLHJ+c18hxZl9XGU4ez6XPTyzFQw8m5dTzEsS3yr+NPQEnrXo3/AAiWin/li/8A32aB4U0cHAhkH/AzXw8eHcWo3uj2Hm1G+zPOWwuc16b4RYnw7bEdhioT4S0jvC5/4Ga1rOzis7VIIAVROmTmvUyjKq+Dquc2tUcOPxtPEQUYo5f4i/ELQvBNkr3sjXN/LkW1hAN00zegHYe5r588V6hr/jC//tTxXfXNoCS1jYWUhC2YHO8kdWHHPNep/HTQtLtUh1a10+BNRuJCslyB+8YY6buuK8sN9Z2Non9ozCLcS0auCxwBz68V9O8a6FN+xXvdX/kduT5ZSrpTqa3+47b4dfFq/wDD7xaF8QZGnt87LfXUXKn0WYD7p/2un869zhu7e7thcW0yTROmUdGDKwPcEV8v2cUdxexwTQ+dDLM3meYCVZSfu4Jx+lfSehaVp2j6XHY6XZx2lsBlYoxhVJ64FDrKpZ2tLS/Y4M0wcMPO8Nnf8D8q/FZP/CWasMEn7ZL1P+21e2/sHME+Nrqw+9p0v9K8T8bAp4y1f2vpx/4+a9m/YUk/4vco/wCofN/Svoq/8B+h4y3Pv4nBz2p4dTiMsN2M4rlfiR4us/BvhmbV7yN5MfJHGgzvc9B7dOtfP/w/+KNunje78V+LdW1ASOpjhs7ZCYgnYH6V8pCbjKzPo8u4fxWPw08TTXux/F9j6ockEU9Txk1514P+L3hTxV4hg0TThefapwxTzIdq/KCTz+FeihT0J4NXDm5jy8Vha2FlyVo8r8y1B9yuP+KhIsLXB/5aHj8K7CHhKpa5p9pfwot1EJAhyuTjFexmeHliMulTju0c+FqqlWU30PGA/wA3C/WnFuMBh9K9N/4RvR84Nmn/AH0aaPDWils/ZB+DGvzR8P4hS+JH0Czal2Z5nkAADmtnwSSviS2w2fvfyNdq3hzRQCDaA/iafY6HptpOLi3g2Sr907jxW9DIq9CtGbktCKuaUqlNxSepqOxY9KRKMkR/MM1wHxS8V+LfD9/aReG/DDavHLGWkcZ+Q56cV9U1aV7nl4XDTxNRUoWu+7sdTrfiPRdHu7S11TUoLSa7k8u3SRuZD6D/ABrUBB5U18sfF7xB4s8Q6Ms3iLwR/Z32Y5ivd5DRk9vf6V6j+zX4k8R694XePWraRoLYiO3vH4Mw9PfHrUv4tD3sdw3PCZesXzLezV0/uPVJDhCOvpX5ZfFcj/hZviTkY/tKf/0M1+p8oVUIFflX8WOPiZ4jB/6CU3/oZr28qVpSPk6jPSP2Jwf+F/6bz/y63B/DyzX1P8b2tj4z0RL7TrjUIDbyboYE3OeeCBkV8tfsRsB8fdNLd7S4x/37NfVXxjM58eaEbbUYdPl+zyBZ5QCq+xzXq4Rf8KcX5Mxm/wB0zzGQaS2j6sy6HepcCdvs9wIwEt0wvyMd3B69j1FaKJoK61aEeFdUNt9nPmQGH52bHDgbuR7579KhlN8PDviHOvWJg+1N59uFG6dvl+dT6Hjj2NasUmrDxHYhfFGniY2h8u48pdiLxlCM9a+ymkcKTue1/B/B8D6WUjaNMPtVhgqNx4NdwR8pFcT8ISW8FaaWlErYbc69GO48iu2FfFUvjmvNnos8Z8Z8+JL0seFk5rKGAetetanoGk3N5JNPbbpHOWOTzVVPDGif8+f/AI8a/LMfkVWeKnJSWrPpqGa04U1FpnmB24pAW+6H4r1M+F9D6/ZD/wB9Gk/4RrQ+n2X/AMeNcs8gr/zI2Wc0uzKHw6B/saZQOPNP8q6XbxUOnWNrp8TR2cflqxyRnPNWB1zX0mGoexoxhJ6o8LEVFVqua6iFMCvGf2zcf8M968f+mlv/AOjlr2dzxXjH7Z//ACb3r47eZb5/7+rXp4ZR9vD1MHsfn1Ebb/hHpf8ATJPtf2hNtqc7GXa2W9MjgfjX3L+wMf8Aizk//YSk/kK+H4RcnwjcAWUBtRepuucDeG2NhB7EZP4V9v8A7BDD/hTc4HGNSk/kK97NLewZjH4j6IbnihQB6UgbAyOaz9a1vSdGtjcapfwWqD/no+CfoOpr5v2fPNKCuzc0WUEZ602NcZ4wO1eOeLvjrptqkkXh+za7fyyyzzfIn3tvTqa9T8L38mpeHrC9mIMs0Cu+0YGSM11V8vq4eMZ1Va5CaZp7frVm0GI/xqvu5qey/wBWfrW+Wpe30FLYyfH5x4Vu/wDgH/oa15MSPp616z4+/wCRVu/+Af8Aoa15Ix2n+VfH8bpPGw9D6LIv4UvUXazHai5PtRhgMMD+Vdf4OsJLWzXVfsxmmlkWOFcZ2gnljWd8QoZIvEkz+WVR1XaccHjmvEr5RKlg1iZPqtPJndTxinXdJL5mRYkfbIOn+sX+deuKuUGa8fsWxeQ5/wCei/zr18ONoX3ru4eUfePOzr4on5h/E42afG/xANSM62v9rzeaYPv43Hp712H7GJT/AIaG0YIDsMV0AW648putcx8Q2vE/aB1pbAwC5/tqXy/OA2btxxn2rpf2OnZP2jdHWTG/F0Gx0z5TdK/VqiTw79D537R+iartyKaOuTQz8Ck3gEDHWvkG47HQTEArkV4p8YvBvxH8V6ndWenXGmNobhTFFNtDKwHJB2kjn3rofiX8V9M8MSnR9LhOra66nZbRN8sXvI38I9q838OfF/xbod+0/ihYtX0uZsytaJ+8syT0A/iUfnXb9UlKK6N7LqelleIxOCqfWaME2u6vY6r9n/4c+IvBOp6nPrZtNt1CqR+TKWOQe/ArhNeFmLbXzJo9zNdfbXEd6qAxx/N0Jz/Svozw3r+keItMj1LRb2G8tJPuyRnofQjsa+d9fa6Wy8Q7dbhgiF85azKrvk+bqD1r6nhaHJKcXoedn2ZVsxrvEVvifYJzo48SWWPCN+LY2b+ZamEeY7AjEgG7oPrVzwUNO+32Mg0S7Sc6qvl3flgIi7uEJz17dKZcSXx8Waew8V2TO1i+26KLtiX+4R0yas+B5bhry2Vtatni/tgZtgq7pDu++D1wa+sxFvZM8CLfOj6ZQHAzXnHxHIGvrx0iBr0la8z+I5/4qAD/AKZCvynjP/kXfNH1GTL/AGn5HNqdzZpykjtxTUwTgnANd1cSLqenyxaRcwMkMGHiaL5jgdQa/O8uy+OLjN81mtl1Z9DicT7JpW3OI3HPSuh8HkbNQPpbNXP85Kt2rb8JkiLU/wDr2f8AlVZOrY2HqZY/XDyPgXNt/wAJVe/a7aa5iL3HywZ3Z+bB+gOCfavWP2JRu+M5bGdumzn/ANBryfTnkj8UXjRaglix+0/vWGc5Vsr/AMC6fjXrn7EeF+MFwT20ub/0JK/ZsT/Al6HyC3PuAEAE+tBIAweKwPGHizRPC2mm91e8WFDxGg5eRvRR1Jrx+4+K/jSTW01a10i2XSF4GnSNi4kj7vns3tXzVPDzqQutPU6qdKdT4Fc+gE96zfEmnW2q6Df6dfStHbXMDxyupwVUjk5+lZXgbxrofi6yM2l3BE8XE9tJ8ssLehH9a4/9pnxefDnw8mtLeXbe6qTbR4PKoR87flx+NYzjKMlCS1M51vYJz6o8N1K9+DcF7LBFD4tuljcqJEeLa+D1GTnH1r13S/jP4P8ACngzQWk03WorK4RktxIsbSLEhxvYBuh5xjnivk3TLWTUdTtrCHPm3MqxqPcnFdH8X763m8TSaTaODa6TbrYw46fIPmP4tmuz6tC1zhxXE2Y42CjiKjklsj7Y8S+MNG0XQH1ee6ikT7N9oihEirJKhGRtDEda8B8W/G3WtUeS10x4dKt8SDKOGlYBcj5j0P0FbXxBisJNb8KtqGmPqVuNCizEi5dvk4x34NcVLaaMdB1Ly9AmW5WctDP5fyxDPCt719hkmSYZUlXqLmb/AAM6+Jn8KNP4KahLqHxRtp7i7kuJmR9xeTJJ8g+tfQN3XjHgKDTYPitow03RpdMVraYyLKm0ufLbkV7Pd105koqraKsisO246mY/3jRQ/wB40V550HpB6V8vv+1z4Z0/xLqOj6/4c1G2+yXUluZ7aRZVO1iucHBHSvqCvyc8eSWi/EvxAb+KaSH+0rkMImCsDvb1BrGtQhWVpDUrH6CeF/2g/hL4gKx23i62s5W/5Z3ytAQfqw2/rXo9jqmm6jCJdP1C0vI2GQ9vMsgP4qTX5Nw22mTrbJHqTQSMrGY3EeEQjoARknP0q/4fXxFY3FnNoGqyw3Nzv8tbS7KSDb1zgjHtXn1Msi17si1PufrAGOKQsecV+bPhv49fGPw4sRXxLe3kBJCLfx+crY6jcef1r03w5+2T4jiZIvEHhewvAMBntpGiY++DkVyVcsrJe7qWpJnrHx4+JXh7+1n8MyQaiLvT5syusSlDlc/Lz7+lec6foeo/E9Xg8LXIgk05Gac3f7oOjjGBtBz0rt/Dn7U/wp1eRf7X0y60y4f7zzWqyLn/AHhmvUfDHxL+GWsLnRPEujbnGCgkWNvxBxXE8JVpatM6sNmOLw75YtWXkfOFr440a2uVDpfyGOTcVES7SwPJBzn1r6h+HPjGw8a+HBq2lwXMMKSGHE4AYlep4JratbfSbmIPbw2UwPIZEVgfxFWoo4ol2QxJGueiqFGfwrNQsZVcViMQ/wB61byVj8o/iBx431zJz/xMJ/8A0Ya9f/YZP/F8IPexm/pXj/j9D/wnGu56/wBoT/8Aow169+wvgfHG3z1NlN/SvqK/+7v0OaKVz721rS7PWNMm0/UbeO4tpkKujjORXk/gX4W6p4W8fXEUcVjfeGLhC/8ApKhpEbso75Hr6V7OacDkc8V8pCCerPXwma4nC0p0acvdnuv19TOtND0m0uluLbTLSCVPuukQBGfetLngZpG6daVOtVSj71rnBUnKesnf1LcH3K8X/a98f+Ifh14G0zWvDk8cVy+oLE4kjDq6lWOCD9K9oh+5Xz/+3ZbyXHwsskj0afUz9uHEJbMXyNh/lBzj0NfW0knTSexyt6nk3hb9sfU4WWPxR4VgulH3pLKUxt9drZH8q9b8I/tP/CrXNsd1qd1okzfw38BCg/7y5H54r4N+zaQ91bQzyX2mlkIuXmj3gP22qOcVBHpZnitjbX1pJJPOYVg3YcejEHoD61yVMuoTd7WLVR2P1P8AD/ifw94iiEuha5p2qJjJNrcpJj6gHIrXB5x0r8mxb65o93cSQfabaW0kCSyWzkbG/wB5TXdeFPj18VvC5WK38V3dxCnHkXy+eCPT5vm/WuKrk7bvGRSqH6WMTjGc00HgjFfGHhT9sfW4FWPxJ4XtLte8tpKYj+RyP1r1rwr+1L8MdXVFvry60iZuq3UJKg/7y5FcVXL68dbFKSO++JXw/t/HFxpv23UrmG3tJd81sh+SYeh9D711um2VpptnDYWUSQwQoFSNBgACsnw5418K6/Es2ka/pt5uHyiOdcn8OtbhdQdxxz0IrmqU+RrmOipi61SlGjKXux2Q4ggc81+V/wAXOfif4k6c6lN/6Ga/VCV/kAr8rviuB/wsvxIxPP8AaU/H/AzXsZVbmlY4pruejfsTc/H3TR1xa3H/AKLNfU/xr8o+NtBSfTJNSjNvJm2jALPz2z6V8tfsQ/8AJe9NPf7LcY/79mvqj4yPKfHegpFqS6W/2eXF0yqQvPTDcV62Dt/aUb9jOov3bseaSxWf9i6yx8N3CSfaCYrgqAtqPl+RueMcj8a0Iv7NXXbMHwRfFDbnfZ+WNznj94Bnkf41Uma4PhzX/wDio4pF+1P5luETNyQV+cHqAfb0rfTQvF39pRXreIrZ7mKzLJJ5IBVOPlxtwfrX2VS1jz09T2b4OKq+CNNCx+UmH2xkYKfMePwruecVwvwXkeXwDpLy4MjIxJHfLGu7HSviqKXPU9Wek9kUbgZmNMAxUlwf3xqLf2xXzGL5fas6I7Ck5ppXvS5ozXPUUbjHAcUzqaexyNtRkkHbj8aJqOgt2MuJoYFXzpUj3sFXcwGSegrx79swf8Y8+IMc/Pb9/wDpsldZ8ZPBU/jHw/Gllez2l/Zv51sVchWcdMj+vavD/HvjabXvhPrXgPxpbSRa1bmJTuJXzwsinP14z71tSnGFWM3sj2sHklTMKKlhpc0r2ceq7P0PjqL7KPD8uLuZbs3S4t/4Cm05Y+4OB+Nfcf7ArZ+D10D/ANBOT+Qr4t1mKa30q8t4bGBbJNRCibjzAwVsJnrjGT+FfaP7Ah/4s9dcY/4mUn8hXv5i1LD3PDnRlRqunLdO33Hr3xP8TX/hjRra506xgu57mcW4SWQp1B5BHevmfXNG8barqd2l7Abi5hAmlVrjcY0ySD9P8K93/aGYL4b0pmuGt0GoJulH/LP5T834V5Us9gdY1PPjS4Cm2Gy43DNwefkPH+c17nDuHoxoKqo6s4sTVkpWRxi+FPEv2K1uBZo0V5+6t3WT/WFn3AAduhHPpX0z8Gda1XUdHutM1bTYbGfSmjt9scu8sCuct6GvEIpLEaPoif8ACUzq4uFLwbh/oXJ+YfT+tew/AqRZT4hKag+oqLmLFyxyZP3ftV8TQjUw6m1qhYWT5rHpo6VZsv8AVn61WFWbL7jH1NfIZb/HO2exk+Psf8Ird5/2P/Q1ryKTk4FesfEiaG38G309xKkMSBCzu2APnXqa8VPiDQz/AMxexH/bdf8AGvk+NKM54yDjFvTsfQ5HKKpSu+p0Nnq+p2ghWG8lRIyDsBOD7U7X9Vn1i9a6mOxQMLHnIWuaPiLQgSP7YsM/9fC/41MNY0k263A1G0aFm2bxMuN3p1618tOeNlT9k1Ll7anqxhQU+fS5p2WPtkGePnX+deu7fun3rwW88WaDYQy3K6rYyPbqZAn2hcsVGcfjWD4f/bB8HTr5etaFqllIOC0W2VePyP6V9Fw3gK8lOXIzxs5nFyjZnzH8Wms4/jz4ha/SWS1GsSeakJ+crnnHvXS/seCP/honQmiLbGNzgN1A8p8ZrhfG+qXHiDx5rfi/R/Mt7ebUGnjkZgrpub5fxrf+BHiGD4f/ABp0rX9fYvZwStHPPCfMVfMjYBsjr1z+Br9NnFui4+R891P0w4z8ozWf4g0+TVdJmso9QurAyDBmtmCuB3wSOKsade2t7YQ3tpMk0E8ayRyIcq6kZBFRarqljpdk93qV1Da26kBpZWCqM8Dmvj5S9nK6WqOhWSPlq60m10TULi0shJkTOGZwWeUhj8zttOT+IpzQRwhhGzxIxOW64wCRjg9/al8Ranpl1q195F5prI88jCRnXd97qDjP5GuV8MQ32lXF1NrVhHYwvtEH2pNqzj5vm+YEE8g9PSid60o1JvVbn2uHrUoUZKLXlqux7T8CPDUD6rfa5Z3t5YupUSQwviKdSWwXQjGcAcgCuO1wMYfER/sTz8XsmNR3r+5+bp0z/wDrruvgRr2iWxvbFtSsI7i4dBDAko+YkscAD61wevl/sXiNf7bEK/bZA1gNuZOeoPWvtuFq0qvO5anw+c8ntnyPTyJ7k48Taen/AAhJVfsjhrLcuZv+mnTHHTmr3gREF9aY8OeTjVlAu8jEfzf6vpnjpxUTW+rXfizT49O8TRXV39jkxcFFIiXvHgDr/jV/w3Ya9pmpaO0+qRy2Vzqw3QIuPn3HJyR7V9XiZL2TXkeJD40fSyHjrXmnxHXOvgj/AJ4j+Zr0pK8u+J17aQeI0jmu4Y3MIwrSAE8ntX5XxlByy+yV9UfU5O0sR8jGt5VhmjkKK/lsGIbocHoa3x4itYbWZNP02O0kmUhnDZP4VzkSSSoGiRpFbuozTxb3AP8AqJMf7pr81w2LxOGTjTVr+R9HVpUajTm/xGnqSScVueFziz1Zh/DaP/I1kfZ525EMuf8AdNauhrLBp2su0bLizfG4Y52murKOZY2m2upz49xdCVmfAukpLN4gvBHpyag2y4YxseFGGy//AAHr+FevfsSo8nxYvBG/luNKmw2M4yyc145phjk1i8ebUHsMxzEPHn5jg4Tjsele1/sObV+KOpSMQNukyEk9B86V+xYl2oS9D5HqemePNDbTvGs8+qarJqd2QGS4uwoEYI+6i5UKP1rKeJnVL8nL7d+F6E7ePw/Gul+LE9vceL5ZI54plCKPlkBHT2YV5fc3N8PGsVsrXfkgqfM81vKA8ogjHT7xHOa+QqSqYlK8rNX+4+3y5wp07eS7bnaeGdD/ALV8Y2TWOpS6bfk5N3Z7QwI6qwDMGH1rlf2ub68g8ZWdneXj3KWmnRlW2hcsxO5sDgZ4r0H4bTW0XjKzlkmhhQZzucDJx1+8f6V5v+17FHe/EsoJAyNp0RUqeD1xXZh6zqzUZapHyfEKhZPvucz8DRps/iS41i/uhb2+mWctx5jRlzGwG0HaOTgnNMu9C8CztLLN8SBvcszOdGmOSeSetQfDCNLfQvFSrwV0Vx9TvXNcSZkd5YF+8q5P416MrbJHymiWiuj678Zwunifwrb6XqsVs6aIojupYwQyhOu0+ori7hb9fC+tO2tW5txdMJ4fLUNK2R8wPUDvXS+PV09vEPhi31PT5r+2GgxZhjj3nO3jj2riLmHRR4f1GRdHuPtvnlbe4EXyRpnhCexxxivu8q1wcPQ6q2szvPDKXifFfQP7S1CG/lNtP5TRIFEa+W3Bx1r1m7rxj4ew6XH8UtI/srTJ9Oj+zTGSOaMoXPlnkZ617Pd1w5l/FXodeF+AzH+8aKH+8aK846T0mvMPGPwU+GnimeafVPC1kLiRizTQr5bknvkd69PqrJjea87MJyhFOLsVFXZ8w+Kv2O/Bd9vfQ9Z1PS3P3VciVB+fP615b4k/Y98d6eGk0TWtL1JVOVVi0Ln88j9a+7yARUZxu5rz1ja0OtzTkTPzM1n4SfGTwpIklx4W1nZbZKSW6/aI1z1I25xXEPdXNjPb22q6TGxt5Gd454TG756hjwcV+tpxjBNY+v8Ahfw7r8DQ61oWmalGw5F1apJ+rDiupZnb4kTyM/KSJ9HkSFZ4bq3YzMZniYOBGegVT3H1ohsbWcwfZtWhillmKbZgybF7MzDI/Kv0J8T/ALMfwh1re6aBLpUrfx2FyyAH/dOV/SvK/E/7F9q5eTw54yljb+CO+twwH/Al/wAK6YY+hLd2JcWfNnh7xF8QdAVLnQNb1RIvPNvG1rdFw7jsFBJI/Dmu90T9p34taNugub+C9KZUrd24LA+54Oal8Sfss/FjRJDNYWlrqipyr2dyN31AODXm3iXwz418MCOHxVomrW1ok/mMlwjBGY9fmPcjvW1qFXazFeSKGsRtJqN7Pri3S6vcTrOYolUqVkG9icdGwRx+ddD8MvF03w/8YR+MPDzxNHbSiFrW5cea8TD5uAMfiOldp+zr4z8KfDn4lalf+LtKeO2vbMGwlKeebZXIYfXK8Z68Vy/xF8RaNrvjzxX4n0HQYk0a6UxRqUVQrtgCTb2JIJ4q37zcGtB+Z+gHgT4keD/GGkWl3pXiHTXmniV2tTcoJYyRyrKTnIrs1bKhs5B6EV+S1jp5lFm1tqFr9ouGZPLMmxosdCxOAAfrXWeGPHXxQ8MRQT6F4j1y2t3cxxItw0sTsvUBWyD+VeVPKFq4yNefTU/T89KVTzXwN4b/AGsPifpbCPVodM1hF4PnW/lP+aY/lXqXhb9sfQJzHH4h8L31kx+9JayrMn5HBrk/s2tGVw5j6yt+Y6ZfRrJFtdVYehGRXPfDDxtoPj/wwmv+HZpJbJ5GjzJGUYMOowa6S5OI69qa5cO0+xl1OG8UfDrwR4kRl1rwxpt2T/GYArD8RXkvif8AZM+HOqvJJpcmo6NIegil3oPwavocgU0HDV899Zq05e7I25Uz4i8U/sheNtP80+HPEtlfwNz5UxaFmx0z1BNeb+K/hp8XtBvbi51vwfdX4e38hp0tluUC9iCmcEY69a/SdhxyKgcZYLjg11rNakGlLUn2aPygkfTo5LS11HSJrYwZW58qRllkPYkNkAj6VW+zadLZrJHqEkdw9xtaKWL5Uj7OXB59xiv1N8S+DPCniOPy9f8ADmlakCMZuLVGYfRsZH515J4u/ZW+Furs8unWt/ocz9DaXBZB/wABfP6YrshmtL7WhLgz4Z+wahZvdzabqcEyWZBa4trnZkHoVDbWP4Cuw0P4s/FfwbJHAuv6rbjYHSK9BZWU9DhxyK9a8W/sc+ILYNL4b8T2N/GOkVzEYX+mRkV5hrnwi+MvhFp5ZdD1IxtCYXltW85GjPVflzxXWqmHrdUyLSiz0Lwx+2B4ts4Vj13QtO1MDI8yMmJz78cfpXg3iWRtZ1jUPEF/LFZT3l2ZvsrKxfa5zuHGCBn15qtqEt4kVnp2q6clitoxUyLaCOZgTk7mwC5HbNevfs4x/Dq8+I2qN8R5kngFuP7O/tb7jD1bPGduMCn7OnQTnFfcPWRyvwV8Tf8ACtfiJa+MY7c6ppNpKbWaZBtwJEPY8g4zjPXBr77udC8G/EewsNakK6jC0AaB4psYVucEDvX59fEiDwVF8SvEyeGFll8NIH+xGIsUWUp8uD/d8zIGe1c5ob+J7I2txot1qED3DFYTaXLK7EdRhTmoqUZTnGrTlyyDS1mfo+PhD4G+4umSjgj/AF7Z5rpV8M6STkwscRmLPmH7p7V+eHh345/GDw6oFv4u1KWHcV2XqidSR1Hzgn8jXoPh/wDbA8d2ZC6zo+j6pGOrIjQM35Ej9Kxq/wBodKlxKFPsfcPhrSrLRbG30zT4zHbwKQgLFsc561udBXzV8HP2otH8ceMNL8MXHhq90++v5fKidJlkjBwTyeDjj0r6UPStsJCcYvn3HIp3Ay26oVXnmpp2w5FRBua+cxPL7V3No7CuMVHk5p8h96z9afUk06Y6Slu95txEJ2Kpn1JAJxWMmnJILlXxn4q0Pwjoz6rrt8ltAoIVSfnkb+6o6kmvMfDfx30+41xrfxFo1zoemXMgSwvZjlfYSj+AmvOtctNXufFF5qfizUBquq2shUZYiC3GekSdvr1qnNaK6Tw3P79LjgpIcqwPqDwPwrrnUw1Fxptc1+v+R72GyR1aTnKVv09T6n1hbjUPDtyuk3iJNPCfs9wrZUEjhgRXyt8b/APizw34Wu/GviXXLfVEtPLR9oPmEM4UdfTNdz8C4PF+m6vLp+i6jBcaBFgzafeuzGHPUwvzgc/dPFbf7ZjY/Z618E5y9uP/ACMlL2NN1owTumRgc3xmSzkqDSfe1z4B1S4sLq0ubuOacXkl5uEJ+4I9p+b65wK+2P2Azu+EN4p/6Cb/APoIr4nlN8PBnFtbiwbUARNgeb5mw/L67cZNfa37Agx8I70g9dSf/wBBFexmSUcPZeR4cqrq1XOW7dz0T4+K7eHtLEcccj/2imEf7rHB4NeZNHqv9vauB4YsPNNmPMhMo2wjn5lOOT/hXpf7QRQeGtN8yZ4IjfpvlQkMgwckEdxXkQGif25qZPizVBELYeVcfaW3ztz8jHHI/wAa+k4fs8HE4MT8ZJA+ojQ/DhOgWRjNwgt5vMG66bJAVhjIB969d+CDSmfxELmzis5hcxb4ImBVPk7EV4ojaSdH0NH8RaiXWdftMSzsBajJ5QDoR6ivY/gI1rJJ4kazvri+gF1EFuJ3LO/7vuTRxDb6oxYZe+ep4GKsWf8AqvxqseFNWbPiLH418Xlv8c757FDxfoWl+JvDl5oWtWwurC7ULNETgMAwI6e4FeB+JP2TPh5qId9LutV0qQ5wI596j8GzX0dOcRNVE5LV0ZlXnSqrlYoXsfFfif8AY68Twb38P+KrG7A6JdI0bfmMivNdc+BHxo8Ngsvh69uYoX8xXsZhMAw/iCg5z+Ffo8fTFNIyOlcizacZWkkyuVvqflPqsniHSXFrrmkywstx57reWpRnbuCSAcH0rJnuLK5RlWyW2mlud3mK52Ih/h2+x5zX6xalpthqNu0GoWNteRMMFJ4lkU/gQa8a+NfwJ+HWs+CtXvbLQ9N0PUYbZpoby2j8pUZRn5lX5SDjHTvXXSzem5qDja5MqcrHy18BvBPhr4hfFGXQvE2swLZWdriAWrCIXRXgYP6+tZHxU8NeH/CfxM8QeDtK11pNDiiaYMXDfvkiLpGT3IY7fxrhpL+G4Utel0uLeARWz2saoDg8F+n59a6XwL4R1/xzqV1oXgXTJr77RBGbya5jQGIg5Pz8hASPXJxXq25Zc7loQjT8EfG34n+DtLt4NM1q4OmxDZBHcR+ZGAP4Rn+Vd7P+1Hf+IdEk0Hxz4WstWsJmVpPs0jQOSpBHqOorgNa+FHxf8JGOSfw9qyxWrmSNoB5sat/eGMiuMnuL22mgi1jRoXWK4M0izwGJ5c9VZxhsfyrGWHoVdbIL6WPovwt47/Zw1IoNU0HWdIlHOXcyoD9VOf0r3O/1T4JfFG006zk8S6ZefYk228TXnkyKCAMYbBPQV+fG/R5I1DwXVq7XBLtG4dVi7KqnBJHqTzTorG0nWP7LqcG+S4MSpMDGVXs7H7oH41z1Mrpz1TaFGMUrWP0i8PfBnwBpWqWms6ZpzrPbOJYZFnZhkdPrWhf/AAv8HXd7JdyWD+bKxd8StyT1r87ND8QfEDwypn0DxBq1rCtwbdTZ3rGNnHYAHBr0Hw/+0/8AFzRJBHqF7a6okZ2sl9aAMcdiy7TmphhMTh1+4nYfJT2sfbOhfDrwtpN+t5Y2TRyKCMmRjweDWv8A8Ipopksz9nbbaz+fF854fJOffqa+YfC37Zdk+2PxH4QmhH8UtlcBx/3y2P516t4S/aS+Fmv3EMC61NYTSMFWO7gZOSeBnpWc62YJrnbY/Z090j3bGQK+Ev26Ukb4yRsmoR2vlaTG4V3Zd53NwuO9fdcLiSNXXlWGQfUV86ftL/s/6h8TfFcfiHT9ftrKWO1WDyZ4mKnBJzuHTr6V6lWpCELz2Ji2nofIWja98RNFZG0fWdUAWD7T/o115oSPuzBScAd89K7zw7+0r8T9KWNLq6tdQTHAurcZYfUYNQ+If2avitom97XTYtSjAIL2U4JYfQ4NcXqOmePPD0qx6zo+ooYYWgRb2081I0PUKHBA/DpWDpYaqtkyuea6n0L4Z/a4hKhfEXhTn+KSzmwD/wABb/Gu7k/aL+Ger+Gb8jULqyuGtnC281sdxYqQACMg/nXxTBeWG+JL7SY2SKNkbyJGid2PRmJyMj2Ap+mW1veXtjbWZYyv/rluCEjyDnAIPTHrWcsrw7aklYftJFjT7bVhMLuysZHju3e3icxZVy3VQTxnmvUP2VtU0jQ/iXe6X4juH08alYSaepbjbIzLwT26EZ9ak+BXwntvir/bF3c6s2lW9lLtit7Zd+1mGc4Y8KK4HXNMu9Ludd0J9QtpBoF08kcqoN0reYsZ2t1x0bGT0NdMuSqpUrkH2If2fvCeMHU9Yz/12Gf5V10Pw20OP4fSeDTNcm1kz/pBI84Zbd97HrXyZ4W/ab+ImjW8NvejT9WgiQIv2iIq+AMD5lI/UGvTPDn7XOjyhItf8MXdox4aS1lEij8Dg14NTL8Sm+qLhGEdjtz+zz4UKk/2prOT384D+lee/HjwNCfGNpDD4m0SzitdOhgWPULspKQoPzEY5zXqfh/9oH4W6wFQeIlspDgbLuMx/qRivOPjz4W1Dxt4qj8R+Ermx1q1e1SMpbXKF1K57Z5rGjGpTnaomcmMox9k+RXON0Lwqui+FfFt+df0TUkOmGPbZXBcqxcYzkDHSvHxaxwTTXJdy7rgDPAr1jx5oureEvBtl4XGm3SS3e2+1SYRHbuP+rizj+Ecn3NeYyphWARixHAx3rulUXQ8io5QaVrH1h4zW/bxl4dXTL2GyuDoUe2SZQy4CnIwa4qYaqfCWrt/a9obQXjedDsAd33Dke1dT8UFsYfFOgvrOmy3timjRq6ImSGwcdx3rhgNEfSL2FdGuFv5JyYJyhAWPPCnn09q+7ymS+pQv2OutfmPQvCyagPirox1W8gvZfsc3lvAoVUGxuCPWvVruuA8BeFtI0jxqsllBLGyWBcbpGYbmcg9fau/u68/HTU6mh14Ze6Zj/eNFD/eNFcR0HpNVZRlzVqq8n3zXnZjFOCuXDcZtwKYVzUhNNrx5xSWhomCrilxS0lEoKyQXEK8Ux1IxUtMfk1FSEVEaZGwyOlec/tHtoUfwb8RSeILeOe0W0bYjcEyniPB9d2K9JkkWNSSQMDJJOMCvhz9tT4tw+KtXi8C+HbgT6dYy7rqWI5E8/QKMdQv866cHQ55px6EyasfO9oupf2JqF1BbLJZRmKOeVgD5RYnYATyCcHp6GvY/wBnf4MSfGF7/VtW1A6bpdmVhZLaIAyPt4x247149fJbR2dnp1m1/wDbXz9vhk+VPNDkIqr3wvc92Nfo3+zJ4HPgn4SaVp86bL25T7XdDHO9+cH6DAr18ZX9lTutzNK54H4n/Y1vAHl8NeKoZcjiK8g2/qtea+If2dPjF4bYTWekm9ER3I9hcAkH1A4NfomwOcYpyj5cV5tLMqi31LcD8pdZ07xj4deCLXdDvbdLeYy7b2zIUseuSR8w/Gs5LzTpTELjTdn79nlkgk2lkP8ACB0GK/WO9s7a6iaK5toZ0YYKyIGB/OuF8S/Bf4XeImd9T8FaZ5jdZLePyXz65TFdNPM4SdpKwnBnJfsJmI/A9DAGEX9oT7Axycbu9e7XHIA9a5v4X+B9B+H/AIa/sDw5FPFYiZpVSaUyEFjk8nnFdJdHaoNdmIkpUWyY7lUim7Tmnuc44oU18xNRTN0IQcVGVJbPpUzE0ikk1FRR5guNCnFIyDNTfw1EvJ5pTtdaBcQoCCDUZiCgmp3PHH51Uv7u2s7OS5u544IYlLySSMFVAO5JrRq8kkDPLv2l/DfhLU/hHrt1r8EEH2a3M0V0saiVZB90A9eTgYr87WvnubGc3lpJduERI7gsf3IHQHHHPvXvH7XPxxi8dXI8JeFpGbQbWXM9yMj7ZKPQf3B29eteITmez0iDTrTVEuUvws1zbRJ9xwSEVj3PPQetfSYKnKnS94wk10PQfgz8LPEfxZvb6LQfK0XQYWjF5K7l18wKdoA6seSfbNdhrX7JXxH02RpNI1LTL7bypSVon/DI6/jX07+yz4Ek8CfCDTbG9i26jfE315xgh3A2of8AdUKPrmvU+d5rz8Tmc4VeWGxahdXPzW1f4S/GPw08LXHhnVZIrWQyxGJROisepAGev0ri7qTVNOkjttZ0Lb5c5lZLm2aJnJ6qTwce1frDtOM4FUL/AEbS9RjaLUNNs7tG6rNCrj8iKP7VatzRD2Z+d37LVzYzfHjwisVgIJzqbPvWQlQmxsLg+nrX6XgdK8/074TfDuz8SWfiCx8JaZZanZyeZBcW0flFW+i4B/EV6BXqUKyrQ5kZtWZUnGZTUSj5ualnbEpqNeTmvnMTb2j9TaOwP1qNhjkHHrUrrmsDx5oMviXwvdaJb6jPpslyABcw8smCDxyPT1rGdrjueCeNIvM8Wak22U/6Sw+XOCM96888L6veatq1/azySSR2wywAAPEpHGOfu4r16X9nO+cs3/CxdR3HnJt8/wDs9db43+D9lr2gaXpun6kmi3Fn/rru2tV33Py7fmwR9epqXTtZNLyPdoZ/y03F0395n/s/ITPqJ+cAouN2ckfjVb9s9QP2eteJ4/eW/wD6OWofDPwEvdF1W1v08eajKsEyyGIRFRJg5wfn6VZ/bPXH7Pmu5Yj57fn/ALbLXRh48taHqePicU8TNzcbH56sbH/hHhi4nN79pz5X/LPy9p5/3s8V9xfsAnPwjuz0/wCJlJ/6CK+JpRqH/CFx/uYBp/28kSf8tDJs6f7uP1r7Z/YCJPwjvCVODqT8/wDARXtZn/B+Zyw3PRvj4kjaFpIgVHkGooVVzhScHAPtXmqLrreJNYB0XTPN+xqZo93yRrzhl4617Z8QvCS+LtJgsjfvZeTMJg6pvJwCPUY61xA+CsonaZPF14ski7WbyTll9CfMyRXqZPmeHw+GVOpKzObEUZSndHnemxeIrjR9CS28OWzwwzCW2m8xQbjbuOH56YB/KvUfgNcXN1ceJpbyzjspheRq8Mf3VISt7R/AI07R9MsDqjStYEkSCEDf8rDpnj736VoeDfC6+HbnVphetcnULgTkGMLs4xjrzU5zmlCvh3Tg9Qw9KcZao6QgbasW2NnFVh0qzaf6v8a+ewCtXOyew645iNVcCrcozGaptndiqzRfvYipvQCBSAZpSDjPXFN7civKkry2NLicAkE182ftv/E228P+DP8AhCNMuQdW1cf6TsbmG375926D2zXTftB/H7w/8OrGfTdKuINU8RupWO3RtyW5P8UhH8u9fCWo32r+J9V1Dxjr839oYuEe7aWYI0zMeI179AeAOAK9PA4Byqe1mtEROelio63Om+HgWSzaPU/unIaVVRuv+zk/nX29+wx4QfQPhU+uXcRW61y485cjBEKjan5/Mfxr5Q+DfgC8+KnxNi0+xsBZ6WZvOu/KJKW0IP3QT37Cv0p0jTbfTNOttNs4hFb20SxRIBwqqMAV0ZriLRVJdSYLW5c2YGBxWPrfhPw1rcZj1fQtOvVbr51urH88ZrcCHuaRhg4rxHKcZaGuh434q/Zr+E+uq23Qjp0p/jtJCn6dK8q8T/sZWLqz+HPFk0LdVju4Qw/MYr652ZFAGBiun67iIbMmyZ+fHiH9lj4raGxn02K01RUO5Ta3G1/qA2P51554h8K/EXw2PK1zw7q0MST+e3n2pdC47lsHP51+piqajmgjkBV40cHqGGRXYs1qRV5RuL2aPyTkv7WUSfatMhDyXXnO8WUKr3QDoB/KtTw7/Y8uvWTQyXNs7ajF5aOA6rHuHU9civ0s8SfC34feJNx1nwho9zIw5k+zKr/99Lg15rqv7KPwzn1GK/0g6rpM8UqyKkVz5keQc9HycfjXZTzGnO11YlxZ9A6Zj+z7facjyl5/Co7oDcc1PbR+TbxxA5CKFz64FRXIzzVZir0SYrUrrgrg9BUFxbW1whSeJJkPG11DD8jVhVwKbg189LmjZo2djiPEHwr+H+u7jqfhbTndv444gjfmMV4B+0R8A/D3hfwpL4q8JmS3WykV7m3nl3KyHjC575xxX1ttJ5Ar5f8A24PHcEFha+BbKYNczsLi+Cn7iD7in3J5/Cu/CVsRKrGN9CZWPm7TNeu9Nlub3Q9ZuNEluZBHJb2xYDYepznt6U/StA1jxM13pnhnR7rW50laaS7jjO9kA6HJwOST6nisu/jjtNJgsp9Mkgvnfz2uHPLRkfKAOw6mvub9k7wk/hr4P6dJPEI7zU2a9lyMMA2Ag/75AP417GJrKhDmS1M0rs+INRsvEOgJFZaxotxbRRS+Z5d1alQx9CSOR+NZdzeWEqzmTTxHNJOHVoXIWNO6Ba/Ue80+0vIjHd2kFwh6rJGGB/A1xHiL4LfDPxAGOoeEdOWRuslspgf80xXFDNY3tKNiuQ/Ou9i0mQ3UtpeTxBWXyIpo8lweuWHAx9KclvqlhJPLpWrp/osQleW2uvLOD6ZIJI9BX2J4n/ZH8FXau2ia1q2mSH7olKzoPwIB/WvLfEv7IfjyzV5tF1nSdWUdFJaBz+DZH611wxlGp1JcWjzWx+LHxW8OeXDJreovGYlkWK9TzEaM9Gww5B9a6HRP2iHjvobrxD4C8OanLEwYTRweU+fXjiuc1/4VfF7ws0pufDesxxmPypJYP3qFPTKkjHtXE3V5e2c0ceqaNbSiCEwrFPamLg9yU2ksPUk1UqFCr0RLSe6Psbw5+1v8PdQCLruhX+nuBjdsWZR/I4r0jw78X/hN4jUHT/EmkJI3/LK4Ahb/AMeAr85IZNClSyiuLe9t2Xd9qmikWTdz8u1CBjHf5jmmwafaTmAQarAkk0rJsmBj8tezM33cH61nLAxtaMmvmVddj9UrO4sbxTc2U1tOrDAkhZWBH1FQ3dfGP7FFtrMXxSEjTSS6csM8TMk5aIsqHsDg9RzX2dd100aTpQUW7ktq+hmP940UP940VqB6TULRkkkVNRWVSlGppIadiDyW9RSeS3qKsUVk8HSfQfMyARNjqKXyj6ipqKHg6TVrBzMhEZxzikENT0UvqVLsHMzy/wCN/hL4geL9HfRPCevWOiWk6bbmd1YzOO6gjoK+fNO/Y38S2iteDxfZLqMcqSWzrExVSDkk56npivtOjsK3p0401aKE22fJ3ws/ZOvNE8e2niHxdrtpq1vauZ/JRGzLLnILE9s5NfVIgKn5SAPSrFFRUoQqu8gTsQiI+opBC2Ooqeis1gqMdkPmZXMB9RR5Bx1GasUUvqNG97BzsZEuxcUSLvGKfRXS6cXHlewr63K4gPqKXyfpU9Fc7wNF9B87IDCfakEB9RViik8BRbvYOdkAhb1FJ5B9RViij6jRfQOZlaSBvLYJtLY4B6Zr59+NHwh+K/xKme2uPGWmado+7K2MEbgN/vn+KvoqlrSGFpQfMkJyZ8WaR+xz4m0yaLUbfxVpL3sUhKpLbM0QXHXB6nNdL8I/2TpfDvjm38ReLNZtNVhtW86K3ijKhpc5BbPYHnFfV1FbtXVhFcQYUAY4pPIb1FWaK5HgKL3Ram0QeUcdRSGFvUVYopPAUX0Fzsjjj2kelSZoorpp0o01aIm7kcke45poixU1FZSwlKTu0HMyBoSehFAhPrU9FT9SovoDkyHyeetIYB61PRQ8FRe6HzNEPlcYzXEfHDwFP8RPhvqPhOC+jspLxoyJnQsF2uG6D6V3tFVHC0otNLYOZnxo37F1+dNWEeM4PPEpZj5DbNuPTPXPevef2ePhZcfCzwXJoE+qR6g73TT+YiFRyBxg/SvUqK1qU41FaQk7EAgAHWgQf7VT0Vi8FRfQfMyHyefvGm/ZwDwasUUvqdLsLmZCIR9akRQo4p1Faww9ODukDdxGGVIqLyj7VNRRUoQqO8gTsQGInjIry34weEfih4qhfTPC3ijT9A01xtkcIzTuD1G7+EfSvWaKiOEpRlzJD5mfEb/sYeKZrh7i58Y2E0jNuYvG5LnPOT1qxqv7HXijUtQa5fxLotsjYAigtmVEUAAAD6CvtSiukix578Gfhbovwy8KR6PpKrJO2Gurph887+p9B6Cu5WBgSSRmrNFcs8HSnLma1LUmiHyj6imtCSeoqxRU/UaN72DnZXELDuKXyW9RU9FDwFF9A52QCJvUUjQuTnIqxRRLA0ZaNBzMg8o+ooEJyCcVPSULA0Vsg52LmopIy3Q1LRXRUpRqR5ZbEp2K/kt6igwH1FWKKweCotWsVzsytbt9UbSbhNIe3S+ZCIWnyUVuxOOtfLt7+yx4q1zxLPrHiTxfbXb3MjS3Dqjb2J7DPQV9b0VrSoQpfChN3PkjR/2TtZbxJZX2veJ7a7s4pVMyKrF3jX+EE+3FfVVtZLbQR28KqkUahUUcAADAFXaKVahCtbmBOxWMDeooEDe1WaKx/s+i+hXOyubckdqBCcdRVgUGk8voPoLnZVNsegI/GsfW/B3h7XEMesaJp18hHPn26sfzxmuioqo4GlF3QczPEfE37MPwn1ou66E2nSN/FaTFP0ORXlPiv9i/T3LyeHvFc0P92O6i3D8xX2GelVLjoa6IU1DZkny98AP2fNb+GXjj+39Q1qzvYfIeMRxIwOSCM8/Wvd7ute871kXlaAZj/eNFD/eNFAH/2Q==",
+  map:"data:image/jpeg;base64,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"
+};
+
+/* ============ READING (учебник, Unit 1) ============ */
+const READINGS = [
+ {id:"r1", name:"Reading 1 · Table completion", title:"The best cities in the world",
+  text:`<p>In a recent internet survey, tourists and business travellers were asked to rate 50 cities around the world, from the best to the worst. Of the top three cities, two were in Europe and one was in Australia.</p>
+<p>In third place was London, scoring highly mainly because it was the most famous city on the list of 50 surveyed. It was also seen as a very good place to do business, and was an important cultural centre. However, it lost points because people believed it was an extremely expensive place to live.</p>
+<p>Sydney was also a very popular destination, achieving second place on the list because people believed it had the friendliest inhabitants, as well as the best standard of living and the nicest climate. It failed to make the top spot, however, because people thought there were very few things to see there, and many also thought it was too far away from other business and cultural centres.</p>
+<p>At the top of the list was Paris. Despite problems such as the large amount of traffic, it beat other cities to first place because people considered it to be the most interesting city, with more museums, art galleries and places of interest than anywhere else. People also thought it was the best city to take a holiday in.</p>`,
+  open:{n:"1", title:"You are going to read a passage about some cities. Read the passage quickly and answer these questions.", qs:["Which cities are mentioned?","How many advantages are given for each city?"]},
+  syn:{n:"2", title:"Find words or phrases in the passage which have a similar meaning to the <u>underlined</u> words and phrases in the table below.", items:[
+    {w:"well-known", ans:["famous"], example:true},
+    {w:"excellent", ans:["very good"]},
+    {w:"very", ans:["extremely"]},
+    {w:"residents", ans:["inhabitants"]},
+    {w:"quality of life", ans:["standard of living"]},
+    {w:"most pleasant", ans:["nicest","the nicest"]},
+    {w:"not many", ans:["very few","few"]},
+    {w:"a lot", ans:["large amount","the large amount","a large amount"]}]},
+  main:{n:"3", title:"Now complete the table. Choose <b>ONE</b> word from the passage for each answer.", kind:"table",
+    head:["City","Overall position in survey","Perceived advantages","Perceived disadvantages"],
+    rows:[
+      ["London","{1}",["Is more <u>well-known</u> than the other cities.","Has <u>excellent</u> {2} opportunities."],["Is <u>very</u> {3} ."]],
+      ["Sydney","Second",["<u>Residents</u> are the {4} .","Has the best <u>quality of life</u>.","Has the <u>most pleasant</u> {5} ."],["<u>Not many</u> things to see."]],
+      ["Paris","{6}",["Is more {7} than other cities."],["Has <u>a lot</u> of {8} ."]]],
+    ans:{1:["third","3rd"],2:["business"],3:["expensive"],4:["friendliest"],5:["climate"],6:["first","1st"],7:["interesting"],8:["traffic"]}}
+ },
+ {id:"r2", name:"Reading 2 · Note completion", title:"A city survey with a difference",
+  text:`<p>There are many websites on the Internet which provide lists of the world's best cities to visit, live or work in. These lists usually grade the cities in order, from ‘best’ to ‘worst’, and are based on facts and figures provided by local or national organisations.</p>
+<p>The City Brands Index (CBI) also provides a list of best and worst cities. However, unlike other surveys, it is based on the idea that cities are <u>similar to</u> products in shops. It asks ordinary people in other countries to grade cities in the same way that they would grade a product, like a soft drink or a car. What is particularly different about the CBI is that the people who take part in the survey may not have ever visited the cities. Instead, they are asked to say what they think the cities are like, basing their opinions on things like news stories, magazine articles or television programmes they have heard or seen.</p>
+<p><u>Each</u> year, about 10,000 people in 20 countries take part in the CBI survey, and they grade a <u>total</u> of 50 cities. They do this by filling in an online questionnaire. There are <u>several</u> categories in the survey. These include things like the economy, education, the environment, local culture, climate and what the city's residents are like.</p>
+<p>The CBI list is <u>useful</u> because it helps people choose a good place to live, <u>find work</u> or take a holiday. It also helps <u>regional</u> governments to understand why people and businesses are, or are not, coming to their cities, and so shows them areas which they could develop or improve.</p>`,
+  open:{n:"4", title:"You are going to read a passage about a type of city survey. Read the passage quickly and answer these questions.", qs:["What do ‘best city’ websites usually show?","What does the CBI ask people to do?"]},
+  match:{n:"5", title:"Match the words or phrases (1–7), which are <u>underlined</u> in the passage, with the words or phrases (a–g) which have a similar meaning.",
+    left:["similar to","each","total","several","useful","find work","regional"],
+    right:["a number of","every","get a job","helpful","like","local","maximum"],
+    ans:["like","every","maximum","a number of","helpful","get a job","local"], example:0},
+  main:{n:"6", title:"Now complete the notes below. Choose <b>ONE WORD OR A NUMBER</b> from the passage for each answer.", kind:"notes", notesTitle:"The City Brands Index",
+    lines:["The CBI believes that cities are like {1} which people can buy when they go shopping.",
+      "Surveys take place every {2} .",
+      "A maximum of {3} cities are included in the survey.",
+      "A number of different {4} are included in the survey.",
+      "<b>The CBI list is helpful for:</b>",
+      "• people who are trying to decide where to {5} or get a job.",
+      "• people who are looking for a good {6} destination.",
+      "• local {7} who want to make their city a better place."],
+    ans:{1:["products"],2:["year"],3:["50","fifty"],4:["categories"],5:["live"],6:["holiday"],7:["governments"]}}
+ }
+];
+
+/* ============ ЛОГИКА ============ */
+let STATE = {name:"", started:null, vocab:{}, listening:null, reading:null};
+const $ = id => document.getElementById(id);
+const KEY="ielts_u1_state_v3";
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){} }
+function load(){ try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.name) STATE=s;}catch(e){} }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function norm(s){ return (s||"").toLowerCase().replace(/[’']/g,"").replace(/[£$!?,]/g,"").replace(/\s+/g," ").replace(/\.$/,"").trim(); }
+function isRight(val, answers, mode){
+  if(mode==="num"){ const v=(val||"").replace(/[^0-9]/g,""); return v!=="" && answers.some(a=>a.replace(/[^0-9]/g,"")===v); }
+  if(mode==="code"){ const c=x=>(x||"").toLowerCase().replace(/[^a-z0-9]/g,""); const v=c(val); return v!=="" && answers.some(a=>c(a)===v); }
+  const v=norm(val); return v!=="" && answers.some(a=>norm(a)===v);
+}
+
+/* голос */
+let voices=[];
+function loadVoices(){ voices=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang)); }
+if("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+function pickVoice(n){ const gb=voices.filter(v=>/en-GB/i.test(v.lang)); const pool=gb.length>1?gb:voices; return pool.length?pool[n%pool.length]:null; }
+function rate(){ return parseFloat($("rate").value); }
+function utter(text,vi,pitch){ const u=new SpeechSynthesisUtterance(text); const v=pickVoice(vi||0); if(v){u.voice=v;u.lang=v.lang;}else u.lang="en-GB"; u.rate=rate(); u.pitch=pitch||1; return u; }
+function noTTS(){ if("speechSynthesis" in window) return false; alert("Браузер не поддерживает озвучку. Открой сайт в Chrome или Safari."); return true; }
+function say(text,slow){ if(noTTS())return; speechSynthesis.cancel(); const u=utter(text,0,1); if(slow)u.rate=Math.min(rate(),0.8); speechSynthesis.speak(u); }
+
+/* вход, вкладки */
+function start(){
+  const n=$("nameInput").value.trim(); if(!n){$("nameInput").focus();return;}
+  if(STATE.name!==n) STATE={name:n,started:Date.now(),vocab:{},listening:null,reading:null,reading2:null};
+  save(); $("login").classList.add("hidden"); $("app").classList.remove("hidden"); $("who").textContent=STATE.name; markDone(); goCurrent();
+}
+$("nav").addEventListener("click",e=>{
+  const t=e.target.dataset.tab; if(!t)return; speechSynthesis.cancel();
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));
+  ["vocab","listening","reading","finish"].forEach(x=>$("tab-"+x).classList.toggle("hidden",x!==t));
+  if(t==="finish") renderResults(); window.scrollTo(0,0);
+});
+function markDone(){
+  const d={vocab:Object.keys(STATE.vocab).length>0, listening:!!(STATE.listening&&Object.keys(STATE.listening).length), reading:!!(STATE.readings&&Object.keys(STATE.readings).length)};
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("done",!!d[b.dataset.tab]));
+}
+$("rate").oninput=()=>$("rateVal").textContent=$("rate").value;
+
+/* ============ ЛЕКСИКА: путь по шагам ============ */
+const STEP_TYPES=[
+  {t:"cards", name:"Карточки"},
+  {t:"tr",    name:"Выбери перевод"},
+  {t:"def",   name:"Слово по определению"},
+  {t:"gaps",  name:"✍️ Вставь пропущенные буквы"},
+  {t:"scr",   name:"✍️ Собери слово из букв"},
+  {t:"lis",   name:"✍️ Послушай и напиши"},
+  {t:"wr",    name:"✍️ Напиши по переводу (без подсказок)"}
+];
+const STEPS=[];
+SETS.forEach(s=>STEP_TYPES.forEach(x=>STEPS.push({key:s.id+":"+x.t, set:s, t:x.t, name:x.name})));
+STEPS.push({key:"all:prep", t:"prep", name:"Предлоги: in / on / by / at / next to…"});
+STEPS.push({key:"all:pos",  t:"pos",  name:"Прилагательное или существительное?"});
+STEPS.push({key:"all:dict", t:"dict", name:"✍️ Диктант: буквы и цифры (для Listening)"});
+
+function base(en){ return en.replace(/^the /,""); }
+function curIdx(){ const i=STEPS.findIndex(s=>!STATE.vocab[s.key]); return i<0?STEPS.length:i; }
+function renderPath(){
+  const ci=curIdx(), done=STEPS.filter(s=>STATE.vocab[s.key]).length;
+  $("vBar").style.width=(100*done/STEPS.length)+"%";
+  $("vProg").textContent="Пройдено шагов: "+done+" из "+STEPS.length;
+  let h="", last=null;
+  STEPS.forEach((s,i)=>{
+    const g=s.set?s.set.name:"Итоговые упражнения";
+    if(g!==last){ if(last!==null)h+="</div>"; h+='<div style="margin:10px 0 4px;font-weight:700">'+esc(g)+'</div><div class="ex">'; last=g; }
+    const st=STATE.vocab[s.key]?"done":i===ci?"cur":"lock";
+    h+='<button class="sm '+(st==="done"?"done":"")+'" '+(st==="lock"?"disabled":"")+' onclick="openStep('+i+')">'+(st==="done"?"✓ ":st==="cur"?"▶ ":"🔒 ")+esc(s.name)+'</button>';
+  });
+  $("path").innerHTML=h+"</div>";
+}
+function goCurrent(){ openStep(curIdx()); }
+function openStep(i){
+  speechSynthesis.cancel();
+  ["cardsBox","drillBox","nextBox"].forEach(x=>$(x).classList.add("hidden"));
+  if(i>=STEPS.length){ $("sStep").textContent=""; $("sTitle").textContent="🎉 Вся лексика пройдена!"; $("sHint").textContent="Переходи к Listening (вкладка 2)."; renderPath(); return; }
+  const s=STEPS[i];
+  $("sStep").textContent="Шаг "+(i+1)+" из "+STEPS.length+(s.set?" · "+s.set.name:"");
+  $("sTitle").textContent=s.name;
+  if(s.t==="cards") startCards(s); else runDrill(s);
+  renderPath();
+  $("stage").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* карточки */
+let CW=[], fi=0, seen=new Set(), cardsStep=null;
+function startCards(s){
+  cardsStep=s; CW=s.set.words; fi=0; seen=new Set();
+  $("sHint").textContent="Нажми на карточку, чтобы увидеть перевод. Послушай каждое слово 🔊 и произнеси вслух. Пролистай все карточки до конца.";
+  $("cardsBox").classList.remove("hidden"); flashShow();
+}
+function flashShow(){
+  const w=CW[fi]; seen.add(fi); $("flash").classList.remove("flip");
+  $("fFront").textContent=w.en; $("fPos").textContent=w.pos; $("fBack").textContent=w.ru; $("fEx").textContent=w.ex;
+  $("fCount").textContent=(fi+1)+" / "+CW.length+"  (просмотрено "+seen.size+")";
+  $("cardsDone").disabled=seen.size<CW.length;
+}
+function flashMove(d){ fi=(fi+d+CW.length)%CW.length; flashShow(); }
+function finishCards(){
+  STATE.vocab[cardsStep.key]={name:cardsStep.name,set:cardsStep.set.id,seen:true}; save(); markDone(); goCurrent();
+}
+
+/* построение заданий */
+function mask(word){
+  const idx=[]; [...word].forEach((c,i)=>{ if(/[a-z]/i.test(c) && i>0 && word[i-1]!==" " && word[i-1]!=="-") idx.push(i); });
+  const k=Math.max(1,Math.round(idx.length*0.45)); const hide=new Set(shuffle(idx).slice(0,k));
+  return [...word].map((c,i)=>c===" "?"&nbsp;&nbsp;":hide.has(i)?"_":esc(c)).join(" ");
+}
+function scramble(word){
+  return word.split(" ").map(w=>{ if(w.length<3) return w; let s; let n=0; do{ s=shuffle([...w]).join(""); n++; }while(s===w && n<10); return s; })
+    .map(w=>[...w].map(c=>'<span style="display:inline-block;min-width:30px;padding:4px 6px;margin:2px;border-radius:7px;background:#eef3ff;text-align:center;font-family:monospace">'+esc(c)+'</span>').join("")).join('<span style="display:inline-block;width:18px"></span>');
+}
+function buildItems(s){
+  const W=s.set?s.set.words:null;
+  const others=(w,f)=>shuffle(W.filter(x=>x!==w)).slice(0,3).map(f);
+  const ru=w=>esc(w.ru)+" <span class='muted' style='font-size:15px'>("+w.pos+")</span>";
+  switch(s.t){
+  case "tr": return {type:"mc", hint:"Послушай слово и выбери перевод.", items:W.map(w=>({prompt:esc(w.en), sayText:w.en, opts:shuffle([w.ru,...others(w,x=>x.ru)]), ans:w.ru, after:w.en+" — "+w.ru, word:w.en}))};
+  case "def": return {type:"mc", hint:"Прочитай определение по-английски и выбери слово. Так в IELTS перефразируют слова.", items:W.map(w=>({prompt:"<span style='font-size:19px'>"+esc(w.def)+"</span>", opts:shuffle([w.en,...others(w,x=>x.en)]), ans:w.en, after:w.en+" = "+w.def, word:w.en}))};
+  case "gaps": return {type:"write", hint:"Напиши слово целиком, вставив пропущенные буквы. «the» писать не нужно.", items:W.map(w=>({prompt:ru(w)+"<div style='font-family:monospace;font-size:26px;letter-spacing:1px;margin-top:8px'>"+mask(base(w.en))+"</div>", ans:[base(w.en),w.en], word:base(w.en), sayText:w.en}))};
+  case "scr": return {type:"write", hint:"Буквы перемешаны. Собери слово и напиши его. Если слов два, буквы перемешаны в каждом слове отдельно.", items:W.map(w=>({prompt:ru(w)+"<div style='margin-top:8px'>"+scramble(base(w.en))+"</div>", ans:[base(w.en),w.en], word:base(w.en), sayText:w.en}))};
+  case "lis": return {type:"write", autoSay:true, hint:"Послушай слово и напиши его. Нажми 🔊, чтобы послушать ещё раз. «the» писать не нужно.", items:W.map(w=>({prompt:"🎧 <span class='muted' style='font-size:15px'>("+base(w.en).length+" знаков)</span>", ans:[base(w.en),w.en], word:base(w.en), sayText:w.en, after:w.ru}))};
+  case "wr": return {type:"write", hint:"Итоговая проверка набора: видишь перевод и пишешь слово по-английски, без подсказок. «the» писать не нужно.", items:W.map(w=>({prompt:ru(w), ans:[base(w.en),w.en], word:base(w.en), sayText:w.en}))};
+  case "prep": return {type:"mc", ordered:true, hint:"Выбери предлог.", items:PREPS.map(p=>({prompt:esc(p.s).replace("___","<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>"), opts:p.o, ans:p.a, after:p.s.replace("___",p.a.toUpperCase()), word:p.s.replace("___",p.a.toUpperCase())}))};
+  case "pos": return {type:"mc", hint:"Это прилагательное (какой?) или существительное (что? кто?)?", items:shuffle(POS).slice(0,14).map(x=>{const [w,p]=x.split(":"); return {prompt:esc(w), sayText:w, opts:["adjective","noun"], ans:p==="adj"?"adjective":"noun", after:w+" — "+(p==="adj"?"adjective (прилагательное)":"noun (существительное)"), word:w};})};
+  case "dict": return {type:"write", ordered:true, autoSay:true, slow:true, hint:"Послушай и запиши. Так в Listening Part 1 диктуют фамилии, адреса и телефоны. Нажми 🔊, чтобы послушать ещё раз.", items:DICTATION.map(d=>({prompt:esc(d.label)+(d.hint?" <span class='muted'>("+esc(d.hint)+")</span>":""), sayText:d.say, ans:[d.ans,...(d.alt||[])], mode:d.num?"num":d.code?"code":null, word:d.ans.toUpperCase()}))};
+  }
+}
+
+/* тренажёр */
+let D=null;
+function runDrill(s){
+  const b=buildItems(s);
+  D={step:s, type:b.type, autoSay:b.autoSay, slow:b.slow, items:b.items, queue:b.ordered?b.items.map((_,i)=>i):shuffle(b.items.map((_,i)=>i)), total:b.items.length, first:0, done:0, wrong:new Set(), mistakes:[], cur:null, lock:false, retype:null};
+  $("sHint").textContent=b.hint; $("drillBox").classList.remove("hidden"); dNext();
+}
+function dNext(){
+  D.lock=false; D.retype=null; $("dBar").style.width=(100*D.done/D.total)+"%"; $("dFb").innerHTML=""; $("dOpts").innerHTML="";
+  if(!D.queue.length){
+    $("dPrompt").innerHTML="✅ Готово! С первого раза: "+D.first+" / "+D.total+(D.mistakes.length?"<div class='muted' style='font-size:15px;font-weight:400'>Повтори эти слова: "+D.mistakes.map(m=>esc(m.split(" (")[0])).join(", ")+"</div>":"");
+    $("dWrite").classList.add("hidden");
+    STATE.vocab[D.step.key]={name:D.step.name,set:D.step.set?D.step.set.id:null,score:D.first,total:D.total,mistakes:D.mistakes};
+    save(); markDone(); renderPath(); $("nextBox").classList.remove("hidden"); return;
+  }
+  D.cur=D.queue.shift(); const it=D.items[D.cur];
+  const sayBtn=it.sayText&&(D.type==="mc"||D.autoSay)?` <button class="dark sm" onclick="say(${esc(JSON.stringify(it.sayText))},${!!D.slow})">🔊</button>`:"";
+  $("dPrompt").innerHTML=it.prompt+sayBtn;
+  if(D.type==="mc"){
+    $("dWrite").classList.add("hidden");
+    it.opts.forEach(o=>{const b=document.createElement("button"); b.textContent=o; b.onclick=()=>dPick(b,o); $("dOpts").appendChild(b);});
+  }else{
+    $("dWrite").classList.remove("hidden"); $("dIn").value=""; $("dIn").className=""; $("dIn").placeholder=""; $("dIn").focus();
+    if(D.autoSay) say(it.sayText,D.slow);
+  }
+}
+function dResult(ok, given){
+  const it=D.items[D.cur];
+  if(ok){ if(!D.wrong.has(D.cur)) D.first++; D.done++; }
+  else{ if(!D.wrong.has(D.cur)){ D.wrong.add(D.cur); D.mistakes.push(it.word+" (написала: "+(given||"—")+")"); } D.queue.push(D.cur); }
+}
+function dPick(btn,o){
+  if(D.lock)return; D.lock=true; const it=D.items[D.cur]; const ok=o===it.ans;
+  [...$("dOpts").children].forEach(b=>{b.disabled=true; if(b.textContent===it.ans) b.classList.add("ok");});
+  if(!ok) btn.classList.add("bad");
+  dResult(ok,o);
+  $("dFb").innerHTML=(ok?"👍 ":"✗ ")+esc(it.after||"")+(ok?"":"<br><span class='muted'>Это задание будет ещё раз.</span>");
+  if(it.sayText && !ok) say(it.sayText);
+  setTimeout(dNext, ok?900:2600);
+}
+function dCheck(){
+  if(D.lock)return; const it=D.items[D.cur]; const v=$("dIn").value; if(!v.trim())return;
+  if(D.retype){ // перепечатать правильно
+    if(isRight(v,it.ans,it.mode)){ D.lock=true; $("dIn").className="ok"; $("dFb").innerHTML="👍 Теперь правильно. Это слово будет ещё раз в конце."; setTimeout(dNext,1100); }
+    else{ $("dIn").className="bad"; $("dFb").innerHTML="Ещё не так. Напиши точно: <b>"+esc(it.word)+"</b>"; }
+    return;
+  }
+  const ok=isRight(v,it.ans,it.mode); $("dIn").className=ok?"ok":"bad";
+  dResult(ok,v);
+  if(it.sayText && !(D.step.t==="dict")) say(it.sayText);
+  if(ok){ D.lock=true; $("dFb").innerHTML="👍 "+esc(it.word)+(it.after?" — "+esc(it.after):""); setTimeout(dNext,1000); }
+  else{ D.retype=true; $("dFb").innerHTML="Правильно: <b style='font-size:20px'>"+esc(it.word)+"</b><br>Перепечатай слово правильно и нажми «Проверить»."; $("dIn").value=""; $("dIn").focus(); }
+}
+
+/* Listening */
+const plays={};
+function player(url){
+  if(/soundcloud\.com/.test(url)){ const src=/w\.soundcloud\.com\/player/.test(url)?url:"https://w.soundcloud.com/player/?url="+encodeURIComponent(url)+"&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&visual=false";
+    return '<iframe width="100%" height="120" scrolling="no" frameborder="no" allow="autoplay" src="'+esc(src)+'"></iframe>'; }
+  return '<audio controls preload="none" style="width:100%" src="'+esc(url)+'"></audio>';
+}
+function lRender(){
+  $("lTasks").innerHTML=LTASKS.map(t=>{
+    let h='<div class="card" id="lt-'+t.id+'"><h3>'+esc(t.name)+'</h3><p>'+t.instr+'</p>'+(t.tip?'<p class="muted">'+esc(t.tip)+'</p>':'');
+    if(t.kind==="pick"){
+      if(t.audio) h+=player(t.audio);
+      h+=t.items.map((it,i)=>'<div class="row">'+(t.audio?'<span class="qn">'+(i+1)+'</span>':'<button class="dark sm" onclick="say('+esc(JSON.stringify(it.say))+')">🔊 '+(i+1)+'</button>')+'<span class="pk" id="pk-'+t.id+'-'+i+'">'+it.o.map(o=>'<button class="sm" onclick="pkSel(this)">'+esc(o)+'</button>').join("")+'</span></div>').join("");
+    }else{
+      plays[t.id]=2;
+      if(t.audio) h+=player(t.audio); else h+='<button class="dark" id="lp-'+t.id+'" onclick="lPlay(\''+t.id+'\')">▶ Слушать (<span id="ll-'+t.id+'">2</span>)</button><button onclick="speechSynthesis.cancel()">⏹ Стоп</button>';
+      h+='<div class="form" style="margin-top:10px"><div class="title">'+esc(t.title)+'</div>';
+      if(t.example) h+='<div class="row example"><span class="lab">Example — '+esc(t.example.label)+'</span> <u>'+esc(t.example.answer)+'</u></div>';
+      t.rows.forEach(r=>{
+        if(r.fixed){h+='<div class="row"><span class="lab">'+esc(r.label)+'</span> '+esc(r.pre)+'</div>';return;}
+        h+='<div class="row"><span class="lab">'+esc(r.label)+'</span>'+(r.pre?esc(r.pre)+' ':'')+'<span class="qn">'+r.q+'</span><input class="gap" id="li-'+t.id+'-'+r.q+'" autocomplete="off" autocapitalize="off" spellcheck="false">'+(r.post?' '+esc(r.post):'')+'<span class="fix" id="lf-'+t.id+'-'+r.q+'"></span></div>';
+      });
+      h+='</div>';
+    }
+    h+='<button class="primary" onclick="lCheck(\''+t.id+'\')">Проверить ответы</button><div class="score" id="ls-'+t.id+'"></div><div class="transcript hidden" id="lx-'+t.id+'"></div></div>';
+    return h;
+  }).join("");
+}
+function pkSel(b){ [...b.parentNode.children].forEach(x=>x.classList.remove("sel","ok","bad")); b.classList.add("sel"); }
+function lPlay(id){
+  const t=LTASKS.find(x=>x.id===id); if(plays[id]<=0||noTTS())return;
+  plays[id]--; $("ll-"+id).textContent=plays[id]; if(plays[id]<=0) $("lp-"+id).disabled=true;
+  speechSynthesis.cancel();
+  t.script.forEach(([w,s])=>{ const c=s.replace(/\[\[|\]\]/g,""); speechSynthesis.speak(w==="A"?utter(c,0,1.1):utter(c,1,0.85)); });
+}
+function lCheck(id){
+  const t=LTASKS.find(x=>x.id===id); let s=0, n=0; const m=[];
+  if(t.kind==="pick"){
+    t.items.forEach((it,i)=>{ n++; const box=$("pk-"+id+"-"+i); const sel=box.querySelector(".sel"); const ok=sel&&sel.textContent===it.a;
+      [...box.children].forEach(b=>{ if(b.textContent===it.a) b.classList.add("ok"); }); if(sel&&!ok) sel.classList.add("bad");
+      if(ok)s++; else m.push((i+1)+": "+(sel?sel.textContent:"—")+" → "+it.a); });
+  }else{
+    t.rows.filter(r=>!r.fixed).forEach(r=>{ n++; const el=$("li-"+id+"-"+r.q); const ok=isRight(el.value,r.ans,r.mode);
+      el.classList.toggle("ok",ok); el.classList.toggle("bad",!ok); $("lf-"+id+"-"+r.q).textContent=ok?"":"→ "+r.ans[0];
+      if(ok)s++; else m.push(r.q+": "+(el.value||"—")+" → "+r.ans[0]); });
+    $("lx-"+id).innerHTML="<b>Скрипт. Жёлтым — ответы:</b>"+t.script.map(([w,x])=>"<p><b>"+esc(t.who[w])+":</b> "+esc(x).replace(/\[\[(.+?)\]\]/g,"<mark>$1</mark>")+"</p>").join("")+'<p class="muted">'+esc(t.traps)+'</p>';
+    $("lx-"+id).classList.remove("hidden");
+  }
+  $("ls-"+id).textContent="Результат: "+s+" / "+n;
+  STATE.listening=STATE.listening||{};
+  if(!STATE.listening[id]){ STATE.listening[id]={name:t.name.replace(/^Задание \d\.\s*/,""),score:s,total:n,mistakes:m}; save(); markDone(); }
+}
+
+/* Учебник */
+function tbRender(){
+  const sel=(id,opts)=>'<select id="'+id+'" style="font:inherit;padding:5px;border-radius:8px"><option value="">—</option>'+opts.map(o=>'<option>'+esc(o)+'</option>').join("")+'</select>';
+  let h='<div class="card" id="lt-tb11"><h3>📗 Учебник · Track 11 (упр. 07–08)</h3>';
+  h+='<iframe width="100%" height="120" scrolling="no" frameborder="no" allow="autoplay" src="'+TB.sc11+'"></iframe>';
+  h+='<p><b>07.</b> You will hear Part 1 of some information about a new shopping centre. While you listen, <b>circle the words and numbers that you hear</b>.</p><p class="muted">Нажимай на всё, что услышала (можно несколько).</p>';
+  h+='<div class="pk multi" id="tb07">'+TB.ex07.map(o=>'<button class="sm" onclick="this.classList.toggle(\'sel\')">'+esc(o)+'</button>').join("")+'</div>';
+  h+='<p style="margin-top:14px"><b>08.</b> Listen again and complete the text with the missing information.</p><div class="form"><div class="title">Northfields\' shopping centre information</div>';
+  TB.ex08.forEach(r=>{ if(r.fixed){h+='<div class="row"><span class="lab">'+esc(r.label)+'</span> '+esc(r.pre)+'</div>';return;}
+    h+='<div class="row"><span class="lab">'+esc(r.label)+'</span>'+(r.pre?esc(r.pre)+' ':'')+'<span class="qn">'+r.q+'</span><input class="gap" id="tb08-'+r.q+'" autocomplete="off" autocapitalize="off" spellcheck="false">'+(r.post?' '+esc(r.post):'')+'<span class="fix" id="tb08f-'+r.q+'"></span></div>'; });
+  h+='</div><button class="primary" onclick="tbCheck(11)">Готово</button><div class="score" id="ls-tb11"></div></div>';
+
+  h+='<div class="card" id="lt-tb12"><h3>📗 Учебник · Track 12 (упр. 09–10)</h3>';
+  h+='<p><b>09.</b> Before you listen, match the phrases with the diagrams.</p><img src="'+TB.diag+'" style="width:100%;border-radius:8px" alt="diagrams 1-5">';
+  h+=[1,2,3,4,5].map(i=>'<div class="row"><span class="qn">'+i+'</span>'+sel("tb09-"+i,TB.ex09opts)+'<span class="fix" id="tb09f-'+i+'"></span></div>').join("");
+  h+='<iframe width="100%" height="120" scrolling="no" frameborder="no" allow="autoplay" src="'+TB.sc12+'" style="margin-top:12px"></iframe>';
+  h+='<p><b>10.</b> Now listen to Part 2 of some information about a new shopping centre. Look at the map and the list of shops. <b>Match the shops with the correct letter, A–F.</b></p>';
+  h+='<img src="'+TB.map+'" style="width:100%;border:1px solid var(--line);border-radius:8px" alt="Northfields map">';
+  h+=TB.ex10.map((n,i)=>'<div class="row"><span class="lab">'+(i+1)+'. '+esc(n)+'</span>'+sel("tb10-"+(i+1),["A","B","C","D","E","F"])+'<span class="fix" id="tb10f-'+(i+1)+'"></span></div>').join("");
+  h+='<button class="primary" onclick="tbCheck(12)">Готово</button><div class="score" id="ls-tb12"></div></div>';
+  $("tbTasks").innerHTML=h;
+}
+function hasKey(o){ return Object.values(o).some(v=>v&&String(v).trim()); }
+function tbCheck(n){
+  const res={name:"Учебник Track "+n, mistakes:[], answers:[]}; let s=0,t=0, checked=false;
+  if(n===11){
+    const picked=[...document.querySelectorAll("#tb07 button.sel")].map(b=>b.textContent);
+    res.answers.push("07: "+(picked.join(", ")||"—"));
+    if(TB_KEY.ex07.length){ checked=true; TB.ex07.forEach(o=>{ const should=TB_KEY.ex07.includes(o), did=picked.includes(o); t++; if(should===did)s++; else res.mistakes.push("07: "+o+(should?" — было в аудио, не отметила":" — этого не было")); });
+      document.querySelectorAll("#tb07 button").forEach(b=>{ b.classList.toggle("ok",TB_KEY.ex07.includes(b.textContent)); b.classList.toggle("bad",b.classList.contains("sel")&&!TB_KEY.ex07.includes(b.textContent)); }); }
+    const k8=hasKey(TB_KEY.ex08);
+    TB.ex08.filter(r=>!r.fixed).forEach(r=>{ const el=$("tb08-"+r.q), v=el.value.trim(); res.answers.push("08."+r.q+": "+(v||"—"));
+      if(k8){ checked=true; t++; const key=String(TB_KEY.ex08[r.q]).split("|"); const ok=isRight(v,key)||isRight(v,key,"code"); el.classList.toggle("ok",ok); el.classList.toggle("bad",!ok); $("tb08f-"+r.q).textContent=ok?"":"→ "+key[0]; if(ok)s++; else res.mistakes.push("08."+r.q+": "+(v||"—")+" → "+key[0]); } });
+  }else{
+    [1,2,3,4,5].forEach(i=>{ t++; checked=true; const v=$("tb09-"+i).value, ok=v===TB.ex09key[i-1]; $("tb09f-"+i).textContent=ok?"✓":"→ "+TB.ex09key[i-1]; $("tb09f-"+i).style.color=ok?"var(--ok)":"var(--bad)"; if(ok)s++; else res.mistakes.push("09."+i+": "+(v||"—")+" → "+TB.ex09key[i-1]); });
+    const k10=hasKey(TB_KEY.ex10);
+    TB.ex10.forEach((nm,i)=>{ const v=$("tb10-"+(i+1)).value; res.answers.push("10. "+nm+": "+(v||"—"));
+      if(k10){ t++; const key=String(TB_KEY.ex10[i+1]).toUpperCase(), ok=v===key; $("tb10f-"+(i+1)).textContent=ok?"✓":"→ "+key; $("tb10f-"+(i+1)).style.color=ok?"var(--ok)":"var(--bad)"; if(ok)s++; else res.mistakes.push("10. "+nm+": "+(v||"—")+" → "+key); } });
+  }
+  res.score=s; res.total=t; res.full=!(n===11?(TB_KEY.ex07.length&&hasKey(TB_KEY.ex08)):hasKey(TB_KEY.ex10));
+  $("ls-tb"+n).textContent=(checked?"Проверено автоматически: "+s+" / "+t+". ":"")+(res.full?"Остальные ответы сохранены — учитель проверит их после отправки.":"");
+  STATE.textbook=STATE.textbook||{}; STATE.textbook[n]=res; save();
+}
+
+/* Reading */
+function rgap(id,n){ return '<span class="qn">'+n+'</span><input class="gap" id="'+id+'-g'+n+'" autocomplete="off" autocapitalize="off" spellcheck="false"><span class="fix" id="'+id+'-gf'+n+'"></span>'; }
+function rfill(id,t){ return t.replace(/\{(\d+)\}/g,(_,n)=>rgap(id,n)); }
+function rRender(){
+  $("rdTasks").innerHTML=READINGS.map(R=>{
+    let h='<div class="card"><h2>📖 '+esc(R.name)+'</h2><div class="reading"><h4>'+esc(R.title)+'</h4>'+R.text+'</div></div><div class="card" id="rc-'+R.id+'">';
+    h+='<h3>'+R.open.n+'. '+R.open.title+'</h3>'+R.open.qs.map((q,i)=>'<div style="margin:8px 0">'+(i+1)+'. '+esc(q)+'<input type="text" id="'+R.id+'-o'+i+'" autocomplete="off" style="margin-top:4px"></div>').join("")+'<p class="muted">Эти ответы проверит учитель.</p>';
+    if(R.syn){ h+='<h3 style="margin-top:18px">'+R.syn.n+'. '+R.syn.title+'</h3>'+R.syn.items.map((it,i)=>'<div class="row"><span class="lab">'+esc(it.w)+':</span>'+(it.example?'<i>'+esc(it.ans[0])+'</i> <span class="muted">(пример)</span>':'<input class="gap" id="'+R.id+'-s'+i+'" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:170px"><span class="fix" id="'+R.id+'-sf'+i+'"></span>')+'</div>').join(""); }
+    if(R.match){ const M=R.match; h+='<h3 style="margin-top:18px">'+M.n+'. '+M.title+'</h3>'+M.left.map((w,i)=>'<div class="row"><span class="lab"><b>'+(i+1)+'.</b> '+esc(w)+'</span>'+(i===M.example?'<i>'+esc(M.ans[i])+'</i> <span class="muted">(пример)</span>':'<select id="'+R.id+'-m'+i+'" style="font:inherit;padding:5px;border-radius:8px"><option value="">—</option>'+M.right.map((o,j)=>'<option value="'+esc(o)+'">'+"abcdefg"[j]+') '+esc(o)+'</option>').join("")+'</select><span class="fix" id="'+R.id+'-mf'+i+'"></span>')+'</div>').join(""); }
+    const C=R.main; h+='<h3 style="margin-top:18px">'+C.n+'. '+C.title+'</h3>';
+    if(C.kind==="table"){
+      h+='<div style="overflow-x:auto"><table class="tbl"><tr>'+C.head.map(x=>'<th>'+esc(x)+'</th>').join("")+'</tr>'+C.rows.map(([c,pos,adv,dis])=>'<tr><td><b>'+c+'</b></td><td>'+rfill(R.id,pos)+'</td><td>'+adv.map(x=>'<div>• '+rfill(R.id,x)+'</div>').join("")+'</td><td>'+dis.map(x=>'<div>'+rfill(R.id,x)+'</div>').join("")+'</td></tr>').join("")+'</table></div>';
+    }else{
+      h+='<div class="form"><div class="title">'+esc(C.notesTitle)+'</div>'+C.lines.map(l=>'<div class="row">'+rfill(R.id,l)+'</div>').join("")+'</div>';
+    }
+    h+='<button class="primary" onclick="rCheck(\''+R.id+'\')">Проверить ответы</button><div class="score" id="'+R.id+'-score"></div></div>';
+    return h;
+  }).join("");
+}
+function rCheck(id){
+  const R=READINGS.find(x=>x.id===id); let s=0,t=0; const m=[], answers=[];
+  R.open.qs.forEach((q,i)=>answers.push(R.open.n+"."+(i+1)+" "+q+" — "+($(id+"-o"+i).value.trim()||"—")));
+  if(R.syn) R.syn.items.forEach((it,i)=>{ if(it.example)return; t++; const el=$(id+"-s"+i), ok=isRight(el.value,it.ans); el.classList.toggle("ok",ok); el.classList.toggle("bad",!ok); $(id+"-sf"+i).textContent=ok?"":"→ "+it.ans[0]; if(ok)s++; else m.push(R.syn.n+". "+it.w+": "+(el.value||"—")+" → "+it.ans[0]); });
+  if(R.match) R.match.left.forEach((w,i)=>{ if(i===R.match.example)return; t++; const v=$(id+"-m"+i).value, a=R.match.ans[i], ok=v===a; $(id+"-mf"+i).textContent=ok?"✓":"→ "+a; $(id+"-mf"+i).style.color=ok?"var(--ok)":"var(--bad)"; if(ok)s++; else m.push(R.match.n+". "+w+": "+(v||"—")+" → "+a); });
+  Object.entries(R.main.ans).forEach(([n,a])=>{ t++; const el=$(id+"-g"+n), ok=isRight(el.value,a); el.classList.toggle("ok",ok); el.classList.toggle("bad",!ok); $(id+"-gf"+n).textContent=ok?"":"→ "+a[0]; if(ok)s++; else m.push(R.main.n+"."+n+": "+(el.value||"—")+" → "+a[0]); });
+  $(id+"-score").textContent="Результат: "+s+" / "+t+" (вопросы "+R.open.n+" проверит учитель)";
+  STATE.readings=STATE.readings||{};
+  if(!STATE.readings[id]){ STATE.readings[id]={score:s,total:t,mistakes:m,answers,full:true}; save(); markDone(); }
+}
+
+/* Итоги и Telegram */
+const SHORT={tr:"перевод",def:"определение",gaps:"буквы",scr:"собери слово",lis:"на слух",wr:"по переводу"};
+function rows(){
+  const r=[];
+  SETS.forEach(st=>{
+    const got=STEPS.filter(x=>x.set===st && x.t!=="cards" && STATE.vocab[x.key]);
+    if(!got.length && !STATE.vocab[st.id+":cards"]){ r.push(["Лексика · "+st.name,null]); return; }
+    const sc=got.reduce((a,x)=>a+STATE.vocab[x.key].score,0), tt=got.reduce((a,x)=>a+STATE.vocab[x.key].total,0);
+    const miss=[]; got.forEach(x=>STATE.vocab[x.key].mistakes.forEach(mm=>miss.push(SHORT[x.t]+": "+mm)));
+    r.push(["Лексика · "+st.name+" ("+got.length+"/6 упр.)",{score:sc,total:tt,mistakes:miss,detail:got.map(x=>SHORT[x.t]+" "+STATE.vocab[x.key].score+"/"+STATE.vocab[x.key].total).join(" · ")}]);
+  });
+  STEPS.filter(x=>!x.set).forEach(x=>r.push(["Лексика · "+x.name,STATE.vocab[x.key]||null]));
+  LTASKS.forEach(t=>{ const v=(STATE.listening||{})[t.id]; r.push(["Listening · "+t.name.replace(/^Задание \d\.\s*/,""),v||null]); });
+  [11,12].forEach(n=>{ const v=(STATE.textbook||{})[n]; r.push(["Учебник · Track "+n, v||null]); });
+  READINGS.forEach(R=>r.push([R.name,(STATE.readings||{})[R.id]||null]));
+  return r;
+}
+function renderResults(){
+  $("resTable").innerHTML=rows().map(([k,v])=>"<tr><td>"+esc(k)+"</td><td style='text-align:right'><b>"+(v?(v.total?v.score+" / "+v.total:"✓ сдано"):"<span class=muted>не сделано</span>")+"</b></td></tr>").join("");
+  const miss=[]; if(curIdx()<STEPS.length)miss.push("лексика (шаг "+(curIdx()+1)+" из "+STEPS.length+")");
+  if(!(STATE.listening&&Object.keys(STATE.listening).length===LTASKS.length) || !(STATE.textbook&&STATE.textbook[11]&&STATE.textbook[12]))miss.push("Listening");
+  if(!(STATE.readings&&STATE.readings.r1&&STATE.readings.r2))miss.push("Reading");
+  $("resNote").textContent=miss.length?"Ещё не сделано: "+miss.join(", ")+". Можно отправить и так, но лучше сначала закончить.":"Всё сделано! 🎉";
+}
+function buildReport(){
+  const mins=Math.max(1,Math.round((Date.now()-STATE.started)/60000));
+  let t="📝 <b>IELTS · Places + Listening Part 1</b>\n👤 "+esc(STATE.name)+"\n🕒 "+new Date().toLocaleString("ru-RU")+" · ≈"+mins+" мин\n📚 Лексика: шаг "+Math.min(curIdx(),STEPS.length)+" из "+STEPS.length+" пройден\n";
+  rows().forEach(([k,v])=>{
+    t+="\n<b>"+esc(k)+"</b>: "+(v?(v.total?v.score+"/"+v.total:"сдано"):"не сделано");
+    if(v&&v.detail) t+="\n   "+esc(v.detail);
+    if(v&&v.mistakes&&v.mistakes.length) t+="\n   ✗ "+v.mistakes.map(esc).join("\n   ✗ ");
+    if(v&&v.full&&v.answers) t+="\n   ✎ "+v.answers.map(esc).join("\n   ✎ ");
+  });
+  return t;
+}
+function chunks(text){ const out=[]; let cur=""; text.split("\n").forEach(l=>{ if((cur+"\n"+l).length>3800){ out.push(cur); cur=l; } else cur=cur?cur+"\n"+l:l; }); if(cur)out.push(cur); return out; }
+async function sendResults(){
+  const text=buildReport();
+  if(!TG_TOKEN||!TG_CHAT_ID){ showCopy(text,"Бот ещё не подключён. Скопируй текст и отправь учителю вручную:"); return; }
+  $("sendBtn").disabled=true; $("sendFb").textContent="Отправляю…";
+  try{
+    for(const part of chunks(text)){
+      const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"})});
+      const j=await r.json(); if(!j.ok) throw new Error(j.description);
+    }
+    $("sendFb").textContent="✅ Отправлено! Молодец!"; $("sendBtn").disabled=false;
+  }catch(e){ $("sendBtn").disabled=false; showCopy(text,"Не получилось отправить ("+e.message+"). Скопируй текст и отправь вручную:"); }
+}
+function showCopy(text,msg){ $("sendFb").textContent=msg; const b=$("copyBox"); b.value=text.replace(/<\/?b>/g,""); b.classList.remove("hidden"); b.select(); }
+
+/* запуск */
+tbRender(); lRender(); rRender(); load();
+if(STATE.name) $("nameInput").value=STATE.name;
+</script>
+</body>
+</html>

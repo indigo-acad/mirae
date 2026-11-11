@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS Band 6 · Transport &amp; towns</title>
+<style>
+  :root{--ink:#1d2433;--muted:#667085;--line:#e4e7ec;--bg:#f5f6fa;--card:#fff;--accent:#2f5bea;--ok:#1f9d55;--okbg:#e9f8ef;--bad:#d64545;--badbg:#fdeeee}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  .wrap{max-width:820px;margin:0 auto;padding:18px 14px 80px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+  header h1{font-size:20px;margin:0}
+  .who{font-size:14px;color:var(--muted)}
+  .card{background:var(--card);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 2px 10px #0000000d}
+  h2{margin:0 0 6px;font-size:20px}
+  h3{margin:4px 0 6px;font-size:17px}
+  .muted{color:var(--muted);font-size:14px}
+  .ielts{font-weight:700}
+  button{font:inherit;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#eef0f4;color:var(--ink);margin:4px 4px 4px 0}
+  button.primary{background:var(--accent);color:#fff}
+  button.dark{background:var(--ink);color:#fff}
+  button.sm{font-size:14px;padding:6px 12px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text]{font:inherit;padding:9px 11px;border:1.5px solid #c9ced8;border-radius:9px;width:100%}
+  input.gap{width:140px;padding:4px 8px;border:0;border-bottom:2px solid #8a93a6;border-radius:0;background:#fafbfc;text-align:center}
+  input.ok{border-color:var(--ok)!important;background:var(--okbg)!important}
+  input.bad{border-color:var(--bad)!important;background:var(--badbg)!important}
+  .fix{color:var(--ok);font-weight:700;font-size:14px;margin-left:6px}
+  nav{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+  nav button{margin:0;font-size:15px}
+  nav button.active{background:var(--ink);color:#fff}
+  nav .done::after{content:" ✓";color:var(--ok)}
+  nav button.active.done::after{color:#8ff0b5}
+  .sets{display:flex;flex-wrap:wrap;gap:6px}
+  .sets button.active{background:var(--accent);color:#fff}
+  .ex{display:flex;flex-wrap:wrap;gap:6px}
+  .ex button{margin:0}
+  .ex button.done{background:var(--okbg);outline:1.5px solid var(--ok)}
+  .form{border:2px solid var(--ink);border-radius:6px;padding:14px 16px;background:#fff}
+  .form .title{text-align:center;font-weight:700;font-size:17px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:8px}
+  .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .row .lab{min-width:210px;color:#344054}
+  .qn{display:inline-block;min-width:24px;height:24px;line-height:24px;text-align:center;border:1.5px solid var(--ink);border-radius:5px;font-size:13px;font-weight:700;margin-right:4px}
+  .example{color:var(--muted);font-style:italic}
+  .pk button.sel{background:#dfe6ff;outline:2px solid var(--accent)}
+  .pk button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .pk button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  label{display:block;margin-top:6px}
+  details{margin:6px 0} summary{cursor:pointer;padding:4px 0}
+  ul.pb{margin:4px 0 8px;padding-left:20px} ul.pb li{margin:3px 0}
+  .score{font-size:18px;font-weight:700;margin-top:12px}
+  .hidden{display:none!important}
+  .transcript{background:#f3f6ff;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .transcript p{margin:4px 0}
+  mark{background:#ffe58a;padding:0 2px;border-radius:3px}
+  .reading{background:#fffdf5;border:1px solid #efe6c4;border-radius:10px;padding:14px 16px;font-family:Georgia,serif;font-size:16.5px}
+  .reading h4{margin:0 0 6px;text-align:center;font-family:inherit;font-size:19px}
+  .reading h5{margin:12px 0 2px;font-size:16px}
+  .reading p{margin:4px 0}
+  table.tbl{width:100%;border-collapse:collapse;font-size:15px}
+  table.tbl th,table.tbl td{border:1px solid #9aa2b1;padding:7px;vertical-align:top;text-align:left}
+  table.tbl th{background:#f1f3f7}
+  table.tbl td div{margin:3px 0}
+  .flash{perspective:900px;height:180px;margin:12px 0;cursor:pointer;user-select:none}
+  .flash .in{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+  .flash.flip .in{transform:rotateY(180deg)}
+  .flash .side{position:absolute;inset:0;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;font-size:26px;font-weight:700;padding:12px;text-align:center}
+  .flash .front{background:#eef3ff}
+  .flash .back{background:#effaf3;transform:rotateY(180deg)}
+  .flash small{font-size:14px;font-weight:400;color:var(--muted);margin-top:6px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .opts button{margin:0;padding:12px;text-align:left;background:#f1f3f7}
+  .opts button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .opts button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  .bar{height:8px;background:#e7e9ef;border-radius:5px;overflow:hidden;margin:8px 0}
+  .bar div{height:100%;background:var(--accent);width:0;transition:width .3s}
+  .big{font-size:22px;font-weight:700;margin:10px 0}
+  .feedback{min-height:24px;margin-top:8px;font-weight:600}
+  table.res{width:100%;border-collapse:collapse;font-size:15px}
+  table.res td{padding:6px 4px;border-bottom:1px solid var(--line)}
+  .speed{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin-top:6px}
+  @media(max-width:560px){.opts{grid-template-columns:1fr}.row .lab{min-width:100%}table.tbl{font-size:14px}input.gap{width:110px}}
+  select.sel{font:inherit;padding:4px 8px;border:1.5px solid #c9ced8;border-radius:8px;background:#fafbfc;margin:0 2px}
+  select.sel.ok{border-color:var(--ok);background:var(--okbg)}
+  select.sel.bad{border-color:var(--bad);background:var(--badbg)}
+  .urow{padding:8px 0;border-bottom:1px dashed var(--line);line-height:2.1}
+  .chip{display:inline-block;background:#eef3ff;border-radius:20px;padding:3px 11px;margin:3px;font-size:14px;cursor:pointer}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+<div id="login" class="card">
+  <h2>💎 IELTS · Band 6</h2>
+  <p class="muted">Тема: <b>Transport &amp; towns</b>. Заучивание слов (много письма), проверка по упражнениям и помощь со Speaking.</p>
+  <p>Как тебя зовут?</p>
+  <input type="text" id="nameInput" placeholder="Имя" autocomplete="off" onkeydown="if(event.key==='Enter')start()">
+  <p><button class="primary" onclick="start()">Начать →</button></p>
+</div>
+<div id="app" class="hidden">
+  <header><h1>Transport &amp; towns · Band 6</h1><div class="who">👤 <span id="who"></span></div></header>
+  <nav id="nav">
+    <button data-tab="vocab" class="active">📚 Заучивание</button>
+    <button data-tab="units">📝 Проверка</button>
+    <button data-tab="speak">🎤 Speaking</button>
+  </nav>
+<section id="tab-vocab">
+  <div class="card">
+    <p class="muted" style="margin-top:0">Иди строго по шагам: следующий откроется, когда закончишь текущий. Ошибки возвращаются в конце шага. Если ошибёшься в написании, слово нужно один раз перепечатать правильно.</p>
+    <div class="bar"><div id="vBar"></div></div>
+    <div id="vProg" class="muted"></div>
+    <div class="speed">🔊 Скорость голоса <input type="range" id="rate" min="0.6" max="1.1" step="0.05" value="0.9"> <span id="rateVal">0.9</span></div>
+  </div>
+  <div class="card" id="stage">
+    <div class="muted" id="sStep"></div>
+    <h3 id="sTitle"></h3>
+    <p class="muted" id="sHint"></p>
+    <div id="cardsBox" class="hidden">
+      <div class="flash" id="flash" style="height:220px" onclick="this.classList.toggle('flip')">
+        <div class="in">
+          <div class="side front"><span id="fFront"></span><small id="fPos"></small></div>
+          <div class="side back"><span id="fBack"></span><small id="fEx" style="font-style:italic"></small></div>
+        </div>
+      </div>
+      <button onclick="flashMove(-1)">←</button><button class="dark" onclick="say(CW[fi].en)">🔊</button><button onclick="flashMove(1)">→</button>
+      <span class="muted" id="fCount"></span>
+      <p><button class="primary" id="cardsDone" onclick="finishCards()" disabled>Посмотрел(а) все карточки — дальше →</button></p>
+    </div>
+    <div id="drillBox" class="hidden">
+      <div class="bar"><div id="dBar"></div></div>
+      <div class="big" id="dPrompt"></div>
+      <div class="opts" id="dOpts"></div>
+      <div id="dWrite" class="hidden">
+        <input type="text" id="dIn" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')dCheck()">
+        <button class="primary" onclick="dCheck()">Проверить</button>
+      </div>
+      <div class="feedback" id="dFb"></div>
+    </div>
+    <div id="nextBox" class="hidden"><button class="primary" onclick="goCurrent()">Дальше →</button></div>
+  </div>
+  <div class="card">
+    <h3>📨 Отправить учителю</h3>
+    <p class="muted">Можно отправлять после каждого занятия: прогресс сохраняется в браузере.</p>
+    <button class="primary" id="sendBtn" onclick="sendResults()">Отправить результаты</button>
+    <div class="feedback" id="sendFb"></div>
+    <textarea id="copyBox" class="hidden" style="width:100%;height:180px;font:13px monospace;margin-top:8px"></textarea>
+  </div>
+  <div class="card">
+    <h3>Весь путь</h3>
+    <p class="muted">✓ — сделано (можно нажать и повторить), ▶ — сейчас, 🔒 — пока закрыто.</p>
+    <div id="path"></div>
+  </div>
+</section>
+<section id="tab-units" class="hidden">
+  <div class="card">
+    <h2>📝 Проверка по юнитам</h2>
+    <p class="muted">Упражнения из учебника (Unit 06): места, прилагательные, сравнительная и превосходная степень. Каждый блок проверяется отдельно, можно пройти заново. Пока не заполнишь все пропуски, блок не проверится.</p>
+    <div class="bar"><div id="uBar"></div></div>
+    <div id="uProg" class="muted"></div>
+  </div>
+  <div id="uList"></div>
+  <div class="card">
+    <h3>📨 Отправить учителю</h3>
+    <button class="primary" id="uSend" onclick="sendUnits()">Отправить результаты</button>
+    <div class="feedback" id="uFb"></div>
+    <textarea id="uCopy" class="hidden" style="width:100%;height:180px;font:13px monospace;margin-top:8px"></textarea>
+  </div>
+</section>
+<section id="tab-speak" class="hidden">
+  <div class="card">
+    <h2>🎤 Speaking: transport and towns</h2>
+    <p class="muted">Как работать с каждым вопросом: 1) прочитай вопрос; 2) нажми на слова, чтобы послушать их; 3) открой подсказку, посмотри начало ответа и пример; 4) напиши короткий план; 5) запиши ответ голосом (до 1 минуты). Для записи браузер попросит доступ к микрофону, нажми «Разрешить».</p>
+    <div class="reading" style="font-family:inherit;font-size:15px"><b>Формула ответа:</b> ответ → because … (причина) → for example … (пример). Старайся сказать 3 предложения и использовать слова урока и сравнения (faster than, the cheapest).</div>
+  </div>
+  <div class="card"><h3>Полезные фразы</h3><div id="spPh"></div></div>
+  <div class="card"><h3>Вопросы</h3><div id="spList"></div></div>
+  <div class="card"><h3>Проверь себя</h3><p class="muted">Отметь после записи.</p><div id="spCheck"></div></div>
+  <div class="card">
+    <h3>📨 Отправить учителю</h3>
+    <p class="muted">Отправятся планы, записи и самопроверка.</p>
+    <button class="primary" id="spSend" onclick="sendSpeaking()">Отправить записи</button>
+    <div class="feedback" id="spFb"></div>
+  </div>
+</section>
+</div>
+</div>
+<script>
+/* ============ НАСТРОЙКИ TELEGRAM ============ */
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID = "347625701";
+
+/* ============ ЛЕКСИКА ============
+   Каждое слово: en, pos, ru, def (определение по-английски), ex (пример — слово en должно стоять в нём точно в такой форме).
+   Наборы учителя ставятся ПЕРВЫМИ (пока пусто — ждём материалы). */
+const SETS = [
+ {id:"S1", name:"1 · Town: places & buildings", words:[
+  {en:"the outskirts", pos:"n", ru:"окраина", def:"the parts of a town that are far from the centre", ex:"We live on the outskirts of the city."},
+  {en:"castle", pos:"n", ru:"замок", def:"a large old building with thick walls", ex:"We visited an old castle near the sea."},
+  {en:"tower", pos:"n", ru:"башня", def:"a tall, narrow building", ex:"You can see the whole city from the tower."},
+  {en:"bridge", pos:"n", ru:"мост", def:"a structure that takes a road or railway over a river", ex:"There is a long bridge over the river."},
+  {en:"cathedral", pos:"n", ru:"собор", def:"a large and important church", ex:"The cathedral is more than 500 years old."},
+  {en:"palace", pos:"n", ru:"дворец", def:"a very big house where a king or queen lives", ex:"The queen lives in a beautiful palace."},
+  {en:"square", pos:"n", ru:"площадь", def:"an open place in a town with buildings around it", ex:"We met in the main square."},
+  {en:"council", pos:"n", ru:"городской совет, администрация", def:"the group of people who run a town", ex:"The council wants to build a new park."},
+  {en:"destination", pos:"n", ru:"пункт назначения, место, куда едешь", def:"the place where someone is going", ex:"Paris is a popular tourist destination."},
+  {en:"go sightseeing", pos:"phr", ru:"осматривать достопримечательности", def:"to visit interesting places as a tourist", ex:"We want to go sightseeing in Rome."}
+ ]},
+ {id:"S2", name:"2 · Travel & transport", words:[
+  {en:"motorway", pos:"n", ru:"автомагистраль (брит.)", def:"a wide road for fast traffic between cities", ex:"The motorway is very busy on Fridays."},
+  {en:"coach", pos:"n", ru:"междугородний автобус", def:"a comfortable bus for long journeys", ex:"We travelled to London by coach."},
+  {en:"flight", pos:"n", ru:"рейс, перелёт", def:"a journey by plane", ex:"The flight to Madrid takes two hours."},
+  {en:"delay", pos:"n", ru:"задержка", def:"a time when something happens later than planned", ex:"There was a long delay at the airport."},
+  {en:"available", pos:"adj", ru:"доступный, свободный", def:"possible to get or to use", ex:"Are there any rooms available?"},
+  {en:"along the way", pos:"phr", ru:"по пути", def:"during a journey, between the start and the end", ex:"We stopped for lunch along the way."},
+  {en:"boat trip", pos:"n", ru:"прогулка на лодке, речная прогулка", def:"a short journey on a boat for fun", ex:"We went on a boat trip on the lake."},
+  {en:"cycle way", pos:"n", ru:"велодорожка", def:"a path for people on bikes", ex:"There is a new cycle way along the river."},
+  {en:"pavement", pos:"n", ru:"тротуар", def:"the path at the side of a road for people who walk", ex:"Please walk on the pavement."},
+  {en:"narrow", pos:"adj", ru:"узкий", def:"not wide", ex:"The streets in the old town are narrow."}
+ ]},
+ {id:"S3", name:"3 · Useful words", words:[
+  {en:"rate", pos:"n", ru:"уровень, показатель", def:"how often something happens", ex:"The crime rate is low in this town."},
+  {en:"customer", pos:"n", ru:"клиент, покупатель", def:"a person who buys things in a shop", ex:"The shop has hundreds of customers every day."},
+  {en:"North", pos:"n", ru:"север", def:"the direction opposite to south", ex:"We drove North for three hours."},
+  {en:"staff", pos:"n", ru:"персонал, сотрудники", def:"the people who work in a place", ex:"The hotel staff were very friendly."},
+  {en:"enough", pos:"adv", ru:"достаточно", def:"as much as you need", ex:"We don't have enough time."},
+  {en:"offer", pos:"v", ru:"предлагать", def:"to say that you will give something to someone", ex:"The hotel offers free breakfast."},
+  {en:"large", pos:"adj", ru:"большой, крупный", def:"big", ex:"The city has a large park."},
+  {en:"than", pos:"conj", ru:"чем (в сравнении)", def:"a word we use to compare two things", ex:"Trains are faster than buses."},
+  {en:"common", pos:"adj", ru:"распространённый, частый", def:"happening in many places or often", ex:"Traffic is a common problem in big cities."},
+  {en:"hurry", pos:"v", ru:"спешить", def:"to move or do something quickly because you have little time", ex:"We must hurry or we will miss the train."}
+ ]}
+];
+
+/* ============ ЛОГИКА ============ */
+let STATE={name:"",started:null,vocab:{}};
+const $=id=>document.getElementById(id);
+const KEY="ielts_b6_state_v1";
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){} }
+function load(){ try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.name) STATE=s;}catch(e){} }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function norm(s){ return (s||"").toLowerCase().replace(/[’']/g,"").replace(/[£$!?,]/g,"").replace(/\s+/g," ").replace(/\.$/,"").trim(); }
+function isRight(val, answers, mode){
+  if(mode==="num"){ const v=(val||"").replace(/[^0-9]/g,""); return v!=="" && answers.some(a=>a.replace(/[^0-9]/g,"")===v); }
+  if(mode==="code"){ const c=x=>(x||"").toLowerCase().replace(/[^a-z0-9]/g,""); const v=c(val); return v!=="" && answers.some(a=>c(a)===v); }
+  const v=norm(val); return v!=="" && answers.some(a=>norm(a)===v);
+}
+
+/* голос */
+let voices=[];
+function loadVoices(){ voices=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang)); }
+if("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+function pickVoice(n){ const gb=voices.filter(v=>/en-GB/i.test(v.lang)); const pool=gb.length>1?gb:voices; return pool.length?pool[n%pool.length]:null; }
+function rate(){ return parseFloat($("rate").value); }
+function utter(text,vi,pitch){ const u=new SpeechSynthesisUtterance(text); const v=pickVoice(vi||0); if(v){u.voice=v;u.lang=v.lang;}else u.lang="en-GB"; u.rate=rate(); u.pitch=pitch||1; return u; }
+function noTTS(){ if("speechSynthesis" in window) return false; alert("Браузер не поддерживает озвучку. Открой сайт в Chrome или Safari."); return true; }
+function say(text,slow){ if(noTTS())return; speechSynthesis.cancel(); const u=utter(text,0,1); if(slow)u.rate=Math.min(rate(),0.8); speechSynthesis.speak(u); }
+
+
+function start(){
+  const n=$("nameInput").value.trim(); if(!n){$("nameInput").focus();return;}
+  if(STATE.name!==n) STATE={name:n,started:Date.now(),vocab:{},units:{}};
+  save(); $("login").classList.add("hidden"); $("app").classList.remove("hidden"); $("who").textContent=STATE.name; goCurrent(); uRenderAll();
+}
+$("rate").oninput=()=>$("rateVal").textContent=$("rate").value;
+
+/* шаги */
+const STEP_TYPES=[
+  {t:"cards", name:"Карточки"},
+  {t:"tr",    name:"Выбери перевод"},
+  {t:"gaps",  name:"✍️ Вставь пропущенные буквы"},
+  {t:"scr",   name:"✍️ Собери слово из букв"},
+  {t:"lis",   name:"✍️ Послушай и напиши"},
+  {t:"ctx",   name:"✍️ Вставь в предложение"},
+  {t:"wr",    name:"✍️ Напиши по переводу (без подсказок)"}
+];
+const STEPS=[];
+SETS.forEach(s=>STEP_TYPES.forEach(x=>STEPS.push({key:s.id+":"+x.t,set:s,t:x.t,name:x.name})));
+
+function base(en){ return en.replace(/^the /,""); }
+function curIdx(){ const i=STEPS.findIndex(s=>!STATE.vocab[s.key]); return i<0?STEPS.length:i; }
+function renderPath(){
+  const ci=curIdx(), done=STEPS.filter(s=>STATE.vocab[s.key]).length;
+  $("vBar").style.width=(100*done/STEPS.length)+"%"; $("vProg").textContent="Пройдено шагов: "+done+" из "+STEPS.length;
+  let h="",last=null;
+  STEPS.forEach((s,i)=>{
+    const g=s.set?s.set.name:"Итоговые задания";
+    if(g!==last){ if(last!==null)h+="</div>"; h+='<div style="margin:10px 0 4px;font-weight:700">'+esc(g)+'</div><div class="ex">'; last=g; }
+    const st=STATE.vocab[s.key]?"done":i===ci?"cur":"lock";
+    h+='<button class="sm '+(st==="done"?"done":"")+'" '+(st==="lock"?"disabled":"")+' onclick="openStep('+i+')">'+(st==="done"?"✓ ":st==="cur"?"▶ ":"🔒 ")+esc(s.name)+'</button>';
+  });
+  $("path").innerHTML=h+"</div>";
+}
+function goCurrent(){ openStep(curIdx()); }
+function openStep(i){
+  speechSynthesis.cancel();
+  ["cardsBox","drillBox","nextBox"].forEach(x=>$(x).classList.add("hidden"));
+  if(i>=STEPS.length){ $("sStep").textContent=""; $("sTitle").textContent="🎉 Всё пройдено!"; $("sHint").innerHTML="Нажми «Отправить учителю» внизу страницы."; renderPath(); return; }
+  const s=STEPS[i];
+  $("sStep").textContent="Шаг "+(i+1)+" из "+STEPS.length+(s.set?" · "+s.set.name:"");
+  $("sTitle").textContent=s.name;
+  if(s.t==="cards") startCards(s); else runDrill(s);
+  renderPath(); $("stage").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* карточки */
+let CW=[],fi=0,seen=new Set(),cardsStep=null;
+function startCards(s){ cardsStep=s; CW=s.set.words; fi=0; seen=new Set();
+  $("sHint").textContent="Нажми на карточку, чтобы увидеть перевод и пример. Послушай каждое слово 🔊 и произнеси вслух. Пролистай все карточки.";
+  $("cardsBox").classList.remove("hidden"); flashShow(); }
+function flashShow(){ const w=CW[fi]; seen.add(fi); $("flash").classList.remove("flip");
+  $("fFront").textContent=w.en; $("fPos").textContent=w.pos+" · "+w.def; $("fBack").textContent=w.ru; $("fEx").textContent=w.ex;
+  $("fCount").textContent=(fi+1)+" / "+CW.length+"  (просмотрено "+seen.size+")"; $("cardsDone").disabled=seen.size<CW.length; }
+function flashMove(d){ fi=(fi+d+CW.length)%CW.length; flashShow(); }
+function finishCards(){ STATE.vocab[cardsStep.key]={name:cardsStep.name,seen:true}; save(); goCurrent(); }
+
+/* задания */
+function scramble(word){
+  return word.toLowerCase().split(" ").map(tok=>{ const a=[...tok]; if(a.length<2) return tok; let s=a; for(let k=0;k<20&&s.join("")===tok;k++) s=shuffle(a); return s.join(" "); }).join("   /   ");
+}
+function mask(word){
+  const idx=[]; [...word].forEach((c,i)=>{ if(/[a-z]/i.test(c)&&i>0&&!/[ -]/.test(word[i-1])) idx.push(i); });
+  const k=Math.max(1,Math.round(idx.length*0.4)); const hide=new Set(shuffle(idx).slice(0,k));
+  return [...word].map((c,i)=>c===" "?"&nbsp;&nbsp;":hide.has(i)?"_":esc(c)).join(" ");
+}
+function ctxPrompt(w){
+  const re=new RegExp(w.en.replace(/[-]/g,"\\-"),"i"); const m=w.ex.match(re); if(!m) return null;
+  const blank=w.en.split(" ").map(p=>[...p].map((c,i)=>i===0?c:c==="-"?"-":"_").join(" ")).join("   ");
+  return esc(w.ex.slice(0,m.index))+'<b style="white-space:pre-wrap;font-family:monospace">'+esc(blank)+'</b>'+esc(w.ex.slice(m.index+m[0].length));
+}
+function buildItems(s){
+  const W=s.set?s.set.words:null;
+  const others=(w,f)=>shuffle(W.filter(x=>x!==w)).slice(0,3).map(f);
+  const ru=w=>esc(w.ru)+" <span class='muted' style='font-size:15px'>("+w.pos+")</span>";
+  switch(s.t){
+  case "tr": return {type:"mc",hint:"Послушай и выбери перевод.",items:W.map(w=>({prompt:esc(w.en),sayText:w.en,opts:shuffle([w.ru,...others(w,x=>x.ru)]),ans:w.ru,after:w.en+" — "+w.ru,word:w.en}))};
+  case "def": return {type:"mc",hint:"Прочитай определение и выбери слово. Именно так IELTS перефразирует лексику в Reading и Listening.",items:W.map(w=>({prompt:"<span style='font-size:19px'>"+esc(w.def)+"</span>",opts:shuffle([w.en,...others(w,x=>x.en)]),ans:w.en,after:w.en+" = "+w.def,word:w.en}))};
+  case "ctx": return {type:"write",hint:"Вставь слово/фразу в предложение. Даны первые буквы, каждая черточка = одна буква.",items:W.filter(w=>ctxPrompt(w)).map(w=>({prompt:"<span style='font-size:19px;font-weight:500'>"+ctxPrompt(w)+"</span>",ans:[w.en],word:w.en,sayText:w.ex,after:w.ru}))};
+  case "gaps": return {type:"write",hint:"Напиши слово целиком, вставив пропущенные буквы.",items:W.map(w=>({prompt:ru(w)+"<div style='font-family:monospace;font-size:24px;margin-top:8px'>"+mask(w.en)+"</div>",ans:[w.en],word:w.en,sayText:w.en}))};
+  case "lis": return {type:"write",autoSay:true,hint:"Послушай и напиши. 🔊 — ещё раз.",items:W.map(w=>({prompt:"🎧 <span class='muted' style='font-size:15px'>("+w.en.length+" знаков)</span>",ans:[w.en],word:w.en,sayText:w.en,after:w.ru}))};
+  case "wr": return {type:"write",hint:"Итог набора: перевод → слово по-английски, без подсказок.",items:W.map(w=>({prompt:ru(w),ans:[w.en],word:w.en,sayText:w.en}))};
+  case "scr": return {type:"write",hint:"Буквы перемешаны. Собери слово и напиши его без ошибок.",items:W.map(w=>({prompt:ru(w)+"<div style='font-family:monospace;font-size:26px;letter-spacing:4px;margin-top:8px'>"+scramble(w.en)+"</div>",ans:[w.en],word:w.en,sayText:w.en}))};
+  }
+}
+let D=null;
+function runDrill(s){ const b=buildItems(s);
+  D={step:s,type:b.type,autoSay:b.autoSay,items:b.items,queue:shuffle(b.items.map((_,i)=>i)),total:b.items.length,first:0,done:0,wrong:new Set(),mistakes:[],cur:null,lock:false,retype:null};
+  $("sHint").textContent=b.hint; $("drillBox").classList.remove("hidden"); dNext(); }
+function dNext(){
+  D.lock=false; D.retype=null; $("dBar").style.width=(100*D.done/D.total)+"%"; $("dFb").innerHTML=""; $("dOpts").innerHTML="";
+  if(!D.queue.length){
+    $("dPrompt").innerHTML="✅ Готово! С первого раза: "+D.first+" / "+D.total+(D.mistakes.length?"<div class='muted' style='font-size:15px;font-weight:400'>Повтори: "+D.mistakes.map(m=>esc(m.split(" (")[0])).join(", ")+"</div>":"");
+    $("dWrite").classList.add("hidden");
+    STATE.vocab[D.step.key]={name:D.step.name,score:D.first,total:D.total,mistakes:D.mistakes}; save(); renderPath(); $("nextBox").classList.remove("hidden"); return;
+  }
+  D.cur=D.queue.shift(); const it=D.items[D.cur];
+  const sayBtn=it.sayText&&(D.type==="mc"||D.autoSay)?` <button class="dark sm" onclick="say(${esc(JSON.stringify(it.sayText))})">🔊</button>`:"";
+  $("dPrompt").innerHTML=it.prompt+sayBtn;
+  if(D.type==="mc"){ $("dWrite").classList.add("hidden"); it.opts.forEach(o=>{const b=document.createElement("button"); b.textContent=o; b.onclick=()=>dPick(b,o); $("dOpts").appendChild(b);}); }
+  else{ $("dWrite").classList.remove("hidden"); $("dIn").value=""; $("dIn").className=""; $("dIn").focus(); if(D.autoSay) say(it.sayText); }
+}
+function dResult(ok,given){ const it=D.items[D.cur];
+  if(ok){ if(!D.wrong.has(D.cur)) D.first++; D.done++; }
+  else{ if(!D.wrong.has(D.cur)){ D.wrong.add(D.cur); D.mistakes.push(it.word+" (написал(а): "+(given||"—")+")"); } D.queue.push(D.cur); } }
+function dPick(btn,o){ if(D.lock)return; D.lock=true; const it=D.items[D.cur]; const ok=o===it.ans;
+  [...$("dOpts").children].forEach(b=>{b.disabled=true; if(b.textContent===it.ans) b.classList.add("ok");}); if(!ok) btn.classList.add("bad");
+  dResult(ok,o); $("dFb").innerHTML=(ok?"👍 ":"✗ ")+esc(it.after||"")+(ok?"":"<br><span class='muted'>Будет ещё раз.</span>");
+  if(it.sayText&&!ok) say(it.sayText); setTimeout(dNext, ok?900:2600); }
+function dCheck(){
+  if(D.lock)return; const it=D.items[D.cur]; const v=$("dIn").value; if(!v.trim())return;
+  if(D.retype){ if(isRight(v,it.ans)){ D.lock=true; $("dIn").className="ok"; $("dFb").innerHTML="👍 Теперь правильно. Будет ещё раз в конце."; setTimeout(dNext,1100); }
+    else{ $("dIn").className="bad"; $("dFb").innerHTML="Ещё не так. Напиши точно: <b>"+esc(it.word)+"</b>"; } return; }
+  const ok=isRight(v,it.ans); $("dIn").className=ok?"ok":"bad"; dResult(ok,v); say(it.word);
+  if(ok){ D.lock=true; $("dFb").innerHTML="👍 "+esc(it.word)+(it.after?" — "+esc(it.after):""); setTimeout(dNext,1000); }
+  else{ D.retype=true; $("dFb").innerHTML="Правильно: <b style='font-size:20px'>"+esc(it.word)+"</b><br>Перепечатай правильно и нажми «Проверить»."; $("dIn").value=""; $("dIn").focus(); }
+}
+
+/* отчёт */
+const SHORT={tr:"перевод",def:"определение",ctx:"в предложении",gaps:"буквы",scr:"из букв",lis:"на слух",wr:"по переводу"};
+function buildReport(){
+  const mins=Math.max(1,Math.round((Date.now()-STATE.started)/60000));
+  let t="📝 <b>IELTS Vocabulary · Transport &amp; towns (band 6)</b>\n👤 "+esc(STATE.name)+"\n🕒 "+new Date().toLocaleString("ru-RU")+" · ≈"+mins+" мин\n📚 Шагов пройдено: "+STEPS.filter(s=>STATE.vocab[s.key]).length+" из "+STEPS.length+"\n";
+  SETS.forEach(st=>{
+    const got=STEPS.filter(x=>x.set===st&&x.t!=="cards"&&STATE.vocab[x.key]);
+    if(!got.length){ t+="\n<b>"+esc(st.name)+"</b>: не начато"; return; }
+    const sc=got.reduce((a,x)=>a+STATE.vocab[x.key].score,0), tt=got.reduce((a,x)=>a+STATE.vocab[x.key].total,0);
+    t+="\n<b>"+esc(st.name)+"</b>: "+sc+"/"+tt+"\n   "+esc(got.map(x=>SHORT[x.t]+" "+STATE.vocab[x.key].score+"/"+STATE.vocab[x.key].total).join(" · "));
+    got.forEach(x=>STATE.vocab[x.key].mistakes.forEach(m=>t+="\n   ✗ "+esc(SHORT[x.t]+": "+m)));
+  });
+  return t;
+}
+function chunks(text){ const out=[]; let cur=""; text.split("\n").forEach(l=>{ if((cur+"\n"+l).length>3800){ out.push(cur); cur=l; } else cur=cur?cur+"\n"+l:l; }); if(cur)out.push(cur); return out; }
+async function sendResults(){
+  const text=buildReport(); $("sendBtn").disabled=true; $("sendFb").textContent="Отправляю…";
+  try{ for(const part of chunks(text)){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+    $("sendFb").textContent="✅ Отправлено! Молодец!"; $("sendBtn").disabled=false; }
+  catch(e){ $("sendBtn").disabled=false; $("sendFb").textContent="Не получилось отправить ("+e.message+"). Скопируй текст и отправь вручную:"; const b=$("copyBox"); b.value=text.replace(/<\/?b>/g,""); b.classList.remove("hidden"); b.select(); }
+}
+
+
+/* ============ ПРОВЕРКА ПО ЮНИТАМ (без кроссвордов и word search) ============ */
+const PL10=["post office","hotel","police station","sports centre","restaurant","supermarket","station","park","library","museum"];
+const SEL2=["-er / -est","more / the most"];
+const UNITS = [
+ {id:"u1", title:"1 · Match the activities with the places", ins:"You might go here to … Выбери место.",
+  items:[
+   ["send a parcel","post office"],["stay for a few days","hotel"],["speak to a policeman","police station"],["exercise","sports centre"],["have a meal","restaurant"],["do some food shopping","supermarket"],["catch a bus or a train","station"],["relax on the grass","park"],["borrow a book","library"],["look at things from the past","museum"]
+  ].map(x=>({t:x[0]+" → {}", b:[{o:PL10,a:[x[1]]}]}))},
+ {id:"u2", title:"2 · Match the places to the sets of words", ins:"Выбери место, к которому подходят все четыре слова.",
+  items:[
+   ["seat – ticket – platform – travel","train"],["lift – floor – clothes – toys","department store"],["cars – road – sign – fast","motorway"],["coffee – snack – talk – table","cafe"],["houses – cars – bikes – neighbours","street"],["history – visitors – building – museum","castle"],["flight – plane – passenger – pilot","airport"]
+  ].map(x=>({t:x[0]+" → {}", b:[{o:["department store","castle","airport","motorway","train","street","cafe"],a:[x[1]]}]}))},
+ {id:"u3", title:"3 · Choose the correct answer", ins:"Read the sentences about Sally and choose the correct word.",
+  items:[
+   {t:"Sally and her friend had nothing to do and they felt a bit {}.", b:[{o:["bored","sorry","heavy"],a:["bored"]}]},
+   {t:"They decided to go to the shopping centre to get some {} clothes.", b:[{o:["latest","new","early"],a:["new"]}]},
+   {t:"The shopping centre had all of Sally's {} shops.", b:[{o:["popular","favourite","great"],a:["favourite"]}]},
+   {t:"It was the weekend, and the centre was {} of people.", b:[{o:["full","busy","crowded"],a:["full"]}]},
+   {t:"Sally was {} not to spend too much money.", b:[{o:["worried","ready","careful"],a:["careful"]}]},
+   {t:"After a couple of hours, Sally and her friend felt {} so they went to a cafe to relax.", b:[{o:["wrong","difficult","tired"],a:["tired"]}]},
+   {t:"They had a drink and a {} snack and then went home.", b:[{o:["right","healthy","fast"],a:["healthy"]}]}
+  ]},
+ {id:"u4", title:"4 · Complete the sentences with an adjective", ins:"Words: friendly, high, comfortable, old, famous, interesting, modern. Каждое слово один раз. Дана первая буква.", hint:true,
+  items:[
+   {t:"I didn't enjoy the flight because my seat was not at all {}.", b:[{a:["comfortable"]}]},
+   {t:"The library looks very {} – the building is made of glass and it is an unusual shape.", b:[{a:["modern"]}]},
+   {t:"The staff at the hotel were always polite and {}.", b:[{a:["friendly"]}]},
+   {t:"I'm reading a very {} book at the moment about the future of the planet.", b:[{a:["interesting"]}]},
+   {t:"I bought some beautiful {} jewellery from the market. It's from the 19th century.", b:[{a:["old"]}]},
+   {t:"The mountain isn't very {} but the views from the top are still amazing.", b:[{a:["high"]}]},
+   {t:"I sat next to a well known actor on the train. I had never seen a {} person before that.", b:[{a:["famous"]}]}
+  ]},
+ {id:"u5", title:"5 · Which form: -er / -est or more / the most?", ins:"Для каждого прилагательного выбери форму сравнения. Пример: small – smaller, smallest; famous – more, the most famous.",
+  items:[["expensive",1],["interesting",1],["modern",1],["comfortable",1],["strong",0],["fast",0],["difficult",1],["low",0],["high",0],["careful",1],["new",0],["important",1],["cheap",0],["crowded",1],["clean",0],["old",0]].map(x=>({t:x[0]+" → {}", b:[{o:SEL2,a:[SEL2[x[1]]]}]}))},
+ {id:"u6", title:"6 · Comparative adjectives (in brackets)", ins:"Write the comparative form of the adjective in brackets.",
+  items:[
+   {t:"I think trains are {} (safe) and {} (fast) than cars.", b:[{a:["safer"]},{a:["faster"]}]},
+   {t:"The traffic is usually {} (bad) in the city than in the countryside.", b:[{a:["worse"]}]},
+   {t:"In London, the bus is {} (cheap) than the trains.", b:[{a:["cheaper"]}]},
+   {t:"The main square is {} (old) than any other parts of the town.", b:[{a:["older"]}]},
+   {t:"My old house was {} (big) than the one I live in now.", b:[{a:["bigger"]}]},
+   {t:"I live far from college so I have to get up {} (early) than my friends.", b:[{a:["earlier"]}]},
+   {t:"Our garden always looks {} (pretty) in summer than in winter.", b:[{a:["prettier"]}]},
+   {t:"My friend has lost weight and is much {} (thin) than last year.", b:[{a:["thinner"]}]},
+   {t:"It is {} (good) for your health to cycle to work than get the bus.", b:[{a:["better"]}]},
+   {t:"Jon lives {} (far) away from me than Pete.", b:[{a:["further","farther"]}]}
+  ]},
+ {id:"u7", title:"7 · Make a comparative sentence", ins:"Complete the sentences using a comparative adjective.",
+  items:[
+   {t:"My bike was expensive but my brother's was {}.", b:[{a:["more expensive"]}]},
+   {t:"Art galleries are interesting but museums are {}.", b:[{a:["more interesting"]}]},
+   {t:"Madrid is hot but Kuwait is {}.", b:[{a:["hotter"]}]},
+   {t:"This garden is pretty but the one we saw yesterday was {}.", b:[{a:["prettier"]}]},
+   {t:"This restaurant is good but the Italian one is {}.", b:[{a:["better"]}]},
+   {t:"I was excited about the trip but my friend was {}.", b:[{a:["more excited"]}]},
+   {t:"Cars are noisy but motorbikes are {}.", b:[{a:["noisier"]}]},
+   {t:"I'm bad at maths but my friend is {}.", b:[{a:["worse"]}]}
+  ]},
+ {id:"u8", title:"8 · Superlatives: three cars", ins:"Look at the facts about the three cars and complete the sentences with the superlative form (the + …).",
+  intro:"<table class='tbl' style='width:100%;border-collapse:collapse;font-size:15px;margin:8px 0'><tr style='background:#eef3ff'><th></th><th>Year</th><th>Kilometres</th><th>Engine</th><th>Doors</th><th>Price</th></tr><tr><td><b>Car A</b></td><td>2010</td><td>80,000 km</td><td>1 litre</td><td>3</td><td>£2000</td></tr><tr><td><b>Car B</b></td><td>2009</td><td>20,000 km</td><td>1.5 litre</td><td>5</td><td>£6500</td></tr><tr><td><b>Car C</b></td><td>2015</td><td>10,000 km</td><td>2 litre</td><td>4</td><td>£15,000</td></tr></table>",
+  items:[
+   {t:"Car A is {} (cheap).", b:[{a:["the cheapest"]}]},
+   {t:"Car B has {} (many) doors.", b:[{a:["the most"]}]},
+   {t:"Car C has {} (large) engine.", b:[{a:["the largest"]}]},
+   {t:"Car A has {} (many) kilometres on the clock.", b:[{a:["the most"]}]},
+   {t:"Car C is {} (expensive).", b:[{a:["the most expensive"]}]},
+   {t:"Car A has {} (small) engine.", b:[{a:["the smallest"]}]},
+   {t:"Car B is {} (old).", b:[{a:["the oldest"]}]}
+  ]},
+ {id:"u9", title:"9 · William's email: correct form of the adjective", ins:"Complete the email with the comparative or superlative form of the adjectives in brackets. Hi Sue, I'm on holiday in Munich and I'm having a great time. We are staying in a little hotel near the city centre.",
+  items:[
+   {t:"It isn't {} (good) hotel in town but it is nice enough.", b:[{a:["the best"]}]},
+   {t:"It was {} (cheap) than most of the others I looked at.", b:[{a:["cheaper"]}]},
+   {t:"The Englischer Garden is a beautiful park that is {} (big) than Central Park in New York!", b:[{a:["bigger"]}]},
+   {t:"Yesterday we went to the Deutsches Museum, a big science museum – one of {} (large) in Europe.", b:[{a:["the largest"]}]},
+   {t:"I liked all of it, but {} (interesting) part for me was the space exhibition.", b:[{a:["the most interesting"]}]},
+   {t:"The guidebook says it is one of {} (fine) palaces in the whole of Germany.", b:[{a:["the finest"]}]}
+  ]}
+];
+
+
+function hintOf(a){ return a.split(" ").map(p=>p[0]+"_".repeat(Math.max(0,p.length-1))).join(" "); }
+function uBlank(u,i,j,b){
+  const id="u_"+u.id+"_"+i+"_"+j;
+  if(b.o) return '<select class="sel" id="'+id+'"><option value="">…</option>'+b.o.map(o=>'<option value="'+esc(o)+'">'+esc(o)+'</option>').join("")+'</select>';
+  const ph=u.hint?hintOf(b.a[0]):"";
+  return '<input class="gap" id="'+id+'" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="'+esc(ph)+'" style="width:'+Math.max(110,b.a[0].length*12+40)+'px">';
+}
+function uRender(u){
+  let h='<div class="card" id="uc_'+u.id+'"><h3>'+esc(u.title)+'</h3><p class="muted">'+esc(u.ins)+'</p>'+(u.intro||"")+(u.ex?'<p class="muted" style="font-style:italic">'+esc(u.ex)+'</p>':"");
+  u.items.forEach((it,i)=>{
+    const parts=it.t.split("{}"); let body="";
+    parts.forEach((p,k)=>{ body+=esc(p)+(k<it.b.length?uBlank(u,i,k,it.b[k]):""); });
+    h+='<div class="urow"><span class="qn">'+(i+1)+'</span> '+body+'<div class="fix" id="uf_'+u.id+'_'+i+'"></div></div>';
+  });
+  const prev=STATE.units&&STATE.units[u.id];
+  h+='<button class="primary" onclick="uCheck(\''+u.id+'\')">Проверить</button><button onclick="uReset(\''+u.id+'\')">Заново</button> <span class="score" id="us_'+u.id+'" style="font-size:16px">'+(prev?"Прошлый результат: "+prev.score+" / "+prev.total:"")+'</span></div>';
+  return h;
+}
+function uRenderAll(){ $("uList").innerHTML=UNITS.map(uRender).join(""); uProgress(); }
+function uReset(id){ const u=UNITS.find(x=>x.id===id); const el=$("uc_"+id); const tmp=document.createElement("div"); tmp.innerHTML=uRender(u); el.replaceWith(tmp.firstChild); }
+function uCheck(id){
+  const u=UNITS.find(x=>x.id===id); let score=0,total=0,mistakes=[],empty=false;
+  u.items.forEach((it,i)=>it.b.forEach((b,j)=>{ if(!$("u_"+id+"_"+i+"_"+j).value.trim()) empty=true; }));
+  if(empty){ $("us_"+id).textContent="Заполни все пропуски, потом проверим."; return; }
+  u.items.forEach((it,i)=>{
+    const fixes=[];
+    it.b.forEach((b,j)=>{
+      const el=$("u_"+id+"_"+i+"_"+j), v=el.value.trim(); total++;
+      const ok=b.o?v===b.a[0]:isRight(v,b.a);
+      el.classList.toggle("ok",ok); el.classList.toggle("bad",!ok);
+      if(ok) score++; else { fixes.push(b.a[0]); mistakes.push((i+1)+(it.b.length>1?"."+(j+1):"")+": "+v+" → "+b.a[0]); }
+    });
+    $("uf_"+id+"_"+i).textContent=fixes.length?"→ "+fixes.join(", "):"";
+  });
+  $("us_"+id).textContent="Результат: "+score+" / "+total;
+  STATE.units=STATE.units||{}; STATE.units[id]={title:u.title,score,total,mistakes}; save(); uProgress();
+}
+function uProgress(){
+  const done=UNITS.filter(u=>STATE.units&&STATE.units[u.id]);
+  const s=done.reduce((a,u)=>a+STATE.units[u.id].score,0), t=done.reduce((a,u)=>a+STATE.units[u.id].total,0);
+  $("uBar").style.width=(100*done.length/UNITS.length)+"%";
+  $("uProg").textContent="Проверено блоков: "+done.length+" из "+UNITS.length+(t?" · баллы: "+s+" / "+t:"");
+}
+async function sendTG(text,btnId,fbId,copyId){
+  const btn=$(btnId); btn.disabled=true; $(fbId).textContent="Отправляю…";
+  try{ for(const part of chunks(text)){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+    $(fbId).textContent="✅ Отправлено! Молодец!"; }
+  catch(e){ $(fbId).textContent="Не получилось отправить ("+e.message+"). Скопируй текст и отправь вручную:"; const b=$(copyId); b.value=text.replace(/<\/?b>/g,""); b.classList.remove("hidden"); b.select(); }
+  btn.disabled=false;
+}
+function sendUnits(){
+  const done=UNITS.filter(u=>STATE.units&&STATE.units[u.id]);
+  if(!done.length){ $("uFb").textContent="Пока нет ни одного проверенного блока."; return; }
+  let t="📝 <b>Проверка по юнитам</b>\n👤 "+esc(STATE.name||"—")+"\n🕒 "+new Date().toLocaleString("ru-RU")+"\n";
+  let s=0,tt=0; done.forEach(u=>{ const r=STATE.units[u.id]; s+=r.score; tt+=r.total; t+="\n<b>"+esc(r.title)+"</b>: "+r.score+"/"+r.total; r.mistakes.forEach(m=>t+="\n   ✗ "+esc(m)); });
+  t+="\n\n<b>Итого</b>: "+s+"/"+tt+" · блоков: "+done.length+" из "+UNITS.length;
+  sendTG(t,"uSend","uFb","uCopy");
+}
+
+
+/* ============ SPEAKING: transport and towns ============ */
+const REC={};
+const SP_PHRASES=[
+ {h:"Начало ответа", l:["I usually … / I came here by …","In my country, most people …","In my opinion, … / I think …","It depends. For example, …"]},
+ {h:"Причина и пример", l:["… because …","The main reason is that …","For example, … / For instance, …","That is why …"]},
+ {h:"Сравнение (comparatives and superlatives)", l:["Trains are faster than buses. / Buses are cheaper than taxis.","Cars are more comfortable than bikes.","It is the best / the cheapest / the most popular way to travel.","good – better – the best; bad – worse – the worst; far – further – the furthest"]},
+ {h:"Сделать ответ длиннее", l:["Add a reason: … because …","Add an example: for example, …","Add a contrast: but / however, …","Add what you feel: I like it because it is …"]}
+];
+const SP_Q=[
+ {g:"Transport", q:"How did you travel here today?",
+  words:["by bus / by metro / on foot","coach","along the way","delay","hurry"],
+  start:["I came here by … today.","It takes about … minutes."],
+  model:"I came here by bus today. It takes about twenty minutes, and it is cheaper than going by taxi. Along the way, I listened to music."},
+ {g:"Transport", q:"How do people prefer to travel in your country?",
+  words:["motorway","flight","coach","cheaper / faster / more comfortable than","common"],
+  start:["Most people prefer to travel by …","In big cities, many people use …"],
+  model:"Most people prefer to travel by car because it is faster and more comfortable than public transport. However, in big cities many people use the metro because it is cheaper and there is less traffic. For long journeys, some people take a coach or a flight."},
+ {g:"Transport", q:"Is traffic a problem in your town?",
+  words:["common (problem)","narrow","delay","motorway","the council"],
+  start:["Yes, traffic is a common problem in …","No, traffic is not a big problem because …"],
+  model:"Yes, traffic is a common problem in my town, especially in the morning. The streets are narrow in the old part of town, so there are often delays. The council is building a new cycle way, which should help."},
+ {g:"Transport", q:"Is it better to walk or cycle where you live?",
+  words:["pavement","cycle way","safer / faster than","hurry","large"],
+  start:["I think it is better to … because …","Walking is … than cycling, but …"],
+  model:"I think it is better to walk, because there are good pavements and the shops are close. Cycling is faster, but it can be dangerous because the roads are busy and there is no cycle way in some places."},
+ {g:"Transport", q:"What is the best way to travel in your town?",
+  words:["the best / the cheapest / the fastest","available","customer","staff","the outskirts"],
+  start:["The best way to travel in my town is by …","It is the … way because …"],
+  model:"The best way to travel in my town is by metro. It is the fastest and the cheapest way, and it is available every five minutes. Buses are cheaper than taxis, but they are slower, especially in the morning."},
+ {g:"Your hometown", q:"Where do you come from?",
+  words:["the North / the South","large","the outskirts","square","rate"],
+  start:["I come from …, a … town / city in …","About … people live there."],
+  model:"I come from a large city in the North of my country. It is on a big river, and about two million people live there. I live on the outskirts, but my college is in the centre."},
+ {g:"Your hometown", q:"Tell me about the most interesting places in your town.",
+  words:["castle","tower","cathedral","palace","go sightseeing","boat trip","bridge"],
+  start:["The most interesting place in my town is …","You can also …"],
+  model:"The most interesting place in my town is the old castle, which is on a hill. There is also a beautiful cathedral in the main square, and you can go on a boat trip along the river. Many tourists go sightseeing there in summer."},
+ {g:"Your hometown", q:"What is the oldest part of your town?",
+  words:["the oldest","square","narrow","bridge","than","modern"],
+  start:["The oldest part of my town is …","It is much older than …"],
+  model:"The oldest part of my town is the centre. It has narrow streets, an old bridge and a palace. It is much older than the outskirts, where there are modern buildings."},
+ {g:"Your hometown", q:"Is your town popular with tourists?",
+  words:["destination","staff","customer","available","offer","famous"],
+  start:["Yes, it is a popular destination, especially in …","Not really, because …"],
+  model:"Yes, it is a popular destination, especially in summer. The most famous place is the tower, and the hotels have more customers than ever. However, rooms are not always available in July, so it is better to book early."},
+ {g:"Your hometown", q:"How could you make your town better?",
+  words:["council","cycle way","pavement","offer","enough","hurry"],
+  start:["I think we could make my town better by …","The council should …"],
+  model:"I think we could make my town better by building more cycle ways and wider pavements. The council should also offer cheaper tickets for buses and keep the streets clean. I am always in a hurry in the mornings, so faster transport would help too."}
+];
+const SP_CHECK=["Did you use vocabulary from the lesson?","Did you forget to use any words?","Did you use comparative and superlative adjectives?","Did you give short answers? How can you make them longer?"];
+function fmt(t){ t=Math.max(0,Math.round(t)); return Math.floor(t/60)+":"+String(t%60).padStart(2,"0"); }
+function recUI(id,max){ return '<div class="recbox" id="rb-'+id+'"><button class="primary" id="rbtn-'+id+'" onclick="recToggle(\''+id+'\','+max+')">🔴 Записать</button> <b id="rtime-'+id+'"></b><div id="rplay-'+id+'" style="margin-top:6px"></div></div>'; }
+let active=null;
+async function recToggle(id,max){
+  if(active && active.id===id){ active.stop(); return; }
+  if(active){ alert("Сначала останови текущую запись."); return; }
+  if(!navigator.mediaDevices||!window.MediaRecorder){ alert("Этот браузер не умеет записывать звук. Открой сайт в Chrome или Safari (iPhone: iOS 14.3+)."); return; }
+  let stream; try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }catch(e){ alert("Нет доступа к микрофону. Разреши доступ в настройках браузера."); return; }
+  const types=["audio/ogg;codecs=opus","audio/webm;codecs=opus","audio/mp4","audio/webm"]; const mime=types.find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||"";
+  const mr=new MediaRecorder(stream, mime?{mimeType:mime}:undefined); const parts=[]; const t0=Date.now();
+  mr.ondataavailable=e=>{ if(e.data.size) parts.push(e.data); };
+  const tick=setInterval(()=>{ const s=(Date.now()-t0)/1000; $("rtime-"+id).textContent="● "+fmt(s)+" / "+fmt(max); if(s>=max) stop(); },250);
+  function stop(){ if(mr.state!=="inactive") mr.stop(); }
+  mr.onstop=()=>{ clearInterval(tick); stream.getTracks().forEach(t=>t.stop()); active=null;
+    const type=mr.mimeType||mime||"audio/webm"; const blob=new Blob(parts,{type}); const dur=(Date.now()-t0)/1000;
+    REC[id]={blob,mime:type,dur}; $("rbtn-"+id).textContent="🔁 Перезаписать"; $("rtime-"+id).textContent="✓ "+fmt(dur);
+    $("rplay-"+id).innerHTML='<audio controls src="'+URL.createObjectURL(blob)+'" style="width:100%"></audio>';
+  };
+  mr.start(1000); active={id,stop}; $("rbtn-"+id).textContent="⏹ Остановить"; $("rplay-"+id).innerHTML="";
+}
+function spRender(){
+  let h="",last=null;
+  SP_Q.forEach((x,i)=>{
+    if(x.g!==last){ h+='<h4 style="margin:16px 0 4px">'+esc(x.g)+'</h4>'; last=x.g; }
+    h+='<div class="form" style="margin:8px 0"><b>'+(i+1)+'. '+esc(x.q)+'</b>'
+      +'<div style="margin:6px 0">'+x.words.map(w=>'<span class="chip" onclick="say('+esc(JSON.stringify(w))+')">'+esc(w)+'</span>').join("")+'</div>'
+      +'<details><summary class="muted">💡 Как начать и пример ответа</summary><ul class="pb">'+x.start.map(s=>'<li>'+esc(s)+'</li>').join("")+'</ul><div class="reading" style="font-family:inherit;font-size:15px"><b>Example:</b> '+esc(x.model)+' <button class="dark sm" onclick="say('+esc(JSON.stringify(x.model))+',true)">🔊</button></div></details>'
+      +'<input type="text" id="spn'+i+'" placeholder="Мой план: ответ → причина → пример" autocomplete="off" style="margin:8px 0">'
+      +recUI("q"+i,60)+'</div>';
+  });
+  $("spList").innerHTML=h;
+  $("spPh").innerHTML=SP_PHRASES.map(g=>'<details style="margin:4px 0"><summary><b>'+esc(g.h)+'</b></summary><ul class="pb">'+g.l.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></details>').join("");
+  $("spCheck").innerHTML=SP_CHECK.map((c,i)=>'<label style="display:block;margin:6px 0"><input type="checkbox" id="spc'+i+'"> '+esc(c)+'</label>').join("");
+}
+function ext(m){ return /ogg/.test(m)?"ogg":/mp4|aac|m4a/.test(m)?"m4a":"webm"; }
+async function tg(method, body){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/"+method,{method:"POST",body}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+async function sendFile(id, caption){
+  const R=REC[id]; const fd=new FormData(); fd.append("chat_id",TG_CHAT_ID); fd.append("caption",caption.slice(0,1000));
+  if(/ogg/.test(R.mime)){ fd.append("voice",R.blob,id+".ogg"); return tg("sendVoice",fd); }
+  fd.append("document",R.blob,(STATE.name||"student")+"_"+id+"."+ext(R.mime)); return tg("sendDocument",fd);
+}
+async function sendSpeaking(){
+  if(active){ alert("Сначала останови запись."); return; }
+  const ids=Object.keys(REC); if(!ids.length){ $("spFb").textContent="Пока нет ни одной записи."; return; }
+  $("spSend").disabled=true; $("spFb").textContent="Отправляю…";
+  let t="🎤 <b>Speaking · Transport and towns (band 6)</b>\n👤 "+esc(STATE.name||"—")+"\n🕒 "+new Date().toLocaleString("ru-RU")+"\n";
+  SP_Q.forEach((x,i)=>{ const r=REC["q"+i]; t+="\n"+(i+1)+". "+esc(x.q)+"\n   план: "+esc($("spn"+i).value.trim()||"—")+"\n   запись: "+(r?fmt(r.dur):"нет"); });
+  t+="\n\n<b>Самопроверка</b>: "+SP_CHECK.map((c,i)=>($("spc"+i).checked?"✓ ":"✗ ")+esc(c)).join("\n   ");
+  try{
+    await tg("sendMessage",new URLSearchParams({chat_id:TG_CHAT_ID,text:t,parse_mode:"HTML"}));
+    for(let i=0;i<SP_Q.length;i++){ const id="q"+i; if(REC[id]){ $("spFb").textContent="Отправляю запись "+(i+1)+"…"; await sendFile(id,(STATE.name||"")+" · Q"+(i+1)+": "+SP_Q[i].q); } }
+    $("spFb").textContent="✅ Отправлено! Молодец!";
+  }catch(e){ $("spFb").textContent="Не получилось отправить: "+e.message+". Попробуй ещё раз."; }
+  $("spSend").disabled=false;
+}
+
+$("nav").addEventListener("click",e=>{ const t=e.target.dataset.tab; if(!t)return; speechSynthesis.cancel();
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));
+  ["vocab","units","speak"].forEach(x=>$("tab-"+x).classList.toggle("hidden",x!==t)); window.scrollTo(0,0); });
+
+load(); if(STATE.name) $("nameInput").value=STATE.name;
+uRenderAll(); spRender();
+</script>
+</body>
+</html>

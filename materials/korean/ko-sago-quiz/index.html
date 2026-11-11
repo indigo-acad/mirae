@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사고와 사건 · быстрые задания</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#1f2430;--muted:#6b7280;--accent:#c2410c;--ok:#15803d;--okbg:#dcfce7;--bad:#b91c1c;--badbg:#fee2e2;--sel:#ffedd5;--line:#e5e1d8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+.wrap{max-width:680px;margin:0 auto;padding:16px 12px 40px}
+h1{font-size:24px;margin:6px 0 4px} h2{font-size:20px;margin:0 0 4px}
+.muted{color:var(--muted);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px}
+button{font:inherit;cursor:pointer;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:11px 12px}
+.main{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;width:100%;margin-top:12px}
+.task{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin-top:9px}
+.task .n{width:34px;height:34px;border-radius:50%;background:var(--sel);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.task.done .n{background:var(--okbg);color:var(--ok)}
+.task .t{flex:1} .task .r{font-size:14px;color:var(--muted);white-space:nowrap}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--muted);gap:8px}
+.bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin:8px 0 2px}
+.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.col{display:grid;gap:8px;align-content:start}
+.it{text-align:left;min-height:48px;font-size:15px;transition:all .15s}
+.it.ko{font-size:18px}
+.it.sel{background:var(--sel);border-color:var(--accent)}
+.it.bad{background:var(--badbg);border-color:var(--bad)}
+.it.gone{opacity:.25;pointer-events:none;background:var(--okbg);border-color:var(--ok)}
+.word{font-size:30px;font-weight:700;text-align:center;margin:18px 0 6px}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cats button{text-align:center}
+.cats button.ok{background:var(--okbg);border-color:var(--ok)}
+.cats button.bad{background:var(--badbg);border-color:var(--bad)}
+.q{font-size:21px;font-weight:600;margin:10px 0 4px}
+.gap{border-bottom:2px solid var(--accent);padding:0 18px}
+.opts{display:grid;gap:8px;margin-top:10px}
+.opts button{text-align:left}
+.opts button.ok{background:var(--okbg);border-color:var(--ok)}
+.opts button.bad{background:var(--badbg);border-color:var(--bad)}
+.fb{margin-top:10px;padding:10px 12px;border-radius:12px;background:#faf8f3;border:1px solid var(--line);font-size:15px}
+.big{font-size:42px;font-weight:700;margin:4px 0}
+.mist{border-top:1px solid var(--line);padding:8px 0;font-size:15px}
+.mist b{font-size:17px}
+.say{border:none;background:none;padding:0 4px;font-size:18px}
+.hidden{display:none}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+
+<div id="menu">
+  <h1>사고와 사건 · быстрые задания</h1>
+  <div class="muted">4 задания подряд, около 20 минут, все 109 слов. В конце результат уйдёт учителю.</div>
+  <div class="card" id="taskList"></div>
+  <div class="card">
+    <div>Как тебя зовут?</div>
+    <input id="nameInput" placeholder="Имя" autocomplete="off" style="font:inherit;width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;margin-top:8px" onkeydown="if(event.key==='Enter')begin()">
+    <button class="main" onclick="begin()">Начать →</button>
+  </div>
+</div>
+
+<div id="final" class="hidden">
+  <div class="card" id="summary"></div>
+  <div class="card">
+    <b>📨 Учителю</b>
+    <div id="sendFb" class="muted" style="margin-top:6px"></div>
+    <button class="main" id="sendBtn" onclick="sendResults()">Отправить ещё раз</button>
+    <textarea id="copyBox" class="hidden" readonly style="width:100%;height:170px;font:13px monospace;margin-top:8px"></textarea>
+    <button class="hidden" id="copyBtn" style="width:100%;margin-top:8px" onclick="copyReport()">Скопировать текст</button>
+  </div>
+  <button style="width:100%;margin-top:12px" onclick="location.reload()">Пройти заново</button>
+</div>
+
+<div id="play" class="hidden">
+  <div class="top"><span id="tInfo" style="font-weight:600;color:var(--accent)"></span><span id="pInfo"></span><span id="clock"></span></div>
+  <div class="bar"><i id="prog"></i></div>
+  <div class="card" id="stage"></div>
+</div>
+
+</div>
+<script>
+const SETS = [
+ {id:"S1", my:true, name:"1 · 요리와 작은 사고", words:[
+  {ko:"볶다", ru:"жарить, обжаривать (помешивая)", ex:"야채를 기름에 볶았어요.", f:"볶았어요", exRu:"Я обжарил овощи на масле."},
+  {ko:"튀기다", ru:"жарить во фритюре", ex:"닭고기를 기름에 튀겼어요.", f:"튀겼어요", exRu:"Я пожарил курицу во фритюре."},
+  {ko:"부치다", ru:"жарить на масле (전, блины)", ex:"명절에는 가족이 함께 전을 부쳐요.", f:"부쳐요", exRu:"На праздник вся семья вместе жарит чон."},
+  {ko:"굽다", ru:"печь, жарить (на огне, гриле)", ex:"오븐에 빵을 구웠어요.", f:"구웠어요", exRu:"Я испёк хлеб в духовке."},
+  {ko:"가지", ru:"баклажан", ex:"가지를 볶아서 먹었어요.", exRu:"Я обжарил баклажан и съел."},
+  {ko:"익다", ru:"созревать; свариться, прожариться", ex:"고기가 아직 안 익었어요.", f:"익었어요", exRu:"Мясо ещё не прожарилось."},
+  {ko:"빠지다", ru:"выпадать, отваливаться; пропускать (занятия)", ex:"요즘 머리카락이 많이 빠져요.", f:"빠져요", exRu:"В последнее время сильно выпадают волосы."},
+  {ko:"문에 끼이다", ru:"застрять, прищемить в двери", ex:"손이 문에 끼였어요.", f:"문에 끼였어요", exRu:"Я прищемил руку дверью."},
+  {ko:"물에 빠지다", ru:"упасть в воду; тонуть", ex:"아이가 물에 빠져서 아빠가 구했어요.", f:"물에 빠져서", exRu:"Ребёнок упал в воду, и папа его спас."},
+  {ko:"물리다", ru:"быть укушенным, ужаленным", ex:"산에서 모기에 많이 물렸어요.", f:"물렸어요", exRu:"В горах меня сильно покусали комары."},
+  {ko:"뱀", ru:"змея 🐍", ex:"등산하다가 뱀을 봤어요.", exRu:"Во время похода я увидел змею."},
+  {ko:"갇히다", ru:"оказаться запертым, взаперти", ex:"화장실에 갇혀서 한 시간 동안 못 나왔어요.", f:"갇혀서", exRu:"Меня заперло в туалете, и я час не мог выйти."},
+  {ko:"엘리베이터에 갇히다", ru:"застрять в лифте", ex:"정전 때문에 엘리베이터에 갇혔어요.", f:"엘리베이터에 갇혔어요", exRu:"Из-за отключения света я застрял в лифте."}
+ ]},
+ {id:"S2", my:true, name:"2 · 교통사고", words:[
+  {ko:"교통사고가 나다", ru:"происходит дорожная авария", ex:"사거리에서 교통사고가 났어요.", f:"교통사고가 났어요", exRu:"На перекрёстке произошла авария."},
+  {ko:"교통사고", ru:"дорожная авария, ДТП", ex:"교통사고 때문에 길이 많이 막혀요.", exRu:"Из-за аварии большая пробка."},
+  {ko:"음주 운전", ru:"вождение в нетрезвом виде", ex:"음주 운전은 절대 안 돼요.", exRu:"Садиться за руль пьяным ни в коем случае нельзя."},
+  {ko:"과속", ru:"превышение скорости", ex:"과속을 해서 벌금을 냈어요.", exRu:"Я превысил скорость и заплатил штраф."},
+  {ko:"속도", ru:"скорость, темп", ex:"비가 오니까 속도를 좀 줄이세요.", exRu:"Идёт дождь, сбавьте скорость."},
+  {ko:"고속", ru:"высокая скорость", ex:"고속으로 달리면 사고가 나기 쉬워요.", exRu:"На высокой скорости легко попасть в аварию."},
+  {ko:"고속열차", ru:"скоростной поезд", ex:"고속열차를 타면 부산까지 두 시간 반쯤 걸려요.", exRu:"На скоростном поезде до Пусана около двух с половиной часов."},
+  {ko:"열차", ru:"поезд", ex:"열차가 곧 도착합니다.", exRu:"Поезд скоро прибудет."},
+  {ko:"신호", ru:"сигнал, знак", ex:"운전할 때는 신호를 잘 봐야 해요.", exRu:"За рулём нужно внимательно следить за сигналами."},
+  {ko:"신호등", ru:"светофор", ex:"신호등이 빨간불로 바뀌었어요.", exRu:"На светофоре загорелся красный."},
+  {ko:"신호를 어기다", ru:"нарушить сигнал светофора", ex:"그 차가 신호를 어겨서 사고가 났어요.", f:"신호를 어겨서", exRu:"Та машина проехала на красный, и случилась авария."},
+  {ko:"어기다", ru:"нарушать, не соблюдать", ex:"규칙을 어기면 벌금을 내야 해요.", f:"어기면", exRu:"Если нарушишь правила, придётся платить штраф."},
+  {ko:"사거리", ru:"перекрёсток", ex:"다음 사거리에서 오른쪽으로 가세요.", exRu:"На следующем перекрёстке поверните направо."}
+ ]},
+ {id:"S3", my:true, name:"3 · 안전과 사고", words:[
+  {ko:"안전벨트", ru:"ремень безопасности", ex:"뒷자리에서도 안전벨트가 필요해요.", exRu:"На заднем сиденье тоже нужен ремень безопасности."},
+  {ko:"띠", ru:"пояс, ремень", ex:"태권도에서 검은 띠를 받았어요.", exRu:"Я получил чёрный пояс по тхэквондо."},
+  {ko:"안전벨트를 매다", ru:"пристегнуть ремень безопасности", ex:"차에 타면 먼저 안전벨트를 매세요.", f:"안전벨트를 매세요", exRu:"Сев в машину, сначала пристегнитесь."},
+  {ko:"주위", ru:"окружение, всё вокруг", ex:"주위에 사람이 아무도 없었어요.", exRu:"Вокруг никого не было."},
+  {ko:"주위를 살피다", ru:"смотреть по сторонам, оглядеться", ex:"길을 건널 때는 주위를 잘 살피세요.", f:"주위를 잘 살피세요", exRu:"Переходя дорогу, хорошо смотрите по сторонам."},
+  {ko:"제한하다", ru:"ограничивать", ex:"이 도로는 트럭 통행을 제한해요.", f:"제한해요", exRu:"На этой дороге ограничено движение грузовиков."},
+  {ko:"제한 속도", ru:"ограничение скорости", ex:"여기 제한 속도는 시속 50킬로미터예요.", exRu:"Ограничение скорости здесь — 50 км/ч."},
+  {ko:"제한 속도를 지키다", ru:"соблюдать ограничение скорости", ex:"학교 앞에서는 제한 속도를 지켜야 해요.", f:"제한 속도를 지켜야", exRu:"Возле школы нужно соблюдать ограничение скорости."},
+  {ko:"사고를 당하다", ru:"попасть в аварию (пострадать)", ex:"출근길에 사고를 당했어요.", f:"사고를 당했어요", exRu:"По дороге на работу я попал в аварию."},
+  {ko:"당하다", ru:"попадать (в неприятную ситуацию), подвергаться", ex:"여행 중에 사기를 당했어요.", f:"당했어요", exRu:"В поездке меня обманули мошенники."},
+  {ko:"급히", ru:"спешно, срочно", ex:"급히 나오느라고 휴대폰을 놓고 왔어요.", exRu:"Выходил в спешке и забыл телефон."},
+  {ko:"경찰", ru:"полиция, полицейский", ex:"사고가 나서 경찰에 신고했어요.", exRu:"Случилась авария, и я сообщил в полицию."},
+  {ko:"잡히다", ru:"быть пойманным, схваченным", ex:"음주 운전을 하다가 경찰에게 잡혔어요.", f:"잡혔어요", exRu:"Его поймала полиция за вождение в нетрезвом виде."},
+  {ko:"큰일이 나다", ru:"случиться беде (큰일 났다! — беда!)", ex:"브레이크를 늦게 밟아서 큰일이 날 뻔했어요.", f:"큰일이 날 뻔했어요", exRu:"Я поздно нажал на тормоз, чуть не случилась беда."}
+ ]},
+ {id:"S4", my:true, name:"4 · 부상: травмы", words:[
+  {ko:"묶다", ru:"связывать, завязывать", ex:"머리를 묶고 운동해요.", f:"묶고", exRu:"Я завязываю волосы и занимаюсь спортом."},
+  {ko:"삐다", ru:"вывихнуть, подвернуть", ex:"계단에서 발목을 삐었어요.", f:"삐었어요", exRu:"Я подвернул ногу на лестнице."},
+  {ko:"발목", ru:"щиколотка, лодыжка", ex:"축구하다가 발목을 다쳤어요.", exRu:"Я повредил лодыжку, играя в футбол."},
+  {ko:"인대", ru:"связка", ex:"무릎 인대를 다쳐서 수술했어요.", exRu:"Я повредил связку колена и сделал операцию."},
+  {ko:"인대가 늘어나다", ru:"растянуть связки", ex:"발목 인대가 늘어나서 걷기 힘들어요.", f:"인대가 늘어나서", exRu:"Я растянул связки на лодыжке, трудно ходить."},
+  {ko:"허리를 삐끗하다", ru:"потянуть поясницу", ex:"무거운 상자를 들다가 허리를 삐끗했어요.", f:"허리를 삐끗했어요", exRu:"Поднимал тяжёлую коробку и потянул поясницу."},
+  {ko:"부러지다", ru:"сломаться (о ноге, руке и т. д.)", ex:"스키를 타다가 다리가 부러졌어요.", f:"부러졌어요", exRu:"Катаясь на лыжах, я сломал ногу."},
+  {ko:"찢어지다", ru:"рваться, порваться", ex:"넘어져서 바지가 찢어졌어요.", f:"찢어졌어요", exRu:"Я упал, и порвались брюки."},
+  {ko:"꿰매다", ru:"зашивать, сшивать", ex:"상처가 깊어서 병원에서 꿰맸어요.", f:"꿰맸어요", exRu:"Рана была глубокой, её зашили в больнице."},
+  {ko:"베이다", ru:"порезаться, быть порезанным", ex:"요리하다가 칼에 손가락이 베였어요.", f:"베였어요", exRu:"Пока готовил, порезал палец ножом."},
+  {ko:"데다", ru:"обжечься", ex:"뜨거운 물에 데었어요.", f:"데었어요", exRu:"Я обжёгся горячей водой."},
+  {ko:"손을 데다", ru:"обжечь руку", ex:"냄비를 잡다가 손을 데었어요.", f:"손을 데었어요", exRu:"Взялся за кастрюлю и обжёг руку."},
+  {ko:"상처", ru:"рана; травма", ex:"상처에 물이 닿지 않게 하세요.", exRu:"Не мочите рану."},
+  {ko:"부상", ru:"ранение, травма", ex:"그 선수는 부상 때문에 경기에 못 나갔어요.", exRu:"Этот спортсмен не вышел на игру из-за травмы."}
+ ]},
+ {id:"S5", my:true, name:"5 · 치료: лечение", words:[
+  {ko:"깁스를 하다", ru:"накладывать гипс; ходить в гипсе", ex:"다리가 부러져서 한 달 동안 깁스를 했어요.", f:"깁스를 했어요", exRu:"Я сломал ногу и месяц ходил в гипсе."},
+  {ko:"수술하다", ru:"делать операцию, оперировать", ex:"다음 주에 무릎을 수술해요.", f:"수술해요", exRu:"На следующей неделе мне оперируют колено."},
+  {ko:"연고", ru:"мазь", ex:"약국에서 연고를 샀어요.", exRu:"Я купил мазь в аптеке."},
+  {ko:"연고를 바르다", ru:"наносить мазь", ex:"하루에 두 번 연고를 바르세요.", f:"연고를 바르세요", exRu:"Наносите мазь два раза в день."},
+  {ko:"붕대", ru:"бинт, повязка", ex:"팔에 붕대가 감겨 있어요.", exRu:"Рука забинтована."},
+  {ko:"붕대를 감다", ru:"наложить повязку, забинтовать", ex:"간호사가 다친 손에 붕대를 감아 줬어요.", f:"붕대를 감아", exRu:"Медсестра забинтовала мне повреждённую руку."},
+  {ko:"진통제", ru:"обезболивающее", ex:"너무 아파서 진통제를 먹었어요.", exRu:"Было очень больно, и я выпил обезболивающее."},
+  {ko:"반창고", ru:"лейкопластырь", ex:"집에 반창고 있어요?", exRu:"У тебя дома есть пластырь?"},
+  {ko:"반창고를 붙이다", ru:"наклеить пластырь", ex:"베인 손가락에 반창고를 붙였어요.", f:"반창고를 붙였어요", exRu:"Я наклеил пластырь на порезанный палец."},
+  {ko:"파스", ru:"обезболивающий пластырь", ex:"어깨가 아파서 약국에서 파스를 샀어요.", exRu:"Болело плечо, и я купил в аптеке обезболивающий пластырь."},
+  {ko:"파스를 붙이다", ru:"наклеить обезболивающий пластырь", ex:"허리에 파스를 붙이고 잤어요.", f:"파스를 붙이고", exRu:"Я наклеил пластырь на поясницу и лёг спать."},
+  {ko:"물리치료", ru:"физиотерапия", ex:"수술 후에 물리치료를 받고 있어요.", exRu:"После операции я хожу на физиотерапию."}
+ ]},
+ {id:"S6", my:true, name:"6 · 병원에서: в больнице", words:[
+  {ko:"입원하다", ru:"ложиться в больницу", ex:"교통사고로 일주일 동안 입원했어요.", f:"입원했어요", exRu:"После аварии я неделю лежал в больнице."},
+  {ko:"퇴원하다", ru:"выписываться из больницы", ex:"할머니가 내일 퇴원하세요.", f:"퇴원하세요", exRu:"Бабушку завтра выписывают."},
+  {ko:"문병을 가다", ru:"навещать больного (= 문병하다)", ex:"친구가 입원해서 문병을 갔어요.", f:"문병을 갔어요", exRu:"Друг попал в больницу, и я пошёл его навестить."},
+  {ko:"면회", ru:"посещение (больного), свидание", ex:"중환자실은 면회가 안 돼요.", exRu:"В реанимацию посетителей не пускают."},
+  {ko:"면회 시간", ru:"время посещения", ex:"면회 시간은 저녁 7시까지예요.", exRu:"Время посещения — до 7 вечера."},
+  {ko:"내과", ru:"терапевтическое отделение, терапевт", ex:"배가 아파서 내과에 갔어요.", exRu:"Болел живот, и я пошёл к терапевту."},
+  {ko:"응급실", ru:"отделение неотложной помощи, приёмный покой", ex:"밤에 열이 많이 나서 응급실에 갔어요.", exRu:"Ночью поднялась высокая температура, и я поехал в неотложку."},
+  {ko:"속이 쓰리다", ru:"изжога, жжёт в желудке", ex:"아침을 안 먹어서 속이 쓰려요.", f:"속이 쓰려요", exRu:"Я не позавтракал, и жжёт в желудке."},
+  {ko:"과음", ru:"чрезмерное употребление алкоголя, перепить", ex:"어제 과음을 해서 머리가 아파요.", exRu:"Вчера я перепил, и болит голова."},
+  {ko:"과식", ru:"переедание", ex:"과식하면 속이 불편해요.", exRu:"Если переешь, в желудке тяжело."}
+ ]},
+ {id:"S7", my:true, name:"7 · 넘어지고 떨어지고", words:[
+  {ko:"떨어지다", ru:"падать; провалиться на экзамене", ex:"나무에서 사과가 떨어졌어요.", f:"떨어졌어요", exRu:"С дерева упало яблоко."},
+  {ko:"떨어뜨리다", ru:"уронить", ex:"휴대폰을 바닥에 떨어뜨렸어요.", f:"떨어뜨렸어요", exRu:"Я уронил телефон на пол."},
+  {ko:"넘어지다", ru:"падать, спотыкаться", ex:"뛰다가 돌에 걸려 넘어졌어요.", f:"넘어졌어요", exRu:"Бежал, споткнулся о камень и упал."},
+  {ko:"미끄러지다", ru:"поскользнуться", ex:"얼음 위에서 미끄러졌어요.", f:"미끄러졌어요", exRu:"Я поскользнулся на льду."},
+  {ko:"미끄럽다", ru:"скользкий", ex:"비가 와서 길이 미끄러워요.", f:"미끄러워요", exRu:"Прошёл дождь, дорога скользкая."},
+  {ko:"부딪히다", ru:"удариться, столкнуться", ex:"문에 머리를 부딪혔어요.", f:"부딪혔어요", exRu:"Я ударился головой о дверь."},
+  {ko:"땅", ru:"земля", ex:"땅에 떨어진 음식은 먹지 마세요.", exRu:"Не ешь еду, которая упала на землю."},
+  {ko:"줄", ru:"верёвка, линия, очередь", ex:"식당 앞에 줄이 길어요.", exRu:"Перед рестораном длинная очередь."},
+  {ko:"넘다", ru:"преодолевать, превышать", ex:"벌써 밤 10시가 넘었어요.", f:"넘었어요", exRu:"Уже больше десяти вечера."},
+  {ko:"벗다", ru:"снимать (одежду, обувь)", ex:"집에 들어갈 때 신발을 벗으세요.", f:"벗으세요", exRu:"Входя в дом, снимите обувь."}
+ ]},
+ {id:"S8", my:true, name:"8 · 여러 가지 (1)", words:[
+  {ko:"정확하다", ru:"точный, правильный", ex:"사고의 정확한 원인은 아직 몰라요.", f:"정확한", exRu:"Точная причина аварии пока неизвестна."},
+  {ko:"사소하다", ru:"незначительный, мелкий", ex:"사소한 일로 싸우지 마세요.", f:"사소한", exRu:"Не ссорьтесь из-за мелочей."},
+  {ko:"끊다", ru:"прекращать, обрывать; бросать (курить)", ex:"건강 때문에 담배를 끊었어요.", f:"끊었어요", exRu:"Ради здоровья я бросил курить."},
+  {ko:"형성하다", ru:"образовывать, формировать", ex:"어릴 때 좋은 습관을 형성하는 것이 중요해요.", f:"형성하는", exRu:"Важно с детства формировать хорошие привычки."},
+  {ko:"조건", ru:"условие", ex:"이 회사는 근무 조건이 좋아요.", exRu:"В этой компании хорошие условия работы."},
+  {ko:"해결하다", ru:"решать (проблему)", ex:"이 문제를 어떻게 해결할까요?", f:"해결할까요", exRu:"Как нам решить эту проблему?"},
+  {ko:"시일", ru:"срок, необходимое время", ex:"수리에는 시일이 좀 걸려요.", exRu:"На ремонт потребуется некоторое время."},
+  {ko:"다소", ru:"несколько, в некоторой степени", ex:"결과가 다소 실망스러워요.", exRu:"Результат несколько разочаровывает."},
+  {ko:"보편적", ru:"универсальный, всеобщий", ex:"이것은 보편적인 문제예요.", exRu:"Это всеобщая проблема."},
+  {ko:"사회적", ru:"общественный, социальный", ex:"음주 운전은 큰 사회적 문제예요.", exRu:"Вождение в нетрезвом виде — большая социальная проблема."},
+  {ko:"관계", ru:"отношение, связь", ex:"두 사람은 어떤 관계예요?", exRu:"Какие отношения между этими двумя?"},
+  {ko:"기준", ru:"критерий, стандарт, норма", ex:"평가 기준이 너무 높아요.", exRu:"Критерии оценки слишком высокие."},
+  {ko:"뜻", ru:"смысл, значение", ex:"이 단어의 뜻을 모르겠어요.", exRu:"Не знаю значения этого слова."}
+ ]},
+ {id:"S9", my:true, name:"9 · 여러 가지 (2): дни и праздники", words:[
+  {ko:"성묘", ru:"посещение могил предков", ex:"추석에 가족과 함께 성묘를 가요.", exRu:"На Чхусок мы всей семьёй едем на могилы предков."},
+  {ko:"소원을 빌다", ru:"загадывать желание", ex:"생일 케이크 앞에서 소원을 빌었어요.", f:"소원을 빌었어요", exRu:"Перед праздничным тортом я загадал желание."},
+  {ko:"궁금하다", ru:"интересоваться, быть любопытным", ex:"시험 결과가 궁금해요.", f:"궁금해요", exRu:"Мне интересно, какие результаты экзамена."},
+  {ko:"일출", ru:"восход солнца", ex:"새해 첫날 바다에서 일출을 봤어요.", exRu:"В первый день Нового года я встретил рассвет на море."},
+  {ko:"일몰", ru:"закат", ex:"여기는 일몰이 정말 아름다워요.", exRu:"Здесь очень красивый закат."},
+  {ko:"일기예보", ru:"прогноз погоды", ex:"일기예보에서 내일 비가 온대요.", exRu:"По прогнозу завтра будет дождь."},
+  {ko:"일교차", ru:"разница дневной и ночной температур", ex:"요즘 일교차가 커서 감기에 걸리기 쉬워요.", exRu:"Сейчас большая разница температур днём и ночью, легко простудиться."},
+  {ko:"기념일", ru:"годовщина, памятная дата", ex:"오늘은 우리 결혼 기념일이에요.", exRu:"Сегодня годовщина нашей свадьбы."},
+  {ko:"과거", ru:"прошлое", ex:"과거에는 이곳이 작은 마을이었어요.", exRu:"В прошлом здесь была маленькая деревня."},
+  {ko:"앞으로", ru:"в будущем, впредь", ex:"앞으로 운전을 더 조심할게요.", exRu:"Впредь буду водить осторожнее."}
+ ]}
+];
+
+
+const ALL=[]; SETS.forEach(s=>s.words.forEach(w=>ALL.push(w)));
+const BY={}; ALL.forEach(w=>BY[w.ko]=w);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const fmt=ms=>{const s=Math.floor(ms/1000);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};
+
+/* озвучка */
+let voice=null;
+function pickVoice(){ try{const v=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang)); voice=v.find(x=>/Natural|Neural|Online|Google|Yuna|SunHi/i.test(x.name))||v[0]||null;}catch(e){} }
+if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
+function say(t){ try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang="ko-KR"; if(voice) u.voice=voice; u.rate=.9; speechSynthesis.speak(u);}catch(e){} }
+const sayBtn=t=>`<button class="say" onclick='event.stopPropagation();say(${JSON.stringify(t).replace(/'/g,"&#39;")})'>🔊</button>`;
+
+/* ---------- данные заданий ---------- */
+// 2. Что с чем: начало → окончание
+const COLLO=[
+ ["안전벨트를","매다"],["붕대를","감다"],["연고를","바르다"],["반창고를","붙이다"],["깁스를","하다"],
+ ["신호를","어기다"],["제한 속도를","지키다"],["사고를","당하다"],["소원을","빌다"],["주위를","살피다"],
+ ["허리를","삐끗하다"],["인대가","늘어나다"],["교통사고가","나다"],["속이","쓰리다"],["엘리베이터에","갇히다"],["문병을","가다"]
+];
+// 3. Разложи по группам
+const CATS=["🍳 Кухня","🚗 Дорога","🤕 Травма","💊 Лечение","🏥 Больница"];
+const SORT=[
+ ["볶다",0],["튀기다",0],["부치다",0],["굽다",0],
+ ["과속",1],["신호등",1],["사거리",1],["음주 운전",1],["고속열차",1],
+ ["삐다",2],["부러지다",2],["베이다",2],["데다",2],["인대",2],
+ ["연고",3],["붕대",3],["진통제",3],["파스",3],["물리치료",3],
+ ["입원하다",4],["퇴원하다",4],["응급실",4],["면회 시간",4],["내과",4]
+];
+// 4. Похожие слова
+const CONF=[
+ {s:"요리하다가 칼에 손가락이 ____.", h:"Порезал палец ножом.", a:"베였어요", d:["데었어요","삐었어요"], n:"베이다 — порезаться; 데다 — обжечься."},
+ {s:"휴대폰을 바닥에 ____.", h:"Я уронил телефон.", a:"떨어뜨렸어요", d:["떨어졌어요","넘어졌어요"], n:"떨어뜨리다 — уронить что-то (을/를); 떨어지다 — упасть самому."},
+ {s:"나무에서 사과가 ____.", h:"С дерева упало яблоко.", a:"떨어졌어요", d:["떨어뜨렸어요","부딪혔어요"], n:"사과가 падает само → 떨어지다."},
+ {s:"명절에는 가족이 함께 전을 ____.", h:"Семья вместе жарит чон.", a:"부쳐요", d:["튀겨요","구워요"], n:"전 — 부치다; фритюр — 튀기다; духовка — 굽다."},
+ {s:"얼음 위에서 ____.", h:"Я поскользнулся на льду.", a:"미끄러졌어요", d:["미끄러워요","떨어뜨렸어요"], n:"미끄러지다 — поскользнуться; 미끄럽다 — скользкий."},
+ {s:"비가 와서 길이 ____.", h:"Дорога скользкая.", a:"미끄러워요", d:["미끄러졌어요","넘어졌어요"], n:"미끄럽다 → 미끄러워요 (ㅂ-неправильный)."},
+ {s:"정전 때문에 엘리베이터에 ____.", h:"Застрял в лифте.", a:"갇혔어요", d:["끼였어요","잡혔어요"], n:"갇히다 — оказаться взаперти; 끼이다 — прищемить."},
+ {s:"손이 문에 ____.", h:"Прищемил руку дверью.", a:"끼였어요", d:["갇혔어요","빠졌어요"], n:"문에 끼이다 — прищемить в двери."},
+ {s:"음주 운전을 하다가 경찰에게 ____.", h:"Его поймала полиция.", a:"잡혔어요", d:["당했어요","갇혔어요"], n:"잡히다 — быть пойманным; 당하다 — пострадать от чего-то."},
+ {s:"요즘 ____가 커서 감기에 걸리기 쉬워요.", h:"Большая разница дневной и ночной температур.", a:"일교차", d:["일출","일기예보"], n:"일출 — восход, 일몰 — закат, 일기예보 — прогноз."},
+ {s:"새해 첫날 바다에서 ____을 봤어요.", h:"Встретил рассвет на море.", a:"일출", d:["일몰","기념일"], n:"일출 — восход; 일몰 — закат."},
+ {s:"할머니가 다 나으셔서 내일 ____.", h:"Завтра бабушку выписывают.", a:"퇴원하세요", d:["입원하세요","면회하세요"], n:"입원 — лечь в больницу; 퇴원 — выписаться."},
+ {s:"중환자실은 ____가 안 돼요.", h:"В реанимацию посетителей не пускают.", a:"면회", d:["문병","입원"], n:"면회 — посещение (разрешено/нет); 문병을 가다 — пойти навестить больного."},
+ {s:"어제 ____을 해서 머리가 아파요.", h:"Вчера перепил.", a:"과음", d:["과식","과속"], n:"과음 — перепить; 과식 — переесть; 과속 — превысить скорость."},
+ {s:"벌써 밤 10시가 ____.", h:"Уже больше десяти.", a:"넘었어요", d:["넘어졌어요","떨어졌어요"], n:"넘다 — превышать; 넘어지다 — упасть."},
+ {s:"사소한 일로 싸우지 마세요.", h:"Что значит 사소하다?", a:"незначительный", d:["точный","всеобщий"], n:"사소하다 — мелкий; 정확하다 — точный; 보편적 — всеобщий.", plain:true},
+];
+
+const TASKS=[
+ {id:"pairs", name:"Пары: слово — перевод", hint:"Все 109 слов. Нажми слово слева и перевод справа.", min:"≈10 мин"},
+ {id:"collo", name:"Что с чем сочетается", hint:"Собери выражения: 안전벨트를 + 매다.", min:"≈2 мин"},
+ {id:"sort",  name:"Разложи по группам", hint:"Кухня, дорога, травма, лечение или больница?", min:"≈3 мин"},
+ {id:"conf",  name:"Похожие слова", hint:"떨어지다 или 떨어뜨리다? 일출 или 일몰?", min:"≈4 мин"},
+];
+let RES={}; // id → {ok, total, mist:[], time}
+
+/* ---------- старт и меню ---------- */
+const TG_TOKEN="9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU", TG_CHAT_ID="347625701";
+let NAME="", T_START=0;
+try{ $("nameInput").value=localStorage.getItem("sago_tasks_name")||""; }catch(e){}
+$("taskList").innerHTML="<b>Задания по порядку:</b>"+TASKS.map((t,i)=>`<div class="task" style="cursor:default"><span class="n">${i+1}</span><span class="t"><b>${t.name}</b><br><span class="muted">${t.hint}</span></span><span class="r">${t.min}</span></div>`).join("");
+function begin(){
+  NAME=$("nameInput").value.trim(); if(!NAME){ $("nameInput").focus(); return; }
+  try{ localStorage.setItem("sago_tasks_name",NAME); }catch(e){}
+  T_START=Date.now(); RES={}; run(TASKS[0].id);
+}
+
+/* ---------- общий ход ---------- */
+let timer=null, t0=0, cur=null;
+function run(id){
+  $("menu").classList.add("hidden"); $("play").classList.remove("hidden");
+  const ti=TASKS.findIndex(t=>t.id===id); $("tInfo").textContent=`Задание ${ti+1}/${TASKS.length}`;
+  t0=Date.now(); clearInterval(timer); timer=setInterval(()=>$("clock").textContent="⏱ "+fmt(Date.now()-t0),1000); $("clock").textContent="⏱ 0:00";
+  cur={id, ok:0, total:0, mist:[], seen:new Set()};
+  ({pairs:startPairs, collo:startCollo, sort:startSort, conf:startConf})[id]();
+  window.scrollTo(0,0);
+}
+function miss(key, item){ if(cur.seen.has(key)) return; cur.seen.add(key); cur.mist.push(item); }
+function finishTask(){
+  clearInterval(timer);
+  RES[cur.id]={ok:cur.total-cur.mist.length, total:cur.total, mist:cur.mist, time:Date.now()-t0};
+  const r=RES[cur.id], i=TASKS.findIndex(t=>t.id===cur.id), nxt=TASKS[i+1];
+  $("prog").style.width="100%";
+  if(!nxt){ showFinal(); return; }
+  $("stage").innerHTML=`<div style="text-align:center"><div class="muted">Задание ${i+1} готово: ${TASKS[i].name}</div><div class="big">${r.ok} / ${r.total}</div><div class="muted">время ${fmt(r.time)}</div></div>
+   <button class="main" onclick="run('${nxt.id}')">Задание ${i+2}: ${nxt.name} →</button>`;
+}
+function showFinal(){
+  $("play").classList.add("hidden"); $("final").classList.remove("hidden");
+  const ok=TASKS.reduce((a,t)=>a+RES[t.id].ok,0), tot=TASKS.reduce((a,t)=>a+RES[t.id].total,0);
+  const mist=TASKS.flatMap(t=>RES[t.id].mist);
+  $("summary").innerHTML=`<div style="text-align:center"><div class="muted">${esc(NAME)}, все задания сделаны 🎉</div>
+   <div class="big">${Math.round(ok/tot*100)}%</div><div class="muted">${ok} из ${tot} с первой попытки · время ${fmt(Date.now()-T_START)}</div></div>
+   ${TASKS.map((t,i)=>`<div class="mist">${i+1}. ${t.name}: <b>${RES[t.id].ok}/${RES[t.id].total}</b> <span class="muted">· ${fmt(RES[t.id].time)}</span></div>`).join("")}
+   ${mist.length?`<div style="margin-top:10px"><b>Повторить (${mist.length}):</b></div>`+mist.map(m=>`<div class="mist"><b>${esc(m.ko)}</b> ${sayBtn(m.ko)} — ${esc(m.ru)}${m.ex?`<div class="muted">${esc(m.ex)}</div>`:""}</div>`).join(""):"<div style='margin-top:8px'><b>Без ошибок!</b></div>"}`;
+  window.scrollTo(0,0);
+  sendResults();
+}
+function buildReport(){
+  const ok=TASKS.reduce((a,t)=>a+RES[t.id].ok,0), tot=TASKS.reduce((a,t)=>a+RES[t.id].total,0);
+  const d=new Date(), dt=d.toLocaleDateString("ru-RU")+" "+d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
+  let t=`🧩 <b>사고와 사건 · быстрые задания</b>\n👤 ${esc(NAME)}\n📅 ${dt}\n\n✅ <b>${ok}/${tot} (${Math.round(ok/tot*100)}%)</b> · ⏱ ${fmt(Date.now()-T_START)}\n`;
+  TASKS.forEach((x,i)=>{ const r=RES[x.id]; t+=`${i+1}. ${x.name}: ${r.ok}/${r.total} · ${fmt(r.time)}\n`; });
+  const mist=TASKS.flatMap(x=>RES[x.id].mist);
+  t+= mist.length? `\n❌ <b>Ошибки (${mist.length}):</b>\n`+mist.map(m=>`• ${esc(m.ko)} — ${esc(m.ru)}`).join("\n") : "\nБез ошибок 🎉";
+  return t;
+}
+let REPORT="";
+async function sendResults(){
+  REPORT=buildReport(); const fb=$("sendFb"), btn=$("sendBtn"); btn.disabled=true; fb.textContent="Отправляю учителю…";
+  try{
+    if(!TG_TOKEN || TG_TOKEN.indexOf("TOKEN")>=0) throw new Error("отправка здесь недоступна");
+    const parts=[]; let rest=REPORT; while(rest.length){ let cut=rest.length>3800?rest.lastIndexOf("\n",3800):rest.length; if(cut<=0) cut=3800; parts.push(rest.slice(0,cut)); rest=rest.slice(cut); }
+    for(const p of parts){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:p,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description||"ошибка"); }
+    fb.textContent="✅ Отправлено учителю! 잘했어요!"; btn.textContent="Отправить ещё раз";
+  }catch(e){
+    fb.textContent="Не получилось отправить ("+e.message+"). Скопируй текст и отправь учителю вручную:";
+    const b=$("copyBox"); b.value=REPORT.replace(/<[^>]+>/g,"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&").replace(/&quot;/g,'"'); b.classList.remove("hidden"); $("copyBtn").classList.remove("hidden");
+  }
+  btn.disabled=false;
+}
+function copyReport(){ const b=$("copyBox"); b.select(); try{ navigator.clipboard.writeText(b.value).then(()=>$("copyBtn").textContent="Скопировано ✓",()=>document.execCommand("copy")); }catch(e){ document.execCommand("copy"); } }
+
+/* ---------- 1 и 2: пары ---------- */
+let ROUNDS=[], ri=0, picked=null, left=0;
+function startPairs(){
+  const ws=shuffle(ALL); ROUNDS=[];
+  for(let i=0;i<ws.length;i+=8) ROUNDS.push(ws.slice(i,i+8).map(w=>({l:w.ko,r:w.ru,w})));
+  // хвост: если в последнем раунде мало слов — сливаем с предыдущим
+  if(ROUNDS.length>1 && ROUNDS.at(-1).length<5){ const t=ROUNDS.pop(); ROUNDS[ROUNDS.length-1]=ROUNDS.at(-1).concat(t); }
+  cur.total=ALL.length; ri=0; drawRound("Пары", true);
+}
+function startCollo(){
+  const ps=shuffle(COLLO); ROUNDS=[ps.slice(0,8),ps.slice(8)].map(r=>r.map(([a,b])=>({l:a,r:b,w:{ko:a+" "+b,ru:(BY[a+" "+b]||{}).ru||""}})));
+  cur.total=COLLO.length; ri=0; drawRound("Что с чем", false);
+}
+let pTitle="", pLeftKo=true;
+function drawRound(title, leftKo){
+  if(title){pTitle=title; pLeftKo=leftKo;}
+  const R=ROUNDS[ri]; left=R.length; picked=null;
+  $("pInfo").textContent=`${pTitle} · ${ri+1}/${ROUNDS.length}`;
+  $("prog").style.width=(ri/ROUNDS.length*100)+"%";
+  const L=shuffle(R.map((p,k)=>({k,t:p.l}))), Rr=shuffle(R.map((p,k)=>({k,t:p.r})));
+  $("stage").innerHTML=`<div class="muted">${pLeftKo?"Найди пары: слово — перевод. Нажми на корейское слово, чтобы услышать.":"Собери выражения: что с чем сочетается."}</div>
+   <div class="cols"><div class="col">${L.map(x=>`<button class="it ko" data-s="L" data-k="${x.k}" onclick="pick(this)">${esc(x.t)}</button>`).join("")}</div>
+   <div class="col">${Rr.map(x=>`<button class="it ${pLeftKo?"":"ko"}" data-s="R" data-k="${x.k}" onclick="pick(this)">${esc(x.t)}</button>`).join("")}</div></div>`;
+}
+function pick(b){
+  if(b.dataset.s==="L") say(b.textContent);
+  if(!picked || picked.dataset.s===b.dataset.s){ if(picked) picked.classList.remove("sel"); picked=b; b.classList.add("sel"); return; }
+  const a=picked; picked=null; a.classList.remove("sel");
+  if(a.dataset.k===b.dataset.k){
+    a.classList.add("gone"); b.classList.add("gone"); left--;
+    if(!left) setTimeout(()=>{ ri++; ri<ROUNDS.length?drawRound():finishTask(); },350);
+  } else {
+    const Lb=a.dataset.s==="L"?a:b, p=ROUNDS[ri][+Lb.dataset.k];
+    miss(p.l, {ko:p.w.ko, ru:p.w.ru||p.r, ex:p.w.ex});
+    [a,b].forEach(x=>{x.classList.add("bad"); setTimeout(()=>x.classList.remove("bad"),450);});
+  }
+}
+
+/* ---------- 3: группы ---------- */
+let SQ=[], si=0, sLock=false;
+function startSort(){ SQ=shuffle(SORT); si=0; cur.total=SQ.length; drawSort(); }
+function drawSort(){
+  sLock=false; const [ko]=SQ[si];
+  $("pInfo").textContent=`Группы · ${si+1}/${SQ.length}`; $("prog").style.width=(si/SQ.length*100)+"%";
+  $("stage").innerHTML=`<div class="muted">К какой группе относится слово?</div><div class="word">${esc(ko)} ${sayBtn(ko)}</div>
+   <div class="cats">${CATS.map((c,k)=>`<button onclick="sortPick(${k},this)">${c}</button>`).join("")}</div><div id="sFb"></div>`;
+}
+function sortPick(k,b){
+  if(sLock) return; const [ko,c]=SQ[si], w=BY[ko];
+  if(k===c){ sLock=true; b.classList.add("ok"); setTimeout(()=>{ si++; si<SQ.length?drawSort():finishTask(); },400); }
+  else { b.classList.add("bad"); miss(ko,{ko,ru:w.ru,ex:w.ex}); $("sFb").innerHTML=`<div class="fb"><b>${esc(ko)}</b> — ${esc(w.ru)}</div>`; }
+}
+
+/* ---------- 4: похожие слова ---------- */
+let CQ=[], ci=0, cLock=false;
+function startConf(){ CQ=shuffle(CONF).map(c=>({...c,opts:shuffle([c.a,...c.d])})); ci=0; cur.total=CQ.length; drawConf(); }
+function drawConf(){
+  cLock=false; const c=CQ[ci];
+  $("pInfo").textContent=`Похожие · ${ci+1}/${CQ.length}`; $("prog").style.width=(ci/CQ.length*100)+"%";
+  $("stage").innerHTML=`<div class="q">${esc(c.s).replace("____",'<span class="gap">&nbsp;</span>')}</div><div class="muted">${esc(c.h)}</div>
+   <div class="opts">${c.opts.map((o,k)=>`<button onclick="confPick(${k},this)">${esc(o)}</button>`).join("")}</div><div id="cFb"></div>`;
+}
+function confPick(k,b){
+  if(cLock) return; cLock=true; const c=CQ[ci], ok=c.opts[k]===c.a;
+  document.querySelectorAll(".opts button").forEach((x,j)=>{ if(c.opts[j]===c.a) x.classList.add("ok"); else if(j===k) x.classList.add("bad"); });
+  const full=c.plain?c.a:c.s.replace("____",c.a);
+  if(ok){ setTimeout(nextConf,500); return; }
+  miss(ci,{ko:c.plain?c.s:full, ru:c.n});
+  $("cFb").innerHTML=`<div class="fb">${esc(full)} ${c.plain?"":sayBtn(full)}<div class="muted">${esc(c.n)}</div></div><button class="main" onclick="nextConf()">Дальше →</button>`;
+}
+function nextConf(){ ci++; ci<CQ.length?drawConf():finishTask(); }
+
+</script>
+</body>
+</html>

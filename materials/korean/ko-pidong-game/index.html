@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>👻 피동 · квест «Запертый дом»</title>
+<style>
+  :root{--bg:#0f1430;--card:#1b2246;--card2:#232c5a;--ink:#eef1ff;--muted:#9aa3c7;--accent:#7c9cff;--ok:#3ccf7e;--okbg:#173c33;--bad:#ff6b6b;--badbg:#45202c;--gold:#ffcf5a}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:radial-gradient(ellipse at top,#1d2552 0%,var(--bg) 60%) fixed;color:var(--ink);line-height:1.5;min-height:100vh}
+  .wrap{max-width:920px;margin:0 auto;padding:16px 14px 40px}
+  .card{background:var(--card);border-radius:20px;padding:22px;margin:12px 0;box-shadow:0 8px 30px #0006;border:1px solid #2e3870}
+  h1,h2,h3{margin:0 0 6px}
+  .muted{color:var(--muted);font-size:14px}
+  button{font:inherit;border:0;border-radius:12px;padding:11px 18px;cursor:pointer;background:#2e3870;color:var(--ink);margin:4px 4px 4px 0;transition:transform .1s}
+  button:active{transform:scale(.96)}
+  button.primary{background:var(--accent);color:#0f1430;font-weight:700}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text]{font:inherit;padding:10px 12px;border:1.5px solid #3a4580;border-radius:10px;width:100%;max-width:320px;background:#141a3a;color:var(--ink)}
+  .ko{font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+  .hidden{display:none!important}
+  kbd{background:#2e3870;border:1px solid #47539a;border-bottom-width:2px;border-radius:5px;padding:0 6px;font-size:12px;color:var(--ink)}
+
+  /* intro */
+  .house{font-size:110px;text-align:center;filter:drop-shadow(0 0 30px #7c9cff55);animation:float 4s ease-in-out infinite}
+  @keyframes float{50%{transform:translateY(-8px)}}
+  .rooms-list{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}
+  .rooms-list div{background:var(--card2);border-radius:12px;padding:10px 8px;text-align:center;font-size:13px}
+  .rooms-list b{display:block;font-size:26px}
+
+  /* top bar */
+  .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .map{display:flex;gap:6px;flex:1;min-width:260px}
+  .map span{flex:1;text-align:center;padding:6px 4px;border-radius:10px;background:#141a3a;font-size:20px;position:relative;filter:grayscale(1) brightness(.6)}
+  .map span.cur{filter:none;outline:2px solid var(--accent);background:#26306a}
+  .map span.done{filter:none;background:#3a3216}
+  .map span.done::after{content:attr(data-syl);position:absolute;right:3px;top:-9px;font-size:13px;background:var(--gold);color:#3a2a00;border-radius:6px;padding:0 5px;font-weight:800}
+  .clock{font-weight:800;font-size:20px;min-width:72px;text-align:right}
+  .clock.over{color:var(--bad)}
+  .stat{font-size:15px;color:var(--muted);white-space:nowrap}
+  .ghostbar{position:relative;height:30px;margin-top:10px;background:linear-gradient(90deg,#141a3a,#2a1530);border-radius:15px}
+  .ghostbar .me{position:absolute;right:8px;top:2px;font-size:20px}
+  .ghostbar .gh{position:absolute;left:6px;top:0;font-size:24px;transition:left .8s cubic-bezier(.3,1.6,.5,1);filter:drop-shadow(0 0 8px #fff8)}
+  .ghostbar .lbl{position:absolute;left:50%;top:5px;transform:translateX(-50%);font-size:12px;color:var(--muted)}
+
+  /* stage */
+  .room-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .room-head .icon{font-size:34px}
+  .room-head .count{margin-left:auto;font-size:20px;letter-spacing:2px}
+  .task{color:var(--muted);margin:2px 0 12px}
+  .prompt{min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-radius:18px;background:var(--card2);padding:20px;transition:background .3s;position:relative;overflow:hidden}
+  .prompt.okf{background:var(--okbg)} .prompt.badf{background:var(--badbg)}
+  .prompt .q{font-size:46px;font-weight:800;line-height:1.25}
+  .prompt .sub{font-size:18px;color:var(--muted);margin-top:4px}
+  .prompt .sent{font-size:28px;font-weight:600;line-height:1.55}
+  .gap{display:inline-block;min-width:110px;border-bottom:3px dashed var(--gold);color:var(--gold)}
+  .answer{margin-top:12px;font-size:28px;font-weight:800;color:var(--ok)}
+  .answer .ex{display:block;font-size:18px;font-weight:400;color:var(--ink);margin-top:6px}
+  .answer .exru{display:block;font-size:14px;font-weight:400;color:var(--muted)}
+  .ctrl{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+  .ctrl button{font-size:17px;padding:12px 20px}
+  .btn-ok{background:var(--ok);color:#06240f;font-weight:700}
+  .btn-bad{background:var(--bad);color:#2b0606;font-weight:700}
+  .hint-keys{text-align:center;margin-top:10px;font-size:12.5px;color:var(--muted)}
+  .shake{animation:shake .4s} @keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+  /* room themes */
+  .t-hall .prompt{background:radial-gradient(circle at 50% 0%,#3a3a1a 0%,var(--card2) 70%)}
+  .lamps{display:flex;gap:8px;justify-content:center;margin-bottom:10px;font-size:26px}
+  .lamps span{filter:grayscale(1) brightness(.4);transition:.4s}
+  .lamps span.on{filter:drop-shadow(0 0 10px #ffd84d);}
+  .radio{font-size:72px;animation:wobble 1.2s ease-in-out infinite}
+  .radio.tune{animation:buzz .08s linear infinite}
+  @keyframes wobble{50%{transform:rotate(-4deg)}} @keyframes buzz{50%{transform:translate(2px,-1px)}}
+  .waves{font-size:18px;color:var(--muted);letter-spacing:4px}
+  .t-mirror .prompt{background:linear-gradient(135deg,#2a3a6a,#1c2550 50%,#33457e);border:3px solid #8aa0d8;box-shadow:inset 0 0 40px #9fb6ff33}
+  .mirrored{display:inline-block;transform:scaleX(-1);transition:transform .7s}
+  .mirrored.flip{transform:scaleX(1)}
+  .shards{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(115deg,transparent 0 60px,#ffffff10 60px 62px)}
+  .chests{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}
+  .chests button{margin:0;padding:10px 4px;background:#3a2b18;border:2px solid #6b4f2a;border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:2px}
+  .chests button .c{font-size:34px;transition:transform .3s}
+  .chests button .l{font-size:20px;font-weight:700;color:var(--gold)}
+  .chests button.ok{border-color:var(--ok);background:#1d3a28} .chests button.ok .c{transform:scale(1.25) rotate(-8deg)}
+  .chests button.bad{border-color:var(--bad);background:#3a1a22;animation:shake .4s}
+  .t-study .prompt{background:#f3e3bf;color:#3b2a10;box-shadow:inset 0 0 50px #b98a4a88}
+  .t-study .prompt .sub{color:#7a5d2e}
+  .t-study .gap{color:#a3480f;border-color:#a3480f}
+  .t-study .answer{color:#1d6b3a} .t-study .answer .ex{color:#3b2a10} .t-study .answer .exru{color:#7a5d2e}
+  .t-study .prompt.okf{background:#d6efc8} .t-study .prompt.badf{background:#f3c9bf}
+
+  /* bonus */
+  .bonus{position:absolute;inset:0;background:#2b1f05;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;animation:pop .35s}
+  .bonus .t{color:var(--gold);font-weight:800;font-size:20px}
+  .bonus .w{font-size:40px;font-weight:800;margin:6px 0;color:#fff}
+  @keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+
+  /* overlays */
+  .ov{position:fixed;inset:0;background:#070a1ef0;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:20;padding:20px}
+  .ov .big{font-size:90px;animation:spin .9s ease-out}
+  @keyframes spin{0%{transform:scale(.2) rotate(-180deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+  .ov h2{font-size:28px;margin:10px 0}
+  .syl{display:inline-block;background:var(--gold);color:#3a2a00;font-size:46px;font-weight:800;border-radius:14px;padding:4px 18px;margin:8px;animation:pop .5s .5s both}
+  .boo{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:200px;z-index:30;pointer-events:none;animation:boo 1.4s ease-out forwards}
+  @keyframes boo{0%{opacity:0;transform:scale(.3)}25%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(1.6)}}
+
+  /* final door */
+  .slots{display:flex;gap:10px;justify-content:center;margin:16px 0;flex-wrap:wrap}
+  .slots span{width:74px;height:74px;border-radius:14px;border:2px dashed #5a6599;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:800}
+  .slots span.f{border-style:solid;border-color:var(--gold);background:#3a3216;color:var(--gold)}
+  .tiles{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .tiles button{font-size:38px;font-weight:800;width:74px;height:74px;padding:0;background:var(--gold);color:#3a2a00;border-radius:14px}
+  .tiles button.used{visibility:hidden}
+  table.res{width:100%;border-collapse:collapse;font-size:16px;margin-top:8px}
+  table.res td{border-bottom:1px solid #2e3870;padding:7px 4px}
+  @media (max-width:640px){.rooms-list{grid-template-columns:repeat(2,1fr)}.prompt .q{font-size:34px}.prompt .sent{font-size:21px}.chests{grid-template-columns:repeat(3,1fr)}.map span{font-size:16px}}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="card" style="text-align:center">
+    <div class="house">🏚️</div>
+    <h1 class="ko" style="font-size:34px">잠긴 집</h1>
+    <p style="font-size:18px;max-width:640px;margin:8px auto">Ты зашла в старый дом — и дверь захлопнулась: <b class="ko">문이 닫혔어요!</b> В доме живёт привидение 👻. В каждой из 5 комнат спрятан ключ с одним слогом пароля. Собери пароль — и дверь откроется. Но осторожно: каждая ошибка подпускает привидение ближе…</p>
+    <div class="rooms-list" id="roomsList"></div>
+    <p style="margin:18px 0 4px">Имя ученика:</p>
+    <input type="text" id="nameIn" placeholder="Имя" autocomplete="off" onkeydown="if(event.key==='Enter')startQuest()" style="text-align:center">
+    <p><button class="primary" onclick="startQuest()" style="font-size:19px;padding:14px 30px">Войти в дом 🕯</button></p>
+    <p class="muted" style="margin-bottom:0">Для учителя: ученица отвечает вслух, ты управляешь. <kbd>Enter</kbd> — верно, <kbd>X</kbd> — ошибка, <kbd>Пробел</kbd> — показать ответ, <kbd>S</kbd> — озвучить. ≈10 минут.</p>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game" class="hidden">
+  <div class="card" style="padding:14px 16px">
+    <div class="top">
+      <div class="map" id="map"></div>
+      <span class="stat" id="stars" title="Бонусные звёзды"></span>
+      <div class="clock" id="clock">10:00</div>
+    </div>
+    <div class="ghostbar"><span class="gh" id="ghost">👻</span><span class="lbl" id="ghostLbl">привидение далеко</span><span class="me">🙂</span></div>
+  </div>
+  <div class="card" id="stage">
+    <div class="room-head"><span class="icon" id="rIcon"></span><h2 class="ko" id="rTitle"></h2><span id="rName" class="muted"></span><span class="count" id="rCount"></span></div>
+    <div class="task" id="rTask"></div>
+    <div class="prompt" id="prompt"></div>
+    <div id="chestBox" class="chests hidden"></div>
+    <div class="ctrl" id="ctrl">
+      <button class="btn-ok" id="bOk" onclick="mark(true)">✓ Верно</button>
+      <button class="btn-bad" id="bBad" onclick="mark(false)">✗ Ошибка</button>
+      <button id="bShow" onclick="reveal()">👁 Ответ</button>
+      <button id="bSay" onclick="sayCur()">🔊</button>
+      <button class="primary hidden" id="bNext" onclick="advance()">Дальше →</button>
+    </div>
+    <div class="hint-keys"><kbd>Enter</kbd> верно · <kbd>X</kbd> ошибка · <kbd>Пробел</kbd> ответ · <kbd>S</kbd> звук</div>
+  </div>
+</div>
+
+<!-- UNLOCK -->
+<div class="ov hidden" id="unlock">
+  <div class="big">🗝</div>
+  <h2 class="ko" id="uTitle"></h2>
+  <p id="uText" style="font-size:18px;max-width:560px"></p>
+  <div>Слог пароля: <span class="syl ko" id="uSyl"></span></div>
+  <p><button class="primary" id="uBtn" onclick="nextRoom()" style="font-size:18px">Дальше →</button></p>
+</div>
+
+<!-- DOOR -->
+<div id="door" class="hidden">
+  <div class="card" style="text-align:center">
+    <div style="font-size:80px">🚪🔒</div>
+    <h2>Последняя дверь</h2>
+    <p style="font-size:18px">Собери пароль из пяти слогов и скажи его вслух. Нажимай слоги по порядку.</p>
+    <div class="slots ko" id="slots"></div>
+    <div class="tiles ko" id="tiles"></div>
+    <p class="muted" id="doorFb" style="min-height:22px;font-size:16px"></p>
+  </div>
+</div>
+
+<!-- FINAL -->
+<div id="final" class="hidden">
+  <div class="card" style="text-align:center">
+    <div style="font-size:80px">🚪✨</div>
+    <h1 class="ko" style="font-size:36px">문이 열렸어요!</h1>
+    <p style="font-size:18px">Дверь открылась — ты выбралась! <span id="fGhost"></span></p>
+  </div>
+  <div class="card">
+    <h2 id="fScore"></h2>
+    <p class="muted" id="fTime"></p>
+    <div id="fList"></div>
+    <p style="margin-top:14px">
+      <button class="primary" id="fSend" onclick="sendTG()">📨 Итоги себе в Telegram</button>
+      <button onclick="location.reload()">Новый квест ↻</button>
+    </p>
+    <div class="muted" id="fSendFb"></div>
+  </div>
+</div>
+
+</div>
+<script>
+const DATA = [{"id":"M1","words":[{"ko":"병가","ru":"больничный (отпуск по болезни)","ex":"감기 때문에 병가를 냈어요.","exRu":"Из-за простуды взял больничный."},{"ko":"눕다","ru":"лежать, ложиться","ex":"피곤해서 침대에 누웠어요.","exRu":"Устал и лёг на кровать.","f":"누웠어요"},{"ko":"급하다","ru":"срочный, спешный; торопливый","ex":"급한 일이 생겨서 먼저 갈게요.","exRu":"Появилось срочное дело, я пойду.","f":"급한"},{"ko":"위치","ru":"местоположение","ex":"가게 위치를 알려 주세요.","exRu":"Подскажите, где находится магазин."},{"ko":"위치가 애매하다","ru":"неудобное, непонятное расположение","ex":"그 식당은 위치가 애매해서 찾기 어려워요.","exRu":"Этот ресторан неудобно расположен, его трудно найти.","f":"위치가 애매해서"},{"ko":"애매하다","ru":"неоднозначный, неясный, неточный","ex":"그의 대답은 좀 애매했어요.","exRu":"Его ответ был довольно неясным.","f":"애매했어요"},{"ko":"놓치다","ru":"выпустить из рук, упустить","ex":"좋은 기회를 놓쳤어요.","exRu":"Я упустил хорошую возможность.","f":"놓쳤어요"},{"ko":"지하철을 놓치다","ru":"опоздать на метро","ex":"늦게 나와서 지하철을 놓쳤어요.","exRu":"Вышел поздно и опоздал на метро.","f":"지하철을 놓쳤어요"},{"ko":"비용","ru":"расходы, затраты","ex":"여행 비용은 얼마나 들어요?","exRu":"Сколько стоит поездка?"},{"ko":"비용이 많이 들다","ru":"требует больших расходов, дорогостоящий","ex":"결혼식은 비용이 많이 들어요.","exRu":"Свадьба требует больших расходов.","f":"비용이 많이 들어요"},{"ko":"꼼짝","ru":"малейшее движение; 꼼짝 못 하다 — не мочь пошевелиться","ex":"너무 피곤해서 꼼짝도 하기 싫어요.","exRu":"Я так устал, что не хочу даже шевелиться."},{"ko":"길을 헤매다","ru":"блуждать, плутать","ex":"처음 가는 곳이라서 길을 헤맸어요.","exRu":"Я шёл туда впервые и заплутал.","f":"길을 헤맸어요"}]},{"id":"M2","words":[{"ko":"약속을 깨다","ru":"нарушить обещание","ex":"친구가 또 약속을 깼어요.","exRu":"Друг опять нарушил обещание.","f":"약속을 깼어요"},{"ko":"착각하다","ru":"заблуждаться, перепутать","ex":"날짜를 착각해서 하루 일찍 왔어요.","exRu":"Перепутал дату и пришёл на день раньше.","f":"착각해서"},{"ko":"오해","ru":"недоразумение (오해다 — это недоразумение)","ex":"그건 오해예요.","exRu":"Это недоразумение."},{"ko":"아늑하다","ru":"уютный","ex":"방이 작지만 아늑해요.","exRu":"Комната маленькая, но уютная.","f":"아늑해요"},{"ko":"평범하다","ru":"обычный, заурядный","ex":"저는 평범한 회사원이에요.","exRu":"Я обычный офисный работник.","f":"평범한"},{"ko":"저렴하다","ru":"дешёвый, недорогой","ex":"이 식당은 가격이 저렴해요.","exRu":"В этом ресторане недорогие цены.","f":"저렴해요"},{"ko":"훌륭하다","ru":"замечательный, превосходный","ex":"정말 훌륭한 공연이었어요.","exRu":"Это был действительно превосходный концерт.","f":"훌륭한"},{"ko":"깔끔하다","ru":"чистый, опрятный, аккуратный","ex":"호텔 방이 깔끔했어요.","exRu":"Номер в отеле был чистым.","f":"깔끔했어요"},{"ko":"주머니","ru":"карман, мешок","ex":"주머니에 열쇠가 있어요.","exRu":"Ключи в кармане."},{"ko":"끼","ru":"талант, артистизм","ex":"그 아이는 끼가 많아요.","exRu":"Этот ребёнок очень артистичный."},{"ko":"신나다","ru":"веселиться, радоваться, быть в восторге","ex":"방학이라서 아이들이 신났어요.","exRu":"Начались каникулы, и дети в восторге.","f":"신났어요"},{"ko":"당황하다","ru":"растеряться, прийти в замешательство","ex":"갑자기 질문을 받아서 당황했어요.","exRu":"Мне неожиданно задали вопрос, и я растерялся.","f":"당황했어요"},{"ko":"잡다","ru":"ловить, хватать","ex":"경찰이 도둑을 잡았어요.","exRu":"Полицейский поймал вора.","f":"잡았어요"},{"ko":"잡히다","ru":"быть пойманным","ex":"도둑이 경찰에게 잡혔어요.","exRu":"Вор был пойман полицейским.","f":"잡혔어요"}]},{"id":"P1","words":[{"ko":"보이다","ru":"быть видным, виднеться","ex":"창문으로 바다가 보여요.","exRu":"Из окна видно море.","f":"보여요","act":"보다","af":"봐요"},{"ko":"쓰이다","ru":"быть написанным; использоваться","ex":"칠판에 이름이 쓰여 있어요.","exRu":"На доске написано имя.","f":"쓰여","act":"쓰다","af":"써"},{"ko":"놓이다","ru":"быть положенным, стоять, лежать","ex":"책상 위에 꽃병이 놓여 있어요.","exRu":"На столе стоит ваза.","f":"놓여","act":"놓다","af":"놓아"},{"ko":"쌓이다","ru":"накапливаться, быть сложенным","ex":"밤새 눈이 많이 쌓였어요.","exRu":"За ночь навалило много снега.","f":"쌓였어요","act":"쌓다","af":"쌓았어요"},{"ko":"섞이다","ru":"смешиваться","ex":"물과 기름은 잘 안 섞여요.","exRu":"Вода и масло плохо смешиваются.","f":"섞여요","act":"섞다","af":"섞어요"},{"ko":"바뀌다","ru":"меняться, быть заменённым","ex":"비밀번호가 바뀌었어요.","exRu":"Пароль изменился.","f":"바뀌었어요","act":"바꾸다","af":"바꿨어요"},{"ko":"깎이다","ru":"быть сниженным (о цене), срезанным","ex":"세일이라서 가격이 많이 깎였어요.","exRu":"Распродажа, цена сильно снижена.","f":"깎였어요","act":"깎다","af":"깎았어요"}]},{"id":"P2","words":[{"ko":"먹히다","ru":"быть съеденным","ex":"쥐가 고양이에게 먹혔어요.","exRu":"Мышь была съедена кошкой.","f":"먹혔어요","act":"먹다","af":"먹었어요"},{"ko":"닫히다","ru":"закрываться","ex":"바람 때문에 문이 닫혔어요.","exRu":"Из-за ветра дверь закрылась.","f":"닫혔어요","act":"닫다","af":"닫았어요"},{"ko":"막히다","ru":"быть перекрытым, засориться; пробка","ex":"출근 시간에는 길이 많이 막혀요.","exRu":"В час пик на дорогах пробки.","f":"막혀요","act":"막다","af":"막아요"},{"ko":"읽히다","ru":"читаться, быть прочитанным","ex":"이 책은 많은 사람들에게 읽혀요.","exRu":"Эту книгу читают многие.","f":"읽혀요","act":"읽다","af":"읽어요"},{"ko":"밟히다","ru":"быть наступленным","ex":"지하철에서 발을 밟혔어요.","exRu":"В метро мне наступили на ногу.","f":"밟혔어요","act":"밟다","af":"밟았어요"},{"ko":"꽂히다","ru":"быть воткнутым, вставленным","ex":"열쇠가 문에 꽂혀 있어요.","exRu":"Ключ вставлен в дверь.","f":"꽂혀","act":"꽂다","af":"꽂아"},{"ko":"박히다","ru":"быть вбитым, застрять (о занозе)","ex":"손에 가시가 박혔어요.","exRu":"В руку попала заноза.","f":"박혔어요","act":"박다","af":"박았어요"}]},{"id":"P3","words":[{"ko":"열리다","ru":"открываться; проводиться","ex":"문이 저절로 열렸어요.","exRu":"Дверь открылась сама.","f":"열렸어요","act":"열다","af":"열었어요"},{"ko":"팔리다","ru":"продаваться","ex":"이 책이 요즘 잘 팔려요.","exRu":"Эта книга сейчас хорошо продаётся.","f":"팔려요","act":"팔다","af":"팔아요"},{"ko":"들리다","ru":"слышаться","ex":"밖에서 이상한 소리가 들려요.","exRu":"С улицы доносится странный звук.","f":"들려요","act":"듣다","af":"들어요"},{"ko":"걸리다","ru":"висеть; заболеть; занимать (время)","ex":"벽에 그림이 걸려 있어요.","exRu":"На стене висит картина.","f":"걸려","act":"걸다","af":"걸어"},{"ko":"풀리다","ru":"развязываться; решаться; теплеть","ex":"신발 끈이 풀렸어요.","exRu":"Шнурок развязался.","f":"풀렸어요","act":"풀다","af":"풀었어요"},{"ko":"밀리다","ru":"быть отодвинутым; накапливаться (о делах)","ex":"휴가 때문에 일이 많이 밀렸어요.","exRu":"Из-за отпуска накопилось много работы.","f":"밀렸어요","act":"밀다","af":"밀었어요"},{"ko":"물리다","ru":"быть укушенным","ex":"어젯밤에 모기에 물렸어요.","exRu":"Вчера ночью меня укусил комар.","f":"물렸어요","act":"물다","af":"물었어요"},{"ko":"눌리다","ru":"быть нажатым, прижатым","ex":"버튼이 잘못 눌렸어요.","exRu":"Кнопка нажалась случайно.","f":"눌렸어요","act":"누르다","af":"눌렀어요"}]},{"id":"P4","words":[{"ko":"안기다","ru":"быть в объятиях","ex":"아기가 엄마 품에 안겼어요.","exRu":"Малыш оказался в маминых объятиях.","f":"안겼어요","act":"안다","af":"안았어요"},{"ko":"끊기다","ru":"прерываться, обрываться","ex":"통화 중에 전화가 끊겼어요.","exRu":"Во время разговора связь оборвалась.","f":"끊겼어요","act":"끊다","af":"끊었어요"},{"ko":"쫓기다","ru":"быть преследуемым","ex":"꿈에서 누군가에게 쫓겼어요.","exRu":"Во сне за мной кто-то гнался.","f":"쫓겼어요","act":"쫓다","af":"쫓았어요"},{"ko":"감기다","ru":"закрываться (о глазах); наматываться","ex":"졸려서 눈이 자꾸 감겨요.","exRu":"Хочу спать, глаза сами закрываются.","f":"감겨요","act":"감다","af":"감아요"},{"ko":"담기다","ru":"быть положенным (в посуду); содержаться","ex":"이 노래에는 사랑이 담겨 있어요.","exRu":"В этой песне заключена любовь.","f":"담겨","act":"담다","af":"담아"},{"ko":"빼앗기다","ru":"лишиться, быть отнятым","ex":"동생에게 장난감을 빼앗겼어요.","exRu":"Младший брат отнял у меня игрушку.","f":"빼앗겼어요","act":"빼앗다","af":"빼앗았어요"},{"ko":"찢기다","ru":"рваться, быть разорванным","ex":"종이가 바람에 찢겼어요.","exRu":"Бумага порвалась на ветру.","f":"찢겼어요","act":"찢다","af":"찢었어요"}]},{"id":"P5","words":[{"ko":"만들어지다","ru":"изготавливаться, создаваться","ex":"이 가방은 가죽으로 만들어졌어요.","exRu":"Эта сумка сделана из кожи.","f":"만들어졌어요","act":"만들다","af":"만들었어요"},{"ko":"지워지다","ru":"стираться, удаляться","ex":"파일이 실수로 지워졌어요.","exRu":"Файл случайно удалился.","f":"지워졌어요","act":"지우다","af":"지웠어요"},{"ko":"켜지다","ru":"включаться, загораться","ex":"사람이 들어오면 불이 자동으로 켜져요.","exRu":"Когда кто-то входит, свет включается автоматически.","f":"켜져요","act":"켜다","af":"켜요"},{"ko":"꺼지다","ru":"выключаться, гаснуть","ex":"갑자기 컴퓨터가 꺼졌어요.","exRu":"Компьютер внезапно выключился.","f":"꺼졌어요","act":"끄다","af":"껐어요"},{"ko":"정해지다","ru":"определяться, быть назначенным","ex":"회의 날짜가 정해졌어요.","exRu":"Дата собрания определена.","f":"정해졌어요","act":"정하다","af":"정했어요"},{"ko":"알려지다","ru":"становиться известным","ex":"이 식당은 맛집으로 알려져 있어요.","exRu":"Этот ресторан известен как очень вкусный.","f":"알려져","act":"알리다","af":"알려"},{"ko":"이루어지다","ru":"осуществляться, сбываться","ex":"드디어 꿈이 이루어졌어요.","exRu":"Наконец мечта сбылась.","f":"이루어졌어요","act":"이루다","af":"이뤘어요"}]}];
+const TG_TOKEN="9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU", TG_CHAT_ID="347625701";
+const QUEST_SEC=600, GHOST_MAX=6, PASSWORD=["문","이","열","렸","다"];
+const $=id=>document.getElementById(id);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const MY=DATA.filter(s=>s.id[0]==="M").flatMap(s=>s.words);
+const PASS=DATA.filter(s=>s.id[0]==="P").flatMap(s=>s.words.map(w=>({...w,set:s.id})));
+const SUFS=[["P1","-이-"],["P2","-히-"],["P3","-리-"],["P4","-기-"],["P5","-어지다"]];
+
+const ROOMS=[
+  {cls:"t-hall",icon:"🕯",title:"현관",name:"Тёмная прихожая",type:"ru2ko",prog:"💡",
+   task:"Темно! Каждое слово, сказанное по-корейски, зажигает лампу.",
+   pick:()=>shuffle(MY).slice(0,5), key:"Все лампы горят — на крючке у двери висит ключ!"},
+  {cls:"t-radio",icon:"📻",title:"거실",name:"Гостиная с радио",type:"audio",prog:"📶",
+   task:"Старое радио шипит и говорит слова. Что оно сказало? Переведи.",
+   pick:()=>shuffle([...shuffle(MY).slice(0,2),...shuffle(PASS).slice(0,2)]), key:"Радио поймало волну: «열쇠는 라디오 안에…» — ключ был внутри!"},
+  {cls:"t-mirror",icon:"🪞",title:"거울 방",name:"Зеркальная комната",type:"pass",prog:"🪞",
+   task:"Зеркало переворачивает слова! Прочитай глагол и назови его пассив.",
+   pick:()=>SUFS.map(([id])=>shuffle(PASS.filter(w=>w.set===id))[0]), key:"Зеркало треснуло — за ним ключ!"},
+  {cls:"t-chest",icon:"🧰",title:"창고",name:"Кладовая с сундуками",type:"suf",prog:"🔒",
+   task:"Каждый пассив открывает свой сундук. Какой суффикс? Нажми сундук, который назвала ученица.",
+   pick:()=>shuffle(PASS).slice(0,5), key:"В последнем сундуке — ключ!"},
+  {cls:"t-study",icon:"📜",title:"서재",name:"Кабинет",type:"gap",prog:"✉️",
+   task:"На столе обгоревшие записки. Прочитай предложение целиком, вставив пассив.",
+   pick:()=>shuffle(PASS).slice(0,4), key:"В последней записке — ключ от входной двери!"}
+];
+const BONUS=[
+  "Придумай своё предложение с этим словом!",
+  "Скажи это слово в прошедшем времени!",
+  "Задай учителю вопрос с этим словом!",
+  "Скажи предложение про себя с этим словом!"
+];
+
+/* ---------- звук ---------- */
+let voices=[];
+function vRank(v){ const n=v.name; return /Natural|Online|Neural|SunHi|InJoon|Hyunsu/i.test(n)?0:/Google|Yuna|Siri|Premium|Enhanced/i.test(n)?1:2; }
+function loadVoices(){ if(!("speechSynthesis" in window)) return; voices=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang)).sort((a,b)=>vRank(a)-vRank(b)); }
+if("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+function say(t){ if(!("speechSynthesis" in window)||!t) return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); if(voices[0]){u.voice=voices[0];u.lang=voices[0].lang;} else u.lang="ko-KR"; u.rate=0.85; speechSynthesis.speak(u); }
+let AC=null; const ac=()=>AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+function tone(fs,dur=0.12,type="triangle",vol=.18){ try{ const c=ac(); let t=c.currentTime;
+  fs.forEach(f=>{ const o=c.createOscillator(), g=c.createGain(); o.type=type; o.frequency.value=f; g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.001,t+dur); o.connect(g).connect(c.destination); o.start(t); o.stop(t+dur); t+=dur*.8; }); }catch(e){} }
+function noise(dur=.6){ try{ const c=ac(), n=c.sampleRate*dur, b=c.createBuffer(1,n,c.sampleRate), d=b.getChannelData(0); for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n);
+  const s=c.createBufferSource(), g=c.createGain(), f=c.createBiquadFilter(); f.type="bandpass"; f.frequency.value=1800; g.gain.value=.12; s.buffer=b; s.connect(f).connect(g).connect(c.destination); s.start(); }catch(e){} }
+const sOk=()=>tone([660,880]), sBad=()=>tone([200,150],.2,"sawtooth",.08), sKey=()=>tone([523,659,784,1046],.16);
+const sBoo=()=>tone([300,240,180,120],.25,"sine",.2), sStar=()=>tone([988,1319,1568],.1,"square",.06);
+
+/* ---------- состояние ---------- */
+let Q=null;
+function startQuest(){
+  Q={ name:$("nameIn").value.trim()||"ученица", room:0, start:Date.now(), right:0, wrong:0, ghost:0, stars:0, missed:[], clock:null, timeBoo:false };
+  $("intro").classList.add("hidden"); $("game").classList.remove("hidden");
+  tone([200,260],.3,"sine",.15);
+  Q.clock=setInterval(drawClock,500); drawClock(); drawGhost(); drawStars();
+  openRoom(0);
+}
+function drawClock(){ const left=QUEST_SEC-Math.floor((Date.now()-Q.start)/1000), a=Math.abs(left);
+  $("clock").textContent="🕯 "+(left<0?"+":"")+Math.floor(a/60)+":"+String(a%60).padStart(2,"0"); $("clock").classList.toggle("over",left<0);
+  if(left<0 && !Q.timeBoo){ Q.timeBoo=true; ghostStep(); } }
+function drawMap(){ $("map").innerHTML=ROOMS.map((r,i)=>`<span class="${i<Q.room?'done':i===Q.room?'cur':''}" data-syl="${PASSWORD[i]}" title="${r.name}">${r.icon}</span>`).join(""); }
+function drawGhost(){ const p=Math.min(Q.ghost,GHOST_MAX)/GHOST_MAX; $("ghost").style.left=`calc(${p*100}% - ${p*40}px + 6px)`;
+  $("ghostLbl").textContent= Q.ghost===0?"привидение далеко": Q.ghost<3?"привидение крадётся…": Q.ghost<GHOST_MAX?"оно совсем близко!":"👻 БУ! Но ты не сдаёшься"; }
+function drawStars(){ $("stars").textContent= Q.stars?("⭐".repeat(Q.stars)):""; }
+function ghostStep(){ Q.ghost++; drawGhost(); if(Q.ghost===3||Q.ghost===GHOST_MAX){ const b=document.createElement("div"); b.className="boo"; b.textContent="👻"; document.body.appendChild(b); sBoo(); setTimeout(()=>b.remove(),1500); } }
+
+function openRoom(i){
+  Q.room=i; const r=ROOMS[i]; drawMap();
+  Q.items=r.pick(); Q.retry=[]; Q.idx=0; Q.second=false; Q.solved=0; Q.bonusAt=1+Math.floor(Math.random()*(Q.items.length-1)); Q.bonusDone=false;
+  $("stage").className="card "+r.cls;
+  $("rIcon").textContent=r.icon; $("rTitle").textContent=r.title; $("rName").textContent="· "+r.name; $("rTask").textContent=r.task;
+  tone([140,120],.35,"sine",.12);
+  showItem();
+}
+function curList(){ return Q.second?Q.retry2:Q.items; }
+function drawCount(){ const r=ROOMS[Q.room], n=Q.items.length;
+  if(r.type==="ru2ko"){ $("rCount").textContent=""; return; }
+  const sym={audio:["📶","▫️"],pass:["✨","🪞"],suf:["🔓","🔒"],gap:["✅","✉️"]}[r.type];
+  $("rCount").textContent=sym[0].repeat(Q.solved)+sym[1].repeat(Math.max(0,n-Q.solved)); }
+function showItem(){
+  const r=ROOMS[Q.room], w=curList()[Q.idx]; Q.cur=w; Q.revealed=false; Q.locked=false; Q.inBonus=false;
+  drawCount();
+  const P=$("prompt"); P.className="prompt";
+  let h="";
+  if(r.type==="ru2ko") h=`<div class="lamps">${Q.items.map((_,i)=>`<span class="${i<Q.solved?'on':''}">💡</span>`).join("")}</div><div class="q">${esc(w.ru)}</div>`;
+  else if(r.type==="audio") h=`<div class="radio tune" id="radio" onclick="sayCur()" style="cursor:pointer">📻</div><div class="waves" id="waves">~ ~ ~ кх-кх ~ ~ ~</div><div class="sub">Нажми на радио, чтобы послушать ещё раз</div>`;
+  else if(r.type==="pass") h=`<div class="shards"></div><div class="q ko"><span class="mirrored" id="mir">${esc(w.act)}</span> → ?</div><div class="sub">${esc(w.ru)}</div>`;
+  else if(r.type==="suf") h=`<div class="q ko">${esc(w.ko)}</div><div class="sub">Какой сундук он откроет?</div>`;
+  else if(r.type==="gap") h=`<div class="sent ko">${esc(w.ex).replace(esc(w.f),`<span class="gap">(${esc(w.act)})</span>`)}</div><div class="sub">${esc(w.exRu)}</div>`;
+  if(Q.second) h=`<div class="sub" style="margin-bottom:6px">🔁 Ещё раз</div>`+h;
+  P.innerHTML=h+`<div class="answer hidden" id="ans"></div>`;
+  const suf=r.type==="suf";
+  $("chestBox").classList.toggle("hidden",!suf);
+  ["bOk","bBad","bShow"].forEach(id=>$(id).classList.toggle("hidden",suf));
+  $("bNext").classList.add("hidden");
+  if(suf) $("chestBox").innerHTML=SUFS.map(([id,l],i)=>`<button class="ko" data-id="${id}" onclick="pickSuf(this)"><span class="c">🧰</span><span class="l">${l}</span><span class="muted" style="font-size:11px">${i+1}</span></button>`).join("");
+  if(r.type==="audio"){ noise(.7); setTimeout(()=>{ const rd=$("radio"); if(rd) rd.classList.remove("tune"); const wv=$("waves"); if(wv) wv.textContent="〰️ 〰️ 〰️"; say(w.ko); },750); }
+}
+function answerHTML(){
+  const r=ROOMS[Q.room], w=Q.cur;
+  if(r.type==="ru2ko") return `<span class="ko">${esc(w.ko)}</span><span class="ex ko">${esc(w.ex)}</span><span class="exru">${esc(w.exRu)}</span>`;
+  if(r.type==="audio") return `<span class="ko">${esc(w.ko)}</span> — ${esc(w.ru)}`;
+  if(r.type==="pass") return `<span class="ko">${esc(w.ko)}</span><span class="ex ko">${esc(w.ex)}</span><span class="exru">${esc(w.exRu)}</span>`;
+  if(r.type==="suf") return `<span class="ko">${esc(w.ko)} ← ${esc(w.act)}</span> · ${SUFS.find(s=>s[0]===w.set)[1]}`;
+  if(r.type==="gap") return `<span class="ko">${esc(w.f)}</span><span class="ex ko">${esc(w.ex)}</span>`;
+}
+function sayWhat(){ return ROOMS[Q.room].type==="gap"?Q.cur.ex:Q.cur.ko; }
+function sayCur(){ if(Q&&Q.cur) say(Q.inBonus?Q.cur.ko:sayWhat()); }
+function reveal(){ if(!Q||Q.revealed||Q.inBonus) return; Q.revealed=true; const a=$("ans"); a.innerHTML=answerHTML(); a.classList.remove("hidden");
+  const m=$("mir"); if(m) m.classList.add("flip"); say(sayWhat()); }
+
+function mark(ok){
+  if(!Q||Q.locked) return;
+  if(Q.inBonus){ finishBonus(ok); return; }
+  Q.locked=true; const P=$("prompt");
+  if(ok){ Q.right++; Q.solved+=Q.second?0:1; sOk(); P.classList.add("okf"); drawCount(); lampsOn(); if(!Q.revealed) reveal();
+    setTimeout(maybeBonus,1000); }
+  else { Q.wrong++; sBad(); P.classList.add("badf","shake"); reveal(); noteMiss(); ghostStep();
+    ["bOk","bBad","bShow"].forEach(id=>$(id).classList.add("hidden")); $("bNext").classList.remove("hidden"); }
+}
+function lampsOn(){ document.querySelectorAll(".lamps span").forEach((s,i)=>s.classList.toggle("on",i<Q.solved)); }
+function pickSuf(btn){
+  if(!Q||Q.locked) return; Q.locked=true;
+  const ok=btn.dataset.id===Q.cur.set;
+  [...$("chestBox").children].forEach(b=>{ if(b.dataset.id===Q.cur.set){ b.classList.add("ok"); b.querySelector(".c").textContent="💎"; } });
+  if(ok){ Q.right++; Q.solved+=Q.second?0:1; sOk(); $("prompt").classList.add("okf"); reveal(); drawCount(); setTimeout(maybeBonus,1200); }
+  else { btn.classList.add("bad"); Q.wrong++; sBad(); $("prompt").classList.add("badf","shake"); reveal(); noteMiss(); ghostStep(); $("bNext").classList.remove("hidden"); }
+}
+function maybeBonus(){
+  if(!Q.second && !Q.bonusDone && Q.idx===Q.bonusAt){
+    Q.bonusDone=true; Q.inBonus=true; Q.locked=false; sStar();
+    const d=document.createElement("div"); d.className="bonus"; d.id="bonus";
+    d.innerHTML=`<div class="t">⭐ БОНУС-ИСПЫТАНИЕ</div><div class="w ko">${esc(Q.cur.ko)}</div><div style="font-size:20px">${BONUS[Math.floor(Math.random()*BONUS.length)]}</div><div class="muted" style="margin-top:8px">✓ — звезда, ✗ — без звезды</div>`;
+    $("prompt").appendChild(d);
+    $("bShow").classList.add("hidden"); ["bOk","bBad"].forEach(id=>$(id).classList.remove("hidden"));
+    return;
+  }
+  advance();
+}
+function finishBonus(ok){ Q.inBonus=false; Q.locked=true; if(ok){ Q.stars++; drawStars(); sStar(); } setTimeout(advance, ok?400:100); }
+function noteMiss(){
+  const w=Q.cur; if(!Q.second) Q.retry.push(w);
+  if(!Q.missed.some(m=>m.ko===w.ko)) Q.missed.push({ko:w.ko,ru:w.ru,act:w.act,room:ROOMS[Q.room].name});
+}
+function advance(){
+  Q.idx++;
+  if(Q.idx<curList().length){ showItem(); return; }
+  if(!Q.second && Q.retry.length){ Q.second=true; Q.retry2=Q.retry; Q.idx=0; showItem(); return; }
+  roomDone();
+}
+function roomDone(){
+  sKey(); const r=ROOMS[Q.room];
+  $("uTitle").textContent=`${r.title} · ключ ${Q.room+1} из ${ROOMS.length}`;
+  $("uText").textContent=r.key; $("uSyl").textContent=PASSWORD[Q.room];
+  $("uBtn").textContent= Q.room===ROOMS.length-1 ? "К входной двери 🚪" : "Следующая комната →";
+  $("unlock").classList.remove("hidden"); setTimeout(()=>$("uBtn").focus(),50);
+}
+function nextRoom(){
+  $("unlock").classList.add("hidden");
+  if(Q.room<ROOMS.length-1) openRoom(Q.room+1); else openDoor();
+}
+
+/* ---------- последняя дверь ---------- */
+function openDoor(){
+  Q.room=ROOMS.length; Q.door=[];
+  $("game").classList.add("hidden"); $("door").classList.remove("hidden");
+  drawDoor(); $("tiles").innerHTML=shuffle(PASSWORD.map((s,i)=>({s,i}))).map(t=>`<button data-i="${t.i}" onclick="pickSyl(this)">${t.s}</button>`).join("");
+}
+function drawDoor(){ $("slots").innerHTML=PASSWORD.map((_,i)=>`<span class="${Q.door[i]!==undefined?'f':''}">${Q.door[i]!==undefined?PASSWORD[Q.door[i]]:""}</span>`).join(""); }
+function pickSyl(btn){
+  const i=+btn.dataset.i, pos=Q.door.length;
+  if(PASSWORD[i]===PASSWORD[pos]){ Q.door.push(i); btn.classList.add("used"); tone([500+pos*90],.1); drawDoor();
+    if(Q.door.length===PASSWORD.length){ $("doorFb").textContent="Скажи вслух: 문이 열렸다!"; say("문이 열렸다"); setTimeout(finish,1800); }
+    else $("doorFb").textContent=""; }
+  else { sBad(); btn.classList.add("shake"); setTimeout(()=>btn.classList.remove("shake"),400); $("doorFb").textContent="Не тот слог — подумай: «дверь открылась»…"; }
+}
+function finish(){
+  clearInterval(Q.clock); sKey();
+  $("door").classList.add("hidden"); $("final").classList.remove("hidden");
+  const sec=Math.round((Date.now()-Q.start)/1000);
+  Q.timeStr=`${Math.floor(sec/60)} мин ${sec%60} с`;
+  $("fGhost").textContent = Q.ghost===0 ? "Привидение даже не заметило тебя 😎" : Q.ghost<GHOST_MAX ? "Привидение осталось ни с чем 👻💨" : "Привидение было совсем рядом, но ты справилась! 💪";
+  $("fScore").textContent=`${Q.name}: ✓ ${Q.right} · ✗ ${Q.wrong}`+(Q.stars?` · ${"⭐".repeat(Q.stars)}`:"");
+  $("fTime").textContent=`Время: ${Q.timeStr}`;
+  $("fList").innerHTML = Q.missed.length
+    ? `<h3 style="margin:14px 0 2px">Повторить</h3><table class="res">`+Q.missed.map(m=>`<tr><td class="ko" style="font-size:19px">${esc(m.ko)}${m.act?` <span class="muted">← ${esc(m.act)}</span>`:""}</td><td>${esc(m.ru)}</td><td class="muted">${esc(m.room)}</td><td style="text-align:right"><button onclick="say(this.dataset.t)" data-t="${esc(m.ko)}">🔊</button></td></tr>`).join("")+`</table>`
+    : `<p>Ни одной ошибки — 완벽해요! 🎉</p>`;
+}
+async function sendTG(){
+  const text=`👻 <b>Квест 피동 «Запертый дом»</b>\n👤 ${esc(Q.name)} · ⏱ ${Q.timeStr}\n✓ ${Q.right} · ✗ ${Q.wrong} · ⭐ ${Q.stars}`+
+    (Q.missed.length?`\n\nПовторить:\n`+Q.missed.map(m=>`• ${esc(m.ko)}${m.act?" ← "+esc(m.act):""} — ${esc(m.ru)}`).join("\n"):"\n✅ Без ошибок");
+  $("fSend").disabled=true; $("fSendFb").textContent="Отправляю…";
+  try{ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text,parse_mode:"HTML"})});
+    const j=await r.json(); if(!j.ok) throw new Error(j.description); $("fSendFb").textContent="✅ Отправлено"; }
+  catch(e){ $("fSend").disabled=false; $("fSendFb").textContent="Не получилось отправить ("+e.message+")"; }
+}
+
+/* ---------- клавиши ---------- */
+document.addEventListener("keydown",e=>{
+  if(!Q||e.target.tagName==="INPUT") return;
+  const k=e.key.toLowerCase();
+  if(!$("unlock").classList.contains("hidden")){ if(k==="enter"||k==="arrowright"){ e.preventDefault(); nextRoom(); } return; }
+  if($("game").classList.contains("hidden")) return;
+  const suf=ROOMS[Q.room].type==="suf" && !Q.inBonus;
+  if(!$("bNext").classList.contains("hidden")){ if(k==="enter"||k==="arrowright"){ e.preventDefault(); advance(); } return; }
+  if(suf && k>="1" && k<="5"){ $("chestBox").children[+k-1].click(); return; }
+  if(!suf && (k==="enter"||k==="arrowright")){ e.preventDefault(); mark(true); }
+  else if(!suf && (k==="x"||k==="ч")){ mark(false); }
+  else if(k===" "){ e.preventDefault(); reveal(); }
+  else if(k==="s"||k==="ы"){ sayCur(); }
+});
+
+$("roomsList").innerHTML=ROOMS.map((r,i)=>`<div><b>${r.icon}</b>${i+1}. ${r.name}</div>`).join("");
+</script>
+</body>
+</html>

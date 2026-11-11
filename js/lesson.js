@@ -118,5 +118,16 @@ function wire(){
   });
   document.body.addEventListener("input",e=>{const i=e.target;if(i.classList.contains("ans")){const k=i.dataset.b;P[k]=P[k]||{};P[k].v=P[k].v||{};P[k].v[i.dataset.i]=i.value;P[k].t=Date.now();i.className="ans ko";save()}});
 }
-render();
+async function boot(){
+  if(window.KR){
+    const ctx=await KR.load();
+    const mid=(L.back?"practice-":"lesson-")+id;
+    if(!KR.can(mid)){
+      document.body.innerHTML='<div id="topbar"></div><main style="padding-top:30px"><div class="card"><h3>Этот материал не назначен</h3><p class="muted">'+(ctx.ok?'Попроси преподавателя открыть доступ к этому уроку.':'Нет связи с сервером, задания не загружены.')+'</p><a class="btn pri" href="cabinet.html">В личный кабинет</a></div></main>';
+      KR.topbar("course");return;
+    }
+  }
+  render();
+}
+boot();
 })();

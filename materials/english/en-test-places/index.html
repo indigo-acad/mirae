@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary check · Places</title>
+<style>
+  :root{--ink:#1d2433;--muted:#667085;--line:#e4e7ec;--bg:#f5f6fa;--card:#fff;--accent:#2f5bea;--ok:#1f9d55;--okbg:#e9f8ef;--bad:#d64545;--badbg:#fdeeee}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  .wrap{max-width:820px;margin:0 auto;padding:18px 14px 80px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+  header h1{font-size:20px;margin:0}
+  .who{font-size:14px;color:var(--muted)}
+  .card{background:var(--card);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 2px 10px #0000000d}
+  h2{margin:0 0 6px;font-size:20px}
+  h3{margin:4px 0 6px;font-size:17px}
+  .muted{color:var(--muted);font-size:14px}
+  button{font:inherit;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#eef0f4;color:var(--ink);margin:4px 4px 4px 0}
+  button.primary{background:var(--accent);color:#fff}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text]{font:inherit;padding:9px 11px;border:1.5px solid #c9ced8;border-radius:9px;width:100%}
+  .hidden{display:none!important}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .opts button{margin:0;padding:12px;text-align:left;background:#f1f3f7}
+  .opts button.sel{background:#dfe6ff;outline:2px solid var(--accent)}
+  .bar{height:8px;background:#e7e9ef;border-radius:5px;overflow:hidden;margin:8px 0}
+  .bar div{height:100%;background:var(--accent);width:0;transition:width .3s}
+  .big{font-size:24px;font-weight:700;margin:10px 0}
+  .hint{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;letter-spacing:3px;color:var(--accent);margin:4px 0 10px}
+  .feedback{min-height:24px;margin-top:8px;font-weight:600}
+  table.res{width:100%;border-collapse:collapse;font-size:15px}
+  table.res td{padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+  .timer{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+  .timer.low{color:var(--bad)}
+  @media(max-width:560px){.opts{grid-template-columns:1fr}}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+<div id="login" class="card">
+  <h2>📝 Vocabulary check · Places</h2>
+  <p class="muted">All the words from the lesson, 10 minutes. Answer quickly: if you don't know, guess and go on. You can't go back or change an answer. At the end, press “Send to teacher”.</p>
+  <p>What's your name?</p>
+  <input type="text" id="nameInput" placeholder="Your name" autocomplete="off" onkeydown="if(event.key==='Enter')start()">
+  <p><button class="primary" onclick="start()">Start the test →</button></p>
+</div>
+<div id="app" class="hidden">
+  <header><h1>Vocabulary test</h1><div class="who">👤 <span id="who"></span> · <span class="timer" id="timer">10:00</span></div></header>
+  <div class="card" id="qCard">
+    <div class="bar"><div id="bar"></div></div>
+    <div class="muted" id="qNum"></div>
+    <div class="muted" id="qTask" style="margin-top:4px"></div>
+    <div class="big" id="qPrompt"></div>
+    <div class="opts" id="qOpts"></div>
+    <div id="qWrite" class="hidden">
+      <div class="hint" id="qHint"></div>
+      <input type="text" id="qIn" lang="en" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')answerWrite()">
+    </div>
+    <p><button class="primary" id="nextBtn" onclick="next()" disabled>Answer →</button></p>
+  </div>
+  <div class="card hidden" id="doneCard">
+    <h2 id="doneTitle">Finished</h2>
+    <p class="muted" id="doneNote"></p>
+    <button class="primary" id="sendBtn" onclick="sendResults()">📨 Send to teacher</button>
+    <div class="feedback" id="sendFb"></div>
+    <textarea id="copyBox" class="hidden" style="width:100%;height:180px;font:13px monospace;margin-top:8px"></textarea>
+    <div id="review" class="hidden" style="margin-top:12px"></div>
+  </div>
+</div>
+</div>
+<script>
+/* ============ НАСТРОЙКИ ============ */
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID = "347625701";
+const MINUTES = 10;
+const PLAN = {ru:9, wr:9};   // 9 «выбери английское слово», 9 «напиши слово», остальные — «выбери перевод»
+
+/* ============ ЛЕКСИКА ============
+   alt — другие принимаемые написания; g — группа близких по смыслу слов (не ставятся друг другу в дистракторы) */
+const WORDS = [
+ {en:"surroundings", ru:"окрестности, окружающая местность", g:"area"},
+ {en:"the outskirts", ru:"окраина, окраины города", alt:["outskirts"]},
+ {en:"inner city", ru:"центральная часть города", alt:["the inner city"]},
+ {en:"neighbourhood", ru:"район, окрестности", alt:["neighborhood"], g:"area"},
+ {en:"housing estate", ru:"жилой массив, жилой комплекс", alt:["a housing estate"]},
+ {en:"countryside", ru:"сельская местность", alt:["the countryside"]},
+ {en:"border", ru:"граница"},
+ {en:"council", ru:"совет, муниципальный совет"},
+ {en:"inhabitants", ru:"жители, население", g:"people"},
+ {en:"community", ru:"сообщество, община", g:"people"},
+ {en:"locals", ru:"местные жители", g:"people"},
+ {en:"tasty", ru:"вкусный"},
+ {en:"run-down", ru:"обветшалый, запущенный", alt:["rundown","run down"]},
+ {en:"spectacular", ru:"впечатляющий, захватывающий"},
+ {en:"rough", ru:"суровый, грубый, неровный"},
+ {en:"rate", ru:"оценивать; показатель, коэффициент", g:"rate"},
+ {en:"reputation", ru:"репутация"},
+ {en:"rank", ru:"ранг; занимать место в рейтинге", g:"rate"},
+ {en:"apartment", ru:"квартира"},
+ {en:"influence", ru:"влияние"},
+ {en:"conclude", ru:"делать вывод; заключать"},
+ {en:"shopping centre", ru:"торговый центр", alt:["shopping center"], g:"shop"},
+ {en:"between", ru:"между"},
+ {en:"department store", ru:"универмаг", g:"shop"},
+ {en:"entrance", ru:"вход"},
+ {en:"opening hours", ru:"часы работы"},
+ {en:"jewellery", ru:"ювелирные изделия, украшения", alt:["jewelry"]},
+ {en:"first floor", ru:"второй этаж (британский английский)", alt:["the first floor"]},
+ {en:"pharmacy", ru:"аптека"},
+ {en:"industrial", ru:"промышленный"}
+];
+
+/* ============ ЛОГИКА ============ */
+const $=id=>document.getElementById(id);
+const KEY="ielts_test_places_v1";
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function norm(s){ return (s||"").toLowerCase().replace(/[’']/g,"").replace(/[.,!?]/g,"").replace(/\s+/g," ").trim(); }
+const close=(a,b)=>a.g&&a.g===b.g;
+// подсказка для написания: первая буква + черточки, пробелы и дефисы видны
+const hintOf=en=>en.split("").map((c,i)=>i===0?c:(c===" "?"  ":c==="-"?"-":"_")).join(" ");
+
+let S=null;
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} }
+function load(){ try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null} }
+
+function makeTest(){
+  const all=shuffle(WORDS);
+  const ruW=all.slice(0,PLAN.ru), wrW=all.slice(PLAN.ru,PLAN.ru+PLAN.wr), trW=all.slice(PLAN.ru+PLAN.wr);
+  const distract=(w,f)=>shuffle(WORDS.filter(x=>x!==w&&!close(x,w))).slice(0,3).map(f);
+  const qs=[];
+  trW.forEach(w=>qs.push({t:"tr",en:w.en,ans:w.ru,opts:shuffle([w.ru,...distract(w,x=>x.ru)])}));   // EN → RU
+  ruW.forEach(w=>qs.push({t:"ru",en:w.en,ru:w.ru,ans:w.en,opts:shuffle([w.en,...distract(w,x=>x.en)])})); // RU → EN
+  wrW.forEach(w=>qs.push({t:"wr",en:w.en,ru:w.ru,ans:w.en,alt:w.alt||[]}));                           // написание
+  return qs;
+}
+
+function start(){
+  const n=$("nameInput").value.trim(); if(!n){$("nameInput").focus();return;}
+  const old=load();
+  if(old&&old.name===n&&!old.sent) S=old;   // продолжить, если страницу случайно закрыли
+  else S={name:n,started:Date.now(),qs:makeTest(),i:0,answers:[],finished:false,sent:false};
+  save(); $("login").classList.add("hidden"); $("app").classList.remove("hidden"); $("who").textContent=S.name;
+  tick(); TIMER=setInterval(tick,1000);
+  if(S.finished) finish(); else show();
+}
+let TIMER=null, pick=null;
+function left(){ return MINUTES*60-Math.floor((Date.now()-S.started)/1000); }
+function tick(){ const l=Math.max(0,left()); $("timer").textContent=Math.floor(l/60)+":"+String(l%60).padStart(2,"0"); $("timer").classList.toggle("low",l<=60);
+  if(l<=0&&!S.finished) finish(true); }
+
+const TASK={tr:"Choose the Russian translation.",ru:"Choose the English word.",wr:"Write the word in English. The first letter is given."};
+function show(){
+  const q=S.qs[S.i]; pick=null;
+  $("bar").style.width=(100*S.i/S.qs.length)+"%"; $("qNum").textContent="Question "+(S.i+1)+" of "+S.qs.length; $("qTask").textContent=TASK[q.t];
+  $("qOpts").innerHTML=""; $("nextBtn").disabled=true;
+  if(q.t==="wr"){
+    $("qPrompt").textContent=q.ru; $("qHint").textContent=hintOf(q.en);
+    $("qWrite").classList.remove("hidden"); $("qIn").value=""; $("qIn").oninput=()=>$("nextBtn").disabled=!$("qIn").value.trim(); $("qIn").focus(); return; }
+  $("qWrite").classList.add("hidden");
+  $("qPrompt").textContent=q.t==="tr"?q.en:q.ru;
+  q.opts.forEach(o=>{ const b=document.createElement("button"); b.textContent=o;
+    b.onclick=()=>{ [...$("qOpts").children].forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); pick=o; $("nextBtn").disabled=false; };
+    $("qOpts").appendChild(b); });
+}
+function answerWrite(){ if($("qIn").value.trim()) next(); }
+function next(){
+  if(S.finished) return; const q=S.qs[S.i];
+  const given=q.t==="wr"?$("qIn").value.trim():pick; if(!given) return;
+  S.answers[S.i]=given; S.i++; save();
+  if(S.i>=S.qs.length) finish(); else show();
+}
+function isOk(q,a){ if(a==null) return false; if(q.t!=="wr") return a===q.ans; return [q.ans,...q.alt].some(x=>norm(x)===norm(a)); }
+function finish(timeout){
+  S.finished=true; if(!S.endedAt) S.endedAt=Date.now(); save(); clearInterval(TIMER);
+  $("qCard").classList.add("hidden"); $("doneCard").classList.remove("hidden");
+  const answered=S.answers.filter(a=>a!=null).length;
+  $("doneTitle").textContent=(timeout||answered<S.qs.length)?"⏰ Time is up":"✅ Finished";
+  $("doneNote").textContent="Answered: "+answered+" of "+S.qs.length+". Press “Send to teacher”.";
+  if(S.sent) showReview();
+}
+function score(){ return S.qs.filter((q,i)=>isOk(q,S.answers[i])).length; }
+function qLabel(q){ return q.t==="tr"?q.en:q.ru; }
+function buildReport(){
+  const secs=Math.round(((S.endedAt||Date.now())-S.started)/1000);
+  let t="📝 <b>Проверка слов · Places</b>\n👤 "+esc(S.name)+"\n🕒 "+new Date(S.started).toLocaleString("ru-RU")+" · "+Math.floor(secs/60)+":"+String(secs%60).padStart(2,"0")+"\n🎯 <b>"+score()+" / "+S.qs.length+"</b>\n";
+  const NAME={tr:"EN → RU (выбор)",ru:"RU → EN (выбор)",wr:"Написание"};
+  let last=null;
+  S.qs.forEach((q,i)=>{ if(q.t!==last){ t+="\n<b>"+NAME[q.t]+"</b>"; last=q.t; }
+    const a=S.answers[i], ok=isOk(q,a);
+    t+="\n"+(ok?"✅ ":"❌ ")+(i+1)+". "+esc(qLabel(q))+(ok?" — "+esc(a):" — ответ: "+esc(a==null?"не успел(а)":a)+" → правильно: "+esc(q.ans)); });
+  const wrong=S.qs.filter((q,i)=>!isOk(q,S.answers[i])).map(q=>q.en);
+  if(wrong.length) t+="\n\n🔁 <b>Повторить:</b> "+esc(wrong.join(", "));
+  return t;
+}
+function showReview(){
+  let h='<h3>Your score: '+score()+' / '+S.qs.length+'</h3><table class="res">';
+  S.qs.forEach((q,i)=>{ const a=S.answers[i], ok=isOk(q,a);
+    h+='<tr><td>'+(ok?"✅":"❌")+'</td><td>'+esc(qLabel(q))+'</td><td>'+(ok?esc(a):'<s>'+esc(a==null?"—":a)+'</s> <b>'+esc(q.ans)+'</b>')+'</td></tr>'; });
+  $("review").innerHTML=h+'</table>'; $("review").classList.remove("hidden");
+}
+function chunks(text){ const out=[]; let cur=""; text.split("\n").forEach(l=>{ if((cur+"\n"+l).length>3800){ out.push(cur); cur=l; } else cur=cur?cur+"\n"+l:l; }); if(cur)out.push(cur); return out; }
+async function sendResults(){
+  const text=buildReport(); $("sendBtn").disabled=true; $("sendFb").textContent="Sending…";
+  try{ for(const part of chunks(text)){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+    $("sendFb").textContent="✅ Sent! Well done!"; S.sent=true; save(); showReview(); }
+  catch(e){ $("sendBtn").disabled=false; $("sendFb").textContent="Couldn't send ("+e.message+"). Copy the text and send it to your teacher:"; const b=$("copyBox"); b.value=text.replace(/<\/?b>/g,""); b.classList.remove("hidden"); b.select(); }
+}
+</script>
+</body>
+</html>
