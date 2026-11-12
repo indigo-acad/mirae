@@ -322,6 +322,14 @@ window.MATERIALS=[
   "level": "1급"
  },
  {
+  "id": "lesson-l11-adaju",
+  "section": "course",
+  "kind": "lesson",
+  "title": "2급 · 11과 · -아/어다 주다",
+  "path": "lesson.html?l=l11-adaju",
+  "level": "2급"
+ },
+ {
   "id": "practice-p12-jiyo-1",
   "section": "course",
   "kind": "practice",

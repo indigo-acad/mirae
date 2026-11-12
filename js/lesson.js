@@ -40,7 +40,7 @@ function extra(){
   const hw=(window.HOMEWORK||[]).filter(h=>h.lesson===id);
   let h="";
   if(hw.length)h+=`<h2 class="sec">🏠 Домашка к уроку</h2><div class="card">${hw.map(x=>{const ok=x.blocks.every(k=>P[k]&&P[k].done);return `<div class="line" style="justify-content:space-between;align-items:center"><span>${esc(x.title)}</span><span class="badge ${ok?"ok":"warn"}">${ok?"сделано":"к выполнению"}</span></div>`}).join("")}</div>`;
-  const cl=window.COURSE?COURSE.lessons.find(l=>l.id===id):null;const pno=cl?cl.no:"all";
+  const cl=window.COURSE?COURSE.lessons.concat((window.COURSE2||{lessons:[]}).lessons).find(l=>l.id===id):null;const pno=cl?cl.no:"all";
   h+=`<div class="card"><h3>Не получилось закрепить?</h3><p class="muted">Если какие-то задания не удались, возьми дополнительную отработку к этому уроку.</p><a class="btn pri" href="practice.html?l=${pno}">🔁 Доп. упражнения</a></div>`;
   return h;
 }

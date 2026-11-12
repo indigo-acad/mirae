@@ -2,10 +2,11 @@
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Личный кабинет</small><h1 id="who"></h1><p id="role">Прогресс, задания от преподавателя и домашка</p></div></header>
 <main id="m"></main>
-<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script>
+<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script>
 <script>
 var MAP={};MATERIALS.forEach(function(m){MAP[m.id]=m});
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var ALL=COURSE.lessons.concat((window.COURSE2||{lessons:[]}).lessons.filter(function(l){return l.id}));
 function lessonRow(l){
   if(!l.id) return '<div class="lcard lock" style="padding:6px 0"><div class="no" style="width:40px;height:40px;font-size:15px">'+l.no+'</div><div class="mid muted">'+l.no+'과 · скоро</div></div>';
   if(!KR.can('lesson-'+l.id)) return '<div class="lcard lock" style="padding:6px 0"><div class="no" style="width:40px;height:40px;font-size:15px">'+l.no+'</div><div class="mid muted">'+l.no+'과 · не назначено</div></div>';
@@ -21,7 +22,7 @@ function hwRow(x){
 }
 function draw(){
   KR.topbar('cabinet');
-  var ctx=KR.ctx,real=COURSE.lessons.filter(function(l){return l.id&&KR.can('lesson-'+l.id)});
+  var ctx=KR.ctx,real=ALL.filter(function(l){return l.id&&KR.can('lesson-'+l.id)});
   var ps=real.map(function(l){return KR.progress(l.id)});var n=0,t=0;ps.forEach(function(p){n+=p.n;t+=p.tot});
   var pct=t?Math.round(n/t*100):0;
   var hw=HOMEWORK.filter(function(h){return KR.can('lesson-'+h.lesson.replace(/^l/,'l'))}).map(function(h){var pr=KR.progress(h.lesson).P||{};var d=h.blocks.every(function(k){return pr[k]&&pr[k].done});return Object.assign({},h,{done:d})});
@@ -30,7 +31,7 @@ function draw(){
   var h='';
   if(ctx.teacher)h+='<div class="card"><h3>Вы вошли как преподаватель</h3><p class="muted">Назначайте ученикам материалы и смотрите их прогресс.</p><a class="btn pri" href="teacher.html">Ученики и задания</a></div>';
   h+='<div class="card"><h3>Мой прогресс</h3><div class="stat"><div><b>'+pct+'%</b><span class="muted">курс</span></div><div><b>'+real.length+'</b><span class="muted">уроков назначено</span></div><div><b>'+hwDone+'/'+hw.length+'</b><span class="muted">домашка</span></div></div>'+KR.bar(pct)+'</div>';
-  h+='<div class="card"><h3>Прогресс по урокам</h3>'+COURSE.lessons.map(lessonRow).join('')+'</div>';
+  h+='<div class="card"><h3>Прогресс по урокам</h3>'+ALL.map(lessonRow).join('')+'</div>';
   if(!ctx.teacher){
     h+='<div class="card"><h3>📌 Назначено преподавателем</h3>'+(items.length?items.map(assignedRow).join(''):'<p class="muted">'+(ctx.ok?'Пока ничего не назначено. Преподаватель откроет тебе задания, и они появятся здесь.':'Нет связи с сервером: задания не загружены.')+'</p>')+'</div>';
   }

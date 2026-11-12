@@ -2,7 +2,7 @@
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Преподаватель</small><h1>Ученики и задания</h1><p>Назначай материалы: ученик увидит только их</p></div></header>
 <main id="m"></main>
-<script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script>
+<script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script>
 <script>
 var $=function(s){return document.querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
@@ -18,7 +18,7 @@ function showInvite(id,login,pin){var t=inviteText(login,pin);
     if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,function(){document.execCommand('copy');done()});else{document.execCommand('copy');done()}}}
 function lessonProgress(state){
   var out=[];var P=(state&&state.progress)||{};
-  [['l12-jiyo','12과 · -지요?'],['p12-jiyo-1','Отработка -지요']].forEach(function(x){
+  [['l12-jiyo','1급 · 12과 · -지요?'],['l11-adaju','2급 · 11과 · -아/어다 주다'],['p12-jiyo-1','Отработка -지요']].forEach(function(x){
     var L=window.LESSONS[x[0]];if(!L)return;var p=P[x[0]]||{},n=0,t=0;
     L.sections.forEach(function(s){s.blocks.forEach(function(b,i){t++;var q=p[s.id+'-'+i];if(q&&q.done)n++})});
     out.push('<div class="line" style="justify-content:space-between"><span>'+esc(x[1])+'</span><span class="muted">'+n+' из '+t+'</span></div>');
