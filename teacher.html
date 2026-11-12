@@ -9,6 +9,13 @@ var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){re
 var MAP={};MATERIALS.forEach(function(m){MAP[m.id]=m});
 var cur=null,students=[],assigned=[],filt='all',sel={};
 function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.style.color=ok?'#2f6b43':'#b9473b'}}
+function genPin(){var a=new Uint32Array(1);crypto.getRandomValues(a);return String(100000+a[0]%900000)}
+function loginFrom(email,login){var l=(login||'').trim()||String(email||'').split('@')[0];return l.toLowerCase().replace(/[^a-z0-9а-яё._-]/g,'').slice(0,40)}
+function inviteText(login,pin){var u=location.href.replace(/[^\/]*$/,'')+'auth.html';return 'Привет! Твой личный кабинет в MIRAÉ готов.\nСсылка: '+u+'\nЛогин: '+login+'\nPIN: '+pin+'\nС ними можно войти с любого устройства.'}
+function showInvite(id,login,pin){var t=inviteText(login,pin);
+  $('#'+id).innerHTML='<p style="margin:10px 0 4px"><b>Сообщение ученику</b></p><textarea id="invt" readonly style="width:100%;min-height:110px;box-sizing:border-box;padding:8px;font:inherit">'+esc(t)+'</textarea><div class="done-row"><span class="muted">PIN больше нигде не показывается, скопируй сейчас</span><button class="pri" id="cp">Скопировать</button></div>';
+  $('#cp').onclick=function(){var ta=$('#invt');ta.select();var done=function(){msg('Скопировано',true)};
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,function(){document.execCommand('copy');done()});else{document.execCommand('copy');done()}}}
 function lessonProgress(state){
   var out=[];var P=(state&&state.progress)||{};
   [['l12-jiyo','12과 · -지요?'],['p12-jiyo-1','Отработка -지요']].forEach(function(x){
@@ -29,8 +36,9 @@ async function boot(){
 function draw(){
   var h='<div class="card"><h3>Ученики</h3>';
   var list=students.filter(function(s){return s.name!==KR.user()});
-  if(!list.length)h+='<p class="muted">Пока никто не зарегистрировался. Ученики регистрируются на странице «Личный кабинет».</p>';
+  if(!list.length)h+='<p class="muted">Пока нет учеников. Добавь первого ниже.</p>';
   h+='<div class="opts">'+list.map(function(s){return '<button data-st="'+esc(s.name)+'" class="'+(cur===s.name?'sel':'')+' cap">'+esc(s.name)+' · '+s.assigned+'</button>'}).join('')+'</div></div>';
+  h+='<div class="card"><h3>Добавить ученика</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="nem" type="email" class="name" placeholder="Email ученика" style="flex:2;min-width:200px;margin:0"><input id="nlg" class="name" placeholder="Логин (по желанию)" style="flex:1;min-width:140px;margin:0" autocomplete="off"></div><div class="done-row"><span class="muted">Если логин пустой, возьмётся часть email до «@»</span><button class="pri" id="add">Создать</button></div><div id="inv"></div></div>';
   if(cur)h+='<div id="stud"></div>';
   h+='<p id="msg" class="muted" style="color:var(--silver)"></p>';
   $('#m').innerHTML=h;
@@ -40,7 +48,8 @@ async function drawStudent(){
   var as=[],st=null;
   try{as=await KR.api('teacher_assignments',{p_student:cur})||[];st=await KR.api('teacher_student_state',{p_student:cur})}catch(e){}
   assigned=as;var have={};as.forEach(function(a){have[a.id]=1});
-  var h='<div class="card"><h3 class="cap">'+esc(cur)+'</h3><b>Назначено</b>';
+  var info=students.filter(function(x){return x.name===cur})[0]||{};
+  var h='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><h3 class="cap" style="margin:0">'+esc(cur)+'</h3><div class="muted">'+esc(info.email||'email не указан')+'</div></div><button id="rst">Сбросить PIN</button></div><div id="inv2"></div><p style="margin:12px 0 4px"><b>Назначено</b></p>';
   if(!as.length)h+='<p class="muted">Пока ничего не назначено.</p>';
   h+=as.map(function(a){var m=MAP[a.id]||{title:a.id,kind:''};
     return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><button data-un="'+esc(a.id)+'">Убрать</button></div>'}).join('');
@@ -54,7 +63,22 @@ async function drawStudent(){
 function count(){var n=Object.keys(sel).filter(function(k){return sel[k]}).length;var e=$('#cnt');if(e)e.textContent=n?('Выбрано: '+n):''}
 document.addEventListener('click',async function(e){
   var b=e.target.closest('button');if(!b)return;
-  if(b.dataset.st){cur=b.dataset.st;sel={};draw()}
+  if(b.id==='add'){
+    var em=($('#nem').value||'').trim(),lg=loginFrom(em,$('#nlg').value);
+    if(!/^\S+@\S+\.\S+$/.test(em)){msg('Введи email ученика');return}
+    if(lg.length<2){msg('Логин получился слишком коротким, впиши свой');return}
+    var pin=genPin();b.disabled=true;
+    try{await KR.api('teacher_create_student',{p_login:lg,p_email:em,p_new_pin:pin});
+      students=await KR.api('teacher_students')||students;draw();showInvite('inv',lg,pin);msg('Ученик создан: '+lg,true)}
+    catch(x){b.disabled=false;msg(/exists/.test(x.message)?'Такой логин уже есть, впиши другой':/bad_input/.test(x.message)?'Некорректный логин или email':'Не получилось. Проверь, что supabase/invite-students.sql выполнен.')}
+  }
+  else if(b.id==='rst'){
+    if(!confirm('Сбросить PIN ученика '+cur+'? Старый PIN перестанет работать.'))return;
+    var np=genPin();
+    try{await KR.api('teacher_reset_pin',{p_student:cur,p_new_pin:np});showInvite('inv2',cur,np);msg('PIN сброшен',true)}
+    catch(x){msg('Не получилось сбросить PIN')}
+  }
+  else if(b.dataset.st){cur=b.dataset.st;sel={};draw()}
   else if(b.dataset.f){filt=b.dataset.f;drawStudent()}
   else if(b.dataset.un){try{await KR.api('teacher_unassign',{p_student:cur,p_material:b.dataset.un});students=await KR.api('teacher_students')||students;draw();msg('Убрано',true)}catch(x){msg('Не получилось убрать')}}
   else if(b.id==='go'){

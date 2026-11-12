@@ -67,16 +67,6 @@ window.KR={
   taken:()=>takenObj(U()).l||[],
   setTaken(a){localStorage.setItem("kr_taken:"+U(),JSON.stringify({l:a,t:Date.now()}));KR.push()},
   push(){clearTimeout(timer);timer=setTimeout(doPush,600)},
-  async register(name,pin,email){
-    const n=name.trim().toLowerCase();
-    if(cloud.on){
-      try{const ex=await cloud.load(n,pin);if(ex!==null)return{err:"taken"};
-        await cloud.save(n,pin,{email:email||"",progress:{},taken:{l:[],t:0}});finish(n,pin);setStatus("ok");return{ok:1}}
-      catch(e){if(e.code==="wrong_pin")return{err:"taken"};if(e.code==="bad_input")return{err:"bad"}}
-    }
-    const u=KR.users();if(u[n])return{err:"taken"};
-    u[n]={pin,email:email||""};localStorage.setItem("kr_users",JSON.stringify(u));finish(n,pin);setStatus("off");return{ok:1,offline:1};
-  },
   async login(name,pin){
     const n=name.trim().toLowerCase(),local=KR.users()[n];
     if(cloud.on){
