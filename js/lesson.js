@@ -83,15 +83,18 @@ function block(b){
 function getItems(b){return b.items}
 function check(key){
   const b=blocks.find(x=>x._key===key);const v=(P[key]=P[key]||{}).v=(P[key].v||{});
-  let ok=0;
+  let ok=0;const wr=[];
   b.items.forEach((it,i)=>{
     let good=false;
     if(b.type==="fill"){const inp=document.querySelector(`input[data-b="${key}"][data-i="${i}"]`);v[i]=inp.value;good=it.a.some(a=>norm(a)===norm(inp.value));inp.className="ans ko "+(good?"ok":"bad")}
     else{const g=document.querySelector(`.opts[data-b="${key}"][data-i="${i}"]`);const sel=v[i];good=sel===it.a;g.querySelectorAll("button").forEach(bt=>{bt.classList.remove("ok","bad");if(bt.dataset.o===sel)bt.classList.add(good?"ok":"bad")})}
     const fb=document.getElementById(`fb-${key}-${i}`);
     if(fb){fb.textContent=good?"✓":"✗ "+it.a[0];fb.className="fb "+(good?"ok":"bad")}
-    if(good)ok++;
+    if(good)ok++;else wr.push(i);
   });
+  P[key].tries=(P[key].tries||0)+1;
+  const ms=P[key].miss=P[key].miss||{};wr.forEach(i=>{ms[i]=(ms[i]||0)+1});
+  const hs=P[key].hist=P[key].hist||[];hs.push({t:Date.now(),s:ok,n:b.items.length,w:wr.map(i=>[i,String(v[i]==null?"":v[i])])});if(hs.length>10)hs.splice(0,hs.length-10);
   P[key].t=Date.now();P[key].score=ok;P[key].total=b.items.length;P[key].done=ok===b.items.length;
   save();refresh();
 }

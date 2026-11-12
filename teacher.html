@@ -16,14 +16,39 @@ function showInvite(id,login,pin){var t=inviteText(login,pin);
   $('#'+id).innerHTML='<p style="margin:10px 0 4px"><b>Сообщение ученику</b></p><textarea id="invt" readonly style="width:100%;min-height:110px;box-sizing:border-box;padding:8px;font:inherit">'+esc(t)+'</textarea><div class="done-row"><span class="muted">PIN больше нигде не показывается, скопируй сейчас</span><button class="pri" id="cp">Скопировать</button></div>';
   $('#cp').onclick=function(){var ta=$('#invt');ta.select();var done=function(){msg('Скопировано',true)};
     if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,function(){document.execCommand('copy');done()});else{document.execCommand('copy');done()}}}
+var LESS=[['l12-jiyo','1급 · 12과 · -지요?'],['l11-adaju','2급 · 11과 · -아/어다 주다'],['p12-jiyo-1','Отработка -지요']];
+function fmtDate(t){if(!t)return '';var d=new Date(t);return d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+', '+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}
+function normA(s){return String(s).normalize('NFC').replace(/[\s?.!,]/g,'').toLowerCase()}
+function corr(it){return Array.isArray(it.a)?it.a[0]:it.a}
+function wrongList(b,p){
+  if(p.hist&&p.hist.length)return p.hist[p.hist.length-1].w.map(function(x){return{i:x[0],g:x[1]}});
+  var out=[],v=p.v||{};
+  b.items.forEach(function(it,i){if(v[i]==null)return;var ok=b.type==='fill'?it.a.some(function(a){return normA(a)===normA(v[i])}):v[i]===it.a;if(!ok)out.push({i:i,g:v[i]})});
+  return out;
+}
 function lessonProgress(state){
-  var out=[];var P=(state&&state.progress)||{};
-  [['l12-jiyo','1급 · 12과 · -지요?'],['l11-adaju','2급 · 11과 · -아/어다 주다'],['p12-jiyo-1','Отработка -지요']].forEach(function(x){
-    var L=window.LESSONS[x[0]];if(!L)return;var p=P[x[0]]||{},n=0,t=0;
-    L.sections.forEach(function(s){s.blocks.forEach(function(b,i){t++;var q=p[s.id+'-'+i];if(q&&q.done)n++})});
-    out.push('<div class="line" style="justify-content:space-between"><span>'+esc(x[1])+'</span><span class="muted">'+n+' из '+t+'</span></div>');
+  var P=(state&&state.progress)||{},weak=[],blocksHtml='';
+  LESS.forEach(function(x){
+    var L=window.LESSONS[x[0]];if(!L)return;
+    var p=P[x[0]]||{},n=0,t=0,last=0,errs=0,rows='';
+    L.sections.forEach(function(s){s.blocks.forEach(function(b,i){
+      t++;var q=p[s.id+'-'+i]||{};if(q.done)n++;if(q.t>last)last=q.t;
+      if((b.type==='fill'||b.type==='choice')&&q.score!=null){
+        var wl=wrongList(b,q);errs+=wl.length;
+        rows+='<div style="margin:10px 0"><div class="line" style="justify-content:space-between;align-items:center"><b>'+esc(b.title)+'</b><span class="badge '+(q.done?'ok':'warn')+'">'+q.score+' из '+q.total+(q.tries?' · проверок '+q.tries:'')+'</span></div>'+
+          wl.map(function(w){var it=b.items[w.i];if(!it)return '';
+            return '<div class="ko" style="font-size:15px;padding:3px 0 3px 10px;margin:3px 0;border-left:3px solid var(--bad)">'+esc(it.q)+'<br><span class="muted">Ответ: «'+esc(w.g===''||w.g==null?'пусто':w.g)+'», верно: «'+esc(corr(it))+'»</span></div>'}).join('')+'</div>';
+        var ms=q.miss||{};
+        Object.keys(ms).forEach(function(k){var it=b.items[k];if(it)weak.push({n:ms[k],q:it.q,a:corr(it),l:x[1]})});
+      }
+    })});
+    var sum='<b>'+esc(x[1])+'</b> <span class="muted">· '+n+' из '+t+' блоков'+(last?' · '+fmtDate(last):'')+(errs?' · ошибок сейчас: '+errs:'')+'</span>';
+    window.__lessonHtml=(window.__lessonHtml||'')+'<details style="margin:8px 0"><summary style="cursor:pointer;padding:4px 0">'+sum+'</summary>'+(rows||'<p class="muted">Упражнения ещё не проверялись.</p>')+'</details>';
   });
-  return out.join('');
+  var body=window.__lessonHtml||'';window.__lessonHtml='';
+  weak.sort(function(a,b){return b.n-a.n});
+  var wh=weak.length?weak.slice(0,8).map(function(w){return '<div class="ko" style="font-size:15px;padding:3px 0 3px 10px;margin:3px 0;border-left:3px solid var(--gold)"><b>'+w.n+'×</b> '+esc(w.q)+' <span class="muted">→ '+esc(w.a)+' · '+esc(w.l)+'</span></div>'}).join(''):'<p class="muted">Повторяющихся ошибок пока нет. Они копятся с каждой проверкой упражнений.</p>';
+  return '<p style="margin:12px 0 4px"><b>Чаще всего ошибается</b></p>'+wh+'<p style="margin:14px 0 4px"><b>Прогресс по урокам</b> <span class="muted">(нажми на урок, чтобы увидеть ошибки)</span></p>'+body;
 }
 async function boot(){
   if(!KR.require())return;KR.topbar('teacher');
@@ -53,7 +78,7 @@ async function drawStudent(){
   if(!as.length)h+='<p class="muted">Пока ничего не назначено.</p>';
   h+=as.map(function(a){var m=MAP[a.id]||{title:a.id,kind:''};
     return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><button data-un="'+esc(a.id)+'">Убрать</button></div>'}).join('');
-  h+='<p style="margin:12px 0 4px"><b>Прогресс по урокам сайта</b></p>'+lessonProgress(st)+'<p class="note" style="margin-top:8px">Тренажёры и игры хранят прогресс внутри себя, здесь он пока не виден.</p></div>';
+  h+=''+lessonProgress(st)+'<p class="note" style="margin-top:8px">Тренажёры и игры хранят прогресс внутри себя, здесь он пока не виден.</p></div>';
   h+='<div class="card"><h3>Назначить материалы</h3><div class="opts" id="flt"><button data-f="all" class="'+(filt==='all'?'sel':'')+'">Все</button>'+Object.keys(SECTIONS).map(function(k){return '<button data-f="'+k+'" class="'+(filt===k?'sel':'')+'">'+esc(SECTIONS[k])+'</button>'}).join('')+'</div><div style="margin-top:8px;max-height:340px;overflow:auto">';
   MATERIALS.filter(function(m){return !have[m.id]&&(filt==='all'||m.section===filt)}).forEach(function(m){
     h+='<label class="line" style="align-items:center;cursor:pointer"><input type="checkbox" data-m="'+esc(m.id)+'" '+(sel[m.id]?'checked':'')+'><span style="flex:1">'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>'});
