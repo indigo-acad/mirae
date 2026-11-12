@@ -186,6 +186,14 @@ window.MATERIALS=[
   "level": "1A–2A"
  },
  {
+  "id": "ko-grammar-randomizer",
+  "section": "korean",
+  "kind": "game",
+  "title": "Рандомайзер грамматики · 1급–2B",
+  "path": "materials/korean/ko-grammar-randomizer/",
+  "level": "1급–2B"
+ },
+ {
   "id": "ko-g2724-lesson",
   "section": "korean",
   "kind": "trainer",
