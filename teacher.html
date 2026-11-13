@@ -1,14 +1,26 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"><title>Ученики · MIRAÉ</title></head><body>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ученики · MIRAÉ</title>
+<meta name="theme-color" content="#0B1535">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Преподаватель</small><h1>Ученики и задания</h1><p>Назначай материалы: ученик увидит только их</p></div></header>
 <main id="m"></main>
-<script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script>
+<script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script>
 <script>
 var $=function(s){return document.querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
 var MAP={};MATERIALS.forEach(function(m){MAP[m.id]=m});
-var cur=null,students=[],assigned=[],filt='all',sel={};
-function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.style.color=ok?'#2f6b43':'#b9473b'}}
+var cur=null,students=[],assigned=[],filt='all',sel={},signup=null;
+function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.className='msg '+(ok?'ok':'bad')}}
 function genPin(){var a=new Uint32Array(1);crypto.getRandomValues(a);return String(100000+a[0]%900000)}
 function loginFrom(email,login){var l=(login||'').trim()||String(email||'').split('@')[0];return l.toLowerCase().replace(/[^a-z0-9а-яё._-]/g,'').slice(0,40)}
 function inviteText(login,pin){var u=location.href.replace(/[^\/]*$/,'')+'auth.html';return 'Привет! Твой личный кабинет в MIRAÉ готов.\nСсылка: '+u+'\nЛогин: '+login+'\nPIN: '+pin+'\nС ними можно войти с любого устройства.'}
@@ -50,22 +62,35 @@ function lessonProgress(state){
   var wh=weak.length?weak.slice(0,8).map(function(w){return '<div class="ko" style="font-size:15px;padding:3px 0 3px 10px;margin:3px 0;border-left:3px solid var(--gold)"><b>'+w.n+'×</b> '+esc(w.q)+' <span class="muted">→ '+esc(w.a)+' · '+esc(w.l)+'</span></div>'}).join(''):'<p class="muted">Повторяющихся ошибок пока нет. Они копятся с каждой проверкой упражнений.</p>';
   return '<p style="margin:12px 0 4px"><b>Чаще всего ошибается</b></p>'+wh+'<p style="margin:14px 0 4px"><b>Прогресс по урокам</b> <span class="muted">(нажми на урок, чтобы увидеть ошибки)</span></p>'+body;
 }
+var REG=[['closed','Закрыта'],['code','По коду школы'],['open','Открыта']];
+var REG_HINT={closed:'Учеников создаёт только преподаватель: форма «Добавить ученика» выше.',code:'Ученик регистрируется сам на странице входа, если знает код школы. Отправь ему код вместе со ссылкой на сайт.',open:'Зарегистрироваться может любой, у кого есть ссылка на сайт. Не больше 40 регистраций в сутки.'};
+function regName(m){return (REG.filter(function(x){return x[0]===m})[0]||REG[0])[1].toLowerCase()}
+function regCard(){
+  if(!signup)return '<div class="card"><h3>Регистрация учеников</h3><p class="muted">Сейчас учеников создаёт только преподаватель. Чтобы ученики могли регистрироваться сами, выполни в Supabase файл supabase/registration.sql (SQL Editor → New query → вставить → Run) и обнови эту страницу.</p></div>';
+  var m=signup.draft||signup.mode;
+  return '<div class="card"><h3>Регистрация учеников</h3><div class="opts">'+REG.map(function(x){return '<button data-reg="'+x[0]+'" class="'+(m===x[0]?'sel':'')+'" aria-pressed="'+(m===x[0])+'">'+x[1]+'</button>'}).join('')+'</div><p class="muted" style="margin:10px 0 0">'+REG_HINT[m]+'</p>'+
+    (m==='code'?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><input id="regc" class="name" aria-label="Код школы" placeholder="Код школы, от 4 символов" maxlength="40" value="'+esc(signup.codeDraft!=null?signup.codeDraft:signup.code)+'" style="flex:1;min-width:180px;margin:0" autocomplete="off"><button id="regg">Придумать код</button></div>':'')+
+    '<div class="done-row"><span class="muted">Сейчас регистрация '+regName(signup.mode)+(m!==signup.mode?' · изменение не сохранено':'')+'</span><button class="pri" id="regs">Сохранить</button></div></div>';
+}
+function isNew(s){return !!s.signup_at&&!s.assigned}
 async function boot(){
   if(!KR.require())return;KR.topbar('teacher');
   var ctx=await KR.load();KR.topbar('teacher');
   if(!ctx.ok){$('#m').innerHTML='<div class="card"><p>Нет связи с сервером. Панель преподавателя работает только онлайн.</p></div>';return}
   if(!ctx.teacher){$('#m').innerHTML='<div class="card"><h3>Только для преподавателя</h3><p class="muted">Этот раздел открыт для аккаунта преподавателя.</p></div>';return}
   try{students=await KR.api('teacher_students')||[]}catch(e){$('#m').innerHTML='<div class="card"><p>Не удалось загрузить учеников.</p></div>';return}
+  try{signup=await KR.api('teacher_signup_settings')}catch(e){signup=null}
   draw();
 }
 function draw(){
   var h='<div class="card"><h3>Ученики</h3>';
   var list=students.filter(function(s){return s.name!==KR.user()});
   if(!list.length)h+='<p class="muted">Пока нет учеников. Добавь первого ниже.</p>';
-  h+='<div class="opts">'+list.map(function(s){return '<button data-st="'+esc(s.name)+'" class="'+(cur===s.name?'sel':'')+' cap">'+esc(s.name)+' · '+s.assigned+'</button>'}).join('')+'</div></div>';
+  h+='<div class="opts">'+list.map(function(s){return '<button data-st="'+esc(s.name)+'" class="'+(cur===s.name?'sel':'')+' cap">'+esc(s.name)+' · '+s.assigned+(isNew(s)?'<span class="badge new">новый</span>':'')+'</button>'}).join('')+'</div></div>';
   h+='<div class="card"><h3>Добавить ученика</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="nem" type="email" class="name" placeholder="Email ученика" style="flex:2;min-width:200px;margin:0"><input id="nlg" class="name" placeholder="Логин (по желанию)" style="flex:1;min-width:140px;margin:0" autocomplete="off"></div><div class="done-row"><span class="muted">Если логин пустой, возьмётся часть email до «@»</span><button class="pri" id="add">Создать</button></div><div id="inv"></div></div>';
+  h+=regCard();
   if(cur)h+='<div id="stud"></div>';
-  h+='<p id="msg" class="muted" style="color:var(--silver)"></p>';
+  h+='<p id="msg" class="msg" role="status" aria-live="polite"></p>';
   $('#m').innerHTML=h;
   if(cur)drawStudent();
 }
@@ -74,7 +99,7 @@ async function drawStudent(){
   try{as=await KR.api('teacher_assignments',{p_student:cur})||[];st=await KR.api('teacher_student_state',{p_student:cur})}catch(e){}
   assigned=as;var have={};as.forEach(function(a){have[a.id]=1});
   var info=students.filter(function(x){return x.name===cur})[0]||{};
-  var h='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><h3 class="cap" style="margin:0">'+esc(cur)+'</h3><div class="muted">'+esc(info.email||'email не указан')+'</div></div><button id="rst">Сбросить PIN</button></div><div id="inv2"></div><p style="margin:12px 0 4px"><b>Назначено</b></p>';
+  var h='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><h3 class="cap" style="margin:0">'+esc(cur)+'</h3><div class="muted">'+esc(info.email||'email не указан')+(info.signup_at?' · зарегистрировался сам '+fmtDate(info.signup_at):'')+'</div></div><span style="display:inline-flex;gap:8px;flex-wrap:wrap"><button id="rst">Сбросить PIN</button>'+(signup?'<button id="del">'+KR.icon('trash',15)+' Удалить</button>':'')+'</span></div><div id="inv2"></div><p style="margin:12px 0 4px"><b>Назначено</b></p>';
   if(!as.length)h+='<p class="muted">Пока ничего не назначено.</p>';
   h+=as.map(function(a){var m=MAP[a.id]||{title:a.id,kind:''};
     return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><button data-un="'+esc(a.id)+'">Убрать</button></div>'}).join('');
@@ -103,6 +128,20 @@ document.addEventListener('click',async function(e){
     try{await KR.api('teacher_reset_pin',{p_student:cur,p_new_pin:np});showInvite('inv2',cur,np);msg('PIN сброшен',true)}
     catch(x){msg('Не получилось сбросить PIN')}
   }
+  else if(b.dataset.reg){var ci=$('#regc');if(ci)signup.codeDraft=ci.value;signup.draft=b.dataset.reg;draw()}
+  else if(b.id==='regg'){var abc='ABCDEFGHJKMNPQRSTUVWXYZ23456789',r=new Uint32Array(5),c='';crypto.getRandomValues(r);for(var k=0;k<5;k++)c+=abc[r[k]%abc.length];$('#regc').value='MIRAE-'+c}
+  else if(b.id==='regs'){
+    var rm=signup.draft||signup.mode,rc=$('#regc')?$('#regc').value.trim():signup.code;
+    if(rm==='code'&&rc.length<4){msg('Придумай код школы: от 4 символов');return}
+    b.disabled=true;
+    try{await KR.api('teacher_set_signup',{p_mode:rm,p_code:rc});signup={mode:rm,code:rc};draw();msg('Сохранено: регистрация '+regName(rm),true)}
+    catch(x){b.disabled=false;msg('Не получилось сохранить')}
+  }
+  else if(b.id==='del'){
+    if(!confirm('Удалить ученика '+cur+'? Его кабинет, прогресс и назначения будут удалены. Это нельзя отменить.'))return;
+    try{await KR.api('teacher_delete_student',{p_student:cur});var gone=cur;cur=null;students=await KR.api('teacher_students')||students;draw();msg('Ученик удалён: '+gone,true)}
+    catch(x){msg('Не получилось удалить')}
+  }
   else if(b.dataset.st){cur=b.dataset.st;sel={};draw()}
   else if(b.dataset.f){filt=b.dataset.f;drawStudent()}
   else if(b.dataset.un){try{await KR.api('teacher_unassign',{p_student:cur,p_material:b.dataset.un});students=await KR.api('teacher_students')||students;draw();msg('Убрано',true)}catch(x){msg('Не получилось убрать')}}
@@ -115,4 +154,7 @@ document.addEventListener('click',async function(e){
 });
 document.addEventListener('change',function(e){var t=e.target;if(t.dataset&&t.dataset.m){sel[t.dataset.m]=t.checked;count()}});
 boot();
-</script></body></html>
+</script>
+</body>
+</html>
+

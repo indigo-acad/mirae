@@ -1,21 +1,60 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"><title>Основной курс · MIRAÉ</title></head><body>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Основной курс · MIRAÉ</title>
+<meta name="theme-color" content="#0B1535">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 <div id="topbar"></div>
 <header class="band"><div class="in"><small id="sub"></small><h1 class="ko" id="ct"></h1><p>Основной курс идёт по учебнику, методику потом настроим под себя</p></div></header>
-<main><div id="list" class="grid"></div></main>
-<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script>
+<main><div id="list"></div></main>
+<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script>
 <script>
-function draw(){
-  KR.topbar('course');var C=COURSE;
-  document.getElementById('ct').textContent=C.title;document.getElementById('sub').textContent=C.subtitle;
-  var row=function(l){
-    if(!l.id)return '<div class="card lcard lock"><div class="no">'+l.no+'</div><div class="mid"><b>'+l.no+'과</b><div class="muted">Скоро</div></div><span class="badge">🔒</span></div>';
-    if(!KR.can('lesson-'+l.id))return '<div class="card lcard lock"><div class="no">'+l.no+'</div><div class="mid"><b>'+l.no+'과 · <span class="ko">'+l.title+'</span></b><div class="muted">'+(KR.ctx.ok?'Не назначено. Преподаватель откроет доступ.':'Нет связи с сервером')+'</div></div><span class="badge">🔒</span></div>';
-    var p=KR.progress(l.id);
-    return '<div class="card"><div class="lcard"><div class="no">'+l.no+'</div><div class="mid"><b>'+l.no+'과 · <span class="ko">'+l.title+'</span></b><div class="muted">'+p.n+' из '+p.tot+' блоков</div>'+KR.bar(p.pct)+'</div></div><div class="done-row"><a class="btn pri" href="lesson.html?l='+l.id+'">Открыть урок</a><a class="btn" href="practice.html">🔁 Доп. упражнения</a></div></div>';
-  };
-  var C2=window.COURSE2;
-  var head=function(t){return '<h2 class="sec" style="grid-column:1/-1;margin:14px 4px 0">'+t+'</h2>'};
-  document.getElementById('list').innerHTML=(C2?head('1급'):'')+C.lessons.map(row).join('')+(C2?head('2급')+C2.lessons.map(row).join(''):'');
+/* Программа показана как путь: части (1급, 2급) и главы-уроки на одной линии.
+   Состояния главы: soon — урока ещё нет; lock — не назначен; open — доступен; now — текущая; done — пройдена.
+   Задел под сюжет: если у урока в data/course.js есть поле scene, его текст показывается в карточке главы. */
+var esc=KR.esc;
+function rail(){
+  // золотая линия пути доходит до последней пройденной или текущей главы в каждой части
+  document.querySelectorAll('.chapters').forEach(function(ol){
+    var last=null;ol.querySelectorAll('.ch.done,.ch.now').forEach(function(c){last=c});
+    var nd=last&&last.querySelector('.ch-node');
+    ol.style.setProperty('--h',(nd?Math.max(0,last.offsetTop+nd.offsetTop+nd.offsetHeight/2-14):0)+'px');
+  });
 }
+function draw(){
+  KR.topbar('course');var C=COURSE,C2=window.COURSE2;
+  document.getElementById('ct').textContent=C2?C.title.split(' · ')[0]:C.title;document.getElementById('sub').textContent=C.subtitle;
+  var parts=[{t:C.title.split(' · ')[1]||'',L:C.lessons}];if(C2)parts.push({t:C2.title.split(' · ')[1]||'',L:C2.lessons});
+  var all=[];parts.forEach(function(p){all=all.concat(p.L)});
+  var st=function(l){if(!l.id)return 'soon';if(!KR.can('lesson-'+l.id))return 'lock';return KR.progress(l.id).pct>=100?'done':'open'};
+  var now=all.filter(function(l){return st(l)==='open'})[0];
+  var n=0,t=0,avail=0;all.forEach(function(l){var s=st(l);if(s==='open'||s==='done'){var p=KR.progress(l.id);n+=p.n;t+=p.tot;avail++}});
+  var pct=t?Math.round(n/t*100):0,i=0;
+  var item=function(l){
+    var s=st(l),no=l.no+'과',cls=s==='open'&&l===now?'now':s,h='<li class="ch '+cls+'" style="--i:'+(i++)+'">';
+    if(s==='soon')return h+'<span class="ch-node"></span><div class="ch-row"><b>'+no+'</b> · скоро</div></li>';
+    if(s==='lock')return h+'<span class="ch-node">'+KR.icon('lock',15)+'</span><div class="ch-row"><b>'+no+' · <span class="ko">'+esc(l.title)+'</span></b><br>'+(KR.ctx.ok?'Не назначено. Преподаватель откроет доступ.':'Нет связи с сервером')+'</div></li>';
+    var p=KR.progress(l.id);
+    var node=cls==='now'?KR.ring(p.pct,52,KR.icon('spark',16)):KR.icon(s==='done'?'check':'spark',16);
+    return h+'<span class="ch-node">'+node+'</span><div class="ch-card glass"><span class="tag">'+no+(cls==='now'?' · сейчас':s==='done'?' · пройдено':'')+'</span><h3 class="ko">'+esc(l.title)+'</h3>'+
+      (l.scene?'<p class="scene">'+esc(l.scene)+'</p>':'')+
+      '<div class="muted" style="margin-top:6px">'+p.n+' из '+p.tot+' блоков</div>'+KR.bar(p.pct)+
+      '<div class="done-row"><a class="btn pri" href="lesson.html?l='+l.id+'">'+(s==='done'?'Повторить':p.n?'Продолжить':'Начать')+KR.icon('arrow',16)+'</a><a class="btn" href="practice.html">'+KR.icon('repeat',16)+'Доп. упражнения</a></div></div></li>';
+  };
+  var h='<section class="journey card glass" aria-label="Общий прогресс">'+KR.ring(pct,92)+'<div class="mid"><h3>'+(avail&&pct>=100?'Путь пройден':'Твой путь')+'</h3><div class="muted">'+
+    (avail?'Пройдено '+n+' из '+t+' блоков · открыто глав: '+avail:(KR.ctx.ok?'Преподаватель ещё не открыл тебе уроки. Когда откроет, они появятся здесь.':'Нет связи с сервером: уроки не загружены.'))+'</div></div></section>';
+  parts.forEach(function(p,k){h+='<h2 class="path-part"><small>Часть '+(k+1)+'</small>'+esc(p.t)+'</h2><ol class="chapters">'+p.L.map(item).join('')+'</ol>'});
+  document.getElementById('list').innerHTML=h;rail();
+}
+window.addEventListener('resize',rail);
 if(KR.require()){KR.topbar('course');KR.load().then(draw)}
-</script></body></html>
+</script>
+</body>
+</html>
