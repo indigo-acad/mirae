@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0B1535">
+<title>Present Simple шаг за шагом · MIRAÉ</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--indigo:#0B1535;--indigo2:#1E2A56;--gold:#D4AF7C;--ivory:#F8F7F2;--silver:#C0C6D4;--ok:#2e7d5b;--bad:#b3433f}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,var(--indigo),var(--indigo2));background-attachment:fixed;color:var(--ivory);font:17px/1.65 Inter,system-ui,sans-serif;padding:0 16px 64px}
+main{max-width:760px;margin:0 auto}
+h1,h2{font-family:"Cormorant Garamond",serif;font-weight:600;margin:0}
+h1{font-size:clamp(34px,8vw,50px);color:var(--gold)}
+.hero{margin:0 -16px 18px;padding:40px 16px 120px;background:url(../../../img/scene-en.svg) bottom/100% 120px no-repeat}.hero>div{max-width:760px;margin:auto}
+.scene{background:#fff;border:1px solid #e3e0d4;border-radius:14px;margin:6px 0 12px;overflow:hidden}.scene svg{display:block;width:100%;height:auto}
+.sub{color:var(--silver);margin:6px 0 0}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+nav a{color:var(--gold);border:1px solid rgba(212,175,124,.4);border-radius:99px;padding:3px 14px;text-decoration:none;font-size:14px}
+.card{background:var(--ivory);color:#1a2040;border-radius:16px;padding:22px;margin:0 0 22px}
+.card h2{font-size:30px;color:var(--indigo);margin-bottom:8px}
+.card h3{margin:18px 0 6px;font-size:17px;color:var(--indigo2)}
+.ex{background:#fff;border-left:3px solid var(--gold);padding:8px 12px;border-radius:6px;margin:8px 0}
+.tag{display:inline-block;font-size:12px;background:var(--indigo);color:var(--gold);border-radius:99px;padding:1px 10px;margin-right:6px}
+table{width:100%;border-collapse:collapse;font-size:16px;margin:6px 0}
+td,th{padding:6px 8px;border-bottom:1px solid #e3e0d4;text-align:left;vertical-align:top}
+th{color:var(--indigo2)}
+.bad{color:var(--bad);text-decoration:line-through}.good{color:var(--ok);font-weight:600}
+.blk{border-top:1px dashed #c9c5b3;margin-top:18px;padding-top:4px}
+.q{margin:12px 0}
+input[type=text]{font:inherit;border:1px solid #b9b5a4;border-radius:8px;padding:3px 8px;width:min(100%,420px);background:#fff;color:#1a2040}
+input.ok{border-color:var(--ok);background:#e6f3ec}input.no{border-color:var(--bad);background:#fbeceb}
+label.opt{display:block;padding:7px 10px;border:1px solid #d6d2c2;border-radius:8px;margin:4px 0;cursor:pointer;background:#fff}
+label.opt.ok{border-color:var(--ok);background:#e6f3ec}label.opt.no{border-color:var(--bad);background:#fbeceb}
+.key{font-size:14px;margin-left:8px;color:var(--bad)}.key.g{color:var(--ok)}
+.res{font-weight:600;color:var(--indigo2)}
+ul{padding-left:20px;margin:6px 0}
+select{font:inherit;padding:3px 6px;border-radius:8px;border:1px solid #b9b5a4;background:#fff;color:#1a2040}select.ok{border-color:var(--ok);background:#e6f3ec}select.no{border-color:var(--bad);background:#fbeceb}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a>
+<header class="hero"><div><h1>Present Simple шаг за шагом</h1>
+<p class="sub">Подготовка к IELTS с нуля · 7 шагов · после каждого шага практика с подсказками</p></div></header>
+<main>
+<nav id="nav"></nav>
+<div id="app"></div>
+</main>
+
+<script>
+const NV=["нужен: глагола нет","не нужен: глагол уже есть"];
+const STEPS=[
+{t:"Шаг 1. am / is / are",
+h:`<p>В английском в каждом предложении нужен глагол. В русском мы говорим «Я студент» без глагола, а в английском нужно <b>to be</b> («быть»).</p>
+<table><tr><th>Кто</th><th>Глагол</th><th>Пример</th></tr>
+<tr><td>I</td><td><b>am</b></td><td>I am a student.</td></tr>
+<tr><td>he / she / it</td><td><b>is</b></td><td>She is from Italy.</td></tr>
+<tr><td>you / we / they</td><td><b>are</b></td><td>They are friends.</td></tr></table>
+<div class="ex"><span class="tag">Запомните</span><b>Если в предложении уже есть обычный глагол</b> (live, work, study, like), am / is / are не ставим: <span class="good">I live here.</span> <span class="bad">I am live here.</span><br><b>Если другого глагола нет</b> (мы говорим, кто человек, какой он или где он), ставим am / is / are: <span class="good">I am a student. · She is tired. · They are at home.</span></div>
+<h3>Отрицание: добавляем not</h3>
+<div class="ex">I am <b>not</b> a student. · He is <b>not</b> (isn’t) a student. · They are <b>not</b> (aren’t) students.</div>
+<h3>Вопрос: меняем местами</h3>
+<div class="ex">You are a student. → <b>Are you</b> a student?<br>She is a doctor. → <b>Is she</b> a doctor?</div>
+<p>Ответ: <b>Yes, I am. / No, she isn’t.</b></p>`,
+ex:[
+{n:"Практика 1.1: вставьте am, is или are",g:[
+["I {} a student.",["am"]],["She {} from Italy.",["is"]],["We {} friends.",["are"]],["My parents {} at home.",["are"]],
+["It {} cold today.",["is"]],["You {} late.",["are"]],["Giorgio {} a student.",["is"]],["Anna and Tom {} teachers.",["are"]]]},
+{n:"Практика 1.2: сделайте отрицание или вопрос",g:[
+["I am a student. → I {} a student. (not)",["am not"]],["She is tired. → She {} tired. (not)",["is not","isn't"]],
+["They are at home. → They {} at home. (not)",["are not","aren't"]],["You are a student. → {} you a student?",["are"]],
+["He is a doctor. → {} he a doctor?",["is"]],["Where {} the accommodation?",["is"]]]}]},
+{t:"Шаг 2. Другие глаголы: live, work, want",
+h:`<p>Это обычные глаголы действия. Глагол уже есть, поэтому <b>am / is / are не нужны</b>.</p>
+<table><tr><th>Кто</th><th>Глагол</th><th>Пример</th></tr>
+<tr><td>I / you / we / they</td><td>live</td><td>I live with my parents.</td></tr>
+<tr><td>he / she / it</td><td>live<b>s</b></td><td>She lives in Rome.</td></tr></table>
+<h3>Как добавлять -s</h3>
+<ul><li>обычно +s: work → <b>works</b>, want → <b>wants</b></li>
+<li>-ch, -sh, -s, -x, -o → +es: watch → <b>watches</b>, go → <b>goes</b></li>
+<li>согласная + y → -ies: study → <b>studies</b></li>
+<li>have → <b>has</b></li></ul>`,
+ex:[{n:"Практика 2.1: поставьте глагол в нужную форму",g:[
+["I {} with my parents. (live)",["live"]],["He {} in Rome. (live)",["lives"]],["She {} English. (study)",["studies"]],
+["We {} to study. (want)",["want"]],["My brother {} in a shop. (work)",["works"]],["They {} Italian. (speak)",["speak"]],
+["Giorgio {} TV. (watch)",["watches"]],["The teacher {} home at five. (go)",["goes"]]]}]},
+{t:"Шаг 3. do / does / don’t / doesn’t",
+h:`<p>С обычными глаголами отрицание и вопрос делаются через <b>do</b> или <b>does</b>.</p>
+<table><tr><th></th><th>I / you / we / they</th><th>he / she / it</th></tr>
+<tr><td>−</td><td>I <b>don’t</b> live here.</td><td>She <b>doesn’t</b> live here.</td></tr>
+<tr><td>?</td><td><b>Do</b> you live here?</td><td><b>Does</b> she live here?</td></tr></table>
+<div class="ex"><span class="tag">Главное</span>После does / doesn’t глагол <b>без -s</b>: <span class="good">Does she live…?</span> <span class="bad">Does she lives…?</span><br>-s уже стоит в does.</div>
+<h3>Порядок с вопросительным словом</h3>
+<div class="ex">Where <b>do</b> you <b>live</b>? · What <b>does</b> he <b>want</b> to study?</div>`,
+ex:[
+{n:"Практика 3.1: do, does, don’t или doesn’t",g:[
+["{} you live with your parents?",["do"]],["{} he want to study?",["does"]],["She {} live in London.",["doesn't","does not"]],
+["I {} speak French.",["don't","do not"]],["{} your sister work?",["does"]],["They {} like coffee.",["don't","do not"]]]},
+{n:"Практика 3.2: выберите правильную форму глагола",m:[
+["Does she … here?",["live","lives"],0],["He doesn’t … on Sunday.",["works","work"],1],["Do they … English?",["speaks","speak"],1],["What does Giorgio …?",["want","wants"],0]]}]},
+{t:"Шаг 4. Be или Do? Почему нельзя «I am live»",
+h:`<div class="ex"><span class="tag">Проверка</span>Найдите глагол в предложении.<br><b>Глагол есть</b> (live, work, play, like…) → am / is / are <b>не ставим</b>: <span class="good">I live here.</span><br><b>Глагола нет</b> → am / is / are <b>обязательны</b>: <span class="good">I am a student.</span></div>
+<p>Профессия, возраст, страна, чувства (student, 20, from Italy, tired) глаголами не являются, поэтому с ними нужен be.</p>
+<p><b>Простое правило:</b> если в предложении уже есть обычный глагол (live, work, play, like), нельзя добавлять am / is / are. Если обычного глагола нет, am / is / are нужны, чтобы связать человека с профессией, состоянием или местом: <b>She is a teacher. / She is happy. / She is at home.</b></p>
+<p><b>Важно:</b> can тоже само образует вопрос и отрицание, поэтому рядом с can не добавляем am / is / are или do / does: <b>Can you swim? · I can’t swim.</b></p>
+<table><tr><th>Какой глагол</th><th>Что используем</th></tr>
+<tr><td><b>to be</b> (am / is / are)</td><td>вопрос и отрицание делаем самим be, без do<br><span class="good">Are you a student?</span> <span class="bad">Do you a student?</span></td></tr>
+<tr><td>другой глагол (live, work, want)</td><td>нужен do / does<br><span class="good">Do you live here?</span> <span class="bad">Are you live here?</span></td></tr></table>
+<div class="ex"><span class="tag">Почему</span><span class="bad">I am live in Rome.</span> Здесь два глагола: <b>am</b> и <b>live</b>. Нужен один: <span class="good">I live in Rome.</span> Или: <span class="good">I am in Rome.</span></div>`,
+ex:[
+{n:"Практика 4.1: выберите верное предложение",m:[
+["",["I am live in Rome.","I live in Rome."],1],["",["Are you a student?","Do you a student?"],0],
+["",["Does he is a teacher?","Is he a teacher?"],1],["",["Do you live with your parents?","Are you live with your parents?"],0],
+["",["She doesn’t live here.","She isn’t live here."],0],["",["He is not a doctor.","He doesn’t a doctor."],0]]},
+{n:"Практика 4.2: am / is / are или do / does?",g:[
+["{} you a student?",["are"]],["{} you live here?",["do"]],["Where {} the accommodation?",["is"]],["Where {} you live?",["do"]],
+["What {} she want to study?",["does"]],["He {} not a teacher.",["is"]],["I {} not like tea.",["do"]],["They {} my friends.",["are"]]]},
+{n:"Практика 4.3: нужен ли am / is / are?",m:[
+["They happy.",NV,0],["They play football.",NV,1],["She at home.",NV,0],["She likes music.",NV,1],["We study English.",NV,1],["My brother a doctor.",NV,0]]},
+{n:"Практика 4.4: выберите правильный вариант",m:[
+["",["I am work in a café.","I work in a café."],1],
+["",["He is hungry.","He hungry."],0],
+["",["We are live in Stockholm.","We live in Stockholm."],1],
+["",["My sister is a student.","My sister does a student."],0],
+["",["They are at university.","They do at university."],0],
+["",["She likes music.","She is likes music."],0]]}]},
+{t:"Шаг 5. can: «могу, умею»",
+h:`<p><b>can</b> значит «могу, умею». Это вспомогательный глагол, поэтому am / is / are и do / does рядом с ним <b>не нужны</b>.</p>
+<table><tr><th></th><th>Схема</th><th>Пример</th></tr>
+<tr><td>+</td><td>подлежащее + can + глагол</td><td>I can speak English.<br>She can speak English.</td></tr>
+<tr><td>−</td><td>can’t / cannot + глагол</td><td>He can’t swim.</td></tr>
+<tr><td>?</td><td>Can + подлежащее + глагол?</td><td>Can you speak English?</td></tr></table>
+<p>Ответ: <b>Yes, I can. / No, I can’t.</b></p>
+<div class="ex"><span class="tag">Главное</span>can одинаковый для всех, без -s. Следующий глагол стоит без to и без -s.<br><span class="good">She can speak.</span> <span class="bad">She cans speak. · She can speaks. · Do you can speak? · I am can swim.</span></div>`,
+ex:[
+{n:"Практика 5.1: can, can’t или глагол",g:[
+["I {} speak English very well. (can)",["can"]],["He {} swim. (not can)",["can't","cannot"]],["{} you speak English?",["can"]],
+["She can {} the guitar. (play)",["play"]],["We {} use Wi-Fi on campus. (can)",["can"]],["Can he {} to the party? (come)",["come"]],["They {} drive. (not can)",["can't","cannot"]]]},
+{n:"Практика 5.2: выберите верное предложение",m:[
+["",["She cans speak French.","She can speak French."],1],["",["Do you can swim?","Can you swim?"],1],["",["He can’t drive.","He can’t to drive."],0],
+["",["I am can swim.","I can swim."],1],["",["She can speaks English.","She can speak English."],1]]},
+{n:"Практика 5.3: составьте вопрос или отрицание с can",g:[
+["{} you play the piano? (вопрос)",["can"]],
+["He {} speak Spanish. (отрицание)",["can't","cannot"]],
+["{} your sister drive? (вопрос)",["can"]],
+["We {} come tomorrow. (отрицание)",["can't","cannot"]],
+["My friends {} cook very well. (can)",["can"]],
+["She can {} very fast. (run)",["run"]]]}]},
+{t:"Шаг 6. Когда используем Present Simple",
+h:`<table><tr><th>Для чего</th><th>Пример</th></tr>
+<tr><td>Привычки, регулярные действия</td><td>I drink tea every morning.</td></tr>
+<tr><td>Факты, которые всегда верны</td><td>Water boils at 100°C.</td></tr>
+<tr><td>Постоянная ситуация</td><td>I live with my parents.</td></tr>
+<tr><td>Расписание</td><td>The lesson starts at six.</td></tr></table>
+<h3>Слова-подсказки</h3>
+<p>always · usually · often · sometimes · never · every day · on Mondays</p>
+<div class="ex">После <b>be</b>: She is <b>always</b> late.<br>Перед другим глаголом: I <b>usually</b> get up at seven.</div>
+<p>Если действие идёт прямо сейчас («Смотри, он бежит»), нужно другое время, Present Continuous. Его мы пройдём позже.</p>`,
+ex:[{n:"Практика 6.1: что выражает предложение?",m:[
+["Water boils at 100°C.",["привычка","факт","расписание"],1],["My lesson starts at 6 p.m.",["привычка","факт","расписание"],2],["I drink tea every morning.",["привычка","факт","расписание"],0]]},
+{n:"Практика 6.2: где стоит always / usually",m:[
+["",["She is always late.","She always is late."],0],["",["I get usually up at seven.","I usually get up at seven."],1]]}]},
+{t:"Шаг 7. Всё вместе",
+h:`<p>Диалог Giorgio и Andrew Taylor из учебника. В каждом пропуске решите: <b>be</b> или <b>do / does</b>, и нужна ли форма с -s.</p>`,
+ex:[{n:"Практика 7.1: смешанные задания",g:[
+["{} you a student?",["are"]],["I {} with my parents. (live)",["live"]],["Where {} the accommodation?",["is"]],["What {} you want to study?",["do"]],
+["Anna {} live alone. (negative)",["doesn't","does not"]],["{} Giorgio speak English?",["does"]],["My parents {} at home.",["are"]],
+["He {} Business. (study)",["studies"]],["I {} tired. (not)",["am not"]],["She {} to live in the UK. (not / want)",["doesn't want","does not want"]]]},
+{n:"Практика 7.2 (учебник, упр. 16): диалог Giorgio и Andrew Taylor",
+p:`<p>Выберите для каждого пропуска реплику A–H. Одна реплика уже дана как пример. Как в тесте, <b>ответов больше, чем пропусков</b>: две реплики лишние, выбирайте лучшую по смыслу. Обратите внимание на can: you can bring, you can study.</p>
+<div class="q">Andrew: “Do you have another question you want to ask me?”<br>Giorgio <b>1</b>: <b>D</b> (пример)</div>`,
+s:["Oh, great. Do the rooms on campus also have TVs?","Really? I like the idea of having a roommate.","It’s important to me to have a shower in the room.","Yes. Is the Wi-Fi connection better on campus or in the private house?","Yes, but I prefer to study alone. Oh, I don’t know what to choose.","Yes, that’s a good idea. They always give me good advice.","Oh, that’s good to know. I really like playing online games, you see.","My room in my parents’ house is on the second floor."],
+x:[["I think the house has superfast broadband. The Wi-Fi is sometimes very busy and slow on campus.","You also have a TV in the private room, so you can connect your computer and play games on the TV.","G"],
+["You also have a TV in the private room, so you can connect your computer and play games on the TV.","No, but you or your roommate can bring one.","A"],
+["No, but you or your roommate can bring one.","Yes, it’s good because you can study together.","B"],
+["Yes, it’s good because you can study together.","Would you like to discuss everything with your parents?","E"],
+["Would you like to discuss everything with your parents?","OK. Let me email you some information. You can contact me again after you read it.","F"]]},
+{n:"Практика 7.3 (учебник, упр. 06): перепишите предложения в вопросительной форме",g:[
+["Сделайте вопрос: It is okay to come to your house this evening. → {}",["Is it okay to come to your house this evening?"]],
+["Сделайте вопрос: You can check that the windows are all closed before we go out. → {}",["Can you check that the windows are all closed before we go out?"]],
+["Сделайте вопрос: You are in the living room next to the kitchen. → {}",["Are you in the living room next to the kitchen?"]],
+["Сделайте вопрос: You want to sit in the garden. → {}",["Do you want to sit in the garden?"]],
+["Сделайте вопрос: The apartments in the UK are very different from the apartments in your country. → {}",["Are the apartments in the UK very different from the apartments in your country?"]]]},
+{n:"Практика 7.4 (учебник, упр. 07): найдите ошибку и перепишите правильно. Если ошибки нет, напишите correct",g:[
+["1. In my country, people live usually in apartments and not houses. → {}",["In my country, people usually live in apartments and not houses."]],
+["2. My uncle keeps his car always in the garage because it is very expensive. → {}",["My uncle always keeps his car in the garage because it is very expensive."]],
+["3. Our sink sometimes makes a very strange noise. → {}",["correct"]],
+["4. I have a housemate but I don’t see very often him – he is always studying. → {}",["I have a housemate but I don’t see him very often – he is always studying."]],
+["5. In your country, do people usually celebrate their 18th birthday with a party? → {}",["correct"]],
+["6. Do you prefer to do your homework in your bedroom? → {}",["correct"]]]},
+{n:"Практика 7.5 (учебник, упр. 08): расставьте слова в правильном порядке",p:`<p>В первом наборе не хватает слова <b>do</b>: добавьте его сами.</p>`,g:[
+["does / he / washing / never / up / the → {}",["Does he never do the washing up?"]],
+["me / advice / you / some / give / can / ? → {}",["Can you give me some advice?"]],
+["eight / house / leave / morning / the / I / in / always / at / my / o’clock → {}",["I always leave my house at eight o’clock in the morning."]],
+["off / time / your / does / what / alarm / go / usually / ? → {}",["What time does your alarm usually go off?"]],
+["often / dinner / house / my / comes / to / cousin / for / my → {}",["My cousin often comes to my house for dinner."]],
+["live / future / do / the / where / to / in / want / you / ? → {}",["Where do you want to live in the future?"]],
+["live / how / you / do / with / people / many / ? → {}",["How many people do you live with?"]],
+["on / campus / live / you / do / university / the → {}",["Do you live on the university campus?"]]]}],
+f:`<div class="blk"><h3>Практика 7.6: расскажите о себе (устно или письменно)</h3>
+<p>Составьте 5 предложений: 2 с <b>am / is / are</b> и 3 с другим глаголом.</p>
+<div class="ex">I am Giorgio. I am from Italy. I live with my parents. I study Business. I don’t speak French.</div>
+<ul><li>В предложениях с be нет лишнего глагола?</li><li>Для he / she есть -s?</li><li>После don’t / doesn’t глагол без -s?</li></ul>
+<p>Это тот же ответ, который просят на IELTS Speaking Part 1: “Do you work or study?”</p></div>`}
+];
+/* ---------- иллюстрации к шагам (палитра MIRAÉ) ---------- */
+const cN="#1E2A56",cG="#D4AF7C",cF="#EFE3CC",cS="#F3DFC8",cI="#F8F7F2";
+const svgW=(inner)=>`<svg viewBox="0 0 640 220" role="img" aria-hidden="true"><rect width="640" height="220" fill="${cI}"/><g stroke="${cN}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" font-family="Inter,sans-serif">${inner}</g></svg>`;
+function person(x,y,body,hair,long){
+ return `<path d="M${x-32} ${y+100}q0-58 32-58t32 58z" fill="${body}"/>`
+ +(long?`<path d="M${x-22} ${y+40}q-4-30 22-34 26 4 22 34z" fill="${hair}"/>`:"")
+ +`<circle cx="${x}" cy="${y+10}" r="20" fill="${cS}"/>`
+ +(long?`<path d="M${x-21} ${y+8}q4-24 21-24 17 0 21 24-12-12-42 0z" fill="${hair}"/>`:`<path d="M${x-20} ${y+6}q3-20 20-20 18 0 20 18-18-8-40 2z" fill="${hair}"/>`)
+ +`<circle cx="${x-7}" cy="${y+12}" r="1.6" fill="${cN}" stroke="none"/><circle cx="${x+7}" cy="${y+12}" r="1.6" fill="${cN}" stroke="none"/><path d="M${x-5} ${y+20}q5 4 10 0" fill="none"/>`;
+}
+function bubble(x,y,w,txt,tailLeft){
+ const tx=tailLeft>1?tailLeft:(tailLeft?x+24:x+w-24);
+ return `<path d="M${x+14} ${y}h${w-28}a14 14 0 0 1 14 14v18a14 14 0 0 1-14 14H${tx+10}l-10 14-4-14H${x+14}a14 14 0 0 1-14-14V14a14 14 0 0 1 14-14z" fill="#fff"/><text x="${x+w/2}" y="${y+29}" text-anchor="middle" font-size="17" fill="${cN}" stroke="none">${txt}</text>`;
+}
+const T=(x,y,t,size=18,anchor="middle",col=cN,w=600)=>`<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="${size}" font-weight="${w}" fill="${col}" stroke="none">${t}</text>`;
+const gold=t=>`<tspan fill="#A9803F" font-weight="700">${t}</tspan>`;
+const SCN=[
+svgW(`<rect x="20" y="20" width="180" height="180" rx="16" fill="${cF}" stroke="none"/><rect x="230" y="20" width="180" height="180" rx="16" fill="${cF}" stroke="none"/><rect x="440" y="20" width="180" height="180" rx="16" fill="${cF}" stroke="none"/>
+ ${person(110,48,cN,"#3b2a1e")}<rect x="126" y="112" width="26" height="20" rx="2" fill="${cG}"/>
+ ${person(320,48,"#4254AD","#6b3f22",1)}<rect x="350" y="36" width="10" height="20" fill="#3d8a4f" stroke-width="1.4"/><rect x="360" y="36" width="10" height="20" fill="#fff" stroke-width="1.4"/><rect x="370" y="36" width="10" height="20" fill="#c2453c" stroke-width="1.4"/><path d="M350 36v40" stroke-width="2"/>
+ ${person(500,58,cN,"#2b1d14")}${person(560,58,cG,"#8a5a2b",1)}<path d="M530 46c-4-6-12-2-8 4l8 7 8-7c4-6-4-10-8-4z" fill="#c2453c" stroke="none"/>
+ ${T(110,190,`I ${gold("am")} a student.`,16)}${T(320,190,`She ${gold("is")} from Italy.`,16)}${T(530,190,`They ${gold("are")} friends.`,16)}`),
+svgW(`<path d="M60 120l90-70 90 70z" fill="${cG}"/><rect x="78" y="120" width="144" height="80" fill="#fff"/><rect x="138" y="150" width="26" height="50" fill="${cF}"/><rect x="96" y="138" width="26" height="24" fill="${cF}"/><rect x="180" y="138" width="26" height="24" fill="${cF}"/>
+ ${person(290,96,"#4254AD","#6b3f22",1)}
+ ${T(370,70,`I ${gold("live")} with my parents.`,19,"start")}${T(370,110,`She live${gold("s")} in Rome.`,19,"start")}
+ <rect x="370" y="135" width="250" height="62" rx="12" fill="${cF}" stroke="none"/>${T(384,160,`work → work${gold("s")} · go → go${gold("es")}`,15,"start",cN,500)}${T(384,186,`study → stud${gold("ies")} · have → ${gold("has")}`,15,"start",cN,500)}`),
+svgW(`${person(150,74,cN,"#2b1d14")}${person(490,74,"#4254AD","#6b3f22",1)}
+ ${bubble(30,6,250,`${gold("Does")} she live here?`,170)}${bubble(360,6,250,`No, she ${gold("doesn’t")}.`,470)}
+ ${T(320,205,`после does / doesn’t → глагол без -s: does she ${gold("live")}`,16,"middle",cN,500)}`),
+svgW(`<path d="M320 60v150" stroke-width="6"/><path d="M320 214h-40M320 214h40"/>
+ <path d="M310 40H70l-26 26 26 26h240z" fill="${cF}"/><path d="M330 92h240l26 26-26 26H330z" fill="${cG}"/>
+ ${T(186,62,"есть глагол (live, work)",16)}${T(186,84,`→ ${gold("do / does")}`,17)}
+ ${T(454,114,"нет глагола (student, happy)",16)}${T(454,136,`→ am / is / are`,17,"middle","#fff",700)}
+ ${T(140,180,`I live here. ✓`,16,"middle","#2e7d5b")}${T(140,204,`<tspan text-decoration="line-through">I am live here.</tspan>`,15,"middle","#b3433f",500)}${T(500,190,`I am a student. ✓`,16,"middle","#2e7d5b")}`),
+svgW(`<path d="M20 170q20-12 40 0t40 0 40 0 40 0 40 0 40 0" fill="none" stroke="#4254AD"/><path d="M20 192q20-12 40 0t40 0 40 0 40 0 40 0 40 0" fill="none" stroke="#4254AD"/>
+ <circle cx="110" cy="146" r="18" fill="${cS}"/><path d="M90 140q20-26 40-6" fill="${cN}"/><path d="M128 160l50-28 14 10" fill="none" stroke-width="7" stroke="${cS}"/><path d="M92 162l-40 8" fill="none" stroke-width="7" stroke="${cS}"/>
+ ${bubble(60,30,180,`I ${gold("can")} swim!`,1)}
+ ${person(440,96,cN,"#2b1d14")}<ellipse cx="470" cy="160" rx="26" ry="20" fill="${cG}" transform="rotate(-30 470 160)"/><circle cx="470" cy="160" r="6" fill="${cN}"/><path d="M482 150l44-40" stroke-width="7"/>
+ ${bubble(400,20,230,`He ${gold("can")} play the guitar.`,1)}`),
+svgW(`<rect x="20" y="20" width="185" height="180" rx="16" fill="${cF}" stroke="none"/><rect x="228" y="20" width="185" height="180" rx="16" fill="${cF}" stroke="none"/><rect x="436" y="20" width="185" height="180" rx="16" fill="${cF}" stroke="none"/>
+ <path d="M80 70h50v40a20 20 0 0 1-20 20h-10a20 20 0 0 1-20-20z" fill="#fff"/><path d="M130 80h8a10 10 0 0 1 0 20h-8" fill="none"/><path d="M96 58c-4-6 4-8 0-14M112 58c-4-6 4-8 0-14" fill="none" stroke="${cG}"/>
+ <rect x="312" y="50" width="16" height="78" rx="8" fill="#fff"/><circle cx="320" cy="132" r="13" fill="#c2453c"/><path d="M320 130V64" stroke="#c2453c" stroke-width="6"/><path d="M334 64h8M334 80h8M334 96h8M334 112h8" stroke-width="2"/>
+ <circle cx="528" cy="96" r="40" fill="#fff"/><path d="M528 66v30l20 0" fill="none" stroke="${cG}" stroke-width="4"/>
+ ${T(112,166,"привычка",17)}${T(112,188,"every morning",14,"middle","#68708a",500)}${T(320,166,"факт",17)}${T(320,188,"water boils at 100°C",14,"middle","#68708a",500)}${T(528,166,"расписание",17)}${T(528,188,"starts at six",14,"middle","#68708a",500)}`),
+svgW(`<path d="M490 104l65-38 65 38z" fill="${cG}"/><path d="M496 106h118M494 200h122"/><path d="M510 110v86M540 110v86M570 110v86M600 110v86" stroke-width="5"/>
+ ${person(110,90,cN,"#9a9a9a")}${person(370,90,"#4254AD","#2b1d14")}
+ ${bubble(10,8,230,`${gold("Do")} you live on campus?`,120)}${bubble(250,8,230,`No, I live at home.`,350)}
+ ${T(110,212,"Andrew Taylor",15)}${T(370,212,"Giorgio",15)}`)
+];
+const norm=s=>s.trim().toLowerCase().replace(/[’‘]/g,"'").replace(/\s*[–—-]\s*/g," - ").replace(/\s*([.!?])+$/,"").replace(/\s+([?,.])/g,"$1").replace(/\s+/g,' ');
+const S={};
+const app=document.getElementById("app"),nav=document.getElementById("nav");
+STEPS.forEach((s,si)=>{
+ nav.insertAdjacentHTML("beforeend",`<a href="#s${si}">${si+1}</a>`);
+ let h=`<section class="card" id="s${si}"><h2>${s.t}</h2>${SCN[si]?`<div class="scene">${SCN[si]}</div>`:""}${s.h}`;
+ s.ex.forEach((e,ei)=>{const b=`b${si}_${ei}`,items=e.g||e.m||e.x;S[b]={n:items.length,done:{},tries:{},e};
+  h+=`<div class="blk"><h3>${e.n}</h3>${e.p||""}`;
+  if(e.g)e.g.forEach((it,i)=>h+=`<div class="q">${i+1}. ${it[0].replace("{}",`<input type="text" data-b="${b}" data-i="${i}" autocomplete="off" autocapitalize="none" spellcheck="false">`)}<span class="key" id="${b}_${i}k"></span></div>`);
+  else if(e.x){h+=e.s.map((t,i)=>`<div class="ex"><b>${"ABCDEFGH"[i]}</b> ${t}</div>`).join("")+e.x.map((it,i)=>`<div class="q">Andrew: “${it[0]}”<br>Giorgio <b>${i+2}</b>: <select data-b="${b}" data-i="${i}"><option value="">–</option>${[..."ABCDEFGH"].map(l=>`<option>${l}</option>`).join("")}</select><span class="key" id="${b}_${i}k"></span><br>Andrew: “${it[1]}”</div>`).join("")}
+  else e.m.forEach((it,i)=>h+=`<div class="q"><b>${i+1}.</b> ${it[0]}`+it[1].map((o,j)=>`<label class="opt" id="${b}_${i}_${j}"><input type="radio" name="${b}_${i}" data-b="${b}" data-i="${i}" value="${j}"> ${o}</label>`).join("")+`</div>`);
+  h+=`<div class="res" id="${b}r">Верно: 0 из ${items.length}</div></div>`});
+ app.insertAdjacentHTML("beforeend",h+(s.f||"")+`</section>`)});
+function upd(b){S[b].r=Object.keys(S[b].done).length;document.getElementById(b+"r").textContent=`Верно: ${S[b].r} из ${S[b].n}`+(S[b].r==S[b].n?" ✓ Отлично!":"")}
+document.addEventListener("change",ev=>{const el=ev.target,b=el.dataset.b;if(!b)return;const i=+el.dataset.i,st=S[b],id=b+"_"+i;
+ st.tries[i]=(st.tries[i]||0)+1;
+ if(el.tagName==="SELECT"){const a=st.e.x[i][2],ok=el.value===a,k=document.getElementById(id+"k");if(!el.value)return;
+  el.className=ok?"ok":"no";if(ok){st.done[i]=1;k.textContent="";}else k.textContent=st.tries[i]>=2?"Правильно: "+a:"Ещё раз";k.className="key"+(ok?" g":"");}
+ else if(el.type==="text"){const a=st.e.g[i][1],ok=a.map(norm).includes(norm(el.value)),k=document.getElementById(id+"k");
+  if(el.value.trim()==="")return;
+  el.className=ok?"ok":"no";if(ok){st.done[i]=1;k.textContent="";}
+  else k.textContent=st.tries[i]>=2?"Правильно: "+a[0].replace("'","’"):"Ещё раз";k.className="key"+(ok?" g":"");}
+ else{const c=st.e.m[i][2],ok=+el.value===c,lab=document.getElementById(`${id}_${el.value}`);
+  lab.className="opt "+(ok?"ok":"no");if(ok)st.done[i]=1;else if(st.tries[i]>=2)document.getElementById(`${id}_${c}`).classList.add("ok");}
+ upd(b)});
+</script>
+</body>
+</html>

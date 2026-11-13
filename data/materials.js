@@ -18,6 +18,22 @@ window.MATERIALS=[
   "level": "band 9"
  },
  {
+  "id": "en-present-simple",
+  "section": "english",
+  "kind": "lesson",
+  "title": "Present Simple шаг за шагом",
+  "path": "materials/english/en-present-simple/",
+  "level": "IELTS с нуля"
+ },
+ {
+  "id": "en-my-home-vocab",
+  "section": "english",
+  "kind": "lesson",
+  "title": "My Home · комнаты и предметы",
+  "path": "materials/english/en-my-home-vocab/",
+  "level": "IELTS с нуля"
+ },
+ {
   "id": "en-ielts-band6-transport",
   "section": "english",
   "kind": "trainer",

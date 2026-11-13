@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0B1535">
+<title>My Home · Vocabulary · MIRAÉ</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--indigo:#0B1535;--indigo2:#1E2A56;--gold:#D4AF7C;--ivory:#F8F7F2;--silver:#C0C6D4;--ok:#2e7d5b;--bad:#b3433f}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,var(--indigo),var(--indigo2));background-attachment:fixed;color:var(--ivory);font:16px/1.65 Inter,system-ui,sans-serif;padding:0 15px 60px}
+main{max-width:850px;margin:auto}h1,h2{font-family:"Cormorant Garamond",serif;font-weight:600;margin:0}
+.hero{position:relative;margin:0 -15px 18px;padding:40px 15px 120px;background:url(../../../img/scene-en.svg) bottom/100% 120px no-repeat}
+.hero>div{max-width:850px;margin:auto}
+h1{font-size:clamp(38px,8vw,54px);color:var(--gold)}.sub{color:var(--silver);margin:4px 0 0}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}nav a{color:var(--gold);border:1px solid #806e58;border-radius:99px;padding:3px 12px;text-decoration:none;font-size:13px}
+.card{background:var(--ivory);color:#1a2040;border-radius:16px;padding:20px;margin:0 0 20px}.card h2{font-size:29px;color:var(--indigo);margin-bottom:8px}.card h3{margin:17px 0 6px;color:var(--indigo2);font-size:17px}
+.ex{background:#fff;border-left:3px solid var(--gold);padding:9px 12px;border-radius:6px;margin:9px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.vocab{background:#fff;border:1px solid #e3e0d4;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column}
+.vocab svg{width:64px;height:64px;margin-bottom:4px}
+.word{font-size:19px;font-weight:600;color:var(--indigo)}.pron{font-size:13px;color:#68708a}.ru{color:#39415d}
+.house{background:#fff;border:1px solid #e3e0d4;border-radius:14px;padding:8px;margin:10px 0}.house svg{display:block;width:100%;height:auto}
+input[type=text]{font:inherit;border:1px solid #b9b5a4;border-radius:8px;padding:5px 8px;max-width:100%;width:280px;background:#fff;color:#1a2040}
+.q{margin:12px 0}.q input{margin:3px 4px}
+.qi{display:flex;gap:12px;align-items:center}.qi svg{flex:0 0 52px;width:52px;height:52px;background:#fff;border:1px solid #e3e0d4;border-radius:10px;padding:4px}
+label.opt{display:block;padding:7px 10px;border:1px solid #d6d2c2;border-radius:8px;margin:4px 0;cursor:pointer;background:#fff}label.opt.ok{border-color:var(--ok);background:#e6f3ec}label.opt.no{border-color:var(--bad);background:#fbeceb}
+input.ok,select.ok{border-color:var(--ok);background:#e6f3ec}input.no,select.no{border-color:var(--bad);background:#fbeceb}.key{font-size:13px;margin-left:7px;color:var(--bad)}.key.g{color:var(--ok)}
+select{font:inherit;padding:4px 6px;border-radius:8px;border:1px solid #b9b5a4;background:#fff;color:#1a2040;max-width:100%}
+.res{font-weight:600;color:var(--indigo2);margin-top:8px}.blk{border-top:1px dashed #c9c5b3;margin-top:17px;padding-top:4px}
+.small{font-size:13px;color:#68708a}
+@media(max-width:520px){.card{padding:15px}.card h2{font-size:25px}input[type=text]{width:100%}.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a>
+<header class="hero"><div><h1>My Home</h1><p class="sub">Урок английского: комнаты, места в доме и предметы · Vocabulary + practice</p></div></header>
+<main>
+<nav id="nav"></nav><div id="app"></div>
+</main>
+<script>
+/* ---------- иллюстрации в палитре MIRAÉ ---------- */
+const N="#1E2A56",G="#D4AF7C",F="#EFE3CC",W="#fff";
+const IC={
+bedroom:`<rect x="7" y="20" width="7" height="30" rx="2" fill="${F}"/><rect x="14" y="34" width="43" height="10" rx="2"/><rect x="17" y="27" width="12" height="7" rx="3" fill="${G}"/><rect x="30" y="29" width="27" height="9" rx="2" fill="${F}"/><path d="M14 44v8M55 44v8"/><path d="M48 9a6 6 0 1 0 6 9 5 5 0 0 1-6-9z" fill="${G}" stroke="none"/>`,
+bathroom:`<path d="M15 32V15a4 4 0 0 1 8 0v2"/><path d="M6 32h52v5c0 7-5 11-11 11H17C11 48 6 44 6 37z" fill="${F}"/><path d="M14 48l-2 6M50 48l2 6"/><circle cx="34" cy="26" r="3" fill="${G}" stroke="none"/><circle cx="42" cy="22" r="2.4" fill="${G}" stroke="none"/><circle cx="48" cy="27" r="2" fill="${G}" stroke="none"/>`,
+kitchen:`<path d="M24 16c-3-3 3-5 0-8M32 16c-3-3 3-5 0-8M40 16c-3-3 3-5 0-8" stroke="${G}"/><rect x="14" y="24" width="36" height="22" rx="5" fill="${F}"/><path d="M10 24h44M8 32h6M50 32h6M8 52h48"/>`,
+living:`<rect x="20" y="6" width="26" height="17" rx="2" fill="${N}"/><path d="M28 27l5-4 5 4"/><rect x="13" y="32" width="38" height="11" rx="4"/><rect x="9" y="40" width="46" height="10" rx="4" fill="${F}"/><path d="M13 50v5M51 50v5"/>`,
+hall:`<rect x="20" y="8" width="24" height="44" rx="2" fill="${F}"/><circle cx="39" cy="32" r="2" fill="${G}" stroke="none"/><path d="M10 14h6M13 14v6"/><path d="M14 56h36" stroke="${G}" stroke-width="4"/>`,
+hallway:`<rect x="23" y="20" width="18" height="24" fill="${F}"/><path d="M6 6l17 14M58 6L41 20M6 58l17-14M58 58L41 44"/><path d="M11 18v26l7-5V23zM53 18v26l-7-5V23z" fill="${G}" stroke-width="1.8"/>`,
+basement:`<path d="M14 30V18L32 7l18 11v12"/><path d="M4 30h56" stroke="#8a7a5c"/><rect x="14" y="30" width="36" height="22" fill="${F}"/><path d="M18 48h6v-5h6v-5h6" stroke="${G}" stroke-width="3"/>`,
+attic:`<path d="M9 30L32 10l23 20z" fill="${G}"/><circle cx="32" cy="23" r="3.5" fill="${W}"/><rect x="13" y="30" width="38" height="24"/><rect x="20" y="38" width="8" height="8"/><rect x="36" y="38" width="8" height="8"/>`,
+garage:`<path d="M7 26L32 11l25 15v28H7z"/><rect x="15" y="31" width="34" height="23" fill="${F}"/><path d="M15 37h34M15 43h34M15 49h34"/><circle cx="32" cy="21" r="2" fill="${G}" stroke="none"/>`,
+study:`<rect x="9" y="9" width="46" height="46" rx="2"/><path d="M9 27h46M9 41h46"/><path d="M15 27V15M20 27V13M25 27V17M42 41V30M47 41V31" stroke="${G}" stroke-width="4"/><path d="M33 26l5-11" stroke="${N}" stroke-width="4"/><path d="M14 55V41h12v14" fill="${F}"/>`,
+garden:`<circle cx="21" cy="22" r="13" fill="${F}"/><path d="M21 32v22"/><path d="M38 54V40M46 54V40M54 54V40M34 44h24"/><circle cx="46" cy="16" r="5" fill="${G}" stroke="none"/><path d="M4 54h56"/>`,
+fridge:`<rect x="17" y="5" width="30" height="54" rx="4" fill="${F}"/><path d="M17 24h30M23 12v6M23 30v10"/><circle cx="38" cy="14" r="2.4" fill="${G}" stroke="none"/>`,
+freezer:`<rect x="10" y="14" width="44" height="42" rx="4" fill="${F}"/><path d="M10 24h44"/><path d="M32 30v20M23 35l18 10M41 35L23 45" stroke="${G}"/><path d="M16 19h10"/>`,
+desk:`<path d="M5 28h54" stroke-width="3"/><path d="M10 28v26"/><rect x="38" y="28" width="18" height="26" fill="${F}"/><path d="M38 40h18"/><circle cx="47" cy="34" r="1.6" fill="${N}"/><circle cx="47" cy="47" r="1.6" fill="${N}"/><path d="M16 28v-8h14v8" fill="${G}"/>`,
+drawers:`<rect x="11" y="10" width="42" height="42" rx="3" fill="${F}"/><path d="M11 24h42M11 38h42M15 52v4M49 52v4"/><circle cx="32" cy="17" r="2.2" fill="${G}" stroke="none"/><circle cx="32" cy="31" r="2.2" fill="${G}" stroke="none"/><circle cx="32" cy="45" r="2.2" fill="${G}" stroke="none"/>`,
+wardrobe:`<rect x="12" y="5" width="40" height="50" rx="2" fill="${F}"/><path d="M32 5v50M16 55v4M48 55v4"/><path d="M28 28v6M36 28v6" stroke="${G}" stroke-width="3"/>`,
+cupboard:`<rect x="8" y="10" width="48" height="30" rx="2" fill="${F}"/><path d="M32 10v30"/><circle cx="28" cy="25" r="2" fill="${G}" stroke="none"/><circle cx="36" cy="25" r="2" fill="${G}" stroke="none"/><path d="M8 52h48"/><path d="M14 52v-6h7v6M26 52v-8h6v8" fill="${W}"/>`,
+chair:`<path d="M20 6v30M36 6v30"/><path d="M20 10h16M20 18h16" stroke="${G}"/><path d="M16 36h26v6H16z" fill="${F}"/><path d="M18 42v16M40 42v16"/>`,
+sofa:`<rect x="13" y="20" width="38" height="16" rx="5"/><path d="M7 30a4 4 0 0 1 8 0v12h34V30a4 4 0 0 1 8 0v18H7z" fill="${F}"/><rect x="20" y="25" width="10" height="7" rx="3" fill="${G}"/><path d="M11 48v5M53 48v5"/>`,
+curtains:`<rect x="14" y="12" width="36" height="40"/><path d="M14 32h36M32 12v40" stroke-width="1.4"/><path d="M6 8h52"/><path d="M8 8h12c-4 14 2 30 4 48H8z" fill="${G}"/><path d="M56 8H44c4 14-2 30-4 48h16z" fill="${G}"/>`,
+lamp:`<path d="M22 10h20l7 20H15z" fill="${G}"/><path d="M32 30v20"/><path d="M22 54h20" stroke-width="4"/><path d="M14 36l-4 3M50 36l4 3M32 34v0" stroke="${G}"/>`,
+posters:`<rect x="6" y="10" width="24" height="32" rx="1" fill="${F}" transform="rotate(-5 18 26)"/><path d="M9 36l6-10 5 6 4-5 4 7" stroke="${N}" stroke-width="1.8" transform="rotate(-5 18 26)"/><rect x="34" y="16" width="24" height="32" rx="1" fill="${W}" transform="rotate(4 46 32)"/><path d="M46 24l2 5 5 .5-4 3 1.5 5-4.5-3-4.5 3 1.5-5-4-3 5-.5z" fill="${G}" stroke-width="1.2" transform="rotate(4 46 32)"/>`,
+pillows:`<path d="M8 22c6-4 18-4 24 0 3 6 3 12 0 18-6 4-18 4-24 0-3-6-3-12 0-18z" fill="${F}"/><path d="M30 30c6-4 18-4 24 0 3 6 3 12 0 18-6 4-18 4-24 0-3-6-3-12 0-18z" fill="${G}"/>`,
+oven:`<rect x="10" y="8" width="44" height="48" rx="3"/><path d="M10 18h44"/><circle cx="17" cy="13" r="2" fill="${G}" stroke="none"/><circle cx="24" cy="13" r="2" fill="${G}" stroke="none"/><rect x="16" y="24" width="32" height="24" rx="2" fill="${F}"/><path d="M20 28h24"/>`,
+terraced:`<path d="M3 30l10-10 10 10 10-10 10 10 10-10 9 9"/><rect x="5" y="30" width="54" height="22" fill="${F}"/><path d="M23 30v22M41 30v22"/><rect x="10" y="40" width="5" height="12" fill="${G}"/><rect x="28" y="40" width="5" height="12" fill="${G}"/><rect x="46" y="40" width="5" height="12" fill="${G}"/>`,
+semi:`<path d="M6 30l13-14 13 14 13-14 13 14"/><rect x="8" y="30" width="48" height="22" fill="${F}"/><path d="M32 18v34" stroke="${G}" stroke-width="3"/><rect x="13" y="38" width="7" height="7"/><rect x="44" y="38" width="7" height="7"/>`,
+block:`<rect x="16" y="6" width="32" height="50" fill="${F}"/><path d="M22 12h5v5h-5zM37 12h5v5h-5zM22 22h5v5h-5zM37 22h5v5h-5zM22 32h5v5h-5zM37 32h5v5h-5z" fill="${G}" stroke-width="1.6"/><rect x="28" y="44" width="8" height="12"/><path d="M8 56h48"/>`,
+campus:`<path d="M6 24L32 10l26 14z" fill="${G}"/><path d="M10 24h44M12 52h40M8 56h48"/><path d="M16 28v22M26 28v22M38 28v22M48 28v22" stroke-width="3"/>`
+};
+const ic=(n,cls="")=>`<svg viewBox="0 0 64 64" class="${cls}" aria-hidden="true"><g fill="none" stroke="${N}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${IC[n]||""}</g></svg>`;
+
+/* разрез дома: подписи (labels=true) или номера для упражнения */
+function houseSVG(labels){
+ const R=[ // x,y,w,h,label,num
+  [190,70,220,60,"attic",1],[190,130,120,80,"bedroom",2],[310,130,100,80,"bathroom",3],
+  [190,210,130,80,"living room",4],[320,210,90,80,"kitchen",5],[190,290,220,50,"basement",6],
+  [70,200,120,90,"garage",7]];
+ let s=`<svg viewBox="0 0 600 360" role="img" aria-label="House"><rect width="600" height="360" fill="#F8F7F2"/>
+ <path d="M0 290h600v70H0z" fill="#E7DCC4"/><circle cx="530" cy="60" r="26" fill="${G}" opacity=".5"/>
+ <g stroke="${N}" stroke-width="2.5" stroke-linejoin="round">
+ <path d="M175 130L300 40l125 90z" fill="#EAD8B4"/><rect x="190" y="130" width="220" height="210" fill="#fff"/>
+ <path d="M60 200l65-40 65 40z" fill="#EAD8B4"/><rect x="70" y="200" width="120" height="90" fill="#fff"/>
+ <path d="M190 210h220M190 290h220M310 130v80M320 210v80M190 130h220" fill="none"/>
+ <path d="M88 220h84v70H88z" fill="${F}"/><path d="M88 240h84M88 260h84" fill="none" stroke-width="1.5"/>
+ <rect x="206" y="160" width="60" height="20" rx="4" fill="${F}"/><rect x="206" y="150" width="14" height="10" rx="3" fill="${G}"/>
+ <path d="M326 170h70v8c0 8-5 12-12 12h-46c-7 0-12-4-12-12z" fill="${F}"/>
+ <rect x="206" y="250" width="56" height="22" rx="6" fill="${F}"/><rect x="214" y="226" width="40" height="18" rx="2" fill="${N}"/>
+ <rect x="350" y="248" width="40" height="42" rx="2" fill="${F}"/><path d="M350 260h40" fill="none"/>
+ <path d="M206 330h14v-10h14v-10h14" fill="none" stroke="${G}" stroke-width="4"/>
+ <circle cx="300" cy="100" r="11" fill="#fff"/>
+ <path d="M500 290v-50" fill="none"/><circle cx="500" cy="225" r="32" fill="#CFD8C4"/>
+ <path d="M440 290v-22M455 290v-22M470 290v-22M432 274h46" fill="none" stroke-width="2"/></g>`;
+ R.forEach(([x,y,w,h,l,n])=>{
+  const cx=x+w/2, cy=y+(l==="attic"?h-10:16);
+  s+=labels?`<text x="${cx}" y="${cy}" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="600" fill="${N}" paint-order="stroke" stroke="#fff" stroke-width="4">${l}</text>`
+   :`<circle cx="${cx}" cy="${cy-5}" r="12" fill="${N}"/><text x="${cx}" y="${cy}" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="${G}">${n}</text>`});
+ s+=labels?`<text x="500" y="230" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="600" fill="${N}">garden</text>`
+  :`<circle cx="500" cy="220" r="12" fill="${N}"/><text x="500" y="225" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="${G}">8</text>`;
+ return s+`</svg>`;
+}
+
+const V=(w,ru,i,extra="")=>`<div class="vocab">${ic(i)}<div class="word">${w}</div>${extra}<div class="ru">${ru}</div></div>`;
+const sections = [
+{title:"1. Новые слова: комнаты в доме", content:`
+<p>Сначала выучи названия основных комнат. Прочитай слово вслух и попробуй вспомнить перевод, прежде чем смотреть на него.</p>
+<div class="house">${houseSVG(true)}</div>
+<div class="grid">
+${V("bedroom","спальня","bedroom",'<div class="pron">[ˈbedruːm]</div>')}
+${V("bathroom","ванная комната","bathroom",'<div class="pron">[ˈbɑːθruːm]</div>')}
+${V("kitchen","кухня","kitchen",'<div class="pron">[ˈkɪtʃɪn]</div>')}
+${V("living room","гостиная","living",'<div class="pron">[ˈlɪvɪŋ ruːm]</div>')}
+</div>
+<div class="ex">I sleep in the <b>bedroom</b>. · I brush my teeth in the <b>bathroom</b>. · We cook in the <b>kitchen</b>. · We watch TV in the <b>living room</b>.</div>
+<h3>Ещё места в доме и вокруг него</h3>
+<div class="grid">
+${V("hall","прихожая, холл","hall")}${V("hallway","коридор","hallway")}${V("basement","подвал","basement")}${V("attic","чердак, мансарда","attic")}
+${V("garage","гараж","garage")}${V("study","кабинет","study")}${V("garden","сад","garden")}
+</div>
+<div class="ex"><b>Запомни:</b> <i>in the bedroom</i> — в спальне; <i>in the kitchen</i> — на кухне; <i>in the garden</i> — в саду.</div>`},
+{title:"2. Вещи и типы жилья",content:`
+<div class="grid">
+${V("fridge","холодильник","fridge")}${V("freezer","морозильник","freezer")}${V("desk","письменный стол","desk")}${V("drawers","выдвижные ящики","drawers")}
+${V("wardrobe","шкаф для одежды","wardrobe")}${V("cupboard","шкафчик, шкаф для посуды/вещей","cupboard")}${V("chair","стул","chair")}${V("sofa","диван","sofa")}
+${V("curtains","шторы","curtains")}${V("table lamp","настольная лампа","lamp")}${V("posters","плакаты","posters")}${V("pillows","подушки","pillows")}${V("oven","духовка","oven")}
+</div>
+<h3>Типы домов и зданий</h3>
+<div class="grid">
+${V("terraced house","дом в ряду одинаковых домов","terraced")}${V("semi-detached house","дом на две семьи, соединённый с соседним одной стеной","semi")}
+${V("private apartment block","частный многоквартирный жилой дом","block")}${V("university campus","университетский кампус","campus")}
+</div>`},
+{title:"3. Практика: вспомни слово", exercises:[
+{type:"text",name:"Вставь название комнаты",items:[
+["This is the place where you usually sleep every night: {}",["bedroom","the bedroom"],"bedroom"],
+["You wash and brush your teeth here: {}",["bathroom","the bathroom"],"bathroom"],
+["People sit together, talk, play games or watch TV here: {}",["living room","the living room"],"living"],
+["You keep your car here: {}",["garage","the garage"],"garage"],
+["You walk through this place to move from one room to another: {}",["hallway","the hallway"],"hallway"],
+["You can be outside and sit on the grass here: {}",["garden","the garden"],"garden"]]},
+{type:"text",name:"Допиши пропущенные буквы (напиши слово целиком)",items:[
+["b _ d r _ _ m",["bedroom"]],["b _ t h r _ _ m",["bathroom"]],["k _ t c h _ n",["kitchen"]],["l i v _ n g &nbsp; r _ _ m",["living room"]],["b _ s _ m _ n t",["basement"]],["a t t _ c",["attic"]],["g a r _ g _",["garage"]],["s t _ d y",["study"]]]},
+{type:"choice",name:"Посмотри на картинку: что под номером?",pre:`<div class="house">${houseSVG(false)}</div>`,items:[
+["1",["basement","attic","hall"],1],["2",["bedroom","kitchen","garage"],0],["3",["study","living room","bathroom"],2],["4",["living room","bedroom","attic"],0],
+["5",["garden","kitchen","hallway"],1],["6",["basement","garage","attic"],0],["7",["study","hall","garage"],2],["8",["garden","hallway","basement"],0]]}
+]},
+{title:"4. Практика: выбери правильное слово",exercises:[
+{type:"choice",name:"Комнаты и предметы",items:[
+["You sleep in the …",["bedroom","bathroom","kitchen"],0],
+["You cook in the …",["garage","kitchen","attic"],1],
+["You watch television in the …",["living room","basement","hallway"],0],
+["You keep clothes in a …",["fridge","wardrobe","oven"],1],
+["You sit on a …",["chair","curtains","drawer"],0],
+["You keep food cold in a …",["desk","fridge","pillow"],1],
+["A room or space under a house is a …",["attic","basement","garden"],1],
+["A room at the top of a house, under the roof, is an …",["attic","hall","garage"],0],
+["You cook food in an …",["oven","wardrobe","freezer"],0]]}
+]},
+{title:"5. Практика: слова в контексте",exercises:[
+{type:"text",name:"Вставь подходящее слово",items:[
+["I really like my {}. They are red and black, and they make my bedroom very dark. (шторы)",["curtains"],"curtains"],
+["I have a bright {} lamp that I use when I do my homework. (настольная)",["table"],"lamp"],
+["I think {} make the walls look more interesting. (плакаты)",["posters"],"posters"],
+["It is good to sleep with two {}. (подушки)",["pillows"],"pillows"],
+["My brother never cooks — the only thing he can do is turn on the {}! (духовка)",["oven"],"oven"],
+["Most of my clothes are in my {}. (шкаф для одежды)",["wardrobe"],"wardrobe"]]},
+{type:"text",name:"Назови предмет по картинке и описанию",items:[
+["A piece of furniture with a flat top where you study: {}",["desk","a desk"],"desk"],
+["A piece of furniture you sit on, usually for one person: {}",["chair","a chair"],"chair"],
+["A large comfortable seat for two or more people: {}",["sofa","a sofa"],"sofa"],
+["A piece of furniture with shelves and doors, often in a kitchen: {}",["cupboard","a cupboard"],"cupboard"],
+["The part of a desk or chest that slides in and out: {}",["drawer","drawers","a drawer"],"drawers"]]}
+]},
+{title:"6. Практика: вопросы и ответы",exercises:[
+{type:"match",name:"Соедини вопрос с подходящим ответом",items:[
+["What do you like about your room?",["My comfortable bed and my posters."],2],
+["Who do you live with?",["My parents, my sister and my grandparents."],4],
+["Do you like to cook?",["Yes, and I think I’m quite good at it."],6],
+["Where do you watch television?",["Usually in the living room and sometimes in my bedroom."],0],
+["Is it often sunny where you live?",["Yes. I like it because I can spend time in the garden."],7],
+["Where do you do your homework?",["Usually in the study and sometimes in my bedroom."],1],
+["Can you tell me where the bathroom is, please?",["Yes. Go down the hall and it is next to the living room."],3],
+["Why don’t you often go in the kitchen?",["Because I can’t cook!"],5]]}
+]},
+{title:"7. Итоговая практика",exercises:[
+{type:"text",name:"Переведи на английский",items:[
+["Моя спальня большая. → {}",["My bedroom is big.","My bedroom is large."]],
+["Мы готовим на кухне. → {}",["We cook in the kitchen."]],
+["Где твоя ванная? → {}",["Where is your bathroom?","Where's your bathroom?"]],
+["Я обычно делаю домашнюю работу в кабинете. → {}",["I usually do my homework in the study.","I usually do homework in the study."]],
+["В саду есть стул и стол. → {}",["There is a chair and a table in the garden.","There's a chair and a table in the garden.","There is a table and a chair in the garden.","There's a table and a chair in the garden."]]]}
+]}
+];
+
+const app=document.getElementById("app"),nav=document.getElementById("nav"),states={};
+let exCount=0;
+sections.forEach((s,si)=>{
+ nav.insertAdjacentHTML("beforeend",`<a href="#s${si}">${si+1}</a>`);
+ let out=`<section class="card" id="s${si}"><h2>${s.title}</h2>${s.content||""}`;
+ (s.exercises||[]).forEach(ex=>{
+  const id="ex"+(exCount++);states[id]={ex,done:{}};
+  out+=`<div class="blk"><h3>${ex.name}</h3>${ex.pre||""}`;
+  if(ex.type==="text"){
+   ex.items.forEach((it,i)=>{
+    const inp=`<input type="text" data-ex="${id}" data-i="${i}" autocomplete="off" autocapitalize="none" spellcheck="false">`;
+    const sentence=it[0].includes("{}")?it[0].replace("{}",inp):`<b>${it[0]}</b> → ${inp}`;
+    const body=`${i+1}. ${sentence}<span class="key" id="${id}_${i}"></span>`;
+    out+=it[2]?`<div class="q qi">${ic(it[2])}<div>${body}</div></div>`:`<div class="q">${body}</div>`;
+   });
+  } else if(ex.type==="choice"){
+   ex.items.forEach((it,i)=>{
+    out+=`<div class="q"><b>${i+1}. ${it[0]}</b>${it[1].map((o,j)=>`<label class="opt" id="${id}_${i}_${j}"><input type="radio" name="${id}_${i}" data-ex="${id}" data-i="${i}" value="${j}"> ${o}</label>`).join("")}</div>`;
+   });
+  } else if(ex.type==="match"){
+   // варианты показываем в перемешанном порядке: ответ вопроса i стоит на позиции it[2]
+   const order=[];ex.items.forEach(x=>order[x[2]]=x[1][0]);
+   ex.items.forEach((it,i)=>{
+    out+=`<div class="q">${i+1}. ${it[0]}<br><select data-ex="${id}" data-i="${i}"><option value="">— выбери ответ —</option>${order.map((a,p)=>`<option value="${p}">${String.fromCharCode(65+p)}. ${a}</option>`).join("")}</select><span class="key" id="${id}_${i}"></span></div>`;
+   });
+  }
+  out+=`<div class="res" id="${id}_res">Верно: 0 из ${ex.items.length}</div></div>`;
+ });
+ out+="</section>";app.insertAdjacentHTML("beforeend",out);
+});
+function norm(s){return s.trim().toLowerCase().replace(/[’‘]/g,"'").replace(/[.!?]+$/,"").replace(/\s+/g," ")}
+document.addEventListener("change",ev=>{
+ const el=ev.target,id=el.dataset.ex;if(!id)return;
+ const st=states[id],i=+el.dataset.i,ex=st.ex,it=ex.items[i];let ok=false;
+ if(ex.type==="text"){
+  if(!el.value.trim())return;
+  ok=it[1].map(norm).includes(norm(el.value));
+  el.className=ok?"ok":"no";
+  st.tries=st.tries||{};st.tries[i]=(st.tries[i]||0)+1;
+  const k=document.getElementById(`${id}_${i}`);
+  k.textContent=ok?"✓":(st.tries[i]>=2?"Правильно: "+it[1][0]:"Ещё раз");
+  k.className="key"+(ok?" g":"");
+ } else if(ex.type==="choice"){
+  ok=+el.value===it[2];
+  document.getElementById(`${id}_${i}_${el.value}`).classList.add(ok?"ok":"no");
+ } else if(ex.type==="match"){
+  if(el.value==="")return;
+  ok=+el.value===it[2];el.className=ok?"ok":"no";
+  const k=document.getElementById(`${id}_${i}`);k.textContent=ok?"✓":"Попробуй ещё";k.className="key"+(ok?" g":"");
+ }
+ if(ok)st.done[i]=1;
+ const n=Object.keys(st.done).length;
+ document.getElementById(id+"_res").textContent=`Верно: ${n} из ${ex.items.length}`+(n===ex.items.length?" ✓ Отлично!":"");
+});
+</script></body></html>
