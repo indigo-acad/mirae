@@ -19,10 +19,12 @@
 var cur='all',esc=KR.esc;
 function draw(){
   KR.topbar('practice');
-  var list=MATERIALS.filter(function(m){return m.section!=='course'||m.kind==='practice'}).filter(function(m){return KR.can(m.id)});
+  var lang=KR.lang();   // раздел зависит от языка: переключатель в шапке
+  var list=MATERIALS.filter(function(m){return m.section!=='course'||m.kind==='practice'}).filter(function(m){var l=KR.langOf(m.id);return (!l||l===lang)&&KR.can(m.id)});
+  if(cur!=='all'&&!list.some(function(m){return m.section===cur||(cur==='korean'&&m.kind==='practice')}))cur='all';
   var secs=Object.keys(SECTIONS).filter(function(k){return k!=='course'});
   var h='';
-  if(!list.length){h='<div class="card glass"><h3>Пока пусто</h3><p class="muted">'+(KR.ctx.ok?'Преподаватель ещё не назначил тебе материалы. Когда назначит, они появятся здесь.':'Нет связи с сервером: задания не загружены.')+'</p></div>';document.getElementById('box').innerHTML=h;return}
+  if(!list.length){h='<div class="card glass"><h3>Пока пусто</h3><p class="muted">'+(KR.ctx.ok?'Преподаватель ещё не назначил тебе материалы этого раздела. Когда назначит, они появятся здесь.':'Нет связи с сервером: задания не загружены.')+'</p></div>';document.getElementById('box').innerHTML=h;return}
   h+='<div class="card glass"><b>Раздел</b><div class="opts" style="margin-top:8px"><button data-f="all" class="'+(cur==='all'?'sel':'')+'" aria-pressed="'+(cur==='all')+'">Все</button>'+secs.filter(function(k){return list.some(function(m){return m.section===k||(k==='korean'&&m.kind==='practice')})}).map(function(k){return '<button data-f="'+k+'" class="'+(cur===k?'sel':'')+'" aria-pressed="'+(cur===k)+'">'+esc(SECTIONS[k])+'</button>'}).join('')+'</div>'+(KR.ctx.teacher?'<p class="note" style="margin-top:12px">Вы видите все материалы как преподаватель. Ученики видят только назначенные.</p>':'')+'</div>';
   var shown=list.filter(function(m){return cur==='all'||m.section===cur||(cur==='korean'&&m.kind==='practice')});
   h+='<div class="grid mats">'+shown.map(function(m){
@@ -32,6 +34,7 @@ function draw(){
   document.getElementById('box').innerHTML=h;
 }
 document.addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(b){cur=b.dataset.f;draw()}});
+KR.onLang=draw;
 if(KR.require()){KR.topbar('practice');KR.load().then(draw)}
 </script>
 </body>

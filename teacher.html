@@ -14,12 +14,12 @@
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Преподаватель</small><h1>Ученики и задания</h1><p>Назначай материалы: ученик увидит только их</p></div></header>
 <main id="m"></main>
-<script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script>
+<script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/assistant.js"></script>
 <script>
 var $=function(s){return document.querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
 var MAP={};MATERIALS.forEach(function(m){MAP[m.id]=m});
-var cur=null,students=[],assigned=[],filt='all',sel={},signup=null;
+var cur=null,students=[],assigned=[],filt='all',sel={},signup=null,voc=null,vlang='ko';
 function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.className='msg '+(ok?'ok':'bad')}}
 function genPin(){var a=new Uint32Array(1);crypto.getRandomValues(a);return String(100000+a[0]%900000)}
 function loginFrom(email,login){var l=(login||'').trim()||String(email||'').split('@')[0];return l.toLowerCase().replace(/[^a-z0-9а-яё._-]/g,'').slice(0,40)}
@@ -94,9 +94,35 @@ function draw(){
   $('#m').innerHTML=h;
   if(cur)drawStudent();
 }
+/* Словарь ученика: сколько слов, какие даются трудно, добавление новых. Слово, которое у ученика уже есть,
+   после повторного добавления вернётся к нему на повторение раньше. */
+function vocabCard(){
+  if(!voc)return '<div class="card"><h3>Словарь ученика</h3><p class="muted">Чтобы видеть словарь ученика и добавлять ему слова, выполни в Supabase файл supabase/vocab.sql (SQL Editor → New query → вставить → Run) и обнови эту страницу. До этого словарь хранится только на устройстве ученика.</p></div>';
+  var now=Date.now(),day=SRS.dayStart(now)+SRS.DAY;
+  var cnt=function(l){return voc.filter(function(c){return c.l===l}).length};
+  var due=voc.filter(function(c){return !c.st||(c.st===2?c.due<day:c.due<=now)}).length;
+  var hard=voc.filter(function(c){return c.lap||c.b}).sort(function(a,b){return ((b.lap||0)*2+(b.b||0))-((a.lap||0)*2+(a.b||0))}).slice(0,8);
+  var row=function(c,del){return '<div class="line" style="align-items:center;justify-content:space-between"><div><b'+(c.l==='ko'?' class="ko"':'')+' lang="'+esc(c.l)+'">'+esc(c.w)+'</b> <span class="muted">· '+esc(c.t||'без перевода')+
+    (c.lap?' · забывал: '+c.lap:'')+(c.b?' · добавляли повторно: '+c.b:'')+(c.star?' · отмечено учеником':'')+'</span></div>'+(del?'<button data-vdel="'+esc(c.id)+'" aria-label="Убрать слово">'+KR.icon('trash',15)+'</button>':'')+'</div>'};
+  var h='<div class="card"><h3>Словарь ученика</h3><p class="muted">Корейский: '+cnt('ko')+' · английский: '+cnt('en')+' · к повторению сегодня: '+due+'</p>';
+  if(hard.length)h+='<p style="margin:12px 0 4px"><b>Даются трудно</b></p>'+hard.map(function(c){return row(c,false)}).join('');
+  h+='<p style="margin:14px 0 4px"><b>Добавить слова</b></p><div class="opts">'+[['ko','Корейский'],['en','Английский']].map(function(x){return '<button data-vl="'+x[0]+'" class="'+(vlang===x[0]?'sel':'')+'" aria-pressed="'+(vlang===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
+    '<textarea id="vtext" aria-label="Слова для ученика" placeholder="Каждое слово с новой строки: слово — перевод&#10;Можно с примером: слово — перевод | пример | перевод примера" style="min-height:120px"></textarea>'+
+    '<div class="done-row"><span class="muted">Если слово у ученика уже есть, оно вернётся на повторение раньше</span><button class="pri" id="vadd">Добавить в словарь</button></div>';
+  if(voc.length)h+='<details style="margin-top:10px"><summary style="cursor:pointer;padding:4px 0"><b>Все слова</b> <span class="muted">· '+voc.length+'</span></summary>'+voc.slice().sort(function(a,b){return (b.a||0)-(a.a||0)}).map(function(c){return row(c,true)}).join('')+'</details>';
+  return h+'</div>';
+}
+function parseWords(text,lang){
+  var now=Date.now();
+  return text.split(/\n+/).map(function(l){return l.trim()}).filter(Boolean).map(function(l,i){
+    var parts=l.split('|').map(function(x){return x.trim()}),m=parts[0].split(/\s+[—–-]\s+|\t|\s*=\s*/),w=(m[0]||'').trim(),t=m.slice(1).join(' — ').trim();
+    return w&&w.length<=80?SRS.make(lang,w,t,{ex:parts[1],et:parts[2],src:'teacher'},now+i):null;
+  }).filter(Boolean);
+}
 async function drawStudent(){
   var as=[],st=null;
   try{as=await KR.api('teacher_assignments',{p_student:cur})||[];st=await KR.api('teacher_student_state',{p_student:cur})}catch(e){}
+  try{voc=await KR.api('teacher_vocab',{p_student:cur})||[]}catch(e){voc=null}   // null — на сервере ещё нет supabase/vocab.sql
   assigned=as;var have={};as.forEach(function(a){have[a.id]=1});
   var info=students.filter(function(x){return x.name===cur})[0]||{};
   var h='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><h3 class="cap" style="margin:0">'+esc(cur)+'</h3><div class="muted">'+esc(info.email||'email не указан')+(info.signup_at?' · зарегистрировался сам '+fmtDate(info.signup_at):'')+'</div></div><span style="display:inline-flex;gap:8px;flex-wrap:wrap"><button id="rst">Сбросить PIN</button>'+(signup?'<button id="del">'+KR.icon('trash',15)+' Удалить</button>':'')+'</span></div><div id="inv2"></div><p style="margin:12px 0 4px"><b>Назначено</b></p>';
@@ -104,6 +130,7 @@ async function drawStudent(){
   h+=as.map(function(a){var m=MAP[a.id]||{title:a.id,kind:''};
     return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><button data-un="'+esc(a.id)+'">Убрать</button></div>'}).join('');
   h+=''+lessonProgress(st)+'<p class="note" style="margin-top:8px">Тренажёры и игры хранят прогресс внутри себя, здесь он пока не виден.</p></div>';
+  h+=vocabCard();
   h+='<div class="card"><h3>Назначить материалы</h3><div class="opts" id="flt"><button data-f="all" class="'+(filt==='all'?'sel':'')+'">Все</button>'+Object.keys(SECTIONS).map(function(k){return '<button data-f="'+k+'" class="'+(filt===k?'sel':'')+'">'+esc(SECTIONS[k])+'</button>'}).join('')+'</div><div style="margin-top:8px;max-height:340px;overflow:auto">';
   MATERIALS.filter(function(m){return !have[m.id]&&(filt==='all'||m.section===filt)}).forEach(function(m){
     h+='<label class="line" style="align-items:center;cursor:pointer"><input type="checkbox" data-m="'+esc(m.id)+'" '+(sel[m.id]?'checked':'')+'><span style="flex:1">'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>'});
@@ -141,6 +168,19 @@ document.addEventListener('click',async function(e){
     if(!confirm('Удалить ученика '+cur+'? Его кабинет, прогресс и назначения будут удалены. Это нельзя отменить.'))return;
     try{await KR.api('teacher_delete_student',{p_student:cur});var gone=cur;cur=null;students=await KR.api('teacher_students')||students;draw();msg('Ученик удалён: '+gone,true)}
     catch(x){msg('Не получилось удалить')}
+  }
+  else if(b.dataset.vl){vlang=b.dataset.vl;var keep=$('#vtext')?$('#vtext').value:'';await drawStudent();if($('#vtext'))$('#vtext').value=keep}
+  else if(b.id==='vadd'){
+    var ws=parseWords($('#vtext').value,vlang);
+    if(!ws.length){msg('Впиши слова: каждое с новой строки, «слово — перевод»');return}
+    if(ws.some(function(w){return !w.t})){msg('У каждого слова нужен перевод: «слово — перевод»');return}
+    b.disabled=true;
+    try{var r=await KR.api('teacher_vocab_add',{p_student:cur,p_words:ws});await drawStudent();msg('Добавлено слов: '+(r&&r.added||0)+((r&&r.bumped)?' · уже были и вернутся раньше: '+r.bumped:''),true)}
+    catch(x){b.disabled=false;msg('Не получилось добавить слова')}
+  }
+  else if(b.dataset.vdel){
+    if(!confirm('Убрать слово из словаря ученика?'))return;
+    try{await KR.api('teacher_vocab_delete',{p_student:cur,p_ids:[b.dataset.vdel]});await drawStudent();msg('Слово убрано',true)}catch(x){msg('Не получилось убрать слово')}
   }
   else if(b.dataset.st){cur=b.dataset.st;sel={};draw()}
   else if(b.dataset.f){filt=b.dataset.f;drawStudent()}

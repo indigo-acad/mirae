@@ -15,16 +15,18 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}
   if(window.KR)KR.push();
   // сюда позже добавится запись в Supabase: window.syncProgress && window.syncProgress(user,id,P)
 }
-function say(t){try{const u=new SpeechSynthesisUtterance(t);u.lang="ko-KR";u.rate=.85;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.startsWith("ko"));if(v)u.voice=v;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+const LANG=L.lang||"ko";   // язык урока: задаёт голос озвучки и оформление страницы
+function say(t){if(window.KR)KR.say(t,LANG)}
 window.say=say;
 const sayBtn=t=>`<button class="say" data-say="${esc(t)}" title="Послушать" aria-label="Послушать">${ic("volume",16)}</button>`;
 
+const VOC=window.KR&&KR.vocab&&!L.back?KR.vocab:null;   // словарь ученика: слова урока попадают в интервальное повторение
 const blocks=[]; // flat list of {key,done}
 L.sections.forEach(s=>s.blocks.forEach((b,i)=>{b._key=s.id+"-"+i;blocks.push(b)}));
 
 function render(){
   document.title=L.course+" · "+L.title;
-  let h=`<div id="topbar"></div><header class="band"><div class="in"><a href="${L.back||"course.html"}">${ic("back",14)}${L.back?"доп. упражнения":"курс"}</a><small>${esc(L.course)} · ${esc(user)}</small><h1 class="ko">${esc(L.title)}</h1><p>${esc(L.subtitle)}</p></div></header><main>
+  let h=`<div id="topbar"></div><header class="band slim"><div class="in"><a href="${L.back||"course.html"}">${ic("back",14)}${L.back?"доп. упражнения":"курс"}</a><small>${esc(L.course)} · ${esc(user)}</small><h1 class="ko">${esc(L.title)}</h1><p>${esc(L.subtitle)}</p></div></header><main>
   <div class="card glass"><b>Прогресс урока</b> <span id="pct" class="muted"></span><div class="bar"><div id="barfill"></div></div></div>
   <div class="subnav"><nav class="nav" id="nav" aria-label="Разделы урока">${L.sections.map(s=>`<a href="#${s.id}" data-sec="${s.id}">${em(s.icon,15)}${esc(s.title)}</a>`).join("")}</nav><div class="subnav-bar"><i id="navfill"></i></div></div>`;
   L.sections.forEach(s=>{
@@ -36,8 +38,38 @@ function render(){
   h+=extra();
   h+="</main>";
   document.body.innerHTML=h;
-  if(window.KR){KR.topbar(L.back?"practice":"course");if(KR.assistant)KR.assistant.sync()}
-  wire();refresh();
+  if(window.KR){KR.theme(LANG);KR.onLang=()=>{location.href="course.html"};KR.topbar(L.back?"practice":"course");if(KR.assistant)KR.assistant.sync()}
+  wire();refresh();vocabInit();
+}
+/* Слова урока добавляются в словарь один раз. Пример берём из диалогов и примеров этого же урока. */
+function lessonWords(){
+  const lines=[];
+  L.sections.forEach(s=>s.blocks.forEach(b=>{
+    if(b.type==="dialogue")b.lines.forEach(l=>lines.push([l[1],l[2]]));
+    if(b.type==="examples")b.items.forEach(l=>lines.push([l[0],l[1]]));
+  }));
+  const strip=t=>t.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,""),out=[];
+  L.sections.forEach(s=>s.blocks.forEach(b=>{
+    if(b.type!=="words")return;
+    b.items.forEach(w=>{
+      const st=VOC.stem(LANG,w[0]),it={w:w[0],t:w[1]};
+      for(const l of lines){
+        const tok=l[0].split(/\s+/).map(strip).find(t=>st.length>1?t.toLowerCase().indexOf(st)===0:t===st);
+        if(tok){it.ex=l[0];it.et=l[1];it.f=tok;break}
+      }
+      out.push(it);
+    });
+  }));
+  return out;
+}
+function stars(){
+  if(!VOC)return;
+  document.querySelectorAll("[data-wstar]").forEach(b=>{const c=VOC.find(LANG,b.dataset.wstar),on=!!(c&&c.star);b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
+}
+function vocabInit(){
+  if(!VOC)return;
+  const items=lessonWords();if(items.length)VOC.addLesson(id,LANG,items);
+  VOC.onchange=stars;KR.onVocab=stars;stars();
 }
 function extra(){
   if(L.back)return `<div class="card glass"><a class="btn pri" href="${L.back}">${ic("back",16)}К списку отработок</a></div>`;
@@ -61,7 +93,8 @@ function block(b){
     h+=b.lines.map(l=>`<div class="line"><span class="sp ko">${l[0]}</span><div><div class="kolg ko">${esc(l[1])} ${sayBtn(l[1])}</div><div class="ru">${esc(l[2])}</div></div></div>`).join("");
     if(b.task)h+=`<p class="muted">${ic("pencil",15)} ${esc(b.task)}</p>`;
   }else if(b.type==="words"){
-    h+=`<div class="words">`+b.items.map(w=>`<div class="w"><span><b class="ko">${esc(w[0])}</b> ${sayBtn(w[0])}</span><span class="ru">${esc(w[1])}</span></div>`).join("")+`</div>`;
+    h+=`<div class="words">`+b.items.map(w=>`<div class="w"><span><b class="ko">${esc(w[0])}</b> ${sayBtn(w[0])}</span><span class="ru">${esc(w[1])}</span>${VOC?`<button class="icb" data-wstar="${esc(w[0])}" data-wt="${esc(w[1])}" aria-pressed="false" aria-label="Отметить слово: оно вернётся на повторение раньше">${ic("star",17)}</button>`:""}</div>`).join("")+`</div>`;
+    if(VOC)h+=`<p class="note vnote">Слова урока уже в твоём словаре и придут на повторение. Отметь звёздочкой трудные: они вернутся раньше. <a href="words.html">Открыть словарь</a></p>`;
   }else if(b.type==="text"){h+=b.html}
   else if(b.type==="examples"){
     if(b.note)h+=`<p class="muted">${esc(b.note)}</p>`;
@@ -123,6 +156,7 @@ function wire(){
   document.body.addEventListener("click",e=>{
     const t=e.target.closest("button");if(!t)return;
     if(t.dataset.say)return say(t.dataset.say);
+    if(t.dataset.wstar!==undefined&&VOC){const c=VOC.find(LANG,t.dataset.wstar);if(c)VOC.star(c.id);else VOC.add(LANG,t.dataset.wstar,t.dataset.wt,{star:1,src:"lesson:"+id});return stars()}
     if(t.dataset.check)return check(t.dataset.check);
     if(t.dataset.done){const k=t.dataset.done;P[k]=P[k]||{};P[k].done=!P[k].done;P[k].t=Date.now();save();return refresh()}
     if(t.dataset.o!==undefined){const g=t.parentElement,k=g.dataset.b;P[k]=P[k]||{};P[k].v=P[k].v||{};P[k].v[g.dataset.i]=t.dataset.o;P[k].t=Date.now();g.querySelectorAll("button").forEach(x=>x.classList.remove("sel","ok","bad"));t.classList.add("sel");save()}

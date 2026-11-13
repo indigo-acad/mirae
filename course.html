@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Основной курс · MIRAÉ</title>
+<title>Курс · MIRAÉ</title>
 <meta name="theme-color" content="#0B1535">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,12 +12,14 @@
 </head>
 <body>
 <div id="topbar"></div>
-<header class="band"><div class="in"><small id="sub"></small><h1 class="ko" id="ct"></h1><p>Основной курс идёт по учебнику, методику потом настроим под себя</p></div></header>
+<header class="band"><div class="in"><small id="sub"></small><h1 id="ct"></h1><p id="cp"></p></div></header>
 <main><div id="list"></div></main>
 <script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script>
 <script>
-/* Программа показана как путь: части (1급, 2급) и главы-уроки на одной линии.
-   Состояния главы: soon — урока ещё нет; lock — не назначен; open — доступен; now — текущая; done — пройдена.
+/* Программа показана как путь: части и главы на одной линии. Раздел зависит от языка (переключатель в шапке).
+   Корейский: уроки 서울대 한국어+ с прогрессом по блокам. Английский: материалы программы из каталога,
+   ученик сам отмечает пройденные. Состояния главы: soon — урока ещё нет; lock — не назначено; open — доступна;
+   now — текущая; done — пройдена.
    Задел под сюжет: если у урока в data/course.js есть поле scene, его текст показывается в карточке главы. */
 var esc=KR.esc;
 function rail(){
@@ -28,32 +30,67 @@ function rail(){
     ol.style.setProperty('--h',(nd?Math.max(0,last.offsetTop+nd.offsetTop+nd.offsetHeight/2-14):0)+'px');
   });
 }
+// ---------- программа: список частей с главами ----------
+function programKo(){
+  var C=COURSE,C2=window.COURSE2;
+  var ch=function(l){
+    var x={key:l.id||('soon-'+l.no),tag:l.no+'과',title:l.title,ko:true,scene:l.scene};
+    if(!l.id){x.state='soon';return x}
+    if(!KR.can('lesson-'+l.id)){x.state='lock';return x}
+    var p=KR.progress(l.id);x.n=p.n;x.tot=p.tot;x.pct=p.pct;x.state=p.pct>=100?'done':'open';
+    x.meta=p.n+' из '+p.tot+' блоков';x.href='lesson.html?l='+l.id;x.go=p.pct>=100?'Повторить':p.n?'Продолжить':'Начать';
+    x.extra='<a class="btn" href="practice.html">'+KR.icon('repeat',16)+'Доп. упражнения</a>';
+    return x;
+  };
+  var parts=[{t:C.title.split(' · ')[1]||'',ko:true,items:C.lessons.map(ch)}];
+  if(C2)parts.push({t:C2.title.split(' · ')[1]||'',ko:true,items:C2.lessons.map(ch)});
+  return {sub:C.subtitle,title:C2?C.title.split(' · ')[0]:C.title,ko:true,note:'Основной курс идёт по учебнику, методику потом настроим под себя',unit:'блоков',parts:parts};
+}
+function programEn(){
+  var done=KR.taken();
+  var items=MATERIALS.filter(function(m){return m.section==='english'&&m.kind!=='class'}).map(function(m){
+    var x={key:m.id,tag:((window.KINDS||{})[m.kind]||'')+(m.level?' · '+m.level:''),title:m.title,mat:m.id};
+    if(!KR.can(m.id)){x.state='lock';return x}
+    var d=done.indexOf(m.id)>=0;x.n=d?1:0;x.tot=1;x.state=d?'done':'open';x.href=m.path;x.go='Открыть';
+    var a=KR.assignedInfo(m.id);x.meta=a&&(a.due||a.note)?((a.due?'срок '+a.due:'')+(a.due&&a.note?' · ':'')+(a.note||'')):'';
+    x.extra='<button data-take="'+esc(m.id)+'" aria-pressed="'+d+'">'+(d?KR.icon('check',16)+' Пройдено':'Отметить пройденным')+'</button>';
+    return x;
+  });
+  return {sub:'Программа',title:(window.SECTIONS||{}).english||'English',note:'Тренажёры, домашние задания и проверочные по программе. Пройденное отмечай сам.',unit:'материалов',parts:[{t:'IELTS',items:items}]};
+}
 function draw(){
-  KR.topbar('course');var C=COURSE,C2=window.COURSE2;
-  document.getElementById('ct').textContent=C2?C.title.split(' · ')[0]:C.title;document.getElementById('sub').textContent=C.subtitle;
-  var parts=[{t:C.title.split(' · ')[1]||'',L:C.lessons}];if(C2)parts.push({t:C2.title.split(' · ')[1]||'',L:C2.lessons});
-  var all=[];parts.forEach(function(p){all=all.concat(p.L)});
-  var st=function(l){if(!l.id)return 'soon';if(!KR.can('lesson-'+l.id))return 'lock';return KR.progress(l.id).pct>=100?'done':'open'};
-  var now=all.filter(function(l){return st(l)==='open'})[0];
-  var n=0,t=0,avail=0;all.forEach(function(l){var s=st(l);if(s==='open'||s==='done'){var p=KR.progress(l.id);n+=p.n;t+=p.tot;avail++}});
+  KR.topbar('course');
+  var P=KR.lang()==='en'?programEn():programKo();
+  var ct=document.getElementById('ct');ct.textContent=P.title;ct.className=P.ko?'ko':'';
+  document.getElementById('sub').textContent=P.sub;document.getElementById('cp').textContent=P.note;
+  var all=[];P.parts.forEach(function(p){all=all.concat(p.items)});
+  var now=all.filter(function(x){return x.state==='open'})[0];
+  var n=0,t=0,avail=0;all.forEach(function(x){if(x.state==='open'||x.state==='done'){n+=x.n;t+=x.tot;avail++}});
   var pct=t?Math.round(n/t*100):0,i=0;
-  var item=function(l){
-    var s=st(l),no=l.no+'과',cls=s==='open'&&l===now?'now':s,h='<li class="ch '+cls+'" style="--i:'+(i++)+'">';
-    if(s==='soon')return h+'<span class="ch-node"></span><div class="ch-row"><b>'+no+'</b> · скоро</div></li>';
-    if(s==='lock')return h+'<span class="ch-node">'+KR.icon('lock',15)+'</span><div class="ch-row"><b>'+no+' · <span class="ko">'+esc(l.title)+'</span></b><br>'+(KR.ctx.ok?'Не назначено. Преподаватель откроет доступ.':'Нет связи с сервером')+'</div></li>';
-    var p=KR.progress(l.id);
-    var node=cls==='now'?KR.ring(p.pct,52,KR.icon('spark',16)):KR.icon(s==='done'?'check':'spark',16);
-    return h+'<span class="ch-node">'+node+'</span><div class="ch-card glass"><span class="tag">'+no+(cls==='now'?' · сейчас':s==='done'?' · пройдено':'')+'</span><h3 class="ko">'+esc(l.title)+'</h3>'+
-      (l.scene?'<p class="scene">'+esc(l.scene)+'</p>':'')+
-      '<div class="muted" style="margin-top:6px">'+p.n+' из '+p.tot+' блоков</div>'+KR.bar(p.pct)+
-      '<div class="done-row"><a class="btn pri" href="lesson.html?l='+l.id+'">'+(s==='done'?'Повторить':p.n?'Продолжить':'Начать')+KR.icon('arrow',16)+'</a><a class="btn" href="practice.html">'+KR.icon('repeat',16)+'Доп. упражнения</a></div></div></li>';
+  var item=function(x){
+    var cls=x===now?'now':x.state,h='<li class="ch '+cls+'" style="--i:'+(i++)+'">';
+    var title='<span'+(x.ko?' class="ko" lang="ko"':'')+'>'+esc(x.title)+'</span>';
+    if(x.state==='soon')return h+'<span class="ch-node"></span><div class="ch-row"><b>'+esc(x.tag)+'</b> · скоро</div></li>';
+    if(x.state==='lock')return h+'<span class="ch-node">'+KR.icon('lock',15)+'</span><div class="ch-row"><b>'+(x.ko?esc(x.tag)+' · ':'')+title+'</b><br>'+(KR.ctx.ok?'Не назначено. Преподаватель откроет доступ.':'Нет связи с сервером')+'</div></li>';
+    var node=cls==='now'?KR.ring(x.pct||0,52,KR.icon('spark',16)):KR.icon(x.state==='done'?'check':'spark',16);
+    return h+'<span class="ch-node">'+node+'</span><div class="ch-card glass"><span class="tag">'+esc(x.tag)+(cls==='now'?' · сейчас':x.state==='done'?' · пройдено':'')+'</span><h3'+(x.ko?' class="ko"':'')+'>'+title+'</h3>'+
+      (x.scene?'<p class="scene">'+esc(x.scene)+'</p>':'')+
+      (x.meta?'<div class="muted" style="margin-top:6px">'+esc(x.meta)+'</div>':'')+(x.pct!=null?KR.bar(x.pct):'')+
+      '<div class="done-row"><a class="btn pri" href="'+esc(x.href)+'">'+x.go+KR.icon('arrow',16)+'</a>'+(x.extra||'')+'</div></div></li>';
   };
   var h='<section class="journey card glass" aria-label="Общий прогресс">'+KR.ring(pct,92)+'<div class="mid"><h3>'+(avail&&pct>=100?'Путь пройден':'Твой путь')+'</h3><div class="muted">'+
-    (avail?'Пройдено '+n+' из '+t+' блоков · открыто глав: '+avail:(KR.ctx.ok?'Преподаватель ещё не открыл тебе уроки. Когда откроет, они появятся здесь.':'Нет связи с сервером: уроки не загружены.'))+'</div></div></section>';
-  parts.forEach(function(p,k){h+='<h2 class="path-part"><small>Часть '+(k+1)+'</small>'+esc(p.t)+'</h2><ol class="chapters">'+p.L.map(item).join('')+'</ol>'});
+    (avail?'Пройдено '+n+' из '+t+' '+P.unit+' · открыто глав: '+avail:(KR.ctx.ok?'Преподаватель ещё не открыл тебе материалы этого раздела. Когда откроет, они появятся здесь.':'Нет связи с сервером: программа не загружена.'))+'</div></div></section>';
+  P.parts.forEach(function(p,k){h+='<h2 class="path-part"><small>Часть '+(k+1)+'</small><span'+(p.ko?' class="ko" lang="ko"':'')+'>'+esc(p.t)+'</span></h2><ol class="chapters">'+p.items.map(item).join('')+'</ol>'});
   document.getElementById('list').innerHTML=h;rail();
 }
+// английская программа: ученик сам отмечает пройденный материал
+document.addEventListener('click',function(e){
+  var b=e.target.closest('button[data-take]');if(!b)return;
+  var id=b.dataset.take,a=KR.taken().slice(),k=a.indexOf(id);if(k>=0)a.splice(k,1);else a.push(id);
+  KR.setTaken(a);draw();
+});
 window.addEventListener('resize',rail);
+KR.onLang=draw;
 if(KR.require()){KR.topbar('course');KR.load().then(draw)}
 </script>
 </body>

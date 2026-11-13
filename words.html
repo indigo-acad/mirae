@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Слова · MIRAÉ</title>
+<meta name="theme-color" content="#0B1535">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="topbar"></div>
+<header class="band"><div class="in"><small>Словарь</small><h1>Слова</h1><p>Интервальное повторение: слово возвращается тогда, когда его пора вспомнить</p></div></header>
+<main>
+  <section id="today" class="card glass today" aria-label="На сегодня"></section>
+  <section id="play" class="card glass play" aria-live="polite" hidden></section>
+  <div class="seg wtabs" id="tabs" role="tablist" aria-label="Словарь и настройки">
+    <button type="button" role="tab" data-tab="list" aria-selected="true">Мои слова</button>
+    <button type="button" role="tab" data-tab="prefs" aria-selected="false">Настройки</button>
+  </div>
+  <section id="list"></section>
+  <section id="prefs" hidden></section>
+</main>
+<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/assistant.js"></script>
+<script>
+/* Тренажёр слов. Расписание как в Anki (js/srs.js), игры взяты из тренажёра группы 2724:
+   карточки, выбор перевода на слух, слово в предложении, письмо, сборка слова, поиск пары.
+   Какая игра достанется слову, зависит от того, насколько оно выучено: сначала узнавание, потом вспоминание. */
+var V=KR.vocab,esc=KR.esc,$=function(s){return document.querySelector(s)};
+var lang='ko',filt='all',q='',shown=60,editing=null,S=null;        // S — текущее занятие
+var FORCE=new URLSearchParams(location.search).get('game');         // ?game=wr — проверить конкретную игру
+var GAME={cards:['Карточки','вспомни перевод и оцени себя сам'],tr:['Выбери перевод','слово звучит, нужно выбрать перевод'],
+  ctx:['Слово в предложении','какое слово пропущено'],wr:['Напиши слово','по переводу, с клавиатуры'],
+  build:['Собери слово','из слогов или букв'],pairs:['Найди пару','соедини слова и переводы']};
+var RATE=[[1,'Снова'],[2,'Трудно'],[3,'Хорошо'],[4,'Легко']];
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function wcls(c){return c.l==='ko'?' class="ko"':''}
+function word(c){return '<span'+wcls(c)+' lang="'+c.l+'">'+esc(c.w)+'</span>'}
+function sayBtn(text,l){return KR.canSay()?'<button type="button" class="say" data-say="'+esc(text)+'" data-l="'+l+'" aria-label="Послушать">'+KR.icon('volume',16)+'</button>':''}
+function same(a,b){var n=function(s){return SRS.norm(s).replace(/[\s.,!?·~'’-]/g,'')};return n(a)!==''&&n(a)===n(b)}
+function units(c){return c.w.replace(/\s+/g,'').split('')}
+/* Место слова в примере: по заданной форме (f) или по основе слова. */
+function cloze(c){
+  if(!c.ex)return null;var f=c.f&&c.ex.indexOf(c.f)>=0?c.f:null;
+  if(!f){var st=V.stem(c.l,c.w);f=c.ex.split(/\s+/).map(function(t){return t.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,'')}).filter(function(t){return t.toLowerCase().indexOf(st)===0})[0]||null}
+  if(!f)return null;var i=c.ex.indexOf(f);return {a:c.ex.slice(0,i),b:c.ex.slice(i+f.length),f:f};
+}
+
+// ---------- сводка «на сегодня» ----------
+function drawToday(){
+  var st=V.stats(lang),G=KR.LANGS[lang];
+  var cloud={cloud:['cloud','Словарь сохраняется в облаке'],local:['alert','Словарь пока хранится только на этом устройстве'],offline:['alert','Нет связи: изменения сохранятся на устройстве и отправятся позже']}[V.status];
+  var box=function(n,t){return '<div><b>'+n+'</b><span class="muted">'+t+'</span></div>'};
+  var h='<div class="stat">'+box(st.fresh,'новых')+box(st.learn,'учу сейчас')+box(st.rev,'повторить')+'</div>';
+  if(S)h+='';
+  else if(st.due)h+='<div class="done-row"><span class="muted">'+G.name+' · слов в словаре: '+st.total+'</span><button type="button" class="cta" id="go">Начать занятие'+KR.icon('arrow',18)+'</button></div>';
+  else h+='<div class="done-row"><span class="muted">'+(st.total?'На сегодня всё. '+(st.nextAt?'Следующее слово вернётся через '+SRS.span(st.nextAt-Date.now())+'.':'Новые повторения появятся завтра.'):'В словаре пока нет слов: '+G.ru+' раздел.')+'</span></div>';
+  h+='<p class="muted cloudline">'+KR.icon(cloud[0],15)+' '+cloud[1]+'</p>';
+  $('#today').innerHTML=h;
+}
+
+// ---------- занятие ----------
+function deck(){return V.all(lang)}
+function feasible(c,d){
+  var g=V.settings().games,others=d.filter(function(x){return x.id!==c.id&&x.t&&x.t!==c.t}),out=[],n=units(c).length;
+  if(g.cards)out.push('cards');
+  if(g.tr&&c.t&&others.length>=3)out.push('tr');
+  if(g.ctx&&others.length>=3&&cloze(c))out.push('ctx');
+  if(g.wr&&c.t)out.push('wr');
+  if(g.build&&n>=2&&n<=16)out.push('build');
+  return out;
+}
+function choose(c,d){
+  var f=feasible(c,d);
+  if(FORCE&&(f.indexOf(FORCE)>=0))return FORCE;
+  if(!c.st)return f.indexOf('cards')>=0?'cards':'intro';                 // новое слово сначала показываем
+  var pref=(c.st===1||c.st===3)?['tr','ctx','build','cards','wr']:(c.ivl||0)<7?['ctx','tr','build','wr','cards']:['wr','build','ctx','tr','cards'];
+  var av=pref.filter(function(g){return f.indexOf(g)>=0});
+  return av.length?av[av.length>1&&Math.random()>.65?1:0]:'cards';
+}
+function start(){S={done:0,sincePairs:99,right:0,wrong:0};$('#play').hidden=false;drawToday();nextCard();$('#play').scrollIntoView({block:'start',behavior:KR.calm()?'auto':'smooth'})}
+function stop(){KR.hush();S=null;$('#play').hidden=true;$('#play').innerHTML='';drawAll()}
+function nextCard(){
+  if(!S)return;KR.hush();clearTimeout(S.timer);
+  var p=V.plan(lang),g=V.settings().games,pool=p.learn.concat(p.rev);
+  if((g.pairs&&S.sincePairs>=8&&pool.length>=4&&!FORCE)||(FORCE==='pairs'&&pool.concat(p.fresh,p.soon).length>=4)){S.sincePairs=0;return pairs((FORCE==='pairs'?pool.concat(p.fresh,p.soon):pool).slice(0,5))}
+  var c=SRS.pick(p);
+  if(!c)return finish(p);
+  S.sincePairs++;S.card=c;S.game=choose(c,deck());S.hint=false;S.retype=false;S.miss=0;S.lock=false;
+  ({cards:gCards,intro:gCards,tr:gChoice,ctx:gChoice,wr:gWrite,build:gBuild})[S.game](c);
+}
+function frame(title,body){
+  var p=V.plan(lang),left=p.learn.length+p.rev.length+p.fresh.length+p.soon.length;
+  $('#play').innerHTML='<div class="play-top"><span class="tag">'+title+'</span><span class="muted">осталось: '+left+'</span><button type="button" class="round" data-x="stop" aria-label="Закончить занятие">'+KR.icon('x',16)+'</button></div>'+body;
+}
+function finish(p){
+  var again=p.waiting?'Ближайшее слово вернётся через '+SRS.span(p.nextAt-Date.now())+'.':'Новые повторения появятся завтра.';
+  $('#play').innerHTML='<div class="fin"><span class="spark">'+KR.icon('spark',34)+'</span><h3>На сегодня всё</h3><p class="muted">Карточек пройдено: '+S.done+'. '+again+'</p><button type="button" class="btn pri" data-x="stop">Готово</button></div>';
+  drawToday();
+}
+/* Записать оценку, показать, когда слово вернётся, и перейти дальше. */
+function grade(g,auto){
+  var c=V.answer(S.card.id,g);S.done++;if(g>1)S.right++;else S.wrong++;
+  var fb=$('#fb');if(fb)fb.insertAdjacentHTML('beforeend','<div class="muted back-in">Вернётся через '+(c.st===2?SRS.span(c.ivl*SRS.DAY):SRS.span(Math.max(0,c.due-Date.now())))+'</div>');
+  drawToday();
+  if(auto)S.timer=setTimeout(nextCard,KR.calm()?600:1100);
+  else{var b=$('#nextb');if(b){b.hidden=false;b.focus()}else nextCard()}
+}
+function more(c){   // пример после ответа
+  return c.ex?'<div class="exbox"><div'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+' '+sayBtn(c.ex,c.l)+'</div>'+(c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>':'';
+}
+// карточки: вспомнил — открыл — оценил сам
+function gCards(c){
+  var intro=S.game==='intro',now=Date.now(),set=V.settings();
+  frame(c.st?GAME.cards[0]:'Новое слово','<div class="flash" id="flash"><div class="flash-w">'+word(c)+' '+sayBtn(c.w,c.l)+'</div>'+
+    (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+'</div>':'')+
+    '<div class="flash-back" id="back" hidden><div class="flash-t">'+esc(c.t||'перевод не указан')+'</div>'+(c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div></div>'+
+    '<div id="fb" class="q-fb"></div>'+
+    '<div class="done-row" id="showrow"><span class="muted">'+(c.st?'Вспомни перевод, потом открой':'Прочитай, послушай и открой перевод')+'</span><button type="button" class="btn pri" data-x="flip">Показать перевод</button></div>'+
+    '<div class="rate" id="rate" hidden>'+(intro?'<button type="button" class="btn pri" data-g="3">Дальше'+KR.icon('arrow',16)+'</button>':RATE.map(function(r){return '<button type="button" data-g="'+r[0]+'"><b>'+r[1]+'</b><small>'+SRS.label(c,r[0],set,now)+'</small></button>'}).join(''))+'</div>');
+  if(c.l&&KR.canSay())KR.say(c.w,c.l);
+}
+function flip(){var b=$('#back');if(!b||!b.hidden)return;b.hidden=false;$('#showrow').hidden=true;$('#rate').hidden=false;var f=$('#rate button[data-g="3"]');if(f)f.focus()}
+// выбор из четырёх: перевод слова или слово в предложении
+function gChoice(c){
+  var ctx=S.game==='ctx',d=deck().filter(function(x){return x.id!==c.id&&x.t&&x.t!==c.t}),pair=c.pair?d.filter(function(x){return x.w===c.pair}):[];
+  var others=pair.concat(shuffle(d.filter(function(x){return pair.indexOf(x)<0}))).slice(0,3),opts=shuffle([c].concat(others)),cz=ctx?cloze(c):null;
+  S.opts=opts;
+  frame(GAME[S.game][0],(ctx?'<div class="q-word"><span'+wcls(c)+' lang="'+c.l+'">'+esc(cz.a)+'<b class="gap">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</b>'+esc(cz.b)+'</span></div>'+(c.et?'<p class="muted q-sub">'+esc(c.et)+'</p>':'')
+      :'<div class="q-word">'+word(c)+' '+sayBtn(c.w,c.l)+'</div>')+
+    '<div class="opts q-opts">'+opts.map(function(o,i){return '<button type="button" data-o="'+i+'"'+(ctx?wcls(o)+' lang="'+o.l+'"':'')+'>'+esc(ctx?o.w:o.t)+'</button>'}).join('')+'</div>'+
+    '<div id="fb" class="q-fb"></div><div class="done-row"><span></span><button type="button" class="btn pri" id="nextb" data-x="next" hidden>Дальше'+KR.icon('arrow',16)+'</button></div>');
+  if(!ctx)KR.say(c.w,c.l);
+}
+function choosePick(i){
+  if(S.lock)return;S.lock=true;var c=S.card,o=S.opts[i],ok=o.id===c.id;
+  [].forEach.call(document.querySelectorAll('.q-opts button'),function(b,k){b.disabled=true;if(S.opts[k].id===c.id)b.classList.add('ok');else if(k===i)b.classList.add('bad')});
+  $('#fb').innerHTML='<div class="'+(ok?'ok':'bad')+'">'+(ok?'Верно':'Правильно так')+': '+word(c)+' — '+esc(c.t)+'</div>'+more(c);
+  if(S.game==='ctx'&&c.ex)KR.say(c.ex,c.l);else if(!ok)KR.say(c.w,c.l);
+  grade(ok?3:1,ok);
+}
+// письмо: перевод → слово; после ошибки слово нужно один раз перепечатать
+function gWrite(c){
+  var n=units(c).length;
+  frame(GAME.wr[0],'<div class="q-word q-ru">'+esc(c.t)+'</div><p class="muted q-sub">'+(c.l==='ko'?'По-корейски, в словарной форме · слогов: '+n+'. Нужна корейская раскладка.':'По-английски · букв: '+n)+'</p>'+
+    '<form id="wf" class="wr" autocomplete="off"><input class="name'+(c.l==='ko'?' ko':'')+'" id="win" lang="'+c.l+'" aria-label="Слово" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="submit" class="btn pri">Проверить</button><button type="button" data-x="hint">Подсказка</button></form>'+
+    '<div id="fb" class="q-fb"></div><div class="done-row"><span></span><button type="button" class="btn pri" id="nextb" data-x="next" hidden>Дальше'+KR.icon('arrow',16)+'</button></div>');
+  $('#win').focus({preventScroll:true});
+}
+function writeCheck(){
+  if(S.lock)return;var c=S.card,inp=$('#win'),v=inp.value;if(!v.trim())return;
+  var ok=same(v,c.w);
+  if(S.retype){
+    if(ok){S.lock=true;inp.className='name ans-ok'+(c.l==='ko'?' ko':'');inp.disabled=true;$('#fb').innerHTML='<div class="ok">Теперь верно. Слово ещё вернётся.</div>'+more(c);grade(1,false)}
+    else{inp.className='name ans-bad'+(c.l==='ko'?' ko':'');$('#fb').innerHTML='<div class="bad">Ещё не так. Напиши точно: '+word(c)+'</div>'}
+    return;
+  }
+  KR.say(c.w,c.l);
+  if(ok){S.lock=true;inp.className='name ans-ok'+(c.l==='ko'?' ko':'');inp.disabled=true;$('#fb').innerHTML='<div class="ok">Верно: '+word(c)+' — '+esc(c.t)+'</div>'+more(c);grade(S.hint?2:3,true)}
+  else{S.retype=true;inp.className='name ans-bad'+(c.l==='ko'?' ko':'');$('#fb').innerHTML='<div class="bad">Правильно: <b>'+word(c)+'</b>. Перепечатай и нажми «Проверить».</div>';inp.value='';inp.focus()}
+}
+// сборка слова из слогов (корейский) или букв (английский)
+function gBuild(c){
+  var u=units(c),extra=shuffle(deck().filter(function(x){return x.id!==c.id}).map(function(x){return units(x)}).reduce(function(a,b){return a.concat(b)},[]).filter(function(ch){return u.indexOf(ch)<0})).slice(0,Math.min(3,Math.max(1,Math.round(u.length/3))));
+  S.u=u;S.pos=0;S.tiles=shuffle(u.concat(extra));
+  frame(GAME.build[0],'<div class="q-word q-ru">'+esc(c.t)+' '+sayBtn(c.w,c.l)+'</div><div class="slots'+(c.l==='ko'?' ko':'')+'" id="slots" aria-label="Собранное слово">'+u.map(function(){return '<i></i>'}).join('')+'</div>'+
+    '<div class="tiles'+(c.l==='ko'?' ko':'')+'" id="tiles">'+S.tiles.map(function(ch,i){return '<button type="button" data-t="'+i+'" lang="'+c.l+'">'+esc(ch)+'</button>'}).join('')+'</div>'+
+    '<div id="fb" class="q-fb"></div><div class="done-row"><span></span><button type="button" class="btn pri" id="nextb" data-x="next" hidden>Дальше'+KR.icon('arrow',16)+'</button></div>');
+}
+function buildTap(b){
+  if(S.lock)return;var c=S.card,ch=S.tiles[+b.dataset.t],need=S.u[S.pos];
+  if(ch.toLowerCase()!==need.toLowerCase()){S.miss++;b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake','bad');setTimeout(function(){b.classList.remove('bad')},500);return}
+  b.disabled=true;b.classList.add('used');$('#slots').children[S.pos].textContent=need;S.pos++;
+  if(S.pos<S.u.length)return;
+  S.lock=true;KR.say(c.w,c.l);
+  $('#fb').innerHTML='<div class="ok">'+(S.miss?'Собрано, ошибок: '+S.miss:'Верно')+': '+word(c)+' — '+esc(c.t)+'</div>'+more(c);
+  grade(S.miss>=3?1:S.miss?2:3,S.miss<3);
+}
+// найди пару: несколько слов сразу
+function pairs(cards){
+  S.game='pairs';S.pc=cards;S.pm={};S.sel=null;S.left=cards.length;
+  var L=shuffle(cards),R=shuffle(cards);
+  frame(GAME.pairs[0],'<p class="muted q-sub">Нажми слово, потом его перевод.</p><div class="pairs"><div>'+L.map(function(c){return '<button type="button" data-pw="'+esc(c.id)+'"'+wcls(c)+' lang="'+c.l+'">'+esc(c.w)+'</button>'}).join('')+'</div><div>'+
+    R.map(function(c){return '<button type="button" data-pt="'+esc(c.id)+'">'+esc(c.t)+'</button>'}).join('')+'</div></div><div id="fb" class="q-fb"></div>');
+}
+function pairTap(b){
+  if(b.dataset.pw!==undefined){[].forEach.call(document.querySelectorAll('.pairs [data-pw]'),function(x){x.classList.remove('sel')});b.classList.add('sel');S.sel=b;var c=V.get(b.dataset.pw);if(c)KR.say(c.w,c.l);return}
+  if(!S.sel)return;var w=S.sel,id=w.dataset.pw;
+  if(b.dataset.pt===id){w.disabled=b.disabled=true;w.classList.remove('sel');w.classList.add('ok');b.classList.add('ok');S.sel=null;S.left--;
+    if(!S.left){S.pc.forEach(function(c){V.answer(c.id,S.pm[c.id]?1:3);S.done++});drawToday();S.timer=setTimeout(nextCard,KR.calm()?500:900)}}
+  else{S.pm[id]=1;S.pm[b.dataset.pt]=1;b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake','bad');setTimeout(function(){b.classList.remove('bad')},500)}
+}
+
+// ---------- список слов ----------
+function badge(c){
+  if(!c.st)return '<span class="badge new">новое</span>';
+  if(c.st===2)return '<span class="badge ok" title="Следующее повторение">'+(c.due<=Date.now()?'сегодня':SRS.span(c.due-Date.now()))+'</span>';
+  return '<span class="badge warn">учу</span>';
+}
+function drawList(){
+  var all=V.all(lang).sort(function(a,b){return (b.a||0)-(a.a||0)}),G=KR.LANGS[lang];
+  var F={all:['Все',function(){return true}],new:['Новые',function(c){return !c.st}],learn:['Учу',function(c){return c.st===1||c.st===3}],known:['Знаю',function(c){return c.st===2}],star:['Отмеченные',function(c){return c.star}]};
+  var h='<div class="card glass"><h3>Добавить слово</h3><form id="addf" class="addw" autocomplete="off"><input class="name'+(lang==='ko'?' ko':'')+'" id="aw" lang="'+lang+'" placeholder="Слово: '+G.name+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false"><input class="name" id="at" placeholder="Перевод" aria-label="Перевод" maxlength="160"><button type="submit" class="btn pri">'+KR.icon('plus',16)+'Добавить</button></form><p class="msg" id="amsg" role="status"></p>'+
+    '<p class="hint">Слова попадают сюда из уроков, по выделению в тексте урока и от преподавателя. Если добавить слово, которое уже есть, оно вернётся на повторение раньше.</p></div>';
+  if(all.length){
+    h+='<div class="card glass"><div class="opts">'+Object.keys(F).map(function(k){var n=all.filter(F[k][1]).length;return '<button type="button" data-f="'+k+'" class="'+(filt===k?'sel':'')+'" aria-pressed="'+(filt===k)+'">'+F[k][0]+' · '+n+'</button>'}).join('')+'</div>'+
+      '<input class="name" id="q" type="search" placeholder="Найти слово или перевод" aria-label="Поиск по словарю" value="'+esc(q)+'">';
+    var qq=SRS.norm(q),rows=all.filter(F[filt][1]).filter(function(c){return !qq||SRS.norm(c.w).indexOf(qq)>=0||SRS.norm(c.t).indexOf(qq)>=0});
+    h+=rows.length?'<div class="wl">'+rows.slice(0,shown).map(function(c){
+      if(editing===c.id)return '<form class="wrow wedit" data-id="'+esc(c.id)+'"><div class="mid"><b>'+word(c)+'</b><input class="name" name="t" value="'+esc(c.t)+'" placeholder="Перевод" aria-label="Перевод" maxlength="160"><input class="name'+(c.l==='ko'?' ko':'')+'" name="ex" lang="'+c.l+'" value="'+esc(c.ex||'')+'" placeholder="Пример (по желанию)" aria-label="Пример" maxlength="240"><input class="name" name="et" value="'+esc(c.et||'')+'" placeholder="Перевод примера" aria-label="Перевод примера" maxlength="240"></div><div class="wact"><button type="submit" class="btn pri">Сохранить</button><button type="button" data-x="cancel">Отмена</button><button type="button" data-del="'+esc(c.id)+'">'+KR.icon('trash',15)+' Удалить</button></div></form>';
+      return '<div class="wrow" data-id="'+esc(c.id)+'">'+sayBtn(c.w,c.l)+'<div class="mid"><b>'+word(c)+'</b><div class="muted">'+esc(c.t||'без перевода')+'</div></div>'+badge(c)+
+        '<button type="button" class="icb'+(c.star?' on':'')+'" data-star="'+esc(c.id)+'" aria-pressed="'+(!!c.star)+'" aria-label="Отметить слово">'+KR.icon('star',17)+'</button><button type="button" class="icb" data-edit="'+esc(c.id)+'" aria-label="Изменить слово">'+KR.icon('pencil',16)+'</button></div>'}).join('')+'</div>'+
+      (rows.length>shown?'<div class="done-row"><span class="muted">Показано '+shown+' из '+rows.length+'</span><button type="button" data-x="more">Показать ещё</button></div>':'')
+      :'<p class="muted">Ничего не найдено.</p>';
+    h+='</div>';
+  }
+  $('#list').innerHTML=h;
+}
+
+// ---------- настройки: интервалы, игры, голос ----------
+function drawPrefs(){
+  var s=V.settings(),vs=KR.voices(lang),cur=KR.pickVoice(lang);
+  var f=function(id,label,val,hint,attrs){return '<label class="field" for="'+id+'">'+label+'</label><input class="name" id="'+id+'" value="'+esc(val)+'" '+(attrs||'inputmode="numeric"')+'>'+(hint?'<p class="hint">'+hint+'</p>':'')};
+  var h='<form id="pf" class="card glass prefs"><h3>Интервалы</h3><div class="pgrid">'+
+    '<div>'+f('p-steps','Шаги изучения, минуты',s.steps.join(' '),'Через сколько минут новое слово покажется снова. Несколько шагов через пробел.','inputmode="decimal"')+'</div>'+
+    '<div>'+f('p-grad','Первый интервал, дни',s.grad,'После последнего шага слово уходит на повторение.')+'</div>'+
+    '<div>'+f('p-easy','Интервал после «Легко», дни',s.easy,'Если новое слово уже знакомо.')+'</div>'+
+    '<div>'+f('p-mod','Множитель интервалов, %',Math.round(s.mod*100),'Меньше 100: повторять чаще. Больше 100: реже.')+'</div>'+
+    '<div>'+f('p-new','Новых слов в день',s.newDay,'')+'</div>'+
+    '<div>'+f('p-rev','Повторений в день',s.revDay,'')+'</div></div>'+
+    '<h3>Игры</h3><p class="hint">Отметь игры, в которых хочешь учить слова. Новое слово сначала показывается карточкой.</p><div class="games">'+
+    SRS.GAMES.map(function(g){return '<label><input type="checkbox" name="g" value="'+g+'"'+(s.games[g]?' checked':'')+'><span><b>'+GAME[g][0]+'</b><small>'+GAME[g][1]+'</small></span></label>'}).join('')+'</div>'+
+    '<div class="done-row"><button type="button" data-x="reset">Вернуть как было</button><button type="submit" class="btn pri">Сохранить</button></div><p class="msg" id="pmsg" role="status"></p></form>';
+  h+='<div class="card glass prefs"><h3>Озвучка · '+KR.LANGS[lang].name+'</h3>'+(KR.canSay()?
+    '<label class="field" for="p-voice">Голос</label><select id="p-voice">'+(vs.length?vs.map(function(v){return '<option value="'+esc(v.name)+'"'+(cur&&cur.name===v.name?' selected':'')+'>'+esc(v.name)+'</option>'}).join(''):'<option value="">голос для этого языка не найден</option>')+'</select>'+
+    '<label class="field" for="p-rate">Скорость: <span id="p-ratev">'+KR.rate().toFixed(2)+'</span></label><input type="range" id="p-rate" min="0.5" max="1.2" step="0.05" value="'+KR.rate()+'">'+
+    '<div class="done-row"><span class="muted">Самые живые голоса: в браузере Microsoft Edge («Natural»), на iPhone в Safari.</span><button type="button" data-x="voice">'+KR.icon('volume',16)+' Проверить</button></div>'
+    :'<p class="muted">В этом браузере нет озвучки.</p>')+'</div>';
+  $('#prefs').innerHTML=h;
+}
+function savePrefs(reset){
+  if(reset){V.setSettings(null);drawPrefs();drawToday();$('#pmsg').textContent='Настройки сброшены';$('#pmsg').className='msg ok';return}
+  var g={};[].forEach.call(document.querySelectorAll('#pf input[name=g]'),function(i){g[i.value]=i.checked?1:0});
+  V.setSettings({steps:$('#p-steps').value,grad:$('#p-grad').value,easy:$('#p-easy').value,mod:parseFloat($('#p-mod').value)/100,newDay:$('#p-new').value,revDay:$('#p-rev').value,games:g});
+  drawPrefs();drawToday();$('#pmsg').textContent='Сохранено';$('#pmsg').className='msg ok';
+}
+
+// ---------- события ----------
+function setTab(t){[].forEach.call(document.querySelectorAll('#tabs button'),function(b){b.setAttribute('aria-selected',b.dataset.tab===t)});$('#list').hidden=t!=='list';$('#prefs').hidden=t!=='prefs';if(t==='prefs')drawPrefs()}
+function drawAll(){lang=KR.lang();KR.topbar('words');drawToday();if(!S){drawList();if(!$('#prefs').hidden&&!typing())drawPrefs()}}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;var d=b.dataset;
+  if(d.say!==undefined){KR.say(d.say,d.l);return}
+  if(b.id==='go')return start();
+  if(d.tab)return setTab(d.tab);
+  if(d.x==='stop')return stop();
+  if(d.x==='flip')return flip();
+  if(d.x==='next')return nextCard();
+  if(d.x==='hint'){S.hint=true;var c=S.card;$('#fb').innerHTML='<div class="muted">Начинается на: <b'+wcls(c)+'>'+esc(units(c)[0])+'…</b></div>';$('#win').focus();return}
+  if(d.g&&S&&S.card){var r=$('#rate');if(r)[].forEach.call(r.children,function(x){x.disabled=true});return grade(+d.g,true)}
+  if(d.o!==undefined)return choosePick(+d.o);
+  if(d.t!==undefined)return buildTap(b);
+  if(d.pw!==undefined||d.pt!==undefined)return pairTap(b);
+  if(d.f){filt=d.f;shown=60;return drawList()}
+  if(d.star){V.star(d.star);drawList();return drawToday()}
+  if(d.edit){editing=d.edit;return drawList()}
+  if(d.x==='cancel'){editing=null;return drawList()}
+  if(d.del){if(confirm('Удалить слово из словаря? Его история повторений тоже удалится.')){V.remove(d.del);editing=null;drawAll()}return}
+  if(d.x==='more'){shown+=60;return drawList()}
+  if(d.x==='reset')return savePrefs(true);
+  if(d.x==='voice')return KR.say(lang==='ko'?'안녕하세요! 같이 공부해요.':'Hello! Let’s learn together.',lang);
+});
+document.addEventListener('submit',function(e){
+  e.preventDefault();var f=e.target;
+  if(f.id==='wf')return writeCheck();
+  if(f.id==='pf')return savePrefs(false);
+  if(f.id==='addf'){
+    var w=$('#aw').value.trim(),t=$('#at').value.trim(),m=$('#amsg');
+    if(!w||!t){m.textContent='Нужны и слово, и перевод.';m.className='msg bad';return}
+    var r=V.add(lang,w,t,{src:'manual'});drawAll();m=$('#amsg');
+    m.textContent=r.added?'Добавлено: '+r.card.w:'Это слово уже было в словаре. Оно вернётся на повторение раньше.';m.className='msg ok';$('#aw').focus();return;
+  }
+  if(f.classList.contains('wedit')){var c=V.get(f.dataset.id);if(c){c=Object.assign({},c,{t:f.t.value.trim(),ex:f.ex.value.trim(),et:f.et.value.trim()});if(!c.ex){delete c.ex;delete c.et;delete c.f}else if(c.f&&c.ex.indexOf(c.f)<0)delete c.f;V.update(c)}editing=null;drawAll()}
+});
+document.addEventListener('input',function(e){
+  if(e.target.id==='q'){q=e.target.value;shown=60;var pos=e.target.selectionStart;drawList();var n=$('#q');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}}}
+  if(e.target.id==='p-rate'){KR.setRate(e.target.value);$('#p-ratev').textContent=(+e.target.value).toFixed(2)}
+});
+document.addEventListener('change',function(e){if(e.target.id==='p-voice')KR.setVoice(lang,e.target.value)});
+document.addEventListener('keydown',function(e){
+  if(!S||e.target.tagName==='INPUT'||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key===' '&&$('#back')&&$('#back').hidden){e.preventDefault();return flip()}
+  if(/^[1-4]$/.test(e.key)){var b=document.querySelector('#rate:not([hidden]) button[data-g="'+e.key+'"]')||document.querySelector('.q-opts button[data-o="'+(e.key-1)+'"]:not(:disabled)');if(b){e.preventDefault();b.click()}}
+});
+// пришли данные из облака: сводку обновляем всегда, а список — только если ученик сейчас ничего не вводит
+function typing(){var a=document.activeElement;return !!a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)}
+V.onchange=function(){drawToday();if(!S&&!typing()&&!editing)drawList()};
+KR.onLang=function(){if(S)stop();else drawAll()};
+if(window.speechSynthesis)speechSynthesis.onvoiceschanged=function(){if(!$('#prefs').hidden&&!typing())drawPrefs()};
+if(KR.require()){KR.topbar('words');drawAll();KR.load().then(drawAll)}
+</script>
+</body>
+</html>
