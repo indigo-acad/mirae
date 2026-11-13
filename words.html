@@ -203,7 +203,8 @@ function drawList(){
   var all=V.all(lang).sort(function(a,b){return (b.a||0)-(a.a||0)}),G=KR.LANGS[lang];
   var F={all:['Все',function(){return true}],new:['Новые',function(c){return !c.st}],learn:['Учу',function(c){return c.st===1||c.st===3}],known:['Знаю',function(c){return c.st===2}],star:['Отмеченные',function(c){return c.star}]};
   var h='<div class="card glass"><h3>Добавить слово</h3><form id="addf" class="addw" autocomplete="off"><input class="name'+(lang==='ko'?' ko':'')+'" id="aw" lang="'+lang+'" placeholder="Слово: '+G.name+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false"><input class="name" id="at" placeholder="Перевод" aria-label="Перевод" maxlength="160"><button type="submit" class="btn pri">'+KR.icon('plus',16)+'Добавить</button></form><p class="msg" id="amsg" role="status"></p>'+
-    '<p class="hint">Слова попадают сюда из уроков, по выделению в тексте урока и от преподавателя. Если добавить слово, которое уже есть, оно вернётся на повторение раньше.</p></div>';
+    '<p class="hint">Слова попадают сюда из уроков, по выделению в тексте урока и от преподавателя. Если добавить слово, которое уже есть, оно вернётся на повторение раньше.</p></div>'+
+    '<div class="card glass"><h3>Добавить список слов</h3><p class="hint">Вставь слова построчно или через запятую. Если после слова указан перевод через тире, он сохранится. Для остальных попробуем найти перевод через DeepL.</p><textarea class="name" id="bulk-input" rows="5" maxlength="8000" placeholder="runny nose\nsore throat\naccommodation — жильё" aria-label="Список слов"></textarea><div class="done-row"><span></span><button type="button" class="btn pri" data-x="bulk-translate">Разобрать и перевести</button></div><p class="msg" id="bulk-msg" role="status"></p><div id="bulk-preview"></div></div>';
   if(all.length){
     h+='<div class="card glass"><div class="opts">'+Object.keys(F).map(function(k){var n=all.filter(F[k][1]).length;return '<button type="button" data-f="'+k+'" class="'+(filt===k?'sel':'')+'" aria-pressed="'+(filt===k)+'">'+F[k][0]+' · '+n+'</button>'}).join('')+'</div>'+
       '<input class="name" id="q" type="search" placeholder="Найти слово или перевод" aria-label="Поиск по словарю" value="'+esc(q)+'">';
@@ -247,6 +248,61 @@ function savePrefs(reset){
   drawPrefs();drawToday();$('#pmsg').textContent='Сохранено';$('#pmsg').className='msg ok';
 }
 
+// ---------- массовое добавление слов с переводом DeepL ----------
+function parseBulk(text){
+  var seen={},out=[];
+  String(text||'').split(/[\\n,;]+/).forEach(function(line){
+    line=line.trim();if(!line)return;
+    var m=line.match(/^(.+?)\\s+[—–-]\\s+(.+)$/),w=(m?m[1]:line).trim(),t=m?m[2].trim():'';
+    if(!w||w.length>80)return;
+    var key=SRS.norm(w);if(seen[key])return;seen[key]=1;out.push({w:w,t:t});
+  });
+  return out.slice(0,80);
+}
+function drawBulkPreview(){
+  var box=$('#bulk-preview');if(!box||!bulkRows.length)return;
+  box.innerHTML='<div class="wl">'+bulkRows.map(function(x,i){
+    return '<div class="wrow bulk-row"><div class="mid"><input class="name'+(lang==='ko'?' ko':'')+'" data-bw="'+i+'" lang="'+lang+'" value="'+esc(x.w)+'" aria-label="Слово '+(i+1)+'"><input class="name" data-bt="'+i+'" value="'+esc(x.t)+'" placeholder="Перевод (можно оставить пустым)" aria-label="Перевод '+(i+1)+'"></div></div>';
+  }).join('')+'</div><div class="done-row"><span class="muted">Проверь слова и переводы перед сохранением.</span><button type="button" class="btn pri" data-x="bulk-save">Добавить в словарь · '+bulkRows.length+'</button></div>';
+}
+var bulkRows=[];
+async function bulkTranslate(){
+  var msg=$('#bulk-msg'),btn=document.querySelector('[data-x="bulk-translate"]');
+  bulkRows=parseBulk($('#bulk-input').value);
+  if(!bulkRows.length){msg.textContent='Вставь список слов — по одному в строке или через запятую.';msg.className='msg bad';return}
+  if(btn)btn.disabled=true;
+  msg.textContent='Подготавливаем список…';msg.className='msg';
+  try{
+    var missing=bulkRows.map(function(x,i){return x.t?null:i}).filter(function(i){return i!==null});
+    if(missing.length){
+      var cfg=window.CONFIG||{},res=await fetch(cfg.SUPABASE_URL+'/functions/v1/translate-words',{
+        method:'POST',headers:{'Content-Type':'application/json',apikey:cfg.SUPABASE_ANON_KEY,Authorization:'Bearer '+cfg.SUPABASE_ANON_KEY},
+        body:JSON.stringify({p_name:KR.user(),p_pin:localStorage.getItem('kr_pin')||'',words:missing.map(function(i){return bulkRows[i].w})})
+      });
+      var data=await res.json();
+      if(!res.ok)throw new Error(data.message||data.error||'Не удалось выполнить перевод');
+      (data.translations||[]).forEach(function(t,j){if(t&&bulkRows[missing[j]])bulkRows[missing[j]].t=t});
+    }
+    drawBulkPreview();
+    var done=bulkRows.filter(function(x){return x.t}).length;
+    msg.textContent='Готово: '+bulkRows.length+' слов, перевод есть у '+done+'. Проверь и при необходимости исправь его ниже.';
+    msg.className='msg ok';
+  }catch(e){
+    drawBulkPreview();
+    msg.textContent='Не удалось получить автоматический перевод: '+(e.message||'ошибка').slice(0,180)+'. Слова можно заполнить вручную и всё равно сохранить.';
+    msg.className='msg bad';
+  }finally{if(btn)btn.disabled=false}
+}
+function bulkSave(){
+  var rows=document.querySelectorAll('#bulk-preview [data-bw]');
+  rows.forEach(function(inp){
+    var i=+inp.dataset.bw,t=document.querySelector('#bulk-preview [data-bt="'+i+'"]');
+    var w=inp.value.trim();if(w)V.add(lang,w,t?t.value.trim():'',{src:'manual-bulk'});
+  });
+  var n=rows.length;bulkRows=[];$('#bulk-preview').innerHTML='';$('#bulk-input').value='';
+  var msg=$('#bulk-msg');msg.textContent='Добавлено в словарь: '+n+'.';msg.className='msg ok';drawToday();drawList();
+}
+
 // ---------- события ----------
 function setTab(t){[].forEach.call(document.querySelectorAll('#tabs button'),function(b){b.setAttribute('aria-selected',b.dataset.tab===t)});$('#list').hidden=t!=='list';$('#prefs').hidden=t!=='prefs';if(t==='prefs')drawPrefs()}
 function drawAll(){lang=KR.lang();KR.topbar('words');drawToday();if(!S){drawList();if(!$('#prefs').hidden&&!typing())drawPrefs()}}
@@ -271,6 +327,8 @@ document.addEventListener('click',function(e){
   if(d.x==='more'){shown+=60;return drawList()}
   if(d.x==='reset')return savePrefs(true);
   if(d.x==='voice')return KR.say(lang==='ko'?'안녕하세요! 같이 공부해요.':'Hello! Let’s learn together.',lang);
+  if(d.x==='bulk-translate')return bulkTranslate();
+  if(d.x==='bulk-save')return bulkSave();
 });
 document.addEventListener('submit',function(e){
   e.preventDefault();var f=e.target;
