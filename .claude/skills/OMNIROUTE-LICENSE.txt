@@ -1,6 +1,6 @@
-Навыки omni-auth и cli-serve взяты из проекта OmniRoute (MIT).
+Навыки omni-auth, cli-serve, omni-inference, omni-models и omni-providers взяты из проекта OmniRoute (MIT).
 Источник: https://github.com/cheaper-inference/OmniRoute, папка skills/, коммит 2f2c1957638c59c9f846dc2775488871df28a123.
-Остальные навыки проекта (44 штуки) сюда сознательно не добавлены, список: skills/README.md в исходном репозитории.
+Остальные навыки проекта (41 штука) сюда сознательно не добавлены, список: skills/README.md в исходном репозитории.
 
 MIT License
 
