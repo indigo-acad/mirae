@@ -14,10 +14,11 @@
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Личный кабинет</small><h1 id="who"></h1><p id="role">Прогресс, задания от преподавателя и домашка</p></div></header>
 <main id="m"></main>
-<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script>
+<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/assistant.js"></script>
 <script>
+/* Кабинет показывает раздел текущего языка (переключатель в шапке): корейский — уроки курса, английский — материалы программы. */
 var MAP={};MATERIALS.forEach(function(m){MAP[m.id]=m});
-var esc=KR.esc;
+var esc=KR.esc,first=true;
 var ALL=COURSE.lessons.concat((window.COURSE2||{lessons:[]}).lessons.filter(function(l){return l.id}));
 function lessonRow(l){
   if(!l.id) return '<div class="lcard lock" style="padding:6px 0"><div class="no" style="width:40px;height:40px;font-size:17px">'+l.no+'</div><div class="mid muted">'+l.no+'과 · скоро</div></div>';
@@ -32,33 +33,66 @@ function assignedRow(a){
 function hwRow(x){
   return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+x.title+'</div><div class="muted">'+x.due+'</div></div><span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><span class="badge '+(x.done?'ok':'warn')+'">'+(x.done?'сделано':'к выполнению')+'</span><a class="btn" href="lesson.html?l='+x.lesson+'#'+x.blocks[0].split('-')[0]+'">Открыть</a></span></div>';
 }
-function draw(){
-  KR.topbar('cabinet');
-  var ctx=KR.ctx,real=ALL.filter(function(l){return l.id&&KR.can('lesson-'+l.id)});
-  var ps=real.map(function(l){return KR.progress(l.id)});var n=0,t=0;ps.forEach(function(p){n+=p.n;t+=p.tot});
+function num(n){return first?'<b data-count="'+n+'">0</b>':'<b>'+n+'</b>'}   // счётчики «набегают» только при первом показе
+// сводка корейского раздела: уроки курса
+function dashKo(){
+  var real=ALL.filter(function(l){return l.id&&KR.can('lesson-'+l.id)});
+  var n=0,t=0;real.forEach(function(l){var p=KR.progress(l.id);n+=p.n;t+=p.tot});
   var pct=t?Math.round(n/t*100):0;
-  var hw=HOMEWORK.filter(function(h){return KR.can('lesson-'+h.lesson.replace(/^l/,'l'))}).map(function(h){var pr=KR.progress(h.lesson).P||{};var d=h.blocks.every(function(k){return pr[k]&&pr[k].done});return Object.assign({},h,{done:d})});
+  var hw=HOMEWORK.filter(function(h){return KR.can('lesson-'+h.lesson)}).map(function(h){var pr=KR.progress(h.lesson).P||{};var d=h.blocks.every(function(k){return pr[k]&&pr[k].done});return Object.assign({},h,{done:d})});
   var hwDone=hw.filter(function(h){return h.done}).length;
-  var items=(ctx.items||[]).filter(function(a){return !/^(lesson|practice)-/.test(a.id)});
   var next=real.filter(function(l){return KR.progress(l.id).pct<100})[0];
-  var h='';
-  if(ctx.teacher)h+='<div class="card glass"><h3>Вы вошли как преподаватель</h3><p class="muted">Назначайте ученикам материалы и смотрите их прогресс.</p><a class="btn pri" href="teacher.html">Ученики и задания'+KR.icon('arrow',16)+'</a></div>';
-  // сводка: кольцо прогресса по курсу и счётчики
-  h+='<section class="dash card glass" aria-label="Мой прогресс">'+KR.ring(pct,128,'<span data-count="'+pct+'">0</span><small>%</small>')+
-    '<div class="stat"><div><b data-count="'+real.length+'">0</b><span class="muted">уроков назначено</span></div><div><b data-count="'+n+'">0</b><span class="muted">блоков пройдено</span></div><div><b>'+hwDone+'/'+hw.length+'</b><span class="muted">домашка</span></div></div></section>';
-  // продолжить с того места, где остановился
+  var h='<section class="dash card glass" aria-label="Мой прогресс">'+KR.ring(pct,128,(first?'<span data-count="'+pct+'">0</span>':pct)+'<small>%</small>')+
+    '<div class="stat"><div>'+num(real.length)+'<span class="muted">уроков назначено</span></div><div>'+num(n)+'<span class="muted">блоков пройдено</span></div><div><b>'+hwDone+'/'+hw.length+'</b><span class="muted">домашка</span></div></div></section>';
   if(next){var np=KR.progress(next.id);
     h+='<a class="next card glass lessonlink" href="lesson.html?l='+next.id+'">'+KR.ring(np.pct,58,KR.icon('spark',18))+'<div class="mid"><span class="tag">'+(np.n?'Продолжить':'Начать')+' · '+next.no+'과</span><h3 class="ko">'+esc(next.title)+'</h3><div class="muted">'+np.n+' из '+np.tot+' блоков</div></div><span class="tile-go">'+KR.icon('arrow',18)+'</span></a>'}
+  h+=wordsCard();
   h+='<div class="card glass"><h3>Прогресс по урокам</h3>'+ALL.map(lessonRow).join('')+'<div class="done-row"><span></span><a class="btn" href="course.html">Весь путь'+KR.icon('arrow',15)+'</a></div></div>';
+  return {h:h,hw:hw};
+}
+// сводка английского раздела: материалы программы, пройденное ученик отмечает сам
+function dashEn(){
+  var items=MATERIALS.filter(function(m){return m.section==='english'&&m.kind!=='class'&&KR.can(m.id)}),done=KR.taken();
+  var n=items.filter(function(m){return done.indexOf(m.id)>=0}).length,pct=items.length?Math.round(n/items.length*100):0;
+  var next=items.filter(function(m){return done.indexOf(m.id)<0})[0],vs=KR.vocab?KR.vocab.stats('en'):{total:0};
+  var h='<section class="dash card glass" aria-label="Мой прогресс">'+KR.ring(pct,128,(first?'<span data-count="'+pct+'">0</span>':pct)+'<small>%</small>')+
+    '<div class="stat"><div>'+num(items.length)+'<span class="muted">материалов назначено</span></div><div>'+num(n)+'<span class="muted">пройдено</span></div><div>'+num(vs.total)+'<span class="muted">слов в словаре</span></div></div></section>';
+  if(next)h+='<a class="next card glass lessonlink" href="'+esc(next.path)+'">'+KR.ring(0,58,KR.icon('spark',18))+'<div class="mid"><span class="tag">Продолжить · '+esc((window.KINDS||{})[next.kind]||'')+'</span><h3>'+esc(next.title)+'</h3></div><span class="tile-go">'+KR.icon('arrow',18)+'</span></a>';
+  h+=wordsCard();
+  h+='<div class="card glass"><h3>Программа</h3><p class="muted">Все материалы раздела собраны на странице курса: там же отмечается пройденное.</p><div class="done-row"><span></span><a class="btn" href="course.html">Весь путь'+KR.icon('arrow',15)+'</a></div></div>';
+  return {h:h,hw:[]};
+}
+// слова на сегодня: интервальное повторение
+function wordsCard(){
+  if(!KR.vocab)return '';var lang=KR.lang(),s=KR.vocab.stats(lang),pct=s.total?Math.round(s.known/s.total*100):0;
+  return '<a class="next card glass lessonlink" href="words.html">'+KR.ring(pct,58,KR.icon('abc',18))+'<div class="mid"><span class="tag">Слова · '+KR.LANGS[lang].name+'</span><h3>'+
+    (s.due?'На сегодня: '+s.due:s.total?'На сегодня всё':'Словарь пока пуст')+'</h3><div class="muted">'+(s.total?'В словаре: '+s.total+' · выучено: '+s.known:'Слова появятся из уроков и по выделению в тексте')+'</div></div><span class="tile-go">'+KR.icon('arrow',18)+'</span></a>';
+}
+function draw(){
+  KR.topbar('cabinet');
+  var ctx=KR.ctx,lang=KR.lang(),D=lang==='en'?dashEn():dashKo();
+  var items=(ctx.items||[]).filter(function(a){if(/^(lesson|practice)-/.test(a.id))return false;var l=KR.langOf(a.id);return !l||l===lang});
+  var h='';
+  if(ctx.teacher)h+='<div class="card glass"><h3>Вы вошли как преподаватель</h3><p class="muted">Назначайте ученикам материалы и смотрите их прогресс.</p><a class="btn pri" href="teacher.html">Ученики и задания'+KR.icon('arrow',16)+'</a></div>';
+  h+=D.h;
   if(!ctx.teacher){
-    h+='<div class="card glass"><h3>'+KR.icon('pin',20)+'Назначено преподавателем</h3>'+(items.length?items.map(assignedRow).join(''):'<p class="muted">'+(ctx.ok?'Пока ничего не назначено. Преподаватель откроет тебе задания, и они появятся здесь.':'Нет связи с сервером: задания не загружены.')+'</p>')+'</div>';
+    h+='<div class="card glass"><h3>'+KR.icon('pin',20)+'Назначено преподавателем</h3>'+(items.length?items.map(assignedRow).join(''):'<p class="muted">'+(ctx.ok?'В этом разделе пока ничего не назначено. Преподаватель откроет тебе задания, и они появятся здесь.':'Нет связи с сервером: задания не загружены.')+'</p>')+'</div>';
   }
-  if(hw.length)h+='<div class="card glass"><h3>'+KR.icon('home',20)+'Домашка по урокам</h3>'+hw.map(hwRow).join('')+'</div>';
+  if(D.hw.length)h+='<div class="card glass"><h3>'+KR.icon('home',20)+'Домашка по урокам</h3>'+D.hw.map(hwRow).join('')+'</div>';
+  var anim=localStorage.getItem('kr_sky')!=='off';
+  h+='<div class="card glass"><h3>Настройки</h3><div class="line" style="align-items:center;justify-content:space-between"><div><div>Анимация фона</div><div class="muted">Падающие звёзды и движение неба</div></div><button id="anim" aria-pressed="'+anim+'">'+(anim?'Включена':'Выключена')+'</button></div>'+
+    '<div class="line" style="align-items:center;justify-content:space-between"><div><div>Голос озвучки и интервалы слов</div><div class="muted">Настраиваются в разделе «Слова»</div></div><a class="btn" href="words.html">Открыть'+KR.icon('arrow',15)+'</a></div></div>';
   var ok=KR.status()==='ok';
   h+='<div class="done-row"><span class="muted">'+KR.icon(ok?'cloud':'alert',16)+' '+(ok?'Прогресс сохраняется в облаке':'Нет связи с сервером: прогресс пока только на этом устройстве')+'</span><button id="out">Выйти</button></div>';
-  document.getElementById('m').innerHTML=h;KR.count(document.getElementById('m'));
+  document.getElementById('m').innerHTML=h;if(first)KR.count(document.getElementById('m'));first=false;
   document.getElementById('out').onclick=function(){KR.logout();location.href='index.html'};
+  document.getElementById('anim').onclick=function(){
+    var on=localStorage.getItem('kr_sky')!=='off';localStorage.setItem('kr_sky',on?'off':'on');
+    var s=document.querySelector('.shoot');if(s)s.remove();draw();
+  };
 }
+KR.onLang=draw;
+if(KR.vocab)KR.vocab.onchange=draw;
 if(KR.require()){
   document.getElementById('who').textContent=KR.user();KR.topbar('cabinet');
   KR.load().then(draw);

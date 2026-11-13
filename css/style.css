@@ -204,7 +204,10 @@ th{background:var(--navy);color:var(--gold);font-weight:600}
 .w{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 12px;background:var(--fill);border-radius:12px}
 .w b{font-size:20px;color:var(--title)}
 .w>span:first-child{display:inline-flex;align-items:center;flex:none;max-width:64%}
-.w .ru{text-align:right}
+.w .ru{flex:1;text-align:right}
+.card:not(.glass) .icb.on{color:var(--gold-ink)}
+.vnote{margin:12px 0 0}
+.vnote a{color:inherit;font-weight:600}
 .ex{padding:12px 0;border-bottom:1px solid var(--rule)}
 .ex:last-of-type{border:0}
 .ex .q{font-size:19px}
@@ -358,6 +361,83 @@ main.auth>.login{margin:0}
 .asst form{display:flex;align-items:center;gap:8px}
 .asst form .round{width:44px;height:44px}
 .asst input.name{margin:0;border-radius:999px;padding:10px 16px}
+
+/* ---------- словарь и тренажёр слов ---------- */
+.glass button.say{background:var(--fill);color:var(--ivory);border-color:var(--rule);margin:0}
+.glass button.say:hover{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.today .stat b{font-size:32px}
+.cloudline{display:flex;align-items:center;gap:6px;margin:12px 0 0;font-size:13.5px}
+.wtabs{margin:20px 0 0;max-width:360px}
+.play{padding:18px 20px 22px;scroll-margin-top:calc(var(--nav-h) + 12px)}
+.play-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.play-top .muted{margin-left:auto;font-size:14px}
+.play-top .round{width:38px;height:38px}
+.flash{padding:26px 16px;border-radius:20px;background:var(--fill);text-align:center}
+.flash-w{font-size:clamp(30px,6vw,42px);font-weight:600;line-height:1.25;color:var(--ivory)}
+.flash-ex{margin-top:10px;color:var(--silver);font-size:18px}
+.flash-back{margin-top:16px;padding-top:16px;border-top:1px solid var(--rule);animation:rise .35s var(--ease) both}
+.flash-t{font-family:var(--font-display);font-size:28px;line-height:1.2;color:var(--gold)}
+.rate{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.rate button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;padding:8px 4px;border-radius:16px}
+.rate button small{font-size:12px;font-weight:400;color:var(--fg-2)}
+.rate button[data-g="1"] b{color:var(--bad-fg)}.rate button[data-g="3"] b{color:var(--ok-fg)}.rate button[data-g="4"] b{color:var(--gold)}
+.rate .btn.pri{grid-column:1/-1;flex-direction:row;gap:8px}
+.q-word{padding:14px 4px 6px;font-size:clamp(26px,5vw,36px);font-weight:600;line-height:1.3;text-align:center;color:var(--ivory)}
+.q-word.q-ru{font-family:var(--font-display);font-weight:500}
+.q-word .gap{color:var(--gold);font-weight:500}
+.q-sub{margin:0 0 6px;text-align:center}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.q-opts button{min-height:56px;padding:10px 12px;border-radius:16px;font-size:16.5px;line-height:1.3}
+.q-opts button.ok,.pairs button.ok{background:rgba(143,211,166,.18);border-color:var(--ok-fg);color:var(--ok-fg);opacity:1}
+.q-opts button.bad,.tiles button.bad,.pairs button.bad{background:rgba(242,169,158,.16);border-color:var(--bad-fg);color:var(--bad-fg)}
+.q-fb{min-height:26px;margin-top:14px;text-align:center}
+.q-fb .ok{color:var(--ok-fg)}.q-fb .bad{color:var(--bad-fg)}
+.back-in{margin-top:6px;font-size:13.5px}
+.exbox{margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--fill);font-size:17px;text-align:left;color:var(--fg)}
+.wr{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.wr input.name{flex:1;min-width:180px;margin:0;font-size:22px;text-align:center}
+input.ans-ok{border-color:var(--ok-fg)!important}input.ans-bad{border-color:var(--bad-fg)!important}
+.slots{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin:14px 0}
+.slots i{display:grid;place-items:center;width:42px;height:52px;border-bottom:2px solid var(--gold);font-style:normal;font-size:26px;font-weight:600}
+.tiles{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
+.tiles button{min-width:50px;height:54px;padding:0 12px;border-radius:14px;font-size:24px;font-weight:600}
+.tiles button.used{opacity:.25}
+@keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.shake{animation:shake .35s}
+.pairs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pairs>div{display:grid;gap:8px;align-content:start}
+.pairs button{min-height:52px;padding:8px 10px;border-radius:14px;font-size:16px;line-height:1.3}
+.pairs button.sel{border-color:var(--gold);background:rgba(212,175,124,.16);color:var(--gold)}
+.addw{display:flex;gap:8px;flex-wrap:wrap}
+.addw input.name{flex:1;min-width:150px;margin:0}
+.wl{margin-top:10px}
+.wrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.wrow:last-child{border:0}
+.wrow .mid{flex:1;min-width:0}
+.wrow .mid b{font-size:19px;font-weight:600}
+.icb{display:inline-grid;place-items:center;flex:none;width:40px;height:40px;padding:0;border-color:transparent;background:transparent;color:var(--fg-2)}
+.icb.on{color:var(--gold)}.icb.on svg{fill:currentColor}
+.wedit{align-items:flex-start;flex-wrap:wrap}
+.wedit .mid{flex-basis:100%}
+.wact{display:flex;gap:8px;flex-wrap:wrap}
+.prefs h3{margin-top:6px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 14px}
+.games label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;background:var(--fill);cursor:pointer}
+.games small{display:block;font-size:13px;color:var(--fg-2)}
+.glass input[type=checkbox]{accent-color:var(--gold)}
+select option{color:#161c3a;background:#fff}
+input[type=range]{width:100%;margin:10px 0;accent-color:var(--gold)}
+@media(max-width:640px){.pgrid,.games,.q-opts{grid-template-columns:1fr}.slots i{width:36px}}
+
+/* перевод по выделению в уроке */
+.lookup{position:absolute;z-index:45;width:min(340px,calc(100vw - 16px));padding:14px 16px;border-radius:20px;--blur:20px;background:linear-gradient(180deg,rgba(13,23,58,.96),rgba(11,21,53,.93));animation:rise .25s var(--ease) both}
+.lk-w{display:flex;align-items:center;gap:8px;font-size:20px;line-height:1.3}
+.lk-w b{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
+.lk-t{margin-top:6px;font-size:16px;color:var(--fg)}
+.lk-t small{display:block;margin-top:3px;font-size:12.5px;color:var(--fg-2)}
+.lk-a{margin-top:12px}
+.lk-a .btn{width:100%;justify-content:center;display:inline-flex;align-items:center;gap:8px}
 
 /* ---------- панель преподавателя ---------- */
 .opts button .badge{margin-left:6px}
