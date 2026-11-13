@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary check · Transport & towns · in class</title>
+<style>
+  :root{--ink:#1d2433;--muted:#667085;--line:#e4e7ec;--bg:#f5f6fa;--card:#fff;--accent:#2f5bea;--ok:#1f9d55;--okbg:#e9f8ef;--bad:#d64545;--badbg:#fdeeee}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;font-size:18px}
+  .wrap{max-width:860px;margin:0 auto;padding:18px 14px 80px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  header h1{font-size:22px;margin:0}
+  .stat{font-size:17px;font-weight:700}
+  .stat .g{color:var(--ok)} .stat .r{color:var(--bad)}
+  .card{background:var(--card);border-radius:16px;padding:24px;margin:14px 0;box-shadow:0 2px 10px #0000000d}
+  h2{margin:0 0 6px;font-size:22px}
+  .muted{color:var(--muted);font-size:16px}
+  button{font:inherit;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#eef0f4;color:var(--ink);margin:4px 4px 4px 0}
+  button.primary{background:var(--accent);color:#fff}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text]{font:inherit;font-size:22px;padding:10px 12px;border:2px solid #c9ced8;border-radius:10px;width:100%}
+  input.ok{border-color:var(--ok);background:var(--okbg)} input.bad{border-color:var(--bad);background:var(--badbg)}
+  .hidden{display:none!important}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .opts button{margin:0;padding:14px;text-align:left;background:#f1f3f7;font-size:19px}
+  .opts button.ok{background:var(--okbg);outline:3px solid var(--ok)}
+  .opts button.bad{background:var(--badbg);outline:3px solid var(--bad)}
+  .bar{height:8px;background:#e7e9ef;border-radius:5px;overflow:hidden;margin:8px 0}
+  .bar div{height:100%;background:var(--accent);width:0;transition:width .3s}
+  .big{font-size:32px;font-weight:700;margin:12px 0}
+  .hint{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:24px;letter-spacing:3px;color:var(--accent);margin:4px 0 12px}
+  .feedback{min-height:30px;margin-top:12px;font-weight:700;font-size:20px}
+  .feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
+  .modes label{display:inline-flex;align-items:center;gap:6px;margin:4px 14px 4px 0;font-size:17px}
+  table.res{width:100%;border-collapse:collapse;font-size:17px}
+  table.res td{padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+  @media(max-width:560px){.opts{grid-template-columns:1fr}.big{font-size:26px}}
+</style>
+</head>
+<body><!--mirae-inject--><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+<div id="setup" class="card">
+  <h2>👩‍🏫 Vocabulary check · Transport & towns (in class)</h2>
+  <p class="muted">We do it together: answer, check at once, talk about mistakes. No timer.</p>
+  <div class="modes">
+    <p style="margin:10px 0 4px"><b>Question types</b></p>
+    <label><input type="checkbox" id="mTr" checked> English → Russian</label>
+    <label><input type="checkbox" id="mRu" checked> Russian → English</label>
+    <label><input type="checkbox" id="mWr" checked> Write the word</label>
+  </div>
+  <p><button class="primary" onclick="startAll()">Start: all 30 words →</button></p>
+</div>
+<div id="app" class="hidden">
+  <header><h1>Transport & towns · vocabulary</h1><div class="stat"><span class="g" id="sOk">0</span> ✅ · <span class="r" id="sBad">0</span> ❌</div></header>
+  <div class="card" id="qCard">
+    <div class="bar"><div id="bar"></div></div>
+    <div class="muted" id="qNum"></div>
+    <div class="muted" id="qTask" style="margin-top:4px"></div>
+    <div class="big" id="qPrompt"></div>
+    <div class="opts" id="qOpts"></div>
+    <div id="qWrite" class="hidden">
+      <div class="hint" id="qHint"></div>
+      <input type="text" id="qIn" lang="en" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')enter()">
+    </div>
+    <div class="feedback" id="fb"></div>
+    <p>
+      <button class="primary" id="checkBtn" onclick="checkWrite()" disabled>Check</button>
+      <button id="showBtn" onclick="reveal()">👀 Show answer</button>
+      <button class="primary hidden" id="nextBtn" onclick="next()">Next →</button>
+    </p>
+  </div>
+  <div class="card hidden" id="doneCard">
+    <h2 id="doneTitle"></h2>
+    <div id="review"></div>
+    <p>
+      <button class="primary" id="againBtn" onclick="repeatMistakes()">🔁 Repeat the mistakes</button>
+      <button onclick="location.reload()">Start again</button>
+    </p>
+  </div>
+</div>
+</div>
+<script>
+/* ============ ЛЕКСИКА (как в проверочной test-places) ============ */
+const WORDS = [
+ {en:"the outskirts", ru:"окраина", alt:["outskirts"]},
+ {en:"castle", ru:"замок", g:"bld"},
+ {en:"tower", ru:"башня", g:"bld"},
+ {en:"bridge", ru:"мост", g:"way"},
+ {en:"cathedral", ru:"собор", g:"bld"},
+ {en:"palace", ru:"дворец", g:"bld"},
+ {en:"square", ru:"площадь"},
+ {en:"council", ru:"городской совет, администрация"},
+ {en:"destination", ru:"пункт назначения, место, куда едешь", g:"sight"},
+ {en:"go sightseeing", ru:"осматривать достопримечательности", alt:["sightseeing"], g:"sight"},
+ {en:"motorway", ru:"автомагистраль (брит.)", g:"way"},
+ {en:"coach", ru:"междугородний автобус", g:"trip"},
+ {en:"flight", ru:"рейс, перелёт", g:"trip"},
+ {en:"delay", ru:"задержка"},
+ {en:"available", ru:"доступный, свободный"},
+ {en:"along the way", ru:"по пути", alt:["on the way"]},
+ {en:"boat trip", ru:"прогулка на лодке, речная прогулка", alt:["boat-trip"], g:"trip"},
+ {en:"cycle way", ru:"велодорожка", alt:["cycleway","cycle-way"], g:"way"},
+ {en:"pavement", ru:"тротуар", g:"way"},
+ {en:"narrow", ru:"узкий", g:"size"},
+ {en:"rate", ru:"уровень, показатель"},
+ {en:"customer", ru:"клиент, покупатель"},
+ {en:"North", ru:"север"},
+ {en:"staff", ru:"персонал, сотрудники"},
+ {en:"enough", ru:"достаточно"},
+ {en:"offer", ru:"предлагать"},
+ {en:"large", ru:"большой, крупный", g:"size"},
+ {en:"than", ru:"чем (в сравнении)"},
+ {en:"common", ru:"распространённый, частый"},
+ {en:"hurry", ru:"спешить"}
+];
+
+/* ============ ЛОГИКА ============ */
+const $=id=>document.getElementById(id);
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function norm(s){ return (s||"").toLowerCase().replace(/[’']/g,"").replace(/[.,!?]/g,"").replace(/\s+/g," ").trim(); }
+const close=(a,b)=>a.g&&a.g===b.g;
+const hintOf=en=>en.split("").map((c,i)=>i===0?c:(c===" "?"  ":c==="-"?"-":"_")).join(" ");
+const TASK={tr:"Choose the Russian translation.",ru:"Choose the English word.",wr:"Write the word in English. The first letter is given."};
+
+let QS=[], I=0, RES=[], done=false;   // RES[i] = {ok, given}
+
+function types(){ const t=[]; if($("mTr").checked)t.push("tr"); if($("mRu").checked)t.push("ru"); if($("mWr").checked)t.push("wr"); return t.length?t:["tr","ru","wr"]; }
+function build(words){
+  const t=types(), distract=(w,f)=>shuffle(WORDS.filter(x=>x!==w&&!close(x,w))).slice(0,3).map(f);
+  // типы вопросов распределяются поровну между словами
+  return shuffle(words).map((w,i)=>{ const k=t[i%t.length];
+    if(k==="tr") return {t:k,w,prompt:w.en,ans:w.ru,opts:shuffle([w.ru,...distract(w,x=>x.ru)])};
+    if(k==="ru") return {t:k,w,prompt:w.ru,ans:w.en,opts:shuffle([w.en,...distract(w,x=>x.en)])};
+    return {t:k,w,prompt:w.ru,ans:w.en}; });
+}
+function run(words){ QS=build(words); I=0; RES=[]; $("setup").classList.add("hidden"); $("app").classList.remove("hidden");
+  $("doneCard").classList.add("hidden"); $("qCard").classList.remove("hidden"); stat(); show(); }
+function startAll(){ run(WORDS); }
+function stat(){ $("sOk").textContent=RES.filter(r=>r&&r.ok).length; $("sBad").textContent=RES.filter(r=>r&&!r.ok).length; }
+
+function show(){
+  const q=QS[I]; done=false;
+  $("bar").style.width=(100*I/QS.length)+"%"; $("qNum").textContent="Question "+(I+1)+" of "+QS.length; $("qTask").textContent=TASK[q.t];
+  $("qPrompt").textContent=q.prompt; $("qOpts").innerHTML=""; $("fb").textContent=""; $("fb").className="feedback";
+  $("nextBtn").classList.add("hidden"); $("showBtn").classList.remove("hidden");
+  if(q.t==="wr"){
+    $("qWrite").classList.remove("hidden"); $("checkBtn").classList.remove("hidden"); $("checkBtn").disabled=true;
+    $("qHint").textContent=hintOf(q.ans); const inp=$("qIn"); inp.value=""; inp.className=""; inp.disabled=false;
+    inp.oninput=()=>$("checkBtn").disabled=!inp.value.trim(); inp.focus(); return; }
+  $("qWrite").classList.add("hidden"); $("checkBtn").classList.add("hidden");
+  q.opts.forEach(o=>{ const b=document.createElement("button"); b.textContent=o; b.onclick=()=>choose(o,b); $("qOpts").appendChild(b); });
+}
+function lock(ok,given){
+  done=true; RES[I]={ok,given}; stat();
+  const q=QS[I]; $("fb").className="feedback "+(ok?"ok":"bad");
+  $("fb").textContent=ok?"✅ Correct!  "+q.w.en+" — "+q.w.ru:"❌ "+q.w.en+" — "+q.w.ru;
+  $("showBtn").classList.add("hidden"); $("checkBtn").classList.add("hidden"); $("nextBtn").classList.remove("hidden"); $("nextBtn").focus();
+}
+function choose(o,b){ if(done) return; const q=QS[I], ok=o===q.ans;
+  [...$("qOpts").children].forEach(x=>{ x.disabled=true; x.style.opacity=1; if(x.textContent===q.ans) x.classList.add("ok"); });
+  if(!ok) b.classList.add("bad"); lock(ok,o); }
+function checkWrite(){ if(done) return; const q=QS[I], inp=$("qIn"), a=inp.value.trim(); if(!a) return;
+  const ok=[q.ans,...(q.w.alt||[])].some(x=>norm(x)===norm(a)); inp.className=ok?"ok":"bad"; inp.disabled=true; lock(ok,a); }
+function reveal(){ if(done) return; const q=QS[I];
+  if(q.t==="wr"){ $("qIn").value=q.ans; $("qIn").className="bad"; $("qIn").disabled=true; }
+  else [...$("qOpts").children].forEach(x=>{ x.disabled=true; x.style.opacity=1; if(x.textContent===q.ans) x.classList.add("ok"); });
+  lock(false,null); }
+function enter(){ if(done) next(); else checkWrite(); }
+function next(){ I++; if(I>=QS.length) finish(); else show(); }
+document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&done&&document.activeElement!==$("qIn")&&document.activeElement!==$("nextBtn")) next(); });
+
+function finish(){
+  $("qCard").classList.add("hidden"); $("doneCard").classList.remove("hidden");
+  const ok=RES.filter(r=>r.ok).length; $("doneTitle").textContent="🎯 "+ok+" / "+QS.length;
+  const bad=QS.filter((q,i)=>!RES[i].ok);
+  let h=bad.length?'<p class="muted">Words to repeat:</p><table class="res">':'<p>🎉 No mistakes!</p>';
+  bad.forEach(q=>{ const r=RES[QS.indexOf(q)]; h+='<tr><td><b>'+q.w.en+'</b></td><td>'+q.w.ru+'</td><td class="muted">'+(r.given==null?'👀 shown':'<s>'+String(r.given).replace(/</g,"&lt;")+'</s>')+'</td></tr>'; });
+  $("review").innerHTML=h+(bad.length?'</table>':''); $("againBtn").classList.toggle("hidden",!bad.length);
+}
+function repeatMistakes(){ run(QS.filter((q,i)=>!RES[i].ok).map(q=>q.w)); }
+</script>
+</body>
+</html>
