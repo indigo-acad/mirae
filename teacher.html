@@ -176,7 +176,7 @@ document.addEventListener('click',async function(e){
     if(ws.some(function(w){return !w.t})){msg('У каждого слова нужен перевод: «слово — перевод»');return}
     b.disabled=true;
     try{var r=await KR.api('teacher_vocab_add',{p_student:cur,p_words:ws});await drawStudent();msg('Добавлено слов: '+(r&&r.added||0)+((r&&r.bumped)?' · уже были и вернутся раньше: '+r.bumped:''),true)}
-    catch(x){console.error('teacher_vocab_add error:', x); b.disabled=false; msg('ошибка добавления:'+(x.message}||x.details||'неизвестная ошибка'));
+    catch(x){console.error('teacher_vocab_add error:', x); b.disabled=false; msg('ошибка добавления:'+(x.message||x.details||'неизвестная ошибка'));}
   }
   else if(b.dataset.vdel){
     if(!confirm('Убрать слово из словаря ученика?'))return;
