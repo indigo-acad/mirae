@@ -58,6 +58,22 @@ window.MATERIALS=[
   "level": ""
  },
  {
+  "id": "en-test-band6",
+  "section": "english",
+  "kind": "test",
+  "title": "Vocabulary check · Transport & towns (band 6)",
+  "path": "materials/english/en-test-band6/",
+  "level": "band 6"
+ },
+ {
+  "id": "en-test-band6-class",
+  "section": "english",
+  "kind": "class",
+  "title": "Vocabulary check · Transport & towns (band 6, в классе)",
+  "path": "materials/english/en-test-band6-class/",
+  "level": "band 6"
+ },
+ {
   "id": "en-test-band9",
   "section": "english",
   "kind": "test",

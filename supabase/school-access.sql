@@ -119,7 +119,7 @@ grant execute on function public.teacher_student_state(text, text, text) to anon
 revoke execute on function public._school_auth(text, text) from public, anon;
 revoke execute on function public._school_teacher(text, text) from public, anon;
 
--- ===== каталог материалов (41 шт.) =====
+-- ===== каталог материалов (43 шт.) =====
 insert into public.materials(id,section,kind,title,level,path,sort) values
   ('en-ielts-unit1-places','english','trainer','IELTS Practice · Unit 1: Places','','materials/english/en-ielts-unit1-places/',0),
   ('en-ielts-places-vocab','english','trainer','IELTS Vocabulary · Places','band 9','materials/english/en-ielts-places-vocab/',1),
@@ -161,5 +161,7 @@ insert into public.materials(id,section,kind,title,level,path,sort) values
   ('kid-forest','kids','game','Лиса в лесу','дошкольник','materials/kids/kid-forest/',37),
   ('kid-letters','kids','game','Лисичка и пропавшие буквы','дошкольник','materials/kids/kid-letters/',38),
   ('lesson-l12-jiyo','course','lesson','1급 · 12과 · -지요?','1급','lesson.html?l=l12-jiyo',39),
-  ('practice-p12-jiyo-1','course','practice','12과 · -지요: формы и времена (отработка)','1급','lesson.html?l=p12-jiyo-1',40)
+  ('practice-p12-jiyo-1','course','practice','12과 · -지요: формы и времена (отработка)','1급','lesson.html?l=p12-jiyo-1',40),
+  ('en-test-band6','english','test','Vocabulary check · Transport & towns (band 6)','band 6','materials/english/en-test-band6/',41),
+  ('en-test-band6-class','english','class','Vocabulary check · Transport & towns (band 6, в классе)','band 6','materials/english/en-test-band6-class/',42)
 on conflict (id) do update set section=excluded.section,kind=excluded.kind,title=excluded.title,level=excluded.level,path=excluded.path,sort=excluded.sort;
