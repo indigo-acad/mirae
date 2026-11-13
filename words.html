@@ -251,9 +251,9 @@ function savePrefs(reset){
 // ---------- массовое добавление слов с переводом DeepL ----------
 function parseBulk(text){
   var seen={},out=[];
-  String(text||'').split(/[\\n,;]+/).forEach(function(line){
+  String(text||'').split(/[\n,;]+/).forEach(function(line){
     line=line.trim();if(!line)return;
-    var m=line.match(/^(.+?)\\s+[—–-]\\s+(.+)$/),w=(m?m[1]:line).trim(),t=m?m[2].trim():'';
+    var m=line.match(/^(.+?)\s+[—–-]\s+(.+)$/),w=(m?m[1]:line).trim(),t=m?m[2].trim():'';
     if(!w||w.length>80)return;
     var key=SRS.norm(w);if(seen[key])return;seen[key]=1;out.push({w:w,t:t});
   });
