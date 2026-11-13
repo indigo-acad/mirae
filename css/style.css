@@ -86,11 +86,24 @@ h1.ko,h2.ko,h3.ko{font-family:var(--font-ko);font-weight:600;letter-spacing:-.01
 .top nav a:hover{color:var(--ivory)}
 .top nav a.on{color:var(--gold)}
 .top nav a.on::after{content:"";position:absolute;left:50%;bottom:5px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--gold)}
-.top .acc{justify-self:end;display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px 0 12px;border-radius:999px;color:var(--ivory);text-decoration:none;font-size:14px;font-weight:500;transition:transform .25s var(--ease),color .2s}
+.top-r{justify-self:end;display:flex;align-items:center;gap:10px;min-width:0}
+.top .acc{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px 0 12px;border-radius:999px;color:var(--ivory);text-decoration:none;font-size:14px;font-weight:500;transition:transform .25s var(--ease),color .2s}
 .top .acc:hover{transform:scale(1.04)}
 .top .acc:active{transform:scale(.97)}
 .top .acc.on{color:var(--gold)}
 .top .acc span{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* переключатель языка раздела */
+.lang{display:inline-flex;padding:3px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--rule)}
+.lang button{min-height:36px;padding:4px 13px;border:0;background:transparent;color:var(--silver);font-size:13.5px;font-weight:500}
+.lang button:hover{background:rgba(255,255,255,.07);color:var(--ivory)}
+.lang button[aria-pressed=true]{background:rgba(212,175,124,.16);color:var(--gold)}
+.lang .lg-s{display:none}
+/* нижняя панель разделов: только телефон и только после входа */
+.tabbar{display:none}
+/* падающие звёзды за страницей (на главной и на входе их рисует js/sky.js) */
+.shoot{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.shoot i{position:absolute;left:var(--x);top:var(--y);width:120px;height:1.5px;border-radius:2px;background:linear-gradient(90deg,rgba(248,247,242,.95),rgba(248,247,242,0));opacity:0;animation:shoot var(--d) linear var(--w) infinite}
+@keyframes shoot{0%{opacity:0;transform:rotate(-35deg) translateX(0)}2%{opacity:1}9%{opacity:0;transform:rotate(-35deg) translateX(-460px)}100%{opacity:0;transform:rotate(-35deg) translateX(-460px)}}
 
 /* ---------- заголовок внутренней страницы ---------- */
 header.band{color:var(--ivory);padding:clamp(22px,4.5vw,46px) 16px clamp(8px,2vw,18px)}
@@ -350,6 +363,38 @@ main.auth>.login{margin:0}
 .opts button .badge{margin-left:6px}
 textarea{resize:vertical}
 
+/* ---------- языковые разделы: то же оформление, но со своим акцентом, орнаментом и пейзажем ----------
+   Корейский: пять вершин и луна (по мотивам «Ирвор обондо»), сосны, беседка, меандр «нвемун», лотос из «танчхон».
+   Английский: холмы, Стоунхендж, дуб, деревенская церковь, плетёнка, роза Тюдоров.
+   Атрибут data-lang на <html> ставит js/common.js; рисунки лежат в img/ и их можно заменить своими. */
+html[data-lang=ko]{--la:#7CC4B5;--scene:url(../img/scene-ko.svg);--band:url(../img/band-ko.svg);--emblem:url(../img/emblem-ko.svg)}
+html[data-lang=en]{--la:#DC97A0;--scene:url(../img/scene-en.svg);--band:url(../img/band-en.svg);--emblem:url(../img/emblem-en.svg)}
+html[data-lang] header.band{position:relative;isolation:isolate;--sw:clamp(680px,72vw,1000px)}
+html[data-lang] header.band small{color:var(--la)}
+html[data-lang] header.band small::before,html[data-lang] .path-part::before{content:"";display:inline-block;flex:none;width:20px;height:20px;margin-right:9px;vertical-align:-5px;background:var(--emblem) center/contain no-repeat}
+html[data-lang] .path-part::before{width:24px;height:24px;margin-right:2px;align-self:center}
+html[data-lang] .path-part small,html[data-lang] .lang button[aria-pressed=true]{color:var(--la)}
+html[data-lang] .lang button[aria-pressed=true]{background:rgba(255,255,255,.1)}
+/* заголовок раздела с пейзажем на рассвете */
+html[data-lang] header.band:not(.slim){padding-bottom:clamp(134px,15.5vw,198px);margin-bottom:8px;background:var(--band) 0 100%/auto 14px repeat-x}
+html[data-lang] header.band:not(.slim)::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:var(--scene) 50% 100%/var(--sw) auto no-repeat,
+    radial-gradient(calc(var(--sw)*.52) 110px at 50% calc(100% - 46px),rgba(226,186,128,.62),rgba(150,120,160,.3) 44%,rgba(11,21,53,0) 76%);
+  -webkit-mask-image:linear-gradient(90deg,transparent calc(50% - var(--sw)/2),#000 calc(50% - var(--sw)/2 + 110px),#000 calc(50% + var(--sw)/2 - 110px),transparent calc(50% + var(--sw)/2));
+  mask-image:linear-gradient(90deg,transparent calc(50% - var(--sw)/2),#000 calc(50% - var(--sw)/2 + 110px),#000 calc(50% + var(--sw)/2 - 110px),transparent calc(50% + var(--sw)/2))}
+/* в уроке пейзажа нет, только лента орнамента под заголовком */
+html[data-lang] header.band.slim .in::after{content:"";display:block;height:14px;margin-top:20px;background:var(--band) 0 0/auto 14px repeat-x;opacity:.75;-webkit-mask-image:linear-gradient(90deg,#000 55%,transparent);mask-image:linear-gradient(90deg,#000 55%,transparent)}
+/* главная для вошедшего ученика: пейзаж его раздела стоит на линии горизонта */
+.hero-art{display:none}
+html[data-lang] .hero-art{display:block;position:absolute;left:0;right:0;bottom:var(--hz,18%);height:300px;z-index:-1;pointer-events:none;background:var(--scene) 50% 100%/clamp(900px,100%,1250px) auto no-repeat;
+  -webkit-mask-image:linear-gradient(90deg,transparent calc(50% - 640px),#000 calc(50% - 500px),#000 calc(50% + 500px),transparent calc(50% + 640px));mask-image:linear-gradient(90deg,transparent calc(50% - 640px),#000 calc(50% - 500px),#000 calc(50% + 500px),transparent calc(50% + 640px))}
+/* луна корейского раздела: отдельный слой, чтобы не попадать под текст и карточку */
+html[data-lang=ko] header.band:not(.slim)::after,html[data-lang=ko] .hero::after{content:"";position:absolute;z-index:-1;width:132px;height:132px;pointer-events:none;
+  background:radial-gradient(circle,#FFF6DF 0,#F3E3BF 15%,rgba(243,227,191,.26) 17%,rgba(243,227,191,0) 50%)}
+html[data-lang=ko] header.band:not(.slim)::after{right:max(4%,calc(50% - 470px));bottom:clamp(60px,9vw,118px)}
+html[data-lang=ko] .hero::after{right:max(6%,calc(50% - 600px));bottom:calc(var(--hz,18%) + 420px)}
+@media(max-width:640px){html[data-lang=ko] .hero::after{right:2%;bottom:calc(var(--hz,18%) + 330px);width:104px;height:104px}}
+
 /* ---------- адаптив ---------- */
 @media(max-width:900px){
   .tiles{grid-template-columns:1fr}
@@ -370,12 +415,21 @@ textarea{resize:vertical}
 @media(max-width:640px){
   :root{--nav-h:58px}
   body{font-size:16.5px}
-  .top{grid-template-columns:auto 1fr auto;gap:10px}
-  .top .logo{font-size:21px;letter-spacing:.16em}
-  .top .logo span,.top .acc span,.xs-hide{display:none}
-  .top nav{gap:12px}
-  .top nav a{font-size:11px;letter-spacing:.05em}
-  .top .acc{width:42px;padding:0;justify-content:center}
+  .top{grid-template-columns:1fr auto;gap:10px}
+  .top .logo{font-size:22px;letter-spacing:.2em}
+  .top .logo span,.top.user .acc span,.xs-hide,.top nav{display:none}
+  .top.user .acc{width:42px;padding:0;justify-content:center}
+  .lang .lg-f{display:none}.lang .lg-s{display:inline}
+  .lang button{min-width:40px;padding:4px 10px}
+  .tabbar{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:35;display:flex;padding:6px;border-radius:24px;background:rgba(11,21,53,.9);-webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%);border:1px solid rgba(212,175,124,.24);box-shadow:0 16px 36px -14px rgba(0,0,0,.85)}
+  .tabbar a{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:50px;padding:6px 2px;border-radius:18px;color:var(--silver);text-decoration:none;font-size:11px;font-weight:500;transition:color .2s,background-color .2s}
+  .tabbar a span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tabbar a.on{color:var(--gold);background:rgba(212,175,124,.13)}
+  body.has-tabs{padding-bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+  body.typing .tabbar{display:none}
+  .has-tabs .sky-toggle{bottom:96px}
+  .has-tabs .asst-btn{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .has-tabs .asst{bottom:calc(148px + env(safe-area-inset-bottom,0px))}
   .card{padding:18px 16px;border-radius:18px}
   .hero{padding-left:16px;padding-right:16px}
   .phrase{border-radius:28px;padding:12px 12px 14px}
@@ -393,9 +447,10 @@ textarea{resize:vertical}
   .asst{right:12px;bottom:76px}
 }
 @media(max-width:380px){
-  .top .logo{letter-spacing:.1em}
-  .top nav{gap:9px}
+  .top .logo{letter-spacing:.14em}
+  .tabbar a{font-size:10.5px}
 }
+@media(min-width:641px) and (max-width:900px){.lang .lg-f{display:none}.lang .lg-s{display:inline}}
 
 /* ---------- доступность ---------- */
 @supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){

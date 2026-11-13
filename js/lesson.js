@@ -15,7 +15,8 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}
   if(window.KR)KR.push();
   // сюда позже добавится запись в Supabase: window.syncProgress && window.syncProgress(user,id,P)
 }
-function say(t){try{const u=new SpeechSynthesisUtterance(t);u.lang="ko-KR";u.rate=.85;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.startsWith("ko"));if(v)u.voice=v;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+const LANG=L.lang||"ko";   // язык урока: задаёт голос озвучки и оформление страницы
+function say(t){if(window.KR)KR.say(t,LANG)}
 window.say=say;
 const sayBtn=t=>`<button class="say" data-say="${esc(t)}" title="Послушать" aria-label="Послушать">${ic("volume",16)}</button>`;
 
@@ -24,7 +25,7 @@ L.sections.forEach(s=>s.blocks.forEach((b,i)=>{b._key=s.id+"-"+i;blocks.push(b)}
 
 function render(){
   document.title=L.course+" · "+L.title;
-  let h=`<div id="topbar"></div><header class="band"><div class="in"><a href="${L.back||"course.html"}">${ic("back",14)}${L.back?"доп. упражнения":"курс"}</a><small>${esc(L.course)} · ${esc(user)}</small><h1 class="ko">${esc(L.title)}</h1><p>${esc(L.subtitle)}</p></div></header><main>
+  let h=`<div id="topbar"></div><header class="band slim"><div class="in"><a href="${L.back||"course.html"}">${ic("back",14)}${L.back?"доп. упражнения":"курс"}</a><small>${esc(L.course)} · ${esc(user)}</small><h1 class="ko">${esc(L.title)}</h1><p>${esc(L.subtitle)}</p></div></header><main>
   <div class="card glass"><b>Прогресс урока</b> <span id="pct" class="muted"></span><div class="bar"><div id="barfill"></div></div></div>
   <div class="subnav"><nav class="nav" id="nav" aria-label="Разделы урока">${L.sections.map(s=>`<a href="#${s.id}" data-sec="${s.id}">${em(s.icon,15)}${esc(s.title)}</a>`).join("")}</nav><div class="subnav-bar"><i id="navfill"></i></div></div>`;
   L.sections.forEach(s=>{
@@ -36,7 +37,7 @@ function render(){
   h+=extra();
   h+="</main>";
   document.body.innerHTML=h;
-  if(window.KR){KR.topbar(L.back?"practice":"course");if(KR.assistant)KR.assistant.sync()}
+  if(window.KR){KR.theme(LANG);KR.onLang=()=>{location.href="course.html"};KR.topbar(L.back?"practice":"course");if(KR.assistant)KR.assistant.sync()}
   wire();refresh();
 }
 function extra(){
