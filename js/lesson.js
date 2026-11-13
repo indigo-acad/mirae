@@ -1,7 +1,9 @@
 (function(){
 const $=(s,r=document)=>r.querySelector(s);
-const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const norm=s=>String(s).normalize("NFC").replace(/[\s?.!,]/g,"").toLowerCase();
+const ic=(n,s)=>window.KR?KR.icon(n,s):"";          // контурный значок
+const em=(e,s)=>window.KR?KR.emo(e,s)+" ":esc(e)+" "; // значок раздела из данных урока (там эмодзи)
 const user=localStorage.getItem("kr_user");
 const id=new URLSearchParams(location.search).get("l")||"l12-jiyo";
 const L=(window.LESSONS||{})[id];
@@ -15,46 +17,49 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}
 }
 function say(t){try{const u=new SpeechSynthesisUtterance(t);u.lang="ko-KR";u.rate=.85;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.startsWith("ko"));if(v)u.voice=v;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
 window.say=say;
-const sayBtn=t=>`<button class="say" data-say="${esc(t)}" title="Послушать">🔊</button>`;
+const sayBtn=t=>`<button class="say" data-say="${esc(t)}" title="Послушать" aria-label="Послушать">${ic("volume",16)}</button>`;
 
 const blocks=[]; // flat list of {key,done}
 L.sections.forEach(s=>s.blocks.forEach((b,i)=>{b._key=s.id+"-"+i;blocks.push(b)}));
 
 function render(){
   document.title=L.course+" · "+L.title;
-  let h=`<div id="topbar"></div><header class="band"><div class="in"><a href="${L.back||"course.html"}">← ${L.back?"доп. упражнения":"курс"}</a><br><small>${esc(L.course)} · ${esc(user)}</small><h1 class="ko">${esc(L.title)}</h1><p>${esc(L.subtitle)}</p></div></header><main>
-  <div class="card"><b>Прогресс урока</b> <span id="pct" class="muted"></span><div class="bar"><div id="barfill"></div></div></div>
-  <nav class="nav" id="nav">${L.sections.map(s=>`<a href="#${s.id}" data-sec="${s.id}">${s.icon} ${esc(s.title)}</a>`).join("")}</nav>`;
+  let h=`<div id="topbar"></div><header class="band"><div class="in"><a href="${L.back||"course.html"}">${ic("back",14)}${L.back?"доп. упражнения":"курс"}</a><small>${esc(L.course)} · ${esc(user)}</small><h1 class="ko">${esc(L.title)}</h1><p>${esc(L.subtitle)}</p></div></header><main>
+  <div class="card glass"><b>Прогресс урока</b> <span id="pct" class="muted"></span><div class="bar"><div id="barfill"></div></div></div>
+  <div class="subnav"><nav class="nav" id="nav" aria-label="Разделы урока">${L.sections.map(s=>`<a href="#${s.id}" data-sec="${s.id}">${em(s.icon,15)}${esc(s.title)}</a>`).join("")}</nav><div class="subnav-bar"><i id="navfill"></i></div></div>`;
   L.sections.forEach(s=>{
-    h+=`<h2 class="sec" id="${s.id}">${s.icon} ${esc(s.title)}</h2>`;
+    h+=`<h2 class="sec" id="${s.id}">${em(s.icon,24)}${esc(s.title)}</h2>`;
     s.blocks.forEach(b=>{h+=block(b)});
   });
+  // появляется, когда закрыты все блоки: завершение главы
+  h+=`<div class="card glass fin" id="fin" hidden><span class="spark">${ic("spark",34)}</span><h3>${L.back?"Отработка пройдена":"Глава пройдена"}</h3><p class="muted">Все блоки закрыты, прогресс сохранён.</p>${L.back?"":`<a class="btn pri" href="course.html">Вернуться на путь${ic("arrow",16)}</a>`}</div>`;
   h+=extra();
   h+="</main>";
   document.body.innerHTML=h;
-  if(window.KR)KR.topbar(L.back?"practice":"course");
+  if(window.KR){KR.topbar(L.back?"practice":"course");if(KR.assistant)KR.assistant.sync()}
   wire();refresh();
 }
 function extra(){
-  if(L.back)return `<div class="card"><a class="btn pri" href="${L.back}">← К списку отработок</a></div>`;
+  if(L.back)return `<div class="card glass"><a class="btn pri" href="${L.back}">${ic("back",16)}К списку отработок</a></div>`;
   const hw=(window.HOMEWORK||[]).filter(h=>h.lesson===id);
   let h="";
-  if(hw.length)h+=`<h2 class="sec">🏠 Домашка к уроку</h2><div class="card">${hw.map(x=>{const ok=x.blocks.every(k=>P[k]&&P[k].done);return `<div class="line" style="justify-content:space-between;align-items:center"><span>${esc(x.title)}</span><span class="badge ${ok?"ok":"warn"}">${ok?"сделано":"к выполнению"}</span></div>`}).join("")}</div>`;
+  if(hw.length)h+=`<h2 class="sec">${ic("home",24)} Домашка к уроку</h2><div class="card">${hw.map(x=>{const ok=x.blocks.every(k=>P[k]&&P[k].done);return `<div class="line" style="justify-content:space-between;align-items:center"><span>${esc(x.title)}</span><span class="badge ${ok?"ok":"warn"}">${ok?"сделано":"к выполнению"}</span></div>`}).join("")}</div>`;
   const cl=window.COURSE?COURSE.lessons.concat((window.COURSE2||{lessons:[]}).lessons).find(l=>l.id===id):null;const pno=cl?cl.no:"all";
-  h+=`<div class="card"><h3>Не получилось закрепить?</h3><p class="muted">Если какие-то задания не удались, возьми дополнительную отработку к этому уроку.</p><a class="btn pri" href="practice.html?l=${pno}">🔁 Доп. упражнения</a></div>`;
+  h+=`<div class="card"><h3>Не получилось закрепить?</h3><p class="muted">Если какие-то задания не удались, возьми дополнительную отработку к этому уроку.</p><a class="btn pri" href="practice.html?l=${pno}">${ic("repeat",16)}Доп. упражнения</a></div>`;
   return h;
 }
+const doneLabel=d=>d?ic("check",16)+" Пройдено":"Отметить пройденным";
 function doneRow(b){
   const interactive=["fill","choice"].includes(b.type);
   const d=P[b._key]&&P[b._key].done;
   if(interactive)return `<div class="done-row"><span class="score" id="sc-${b._key}"></span><button data-check="${b._key}" class="pri">Проверить</button></div>`;
-  return `<div class="done-row"><span class="muted"></span><button data-done="${b._key}">${d?"✓ Пройдено":"Отметить пройденным"}</button></div>`;
+  return `<div class="done-row"><span class="muted"></span><button data-done="${b._key}">${doneLabel(d)}</button></div>`;
 }
 function block(b){
   let h=`<div class="card" id="b-${b._key}"><h3>${esc(b.title)}</h3>`;
   if(b.type==="dialogue"){
     h+=b.lines.map(l=>`<div class="line"><span class="sp ko">${l[0]}</span><div><div class="kolg ko">${esc(l[1])} ${sayBtn(l[1])}</div><div class="ru">${esc(l[2])}</div></div></div>`).join("");
-    if(b.task)h+=`<p class="muted">📝 ${esc(b.task)}</p>`;
+    if(b.task)h+=`<p class="muted">${ic("pencil",15)} ${esc(b.task)}</p>`;
   }else if(b.type==="words"){
     h+=`<div class="words">`+b.items.map(w=>`<div class="w"><span><b class="ko">${esc(w[0])}</b> ${sayBtn(w[0])}</span><span class="ru">${esc(w[1])}</span></div>`).join("")+`</div>`;
   }else if(b.type==="text"){h+=b.html}
@@ -68,7 +73,7 @@ function block(b){
     h+=`<p class="muted">${esc(b.instr)}</p>`+b.items.map((it,i)=>{
       const v=(P[b._key]&&P[b._key].v&&P[b._key].v[i])||"";
       const parts=it.q.split("___");
-      return `<div class="ex" data-i="${i}"><span class="q ko">${esc(parts[0])}<input class="ans ko" data-b="${b._key}" data-i="${i}" value="${esc(v)}" autocomplete="off" autocapitalize="off" spellcheck="false">${esc(parts[1]||"")}</span><span class="fb" id="fb-${b._key}-${i}"></span></div>`}).join("")+doneRow(b);
+      return `<div class="ex" data-i="${i}"><span class="q ko">${esc(parts[0])}<input class="ans ko" data-b="${b._key}" data-i="${i}" value="${esc(v)}" aria-label="Ответ ${i+1}" autocomplete="off" autocapitalize="off" spellcheck="false">${esc(parts[1]||"")}</span><span class="fb" id="fb-${b._key}-${i}"></span></div>`}).join("")+doneRow(b);
   }else if(b.type==="choice"){
     h+=`<p class="muted">${esc(b.instr)}</p>`;
     h+=b.items.map((it,i)=>{
@@ -89,7 +94,7 @@ function check(key){
     if(b.type==="fill"){const inp=document.querySelector(`input[data-b="${key}"][data-i="${i}"]`);v[i]=inp.value;good=it.a.some(a=>norm(a)===norm(inp.value));inp.className="ans ko "+(good?"ok":"bad")}
     else{const g=document.querySelector(`.opts[data-b="${key}"][data-i="${i}"]`);const sel=v[i];good=sel===it.a;g.querySelectorAll("button").forEach(bt=>{bt.classList.remove("ok","bad");if(bt.dataset.o===sel)bt.classList.add(good?"ok":"bad")})}
     const fb=document.getElementById(`fb-${key}-${i}`);
-    if(fb){fb.textContent=good?"✓":"✗ "+it.a[0];fb.className="fb "+(good?"ok":"bad")}
+    if(fb){fb.textContent=good?"✓":"✗ "+(Array.isArray(it.a)?it.a[0]:it.a);fb.className="fb "+(good?"ok":"bad")}
     if(good)ok++;else wr.push(i);
   });
   P[key].tries=(P[key].tries||0)+1;
@@ -101,14 +106,17 @@ function check(key){
 function refresh(){
   let n=0;
   blocks.forEach(b=>{
-    const p=P[b._key];if(p&&p.done)n++;
+    const p=P[b._key],d=!!(p&&p.done);if(d)n++;
     const sc=document.getElementById("sc-"+b._key);
     if(sc&&p&&p.total!=null)sc.textContent=`Результат: ${p.score} из ${p.total}`;
-    const bd=document.querySelector(`[data-done="${b._key}"]`);if(bd)bd.textContent=p&&p.done?"✓ Пройдено":"Отметить пройденным";
+    const bd=document.querySelector(`[data-done="${b._key}"]`);if(bd)bd.innerHTML=doneLabel(d);
+    const card=document.getElementById("b-"+b._key);if(card)card.classList.toggle("is-done",d);   // золотая отметка на пройденном блоке
   });
   const pct=Math.round(n/blocks.length*100);
   const f=document.getElementById("barfill");if(f)f.style.width=pct+"%";
+  const nf=document.getElementById("navfill");if(nf)nf.style.width=pct+"%";
   const t=document.getElementById("pct");if(t)t.textContent=`${n} из ${blocks.length} блоков · ${pct}%`;
+  const fin=document.getElementById("fin");if(fin)fin.hidden=pct<100;
   L.sections.forEach(s=>{const a=document.querySelector(`[data-sec="${s.id}"]`);if(a)a.classList.toggle("done",s.blocks.every(b=>P[b._key]&&P[b._key].done))});
 }
 function wire(){
@@ -126,8 +134,8 @@ async function boot(){
     const ctx=await KR.load();
     const mid=(L.back?"practice-":"lesson-")+id;
     if(!KR.can(mid)){
-      document.body.innerHTML='<div id="topbar"></div><main style="padding-top:30px"><div class="card"><h3>Этот материал не назначен</h3><p class="muted">'+(ctx.ok?'Попроси преподавателя открыть доступ к этому уроку.':'Нет связи с сервером, задания не загружены.')+'</p><a class="btn pri" href="cabinet.html">В личный кабинет</a></div></main>';
-      KR.topbar("course");return;
+      document.body.innerHTML='<div id="topbar"></div><main style="padding-top:30px"><div class="card glass"><h3>Этот материал не назначен</h3><p class="muted">'+(ctx.ok?'Попроси преподавателя открыть доступ к этому уроку.':'Нет связи с сервером, задания не загружены.')+'</p><a class="btn pri" href="cabinet.html">В личный кабинет</a></div></main>';
+      KR.topbar("course");if(KR.assistant)KR.assistant.sync();return;
     }
   }
   render();

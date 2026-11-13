@@ -1,24 +1,36 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"><title>Личный кабинет · MIRAÉ</title></head><body>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Личный кабинет · MIRAÉ</title>
+<meta name="theme-color" content="#0B1535">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Личный кабинет</small><h1 id="who"></h1><p id="role">Прогресс, задания от преподавателя и домашка</p></div></header>
 <main id="m"></main>
-<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script>
+<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script>
 <script>
 var MAP={};MATERIALS.forEach(function(m){MAP[m.id]=m});
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var esc=KR.esc;
 var ALL=COURSE.lessons.concat((window.COURSE2||{lessons:[]}).lessons.filter(function(l){return l.id}));
 function lessonRow(l){
-  if(!l.id) return '<div class="lcard lock" style="padding:6px 0"><div class="no" style="width:40px;height:40px;font-size:15px">'+l.no+'</div><div class="mid muted">'+l.no+'과 · скоро</div></div>';
-  if(!KR.can('lesson-'+l.id)) return '<div class="lcard lock" style="padding:6px 0"><div class="no" style="width:40px;height:40px;font-size:15px">'+l.no+'</div><div class="mid muted">'+l.no+'과 · не назначено</div></div>';
+  if(!l.id) return '<div class="lcard lock" style="padding:6px 0"><div class="no" style="width:40px;height:40px;font-size:17px">'+l.no+'</div><div class="mid muted">'+l.no+'과 · скоро</div></div>';
+  if(!KR.can('lesson-'+l.id)) return '<div class="lcard lock" style="padding:6px 0"><div class="no" style="width:40px;height:40px;font-size:17px">'+l.no+'</div><div class="mid muted">'+l.no+'과 · не назначено</div></div>';
   var p=KR.progress(l.id);
-  return '<a class="lessonlink" href="lesson.html?l='+l.id+'" style="display:block;padding:6px 0"><div class="lcard"><div class="no" style="width:40px;height:40px;font-size:15px">'+l.no+'</div><div class="mid"><b>'+l.no+'과 · <span class="ko">'+l.title+'</span></b> <span class="muted">'+p.pct+'%</span>'+KR.bar(p.pct)+'</div></div></a>';
+  return '<a class="lessonlink" href="lesson.html?l='+l.id+'" style="display:block;padding:6px 0"><div class="lcard"><div class="no" style="width:40px;height:40px;font-size:17px">'+l.no+'</div><div class="mid"><b>'+l.no+'과 · <span class="ko">'+esc(l.title)+'</span></b> <span class="muted">'+p.pct+'%</span>'+KR.bar(p.pct)+'</div></div></a>';
 }
 function assignedRow(a){
   var m=MAP[a.id]||{title:a.id,kind:'',path:'#'};
-  return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><a class="btn pri" href="'+esc(m.path)+'">Открыть</a></div>';
+  return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><a class="btn" href="'+esc(m.path)+'">Открыть'+KR.icon('arrow',15)+'</a></div>';
 }
 function hwRow(x){
-  return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+x.title+'</div><div class="muted">'+x.due+'</div></div><span><span class="badge '+(x.done?'ok':'warn')+'">'+(x.done?'сделано':'к выполнению')+'</span> <a class="btn" href="lesson.html?l='+x.lesson+'#'+x.blocks[0].split('-')[0]+'">Открыть</a></span></div>';
+  return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+x.title+'</div><div class="muted">'+x.due+'</div></div><span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><span class="badge '+(x.done?'ok':'warn')+'">'+(x.done?'сделано':'к выполнению')+'</span><a class="btn" href="lesson.html?l='+x.lesson+'#'+x.blocks[0].split('-')[0]+'">Открыть</a></span></div>';
 }
 function draw(){
   KR.topbar('cabinet');
@@ -28,20 +40,29 @@ function draw(){
   var hw=HOMEWORK.filter(function(h){return KR.can('lesson-'+h.lesson.replace(/^l/,'l'))}).map(function(h){var pr=KR.progress(h.lesson).P||{};var d=h.blocks.every(function(k){return pr[k]&&pr[k].done});return Object.assign({},h,{done:d})});
   var hwDone=hw.filter(function(h){return h.done}).length;
   var items=(ctx.items||[]).filter(function(a){return !/^(lesson|practice)-/.test(a.id)});
+  var next=real.filter(function(l){return KR.progress(l.id).pct<100})[0];
   var h='';
-  if(ctx.teacher)h+='<div class="card"><h3>Вы вошли как преподаватель</h3><p class="muted">Назначайте ученикам материалы и смотрите их прогресс.</p><a class="btn pri" href="teacher.html">Ученики и задания</a></div>';
-  h+='<div class="card"><h3>Мой прогресс</h3><div class="stat"><div><b>'+pct+'%</b><span class="muted">курс</span></div><div><b>'+real.length+'</b><span class="muted">уроков назначено</span></div><div><b>'+hwDone+'/'+hw.length+'</b><span class="muted">домашка</span></div></div>'+KR.bar(pct)+'</div>';
-  h+='<div class="card"><h3>Прогресс по урокам</h3>'+ALL.map(lessonRow).join('')+'</div>';
+  if(ctx.teacher)h+='<div class="card glass"><h3>Вы вошли как преподаватель</h3><p class="muted">Назначайте ученикам материалы и смотрите их прогресс.</p><a class="btn pri" href="teacher.html">Ученики и задания'+KR.icon('arrow',16)+'</a></div>';
+  // сводка: кольцо прогресса по курсу и счётчики
+  h+='<section class="dash card glass" aria-label="Мой прогресс">'+KR.ring(pct,128,'<span data-count="'+pct+'">0</span><small>%</small>')+
+    '<div class="stat"><div><b data-count="'+real.length+'">0</b><span class="muted">уроков назначено</span></div><div><b data-count="'+n+'">0</b><span class="muted">блоков пройдено</span></div><div><b>'+hwDone+'/'+hw.length+'</b><span class="muted">домашка</span></div></div></section>';
+  // продолжить с того места, где остановился
+  if(next){var np=KR.progress(next.id);
+    h+='<a class="next card glass lessonlink" href="lesson.html?l='+next.id+'">'+KR.ring(np.pct,58,KR.icon('spark',18))+'<div class="mid"><span class="tag">'+(np.n?'Продолжить':'Начать')+' · '+next.no+'과</span><h3 class="ko">'+esc(next.title)+'</h3><div class="muted">'+np.n+' из '+np.tot+' блоков</div></div><span class="tile-go">'+KR.icon('arrow',18)+'</span></a>'}
+  h+='<div class="card glass"><h3>Прогресс по урокам</h3>'+ALL.map(lessonRow).join('')+'<div class="done-row"><span></span><a class="btn" href="course.html">Весь путь'+KR.icon('arrow',15)+'</a></div></div>';
   if(!ctx.teacher){
-    h+='<div class="card"><h3>📌 Назначено преподавателем</h3>'+(items.length?items.map(assignedRow).join(''):'<p class="muted">'+(ctx.ok?'Пока ничего не назначено. Преподаватель откроет тебе задания, и они появятся здесь.':'Нет связи с сервером: задания не загружены.')+'</p>')+'</div>';
+    h+='<div class="card glass"><h3>'+KR.icon('pin',20)+'Назначено преподавателем</h3>'+(items.length?items.map(assignedRow).join(''):'<p class="muted">'+(ctx.ok?'Пока ничего не назначено. Преподаватель откроет тебе задания, и они появятся здесь.':'Нет связи с сервером: задания не загружены.')+'</p>')+'</div>';
   }
-  if(hw.length)h+='<div class="card"><h3>🏠 Домашка по урокам</h3>'+hw.map(hwRow).join('')+'</div>';
-  h+='<div class="done-row"><span class="muted">'+(KR.status()==='ok'?'☁️ Прогресс сохраняется в облаке':'⚠️ Нет связи с сервером: прогресс пока только на этом устройстве')+'</span><button id="out">Выйти</button></div>';
-  document.getElementById('m').innerHTML=h;
+  if(hw.length)h+='<div class="card glass"><h3>'+KR.icon('home',20)+'Домашка по урокам</h3>'+hw.map(hwRow).join('')+'</div>';
+  var ok=KR.status()==='ok';
+  h+='<div class="done-row"><span class="muted">'+KR.icon(ok?'cloud':'alert',16)+' '+(ok?'Прогресс сохраняется в облаке':'Нет связи с сервером: прогресс пока только на этом устройстве')+'</span><button id="out">Выйти</button></div>';
+  document.getElementById('m').innerHTML=h;KR.count(document.getElementById('m'));
   document.getElementById('out').onclick=function(){KR.logout();location.href='index.html'};
 }
 if(KR.require()){
   document.getElementById('who').textContent=KR.user();KR.topbar('cabinet');
   KR.load().then(draw);
 }
-</script></body></html>
+</script>
+</body>
+</html>

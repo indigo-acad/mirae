@@ -1,11 +1,126 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="css/style.css"><title>MIRAÉ · The Indigo Language Academy</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet"></head><body>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MIRAÉ · The Indigo Language Academy</title>
+<meta name="description" content="MIRAÉ — The Indigo Language Academy. Уроки, отработка и личный кабинет в одном месте.">
+<meta name="theme-color" content="#0B1535">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>document.documentElement.className+=" js"</script>
+</head>
+<body>
 <div id="topbar"></div>
-<header class="band"><div class="in"><small>The Indigo Language Academy</small><h1 class="tag-line">Languages open worlds.</h1><p>Уроки, отработка и личный кабинет в одном месте</p></div></header>
-<main><div class="grid">
-<a class="card lessonlink" href="course.html"><div class="lcard"><div class="no">📘</div><div class="mid"><h3 style="margin:0">Основной курс</h3><span class="muted">Уроки по программе 서울대 한국어+</span></div></div></a>
-<a class="card lessonlink" href="practice.html"><div class="lcard"><div class="no">🔁</div><div class="mid"><h3 style="margin:0">Доп. упражнения</h3><span class="muted">Отработка, если тема не закрепилась</span></div></div></a>
-<a class="card lessonlink" id="cab" href="cabinet.html"><div class="lcard"><div class="no">👤</div><div class="mid"><h3 style="margin:0">Личный кабинет</h3><span class="muted" id="cabtxt">Прогресс, домашние задания, слова</span></div></div></a>
-<h2 class="sec">Языки</h2><div class="langs"><div>KOREAN <b class="ko">한국어</b></div><div>ENGLISH <b>English</b></div><div>JAPANESE <b>日本語</b></div><div>CHINESE <b>中文</b></div></div><div class="card sk" style="margin-top:14px">Здесь позже: о школе, преподаватели, расписание, контакты</div>
-</div></main>
-<script src="data/course.js"></script><script src="js/config.js"></script><script src="js/common.js"></script>
-<script>KR.topbar("home");if(!KR.user())document.getElementById("cabtxt").textContent="Войти или зарегистрироваться";</script></body></html>
+
+<header class="hero" id="hero">
+  <canvas class="sky" id="sky" aria-hidden="true"></canvas>
+  <div class="hero-in">
+    <p class="eyebrow rise">The Indigo Language Academy</p>
+    <h1 class="hero-title rise d1">Languages <em>open worlds.</em></h1>
+    <p class="hero-sub rise d2">Уроки, отработка и личный кабинет в одном месте</p>
+
+    <!-- стеклянная карточка: первая фраза на новом языке, её можно послушать -->
+    <section class="phrase glass frost rise d3" aria-label="Первая фраза на новом языке">
+      <div class="phrase-tabs" role="tablist" aria-label="Язык фразы">
+        <button type="button" role="tab" id="ph-ko" data-l="ko" lang="ko" aria-controls="phBody" aria-selected="true">한국어</button>
+        <button type="button" role="tab" id="ph-en" data-l="en" lang="en" aria-controls="phBody" aria-selected="false" tabindex="-1">English</button>
+        <button type="button" role="tab" id="ph-ja" data-l="ja" lang="ja" aria-controls="phBody" aria-selected="false" tabindex="-1">日本語</button>
+        <button type="button" role="tab" id="ph-zh" data-l="zh" lang="zh-Hans" aria-controls="phBody" aria-selected="false" tabindex="-1">中文</button>
+      </div>
+      <div class="phrase-body" id="phBody" role="tabpanel" aria-labelledby="ph-ko">
+        <p class="phrase-text" id="phT" lang="ko">안녕하세요! 같이 공부해요.</p>
+        <p class="phrase-ru">Здравствуйте! Давайте учиться вместе.</p>
+      </div>
+      <div class="phrase-foot">
+        <button type="button" class="round frost" id="phSay" aria-label="Послушать фразу" data-ic="volume"></button>
+        <a class="cta" id="phGo" href="auth.html"><span id="phGoT">Войти в кабинет</span><span data-ic="arrow" data-s="18"></span></a>
+      </div>
+    </section>
+  </div>
+  <button type="button" class="round frost sky-toggle" id="skyBtn" hidden></button>
+</header>
+
+<main class="home">
+  <section class="tiles" aria-label="Разделы сайта">
+    <a class="tile glass reveal" href="course.html">
+      <div class="tile-top"><span class="tile-ic" data-ic="book" data-s="22"></span><span class="tile-go" data-ic="arrowUp" data-s="18"></span></div>
+      <div class="tile-tx"><h3>Основной курс</h3><p>Уроки по программе <span class="ko" lang="ko">서울대 한국어+</span></p></div>
+    </a>
+    <a class="tile glass reveal" href="practice.html">
+      <div class="tile-top"><span class="tile-ic" data-ic="repeat" data-s="22"></span><span class="tile-go" data-ic="arrowUp" data-s="18"></span></div>
+      <div class="tile-tx"><h3>Доп. упражнения</h3><p>Отработка, если тема не закрепилась</p></div>
+    </a>
+    <a class="tile glass reveal" id="cab" href="cabinet.html">
+      <div class="tile-top"><span class="tile-ic" data-ic="user" data-s="22"></span><span class="tile-go" data-ic="arrowUp" data-s="18"></span></div>
+      <div class="tile-tx"><h3>Личный кабинет</h3><p id="cabtxt">Прогресс, домашние задания, слова</p></div>
+    </a>
+  </section>
+
+  <section class="reveal" aria-labelledby="langsH">
+    <h2 class="sec" id="langsH">Языки</h2>
+    <div class="langs">
+      <div>KOREAN <b class="ko" lang="ko">한국어</b></div>
+      <div>ENGLISH <b lang="en">English</b></div>
+      <div>JAPANESE <b lang="ja">日本語</b></div>
+      <div>CHINESE <b lang="zh-Hans">中文</b></div>
+    </div>
+  </section>
+
+  <div class="card sk reveal">Здесь позже: о школе, преподаватели, расписание, контакты</div>
+</main>
+
+<footer class="foot"><span>MIRAÉ · The Indigo Language Academy</span><i>Languages open worlds.</i></footer>
+
+<script src="js/config.js"></script><script src="js/common.js"></script><script src="js/sky.js"></script>
+<script>
+KR.topbar("home");
+var $=function(s){return document.querySelector(s)};
+if(KR.user()){$("#phGo").href="course.html";$("#phGoT").textContent="Продолжить обучение"}
+else $("#cabtxt").textContent="Войти или зарегистрироваться";
+
+// ---------- карточка фразы ----------
+var PH={
+  ko:{t:"안녕하세요! 같이 공부해요.",tts:"ko-KR"},
+  en:{t:"Hello! Let’s learn together.",tts:"en-US"},
+  ja:{t:"こんにちは！一緒に勉強しましょう。",tts:"ja-JP"},
+  zh:{t:"你好！我们一起学习吧。",tts:"zh-CN",lang:"zh-Hans"}
+};
+var cur="ko",tabs=[].slice.call(document.querySelectorAll(".phrase-tabs button")),body=$("#phBody"),say=$("#phSay");
+function pick(l,focus){
+  cur=l;
+  tabs.forEach(function(b){var on=b.dataset.l===l;b.setAttribute("aria-selected",on);b.tabIndex=on?0:-1;if(on&&focus)b.focus()});
+  $("#phT").textContent=PH[l].t;$("#phT").lang=PH[l].lang||l;body.setAttribute("aria-labelledby","ph-"+l);
+  body.classList.remove("swap");void body.offsetWidth;body.classList.add("swap");
+  if(window.speechSynthesis)speechSynthesis.cancel();say.classList.remove("speaking");
+}
+tabs.forEach(function(b,i){
+  b.onclick=function(){pick(b.dataset.l)};
+  b.onkeydown=function(e){var d=e.key==="ArrowRight"?1:e.key==="ArrowLeft"?-1:0;if(d){e.preventDefault();pick(tabs[(i+d+tabs.length)%tabs.length].dataset.l,true)}};
+});
+if(!window.speechSynthesis||!window.SpeechSynthesisUtterance)say.hidden=true;
+else say.onclick=function(){
+  var p=PH[cur];
+  try{
+    speechSynthesis.cancel();
+    var x=new SpeechSynthesisUtterance(p.t);x.lang=p.tts;x.rate=.9;
+    var v=speechSynthesis.getVoices().filter(function(v){return v.lang&&v.lang.replace("_","-").toLowerCase().indexOf(p.tts.slice(0,2))===0})[0];if(v)x.voice=v;
+    x.onstart=function(){say.classList.add("speaking")};x.onend=x.onerror=function(){say.classList.remove("speaking")};
+    speechSynthesis.speak(x);
+  }catch(e){}
+};
+
+// ---------- живой фон: линия горизонта проходит за нижним краем карточки, под строкой кнопок ----------
+var hero=$("#hero"),card=$(".phrase"),sb=$("#skyBtn");
+var sky=window.Sky&&Sky.mount($("#sky"),{horizon:function(){return 1-(card.offsetTop+card.offsetHeight*.86)/hero.offsetHeight}});
+if(sky){
+  var paint=function(){sb.innerHTML=KR.icon(sky.paused?"play":"pause",16);sb.setAttribute("aria-label",sky.paused?"Запустить анимацию фона":"Остановить анимацию фона")};
+  sb.hidden=false;sb.onclick=function(){sky.toggle();paint()};paint();
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(sky.refresh);
+}
+KR.reveal();
+</script>
+</body>
+</html>

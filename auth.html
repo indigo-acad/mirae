@@ -1,22 +1,106 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="css/style.css"><title>Вход</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet"></head><body>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Вход · MIRAÉ</title>
+<meta name="theme-color" content="#0B1535">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 <div id="topbar"></div>
-<header class="band"><div class="in"><small>MIRAÉ</small><h1>Личный кабинет</h1><p>Вход для учеников MIRAÉ</p></div></header>
-<main><div class="card login" style="margin-top:14px">
-<input id="nm" class="name" placeholder="Логин" autocomplete="off">
-<input id="pin" class="name" type="password" inputmode="numeric" maxlength="8" placeholder="PIN-код" autocomplete="off">
-<p id="msg" class="muted" style="min-height:22px"></p>
-<button class="pri" id="go" style="width:100%">Войти</button>
-<p class="note" style="margin-top:12px">Логин и PIN выдаёт преподаватель. Если забыл PIN, напиши ей, она пришлёт новый.</p>
-</div></main>
-<script src="js/config.js"></script><script src="js/common.js"></script>
+<canvas class="sky fixed" id="sky" aria-hidden="true"></canvas>
+
+<main class="auth">
+  <section class="login glass frost rise" aria-labelledby="authH">
+    <p class="eyebrow">MIRAÉ</p>
+    <h1 id="authH">Личный кабинет</h1>
+    <p class="muted" id="authSub">Вход для учеников MIRAÉ</p>
+
+    <!-- переключатель появляется, только если преподаватель открыл регистрацию -->
+    <div class="seg" id="seg" role="tablist" aria-label="Вход или регистрация" hidden>
+      <button type="button" role="tab" id="t-in" aria-controls="p-in" aria-selected="true">Вход</button>
+      <button type="button" role="tab" id="t-up" aria-controls="p-up" aria-selected="false">Регистрация</button>
+    </div>
+
+    <form id="p-in" role="tabpanel" aria-labelledby="t-in" novalidate>
+      <label class="field" for="nm">Логин</label>
+      <input id="nm" class="name" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <label class="field" for="pin">PIN-код</label>
+      <input id="pin" class="name" type="password" inputmode="numeric" maxlength="8" autocomplete="off">
+      <p id="msg" class="msg" role="status" aria-live="polite"></p>
+      <button class="cta" id="go" type="submit">Войти</button>
+    </form>
+
+    <form id="p-up" role="tabpanel" aria-labelledby="t-up" novalidate hidden>
+      <label class="field" for="rn">Логин</label>
+      <input id="rn" class="name" maxlength="40" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="rnH">
+      <p class="hint" id="rnH">Имя или ник без пробелов. Его увидит преподаватель.</p>
+      <label class="field" for="re">Email</label>
+      <input id="re" class="name" type="email" inputmode="email" autocomplete="email">
+      <label class="field" for="rp">PIN-код</label>
+      <input id="rp" class="name" type="password" inputmode="numeric" maxlength="8" autocomplete="off" aria-describedby="rpH">
+      <p class="hint" id="rpH">От 6 до 8 цифр. Запомни его: с ним можно войти с любого устройства.</p>
+      <div id="codeRow" hidden>
+        <label class="field" for="rc">Код школы</label>
+        <input id="rc" class="name" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="rcH">
+        <p class="hint" id="rcH">Его сообщает преподаватель.</p>
+      </div>
+      <p id="msg2" class="msg" role="status" aria-live="polite"></p>
+      <button class="cta" id="reg" type="submit">Создать кабинет</button>
+    </form>
+
+    <p class="note" id="authNote">Логин и PIN выдаёт преподаватель. Если забыл PIN, напиши ей, она пришлёт новый.</p>
+  </section>
+</main>
+
+<script src="js/config.js"></script><script src="js/common.js"></script><script src="js/sky.js"></script>
 <script>
 const $=s=>document.querySelector(s);KR.topbar("cabinet");
+if(window.Sky)Sky.mount($("#sky"),{horizon:.13});
 let busy=false;
-$("#go").onclick=async()=>{if(busy)return;const n=$("#nm").value.trim(),p=$("#pin").value.trim(),m=$("#msg");
- if(!n||!/^\d{4,8}$/.test(p)){m.textContent="Введи логин и PIN из 4–8 цифр.";return}
- busy=true;m.textContent="Подождите…";
+const say=(el,t,kind)=>{el.textContent=t;el.className="msg"+(kind?" "+kind:"")};
+
+let mode="closed";   // режим регистрации: closed | code | open (задаёт преподаватель)
+
+// ---------- вход ----------
+$("#p-in").onsubmit=async e=>{e.preventDefault();if(busy)return;const n=$("#nm").value.trim(),p=$("#pin").value.trim(),m=$("#msg");
+ if(!n||!/^\d{4,8}$/.test(p)){say(m,"Введи логин и PIN из 4–8 цифр.","bad");return}
+ busy=true;say(m,"Подождите…");
  const r=await KR.login(n,p);busy=false;
  if(r.ok){location.href="cabinet.html";return}
- m.textContent={none:"Такого ученика нет. Логин выдаёт преподаватель.",pin:"Неверный PIN."}[r.err]||"Не получилось. Попробуй ещё раз."};
-document.addEventListener("keydown",e=>{if(e.key==="Enter")$("#go").click()});
-</script></body></html>
+ say(m,{none:mode==="closed"?"Такого ученика нет. Логин выдаёт преподаватель.":"Такого ученика нет. Проверь логин или зарегистрируйся.",pin:"Неверный PIN."}[r.err]||"Не получилось. Попробуй ещё раз.","bad")};
+
+// ---------- регистрация ----------
+function tab(up){
+ $("#t-in").setAttribute("aria-selected",!up);$("#t-up").setAttribute("aria-selected",up);
+ $("#p-in").hidden=up;$("#p-up").hidden=!up;
+ $("#authSub").textContent=up?"Новый кабинет ученика MIRAÉ":"Вход для учеников MIRAÉ";
+ $("#authNote").textContent=up?"После регистрации преподаватель увидит тебя в списке и откроет уроки и задания.":"Забыл PIN? Напиши преподавателю, она пришлёт новый.";
+ (up?$("#rn"):$("#nm")).focus({preventScroll:true});
+}
+$("#t-in").onclick=()=>tab(false);$("#t-up").onclick=()=>tab(true);
+$("#seg").onkeydown=e=>{if(e.key==="ArrowRight"||e.key==="ArrowLeft"){e.preventDefault();const up=$("#t-in").getAttribute("aria-selected")==="true";tab(up);(up?$("#t-up"):$("#t-in")).focus()}};
+KR.signupInfo().then(i=>{
+ mode=i.mode;if(mode!=="code"&&mode!=="open")return;
+ $("#seg").hidden=false;$("#codeRow").hidden=mode!=="code";
+ $("#authNote").textContent="Забыл PIN? Напиши преподавателю, она пришлёт новый.";
+ if(location.hash==="#reg")tab(true);
+});
+$("#p-up").onsubmit=async e=>{e.preventDefault();if(busy)return;const m=$("#msg2");
+ const n=$("#rn").value.trim().toLowerCase(),em=$("#re").value.trim(),p=$("#rp").value.trim(),c=$("#rc").value.trim();
+ if(!/^[a-z0-9а-яё._-]{2,40}$/.test(n)){say(m,"Логин: от 2 символов, буквы и цифры без пробелов.","bad");$("#rn").focus();return}
+ if(!/^\S+@\S+\.\S+$/.test(em)){say(m,"Проверь email.","bad");$("#re").focus();return}
+ if(!/^\d{6,8}$/.test(p)){say(m,"PIN: от 6 до 8 цифр.","bad");$("#rp").focus();return}
+ if(mode==="code"&&!c){say(m,"Введи код школы: его сообщает преподаватель.","bad");$("#rc").focus();return}
+ busy=true;say(m,"Создаём кабинет…");
+ const r=await KR.register(n,em,p,c);busy=false;
+ if(r.ok){location.href="cabinet.html";return}
+ say(m,{exists:"Такой логин уже занят, выбери другой.",bad_code:"Неверный код школы.",signup_closed:"Регистрация сейчас закрыта. Логин и PIN выдаёт преподаватель.",
+   too_many:"Сегодня слишком много регистраций. Попробуй завтра или напиши преподавателю.",bad_input:"Проверь логин, email и PIN."}[r.err]||"Не получилось. Проверь интернет и попробуй ещё раз.","bad")};
+</script>
+</body>
+</html>
