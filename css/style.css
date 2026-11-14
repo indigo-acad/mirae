@@ -659,3 +659,14 @@ html[data-lang=ko] .hero::after{right:max(7%,calc(50% - 600px));top:clamp(84px,1
   *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .js .reveal{opacity:1;transform:none}
 }
+
+/* ---------- хангыль: аудио-задания и сборка слогов ---------- */
+button.say.big{width:46px;height:46px;margin:0 6px 0 0}
+.build .q{display:flex;align-items:center;gap:6px;font-size:20px}
+.bk-row{display:flex;align-items:center;gap:8px;margin:8px 0}
+.built{display:inline-grid;place-items:center;min-width:96px;min-height:58px;padding:4px 14px;border:1.5px dashed var(--field-line);border-radius:14px;background:var(--field);font-size:34px;font-weight:600;color:var(--title);letter-spacing:.02em}
+.built.ok{border:1.5px solid var(--ok);background:#dcefd8}
+.built.bad{border:1.5px solid var(--bad);background:#fbe6e2}
+.kb{display:flex;flex-wrap:wrap;gap:6px}
+.kb button{min-width:44px;height:44px;padding:0 8px;font-size:21px;border-radius:12px}
+.kb .kb-del{color:var(--fg-2)}

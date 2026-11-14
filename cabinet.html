@@ -14,12 +14,12 @@
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Личный кабинет</small><h1 id="who"></h1><p id="role">Прогресс, задания от преподавателя и домашка</p></div></header>
 <main id="m"></main>
-<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/assistant.js"></script>
+<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/assistant.js"></script>
 <script>
 /* Кабинет показывает раздел текущего языка (переключатель в шапке): корейский — уроки курса, английский — материалы программы. */
 var MAP={};MATERIALS.forEach(function(m){MAP[m.id]=m});
 var esc=KR.esc,first=true;
-var ALL=COURSE.lessons.concat((window.COURSE2||{lessons:[]}).lessons.filter(function(l){return l.id}));
+var ALL=(window.COURSE0?COURSE0.lessons:[]).concat(COURSE.lessons).concat((window.COURSE2||{lessons:[]}).lessons.filter(function(l){return l.id}));
 function lessonRow(l){
   if(!l.id) return '<div class="lcard lock" style="padding:6px 0"><div class="no" style="width:40px;height:40px;font-size:17px">'+l.no+'</div><div class="mid muted">'+l.no+'과 · скоро</div></div>';
   if(!KR.can('lesson-'+l.id)) return '<div class="lcard lock" style="padding:6px 0"><div class="no" style="width:40px;height:40px;font-size:17px">'+l.no+'</div><div class="mid muted">'+l.no+'과 · не назначено</div></div>';

@@ -14,7 +14,7 @@
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Преподаватель</small><h1>Ученики и задания</h1><p>Назначай материалы: ученик увидит только их</p></div></header>
 <main id="m"></main>
-<script src="data/materials.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/assistant.js"></script>
+<script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/assistant.js"></script>
 <script>
 var $=function(s){return document.querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
@@ -28,7 +28,7 @@ function showInvite(id,login,pin){var t=inviteText(login,pin);
   $('#'+id).innerHTML='<p style="margin:10px 0 4px"><b>Сообщение ученику</b></p><textarea id="invt" readonly style="width:100%;min-height:110px;box-sizing:border-box;padding:8px;font:inherit">'+esc(t)+'</textarea><div class="done-row"><span class="muted">PIN больше нигде не показывается, скопируй сейчас</span><button class="pri" id="cp">Скопировать</button></div>';
   $('#cp').onclick=function(){var ta=$('#invt');ta.select();var done=function(){msg('Скопировано',true)};
     if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,function(){document.execCommand('copy');done()});else{document.execCommand('copy');done()}}}
-var LESS=[['l12-jiyo','1급 · 12과 · -지요?'],['l11-adaju','2급 · 11과 · -아/어다 주다'],['p12-jiyo-1','Отработка -지요']];
+var LESS=(window.COURSE0?COURSE0.lessons.map(function(l){return [l.id,'한글 · '+l.tag+' · '+l.title]}):[]).concat([['l12-jiyo','1급 · 12과 · -지요?'],['l11-adaju','2급 · 11과 · -아/어다 주다'],['p12-jiyo-1','Отработка -지요']]);
 function fmtDate(t){if(!t)return '';var d=new Date(t);return d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+', '+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}
 function normA(s){return String(s).normalize('NFC').replace(/[\s?.!,]/g,'').toLowerCase()}
 function corr(it){return Array.isArray(it.a)?it.a[0]:it.a}
@@ -45,13 +45,13 @@ function lessonProgress(state){
     var p=P[x[0]]||{},n=0,t=0,last=0,errs=0,rows='';
     L.sections.forEach(function(s){s.blocks.forEach(function(b,i){
       t++;var q=p[s.id+'-'+i]||{};if(q.done)n++;if(q.t>last)last=q.t;
-      if((b.type==='fill'||b.type==='choice')&&q.score!=null){
+      if((b.type==='fill'||b.type==='choice'||b.type==='build')&&q.score!=null){
         var wl=wrongList(b,q);errs+=wl.length;
         rows+='<div style="margin:10px 0"><div class="line" style="justify-content:space-between;align-items:center"><b>'+esc(b.title)+'</b><span class="badge '+(q.done?'ok':'warn')+'">'+q.score+' из '+q.total+(q.tries?' · проверок '+q.tries:'')+'</span></div>'+
           wl.map(function(w){var it=b.items[w.i];if(!it)return '';
-            return '<div class="ko" style="font-size:15px;padding:3px 0 3px 10px;margin:3px 0;border-left:3px solid var(--bad)">'+esc(it.q)+'<br><span class="muted">Ответ: «'+esc(w.g===''||w.g==null?'пусто':w.g)+'», верно: «'+esc(corr(it))+'»</span></div>'}).join('')+'</div>';
+            return '<div class="ko" style="font-size:15px;padding:3px 0 3px 10px;margin:3px 0;border-left:3px solid var(--bad)">'+esc(it.q||it.p||('🔊 '+it.say))+'<br><span class="muted">Ответ: «'+esc(w.g===''||w.g==null?'пусто':w.g)+'», верно: «'+esc(corr(it))+'»</span></div>'}).join('')+'</div>';
         var ms=q.miss||{};
-        Object.keys(ms).forEach(function(k){var it=b.items[k];if(it)weak.push({n:ms[k],q:it.q,a:corr(it),l:x[1]})});
+        Object.keys(ms).forEach(function(k){var it=b.items[k];if(it)weak.push({n:ms[k],q:it.q||it.p||it.say,a:corr(it),l:x[1]})});
       }
     })});
     var sum='<b>'+esc(x[1])+'</b> <span class="muted">· '+n+' из '+t+' блоков'+(last?' · '+fmtDate(last):'')+(errs?' · ошибок сейчас: '+errs:'')+'</span>';
