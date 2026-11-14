@@ -60,6 +60,12 @@ function programEn(){
 }
 function draw(){
   KR.topbar('course');
+  // преподаватель ещё не открыл ученику ни одного курса: показываем это прямо, без программы чужого языка
+  if(KR.noCourses()){
+    var c0=document.getElementById('ct');c0.textContent='Курс';c0.className='';
+    document.getElementById('sub').textContent='MIRAÉ · школа языков';document.getElementById('cp').textContent='Здесь появится программа твоего языка.';
+    document.getElementById('list').innerHTML=KR.noCoursesCard();return;
+  }
   var P=KR.lang()==='en'?programEn():programKo();
   var ct=document.getElementById('ct');ct.textContent=P.title;ct.className=P.ko?'ko':'';
   document.getElementById('sub').textContent=P.sub;document.getElementById('cp').textContent=P.note;
@@ -78,7 +84,7 @@ function draw(){
       (x.meta?'<div class="muted" style="margin-top:6px">'+esc(x.meta)+'</div>':'')+(x.pct!=null?KR.bar(x.pct):'')+
       '<div class="done-row"><a class="btn pri" href="'+esc(x.href)+'">'+x.go+KR.icon('arrow',16)+'</a>'+(x.extra||'')+'</div></div></li>';
   };
-  var h='<section class="journey card glass" aria-label="Общий прогресс">'+KR.ring(pct,92)+'<div class="mid"><h3>'+(avail&&pct>=100?'Путь пройден':'Твой путь')+'</h3><div class="muted">'+
+  var h='<section class="journey card glass fr" aria-label="Общий прогресс">'+KR.ring(pct,92)+'<div class="mid"><h3>'+(avail&&pct>=100?'Путь пройден':'Твой путь')+'</h3><div class="muted">'+
     (avail?'Пройдено '+n+' из '+t+' '+P.unit+' · открыто глав: '+avail:(KR.ctx.ok?'Преподаватель ещё не открыл тебе материалы этого раздела. Когда откроет, они появятся здесь.':'Нет связи с сервером: программа не загружена.'))+'</div></div></section>';
   P.parts.forEach(function(p,k){h+='<h2 class="path-part"><small>Часть '+(k+1)+'</small><span'+(p.ko?' class="ko" lang="ko"':'')+'>'+esc(p.t)+'</span></h2><ol class="chapters">'+p.items.map(item).join('')+'</ol>'});
   document.getElementById('list').innerHTML=h;rail();

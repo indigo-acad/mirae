@@ -53,23 +53,52 @@ async function doPush(){
 async function api(fn,extra){return cloud.rpc(fn,Object.assign({p_name:U(),p_pin:localStorage.getItem("kr_pin")||""},extra||{}))}
 
 // ---------- языки разделов ----------
-// У школы два языковых раздела. Ученик «подписан» на язык, если ему назначен хотя бы один материал этого языка;
-// преподаватель видит оба. Текущий раздел хранится на устройстве и задаёт оформление, программу и словарь.
-const LANGS={ko:{name:"한국어",short:"한",ru:"корейский",tts:"ko-KR"},en:{name:"English",short:"EN",ru:"английский",tts:"en-GB"}};
-const SECT_LANG={korean:"ko",quests:"ko",course:"ko",english:"en"};
+// Каждый язык — отдельная «школа» со своим оформлением, программой и словарём. Ученик видит только те языки,
+// курсы которых ему открыл преподаватель (назначен хотя бы один материал языка); если открыт один язык, переключателя нет.
+// Преподаватель видит все языки школы. Текущий раздел хранится на устройстве. Чтобы добавить язык, допишите его в LANGS,
+// в SECT_LANG (разделы материалов) и в css/style.css (цвет и рисунки блока «языковые разделы»).
+const LANGS={
+  ko:{name:"한국어",short:"한",ru:"корейский",tts:"ko-KR",wm:"한국어",tag:"корейский"},
+  en:{name:"English",short:"EN",ru:"английский",tts:"en-GB",wm:"English",tag:"английский"},
+  ja:{name:"日本語",short:"日",ru:"японский",tts:"ja-JP",wm:"日本語",tag:"японский"},
+  zh:{name:"中文",short:"中",ru:"китайский",tts:"zh-CN",wm:"中文",tag:"китайский"}
+};
+const ORDER=["ko","en","ja","zh"];
+const SECT_LANG={korean:"ko",quests:"ko",course:"ko",english:"en",japanese:"ja",chinese:"zh"};
+// язык материала: сначала по каталогу (data/materials.js), а на страницах без каталога — по началу идентификатора
+const ID_LANG={en:"en",ko:"ko",qu:"ko",ja:"ja",zh:"zh"};
 function langOf(id){
+  id=String(id||"");
   if(/^(lesson|practice)-/.test(id))return "ko";
-  const m=(window.MATERIALS||[]).find(x=>x.id===id);return m?(SECT_LANG[m.section]||null):null;
+  const m=(window.MATERIALS||[]).find(x=>x.id===id);
+  if(m)return SECT_LANG[m.section]||null;
+  return ID_LANG[id.split("-")[0]]||null;
+}
+// языки, на которых у школы уже есть материалы: корейский и английский всегда, остальные — когда появятся их разделы
+function avail(){
+  const s={ko:1,en:1};(window.MATERIALS||[]).forEach(m=>{const l=SECT_LANG[m.section];if(l)s[l]=1});
+  return ORDER.filter(l=>s[l]);
 }
 function langsOf(ctx){
-  if(ctx.teacher)return["ko","en"];
+  if(ctx.teacher)return avail();
   const s={};(ctx.items||[]).forEach(i=>{const l=langOf(i.id);if(l)s[l]=1});
-  return["ko","en"].filter(l=>s[l]);
+  return ORDER.filter(l=>s[l]);
 }
 let lockLang=null,activeTab="";      // lockLang: страница сама задаёт язык оформления (урок)
+// Нарядный шрифт для надписи «한국어» в шапке и на главной. Загружаем только три нужных знака (несколько килобайт).
+let koFontOn=false;
+function koFont(){
+  if(koFontOn)return;koFontOn=true;
+  const l=document.createElement("link");l.rel="stylesheet";
+  l.href="https://fonts.googleapis.com/css2?family=Song+Myung&text="+encodeURIComponent("한국어")+"&display=swap";
+  document.head.appendChild(l);
+}
+// язык, в котором сейчас показана страница: язык урока или выбранный раздел; null — у ученика пока нет открытых курсов
+function curLang(){return lockLang||(U()&&window.KR.hasLang()?window.KR.lang():null)}
 function applyLang(){
-  const el=document.documentElement,l=lockLang||(U()?window.KR.lang():null);
+  const el=document.documentElement,l=curLang();
   if(l)el.setAttribute("data-lang",l);else el.removeAttribute("data-lang");
+  if(l==="ko")koFont();
 }
 
 async function loadCtx(){
@@ -77,11 +106,14 @@ async function loadCtx(){
   if(cloud.on&&u){
     try{const t=await api("is_teacher");const items=t?[]:(await api("my_assignments"))||[];
       ctx={teacher:!!t,items,ok:true};
-      ctx.langs=window.MATERIALS?langsOf(ctx):(prev.langs||langsOf(ctx));
+      ctx.langs=langsOf(ctx);
+      // преподавателю на странице без каталога оставляем прежний список языков: он мог быть шире
+      if(t&&!window.MATERIALS&&Array.isArray(prev.langs)&&prev.langs.length>ctx.langs.length)ctx.langs=prev.langs;
       localStorage.setItem("kr_ctx:"+u,JSON.stringify(ctx))}
     catch(e){ctx=Object.assign({},prev,{ok:false})}
   }
   window.KR.ctx=ctx;applyLang();
+  window.KR.topbar(activeTab);          // роль и открытые языки могли измениться: шапка зависит от них
   if(window.KR.assistant)window.KR.assistant.sync();
   return ctx;
 }
@@ -204,9 +236,10 @@ function onScroll(){const t=document.querySelector(".top");if(t)t.classList.togg
 window.addEventListener("scroll",onScroll,{passive:true});
 
 // ---------- шапка, переключатель языка, нижняя панель на телефоне ----------
+// переключатель показываем, только если преподаватель открыл ученику курсы минимум на двух языках
 function langSwitch(){
   const ls=window.KR.langs();if(!U()||ls.length<2)return "";
-  const cur=window.KR.lang();
+  const cur=curLang()||window.KR.lang();
   return '<div class="lang" role="group" aria-label="Язык раздела">'+ls.map(l=>'<button type="button" data-lang-set="'+l+'" lang="'+l+'" aria-pressed="'+(l===cur)+'" title="'+LANGS[l].name+'"><span class="lg-f">'+LANGS[l].name+'</span><span class="lg-s">'+LANGS[l].short+"</span></button>").join("")+"</div>";
 }
 function tabbar(active){
@@ -275,9 +308,18 @@ window.KR={
   logout(){const u=U();localStorage.removeItem("kr_user");localStorage.removeItem("kr_pin");localStorage.removeItem("kr_ctx:"+u)},
 
   // языки разделов
-  LANGS,langOf,
-  langs(){const c=window.KR.ctx,x=(c&&c.langs)||((U()&&J("kr_ctx:"+U(),null))||{}).langs;return x&&x.length?x:["ko","en"]},
-  lang(){const ls=KR.langs(),l=LS("kr_lang:"+U());return ls.indexOf(l)>=0?l:ls[0]},
+  LANGS,langOf,koFont,
+  // языки, курсы которых открыл преподаватель этому ученику (преподавателю — все языки школы); у гостя пусто
+  langs(){if(!U())return[];const c=window.KR.ctx,x=(c&&c.langs)||(J("kr_ctx:"+U(),null)||{}).langs;return Array.isArray(x)?x.filter(l=>LANGS[l]):[]},
+  hasLang(){return KR.langs().length>0},
+  // текущий раздел; пока ничего не открыто, возвращает "ko", чтобы страницы не падали (оформление при этом нейтральное)
+  lang(){const ls=KR.langs(),l=LS("kr_lang:"+U());return ls.indexOf(l)>=0?l:(ls[0]||"ko")},
+  // карточка для ученика, которому ещё не открыли ни одного курса
+  noCoursesCard(){
+    return '<div class="card glass nocourse"><h3>'+icon("lock",20)+'Курсы пока не открыты</h3><p class="muted">Доступ открывает преподаватель. Когда тебе назначат уроки и материалы, здесь появится страница твоего языка: курс, слова и упражнения.</p></div>';
+  },
+  // у вошедшего ученика курсы не открыты (учитываем, что роль уже загружена)
+  noCourses(){const c=window.KR.ctx||{};return !!U()&&!c.teacher&&!!c.ok&&!KR.hasLang()},
   setLang(l){
     if(!LANGS[l]||l===KR.lang())return;
     LS("kr_lang:"+U(),l);hush();applyLang();KR.topbar(activeTab);
@@ -291,15 +333,33 @@ window.KR={
   rate,setRate(r){LS("kr_rate",String(r))},
   setVoice(lang,name){LS("kr_voice:"+String(lang).slice(0,2),name||null)},
 
+  // Шапка бывает трёх видов:
+  //  гость — общая шапка школы языков (языки, как учим, как начать, «Войти»);
+  //  вошёл, и преподаватель открыл курсы — шапка школы своего языка: эмблема и название языка, курс, слова, упражнения;
+  //  вошёл, но курсов пока нет — общая шапка школы с кнопкой кабинета.
   topbar(active){
     activeTab=active;applyLang();
     const el=document.getElementById("topbar");if(!el)return;const u=U();
     const a=(h,t,k)=>'<a href="'+h+'"'+(active===k?' class="on" aria-current="page"':"")+">"+t+"</a>";
-    const cx=(u&&J("kr_ctx:"+u,null))||{};const tl=cx.teacher?a("teacher.html","Ученики","teacher"):"";
-    el.innerHTML='<div class="top '+(u?"user":"guest")+'"><a class="logo" href="index.html" aria-label="MIRAÉ, на главную">MIRAÉ<span>THE INDIGO LANGUAGE ACADEMY</span></a>'+
-      '<nav aria-label="Разделы сайта">'+a("course.html","Курс","course")+a("words.html","Слова","words")+a("practice.html",'<span class="xs-hide">Доп.&nbsp;</span>упражнения',"practice")+tl+"</nav>"+
-      '<div class="top-r">'+langSwitch()+
-      '<a href="'+(u?"cabinet.html":"auth.html")+'" class="acc glass frost'+(active==="cabinet"?" on":"")+'" aria-label="'+(u?"Личный кабинет: "+esc(u):"Войти")+'"'+(active==="cabinet"?' aria-current="page"':"")+">"+icon("user",20)+'<span class="cap">'+(u?esc(u):"Войти")+"</span></a></div></div>";
+    const acc='<a href="'+(u?"cabinet.html":"auth.html")+'" class="acc glass frost'+(u?"":" enter")+(active==="cabinet"?" on":"")+'" aria-label="'+(u?"Личный кабинет: "+esc(u):"Войти в личный кабинет")+'"'+(active==="cabinet"?' aria-current="page"':"")+">"+icon("user",20)+'<span class="cap">'+(u?esc(u):"Войти")+"</span></a>";
+    const logo='<a class="logo" href="index.html" aria-label="MIRAÉ, школа языков, на главную">MIRAÉ<span>Школа языков</span></a>';
+    let h;
+    if(!u){
+      h='<div class="top guest">'+logo+'<nav aria-label="Разделы сайта">'+a("index.html#langs","Языки","")+a("index.html#how","Как учим","")+a("index.html#start","Как начать","")+"</nav>"+
+        '<div class="top-r">'+acc+"</div></div>";
+    }else{
+      const l=curLang(),cx=J("kr_ctx:"+u,null)||{},tl=cx.teacher?a("teacher.html","Ученики","teacher"):"";
+      if(l){
+        const L=LANGS[l];
+        h='<div class="top user school"><a class="logo brand" href="index.html" aria-label="MIRAÉ, школа: '+L.tag+', на главную"><i class="emb" aria-hidden="true"></i>'+
+          '<span class="wm"><b lang="'+l+'">'+L.wm+'</b><small>MIRAÉ · '+L.tag+'</small></span></a>'+
+          '<nav aria-label="Разделы сайта">'+a("course.html","Курс","course")+a("words.html","Слова","words")+a("practice.html",'<span class="xs-hide">Доп.&nbsp;</span>упражнения',"practice")+tl+"</nav>"+
+          '<div class="top-r">'+langSwitch()+acc+"</div></div>";
+      }else{
+        h='<div class="top user">'+logo+"<nav aria-label=\"Разделы сайта\">"+tl+"</nav><div class=\"top-r\">"+acc+"</div></div>";
+      }
+    }
+    el.innerHTML=h;
     tabbar(active);shooting();onScroll();
   },
   esc,icon,icons,emo,bar,ring,count,reveal,calm

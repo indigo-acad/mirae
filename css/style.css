@@ -79,7 +79,18 @@ h1.ko,h2.ko,h3.ko{font-family:var(--font-ko);font-weight:600;letter-spacing:-.01
 .top.scrolled{background:rgba(11,21,53,.84);-webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%);border-bottom-color:rgba(212,175,124,.18)}
 .top .logo{justify-self:start;white-space:nowrap;color:var(--gold);text-decoration:none;font-size:25px;letter-spacing:.28em;font-weight:500;display:flex;flex-direction:column;line-height:1;transition:opacity .2s}
 .top .logo:hover{opacity:.8}
-.top .logo span{font-family:var(--font-body);font-size:8.5px;font-weight:500;letter-spacing:.3em;color:var(--silver);margin-top:5px}
+.top .logo>span:not(.wm){font-family:var(--font-body);font-size:9.5px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:var(--silver);margin-top:6px}
+/* после входа: эмблема и название языка вместо общего логотипа */
+.top .logo.brand{flex-direction:row;align-items:center;gap:12px;letter-spacing:0}
+.logo.brand .emb{flex:none;width:42px;height:42px;background:var(--emblem) center/contain no-repeat}
+.logo.brand .wm{display:flex;flex-direction:column;line-height:1}
+.logo.brand .wm b{font-weight:500;font-size:25px;letter-spacing:.01em;color:var(--ivory)}
+.logo.brand .wm b:lang(ko){font-family:"Song Myung",var(--font-ko);font-weight:400;font-size:22px;letter-spacing:.06em}
+.logo.brand .wm b:lang(ja),.logo.brand .wm b:lang(zh){font-family:var(--font-body);font-size:20px}
+.logo.brand .wm small{font-family:var(--font-body);font-size:9.5px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--la,var(--silver));margin-top:6px}
+/* гость: кнопка входа заметнее */
+.top .acc.enter{color:var(--gold);padding:0 18px 0 14px}
+.top .acc.enter:hover{color:var(--gold-hi)}
 .top nav{justify-self:center;display:flex;align-items:center;gap:clamp(14px,2.6vw,34px);max-width:100%;overflow-x:auto;scrollbar-width:none}
 .top nav::-webkit-scrollbar{display:none}
 .top nav a{position:relative;white-space:nowrap;text-decoration:none;color:var(--silver);font-size:13px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:13px 2px;transition:color .2s}
@@ -275,10 +286,65 @@ input.ans.bad{border-color:var(--bad);background:#fbe6e2}
 .round.speaking{color:var(--gold);border-color:var(--gold);animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(212,175,124,.5)}100%{box-shadow:0 0 0 14px rgba(212,175,124,0)}}
 .sky-toggle{position:absolute;right:clamp(14px,4vw,40px);bottom:22px;width:40px;height:40px;color:var(--silver);border-color:var(--rule)}
+/* режимы главной: гость (m-guest), школа языка (m-school), ученик без курсов (m-wait) */
+.m-guest [data-for]:not([data-for~=guest]),.m-school [data-for]:not([data-for~=school]),.m-wait [data-for]:not([data-for~=wait]){display:none!important}
+.hero-in>*{order:2}.hero-in>.eyebrow,.hero-in>.hero-title{order:0}.hero-in>.hero-orn{order:1}
+.m-school .hero{min-height:min(100vh,800px);min-height:min(100svh,800px);justify-content:flex-start;padding-top:calc(var(--nav-h) + clamp(26px,7vh,76px));padding-bottom:calc(var(--hz,64px) + max(168px,min(18vw,290px)))}
+.m-school .hero::before,.m-school .hero .sky{-webkit-mask-image:linear-gradient(#000 93%,transparent);mask-image:linear-gradient(#000 93%,transparent)}
+.hero-title em:lang(en){letter-spacing:0}
+.hero-title .wm-ko{display:inline-block;font-family:"Song Myung",var(--font-ko);font-weight:400;font-size:1.06em;line-height:1.16;letter-spacing:.07em;padding:.02em .06em 0;color:var(--gold-hi)}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .hero-title .wm-ko{color:transparent;-webkit-text-stroke:1.8px var(--gold);paint-order:stroke fill;
+    background:url(../img/seigaiha.svg) 0 100%/44px 22px repeat-x,url(../img/seigaiha.svg) 22px calc(100% - 22px)/44px 22px repeat-x,linear-gradient(180deg,#24348a 0%,#131e60 52%,#0a1240 100%);
+    -webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 22px rgba(212,175,124,.3))}
+}
+.hero-orn{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:clamp(12px,2.4vh,22px)}
+.hero-orn::before,.hero-orn::after{content:"";width:min(150px,22vw);height:1px;background:linear-gradient(90deg,rgba(212,175,124,0),rgba(212,175,124,.75))}
+.hero-orn::after{transform:scaleX(-1)}
+.hero-orn i{width:30px;height:30px;background:var(--emblem) center/contain no-repeat}
+.hero-hi{margin:clamp(12px,2.4vh,20px) 0 0;display:flex;flex-direction:column;gap:5px;font-size:clamp(18px,1.8vw,22px);line-height:1.35;color:var(--ivory)}
+.hero-hi .muted{font-size:15px}
+.hero-cta{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;margin-top:clamp(18px,3.4vh,30px)}
+.cta.ghost{background:rgba(11,21,53,.42);color:var(--ivory);border:1px solid rgba(248,247,242,.4);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.cta.ghost:hover{background:rgba(255,255,255,.12)}
 main.home{max-width:1168px;padding:0 24px;margin:0 auto}
+.tiles.four{grid-template-columns:repeat(4,1fr)}
+div.tile{min-height:0}div.tile:hover{transform:none}
+div.tile .tile-tx{padding-top:18px}
+/* заголовок раздела с линиями по сторонам */
+h2.sec.orn-h{justify-content:center;gap:18px;text-align:center}
+h2.sec.orn-h::before,h2.sec.orn-h::after{content:"";flex:1;max-width:230px;height:1px;background:linear-gradient(90deg,rgba(212,175,124,0),rgba(212,175,124,.6))}
+h2.sec.orn-h::after{transform:scaleX(-1)}
+.sec-sub{margin:8px auto 0;max-width:58ch;text-align:center;color:var(--silver);font-size:15.5px;text-wrap:balance}
+.home h2.sec.orn-h+.tiles,.home h2.sec.orn-h+.steps{margin-top:22px}
+/* карточки языков */
+.lcards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
+.lc{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;padding:30px 32px 136px;border-radius:26px}
+.lc[data-l=ko]{--la:#7CC4B5;--scene:url(../img/scene-ko.svg);--emblem:url(../img/emblem-ko.svg);--frame:url(../img/frame-ko.svg)}
+.lc[data-l=en]{--la:#DC97A0;--scene:url(../img/scene-en.svg);--emblem:url(../img/emblem-en.svg);--frame:url(../img/frame-en.svg)}
+.lc-art{position:absolute;left:0;right:0;bottom:0;height:150px;z-index:-1;background:var(--scene) 50% 100%/760px auto no-repeat,radial-gradient(60% 90px at 50% 100%,rgba(226,186,128,.34),rgba(11,21,53,0) 75%)}
+.lc-emb{width:46px;height:46px;margin-bottom:14px;background:var(--emblem) center/contain no-repeat}
+.lc h3{margin:0;font-size:38px;font-weight:500;line-height:1.1;color:var(--ivory)}
+.lc h3.ko{font-family:"Song Myung",var(--font-ko);font-weight:400;font-size:33px;letter-spacing:.06em}
+.lc h3:lang(en){font-style:italic}
+.lc h3:lang(ja),.lc h3:lang(zh){font-family:var(--font-body);font-size:26px;font-weight:500}
+.lc-ru{margin:8px 0 0;color:var(--la,var(--gold));font-size:12px;font-weight:500;letter-spacing:.24em;text-transform:uppercase}
+.lc-tx{margin:12px 0 0;max-width:38ch;color:var(--silver);font-size:15px;line-height:1.5}
+.lc .badge{position:absolute;top:26px;right:28px}
+.lc.soon{flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 16px;padding:18px 24px}
+.lc.soon .lc-ru{margin:0}.lc.soon .lc-tx{margin:0 0 0 auto;font-size:14px}.lc.soon .badge{position:static}
+/* как начать */
+.steps{list-style:none;margin:22px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.steps li{display:flex;gap:16px;align-items:flex-start;padding:22px;border-radius:24px}
+.steps b{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:1px solid rgba(212,175,124,.55);color:var(--gold);font:500 23px/1 var(--font-display)}
+.steps h3{margin:3px 0 6px;font-size:24px;font-weight:500;line-height:1.15;color:var(--ivory)}
+.steps p{margin:0;color:var(--silver);font-size:15px;line-height:1.5}
+.start-cta{margin:28px 0 0;text-align:center}
+.nocourse h3{display:flex;align-items:center;gap:8px}
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 main.home>.tiles{margin-top:clamp(8px,2vw,24px)}
-.tile{display:flex;flex-direction:column;min-height:214px;padding:24px;border-radius:28px;text-decoration:none;color:var(--ivory);transition:transform .35s var(--ease),background .3s}
+main.home .tiles{display:grid;gap:16px;justify-content:stretch}   /* в тренажёре слов .tiles — это плитки с буквами (flex), здесь нужна сетка */
+.tile{display:flex;flex-direction:column;min-width:0;min-height:214px;padding:24px;border-radius:28px;text-decoration:none;color:var(--ivory);transition:transform .35s var(--ease),background .3s}
 .tile:hover{transform:translateY(-4px)}
 .tile-top{display:flex;justify-content:space-between;align-items:flex-start}
 .tile-ic{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;color:var(--gold);border:1px solid rgba(212,175,124,.45);background:rgba(212,175,124,.08)}
@@ -447,37 +513,45 @@ textarea{resize:vertical}
    Корейский: пять вершин и луна (по мотивам «Ирвор обондо»), сосны, беседка, меандр «нвемун», лотос из «танчхон».
    Английский: холмы, Стоунхендж, дуб, деревенская церковь, плетёнка, роза Тюдоров.
    Атрибут data-lang на <html> ставит js/common.js; рисунки лежат в img/ и их можно заменить своими. */
-html[data-lang=ko]{--la:#7CC4B5;--scene:url(../img/scene-ko.svg);--band:url(../img/band-ko.svg);--emblem:url(../img/emblem-ko.svg)}
-html[data-lang=en]{--la:#DC97A0;--scene:url(../img/scene-en.svg);--band:url(../img/band-en.svg);--emblem:url(../img/emblem-en.svg)}
-html[data-lang] header.band{position:relative;isolation:isolate;--sw:clamp(680px,72vw,1000px)}
+html[data-lang=ko]{--la:#7CC4B5;--scene:url(../img/scene-ko.svg);--band:url(../img/band-ko.svg);--emblem:url(../img/emblem-ko.svg);--frame:url(../img/frame-ko.svg)}
+html[data-lang=en]{--la:#DC97A0;--scene:url(../img/scene-en.svg);--band:url(../img/band-en.svg);--emblem:url(../img/emblem-en.svg);--frame:url(../img/frame-en.svg)}
+/* языки, для которых рисунков пока нет: только свой акцент */
+html[data-lang=ja]{--la:#E3A9B8}
+html[data-lang=zh]{--la:#E0A070}
+html[data-lang] header.band{position:relative;isolation:isolate;--sw:clamp(700px,86vw,1180px)}
 html[data-lang] header.band small{color:var(--la)}
-html[data-lang] header.band small::before,html[data-lang] .path-part::before{content:"";display:inline-block;flex:none;width:20px;height:20px;margin-right:9px;vertical-align:-5px;background:var(--emblem) center/contain no-repeat}
-html[data-lang] .path-part::before{width:24px;height:24px;margin-right:2px;align-self:center}
+html:is([data-lang=ko],[data-lang=en]) header.band small::before,html:is([data-lang=ko],[data-lang=en]) .path-part::before{content:"";display:inline-block;flex:none;width:20px;height:20px;margin-right:9px;vertical-align:-5px;background:var(--emblem) center/contain no-repeat}
+html:is([data-lang=ko],[data-lang=en]) .path-part::before{width:24px;height:24px;margin-right:2px;align-self:center}
 html[data-lang] .path-part small,html[data-lang] .lang button[aria-pressed=true]{color:var(--la)}
 html[data-lang] .lang button[aria-pressed=true]{background:rgba(255,255,255,.1)}
-/* заголовок раздела с пейзажем на рассвете */
-html[data-lang] header.band:not(.slim){padding-bottom:clamp(134px,15.5vw,198px);margin-bottom:8px;background:var(--band) 0 100%/auto 14px repeat-x}
-html[data-lang] header.band:not(.slim)::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background:var(--scene) 50% 100%/var(--sw) auto no-repeat,
-    radial-gradient(calc(var(--sw)*.52) 110px at 50% calc(100% - 46px),rgba(226,186,128,.62),rgba(150,120,160,.3) 44%,rgba(11,21,53,0) 76%);
-  -webkit-mask-image:linear-gradient(90deg,transparent calc(50% - var(--sw)/2),#000 calc(50% - var(--sw)/2 + 110px),#000 calc(50% + var(--sw)/2 - 110px),transparent calc(50% + var(--sw)/2));
-  mask-image:linear-gradient(90deg,transparent calc(50% - var(--sw)/2),#000 calc(50% - var(--sw)/2 + 110px),#000 calc(50% + var(--sw)/2 - 110px),transparent calc(50% + var(--sw)/2))}
+/* заголовок раздела с пейзажем на рассвете; края пейзажа растворяются внутри самого рисунка */
+html:is([data-lang=ko],[data-lang=en]) header.band:not(.slim){padding-bottom:clamp(150px,18.5vw,236px);margin-bottom:8px;background:var(--band) 50% 100%/auto 16px repeat-x}
+html:is([data-lang=ko],[data-lang=en]) header.band:not(.slim)::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:var(--scene) 50% calc(100% - 15px)/var(--sw) auto no-repeat,
+    radial-gradient(calc(var(--sw)*.46) 120px at 50% calc(100% - 64px),rgba(226,186,128,.5),rgba(150,120,160,.26) 44%,rgba(11,21,53,0) 76%)}
 /* в уроке пейзажа нет, только лента орнамента под заголовком */
-html[data-lang] header.band.slim .in::after{content:"";display:block;height:14px;margin-top:20px;background:var(--band) 0 0/auto 14px repeat-x;opacity:.75;-webkit-mask-image:linear-gradient(90deg,#000 55%,transparent);mask-image:linear-gradient(90deg,#000 55%,transparent)}
-/* главная для вошедшего ученика: пейзаж его раздела стоит на линии горизонта */
+html:is([data-lang=ko],[data-lang=en]) header.band.slim .in::after{content:"";display:block;height:16px;margin-top:20px;background:var(--band) 0 0/auto 16px repeat-x;opacity:.75;-webkit-mask-image:linear-gradient(90deg,#000 55%,transparent);mask-image:linear-gradient(90deg,#000 55%,transparent)}
+/* главная школы языка: пейзаж раздела стоит на линии горизонта, под ним лента орнамента */
 .hero-art{display:none}
-html[data-lang] .hero-art{display:block;position:absolute;left:0;right:0;bottom:var(--hz,18%);height:300px;z-index:-1;pointer-events:none;background:var(--scene) 50% 100%/clamp(900px,100%,1250px) auto no-repeat;
-  -webkit-mask-image:linear-gradient(90deg,transparent calc(50% - 640px),#000 calc(50% - 500px),#000 calc(50% + 500px),transparent calc(50% + 640px));mask-image:linear-gradient(90deg,transparent calc(50% - 640px),#000 calc(50% - 500px),#000 calc(50% + 500px),transparent calc(50% + 640px))}
-/* луна корейского раздела: отдельный слой, чтобы не попадать под текст и карточку */
+html:is([data-lang=ko],[data-lang=en]) .hero-art{display:block;position:absolute;left:0;right:0;bottom:var(--hz,64px);height:300px;z-index:-1;pointer-events:none;background:var(--scene) 50% 100%/max(1000px,min(100%,1600px)) auto no-repeat}
+html:is([data-lang=ko],[data-lang=en]) .hero-art::before{content:"";position:absolute;left:0;right:0;top:100%;height:var(--hz,64px);background:linear-gradient(#070C26,rgba(7,12,38,0))}
+html:is([data-lang=ko],[data-lang=en]) .hero-art::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:16px;background:var(--band) 50% 0/auto 16px repeat-x;opacity:.9}
+/* луна корейского раздела: отдельный слой, чтобы не попадать под текст */
 html[data-lang=ko] header.band:not(.slim)::after,html[data-lang=ko] .hero::after{content:"";position:absolute;z-index:-1;width:132px;height:132px;pointer-events:none;
   background:radial-gradient(circle,#FFF6DF 0,#F3E3BF 15%,rgba(243,227,191,.26) 17%,rgba(243,227,191,0) 50%)}
-html[data-lang=ko] header.band:not(.slim)::after{right:max(4%,calc(50% - 470px));bottom:clamp(60px,9vw,118px)}
-html[data-lang=ko] .hero::after{right:max(6%,calc(50% - 600px));bottom:calc(var(--hz,18%) + 420px)}
-@media(max-width:640px){html[data-lang=ko] .hero::after{right:2%;bottom:calc(var(--hz,18%) + 330px);width:104px;height:104px}}
+html[data-lang=ko] header.band:not(.slim)::after{right:max(4%,calc(50% - 540px));bottom:clamp(96px,13vw,176px)}
+html[data-lang=ko] .hero::after{right:max(7%,calc(50% - 600px));top:clamp(84px,15vh,150px)}
+@media(max-width:640px){html[data-lang=ko] .hero::after{right:3%;top:76px;width:96px;height:96px}html[data-lang=ko] header.band:not(.slim)::after{width:100px;height:100px}}
+/* рамка с орнаментом в углах: карточки-итоги в разделах и карточки языков на главной */
+.fr::after{content:"";position:absolute;inset:7px;z-index:1;pointer-events:none;border:24px solid transparent;border-image:var(--frame,none) 56/24px stretch;opacity:.85}
 
 /* ---------- адаптив ---------- */
+@media(max-width:1100px){.tiles.four{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.tiles.four{grid-template-columns:1fr}.hero-title .wm-ko{-webkit-text-stroke-width:1.2px}.m-school .hero .eyebrow{letter-spacing:.2em}}
 @media(max-width:900px){
   .tiles{grid-template-columns:1fr}
+  .lcards,.steps{grid-template-columns:1fr}
+  .lc{padding:26px 24px 128px}.lc.soon{padding:16px 20px}
   .tile{min-height:0;flex-direction:row;align-items:center;gap:16px;padding:18px 20px;border-radius:24px}
   .tile-top{display:contents}
   .tile-tx{flex:1;min-width:0;order:1;margin:0;padding:0}
@@ -497,7 +571,10 @@ html[data-lang=ko] .hero::after{right:max(6%,calc(50% - 600px));bottom:calc(var(
   body{font-size:16.5px}
   .top{grid-template-columns:1fr auto;gap:10px}
   .top .logo{font-size:22px;letter-spacing:.2em}
-  .top .logo span,.top.user .acc span,.xs-hide,.top nav{display:none}
+  .top.user .acc span,.xs-hide,.top nav,.logo.brand .wm small{display:none}
+  .top .logo>span:not(.wm){font-size:8.5px;letter-spacing:.24em}
+  .logo.brand .emb{width:36px;height:36px}.top .logo.brand{gap:9px}
+  .logo.brand .wm b{font-size:21px}.logo.brand .wm b:lang(ko){font-size:19px}
   .top.user .acc{width:42px;padding:0;justify-content:center}
   .lang .lg-f{display:none}.lang .lg-s{display:inline}
   .lang button{min-width:40px;padding:4px 10px}

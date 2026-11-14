@@ -42,7 +42,7 @@ function dashKo(){
   var hw=HOMEWORK.filter(function(h){return KR.can('lesson-'+h.lesson)}).map(function(h){var pr=KR.progress(h.lesson).P||{};var d=h.blocks.every(function(k){return pr[k]&&pr[k].done});return Object.assign({},h,{done:d})});
   var hwDone=hw.filter(function(h){return h.done}).length;
   var next=real.filter(function(l){return KR.progress(l.id).pct<100})[0];
-  var h='<section class="dash card glass" aria-label="Мой прогресс">'+KR.ring(pct,128,(first?'<span data-count="'+pct+'">0</span>':pct)+'<small>%</small>')+
+  var h='<section class="dash card glass fr" aria-label="Мой прогресс">'+KR.ring(pct,128,(first?'<span data-count="'+pct+'">0</span>':pct)+'<small>%</small>')+
     '<div class="stat"><div>'+num(real.length)+'<span class="muted">уроков назначено</span></div><div>'+num(n)+'<span class="muted">блоков пройдено</span></div><div><b>'+hwDone+'/'+hw.length+'</b><span class="muted">домашка</span></div></div></section>';
   if(next){var np=KR.progress(next.id);
     h+='<a class="next card glass lessonlink" href="lesson.html?l='+next.id+'">'+KR.ring(np.pct,58,KR.icon('spark',18))+'<div class="mid"><span class="tag">'+(np.n?'Продолжить':'Начать')+' · '+next.no+'과</span><h3 class="ko">'+esc(next.title)+'</h3><div class="muted">'+np.n+' из '+np.tot+' блоков</div></div><span class="tile-go">'+KR.icon('arrow',18)+'</span></a>'}
@@ -55,7 +55,7 @@ function dashEn(){
   var items=MATERIALS.filter(function(m){return m.section==='english'&&m.kind!=='class'&&KR.can(m.id)}),done=KR.taken();
   var n=items.filter(function(m){return done.indexOf(m.id)>=0}).length,pct=items.length?Math.round(n/items.length*100):0;
   var next=items.filter(function(m){return done.indexOf(m.id)<0})[0],vs=KR.vocab?KR.vocab.stats('en'):{total:0};
-  var h='<section class="dash card glass" aria-label="Мой прогресс">'+KR.ring(pct,128,(first?'<span data-count="'+pct+'">0</span>':pct)+'<small>%</small>')+
+  var h='<section class="dash card glass fr" aria-label="Мой прогресс">'+KR.ring(pct,128,(first?'<span data-count="'+pct+'">0</span>':pct)+'<small>%</small>')+
     '<div class="stat"><div>'+num(items.length)+'<span class="muted">материалов назначено</span></div><div>'+num(n)+'<span class="muted">пройдено</span></div><div>'+num(vs.total)+'<span class="muted">слов в словаре</span></div></div></section>';
   if(next)h+='<a class="next card glass lessonlink" href="'+esc(next.path)+'">'+KR.ring(0,58,KR.icon('spark',18))+'<div class="mid"><span class="tag">Продолжить · '+esc((window.KINDS||{})[next.kind]||'')+'</span><h3>'+esc(next.title)+'</h3></div><span class="tile-go">'+KR.icon('arrow',18)+'</span></a>';
   h+=wordsCard();
@@ -70,12 +70,12 @@ function wordsCard(){
 }
 function draw(){
   KR.topbar('cabinet');
-  var ctx=KR.ctx,lang=KR.lang(),D=lang==='en'?dashEn():dashKo();
+  var ctx=KR.ctx,lang=KR.lang(),D=KR.noCourses()?{h:KR.noCoursesCard(),hw:[]}:lang==='en'?dashEn():dashKo();
   var items=(ctx.items||[]).filter(function(a){if(/^(lesson|practice)-/.test(a.id))return false;var l=KR.langOf(a.id);return !l||l===lang});
   var h='';
   if(ctx.teacher)h+='<div class="card glass"><h3>Вы вошли как преподаватель</h3><p class="muted">Назначайте ученикам материалы и смотрите их прогресс.</p><a class="btn pri" href="teacher.html">Ученики и задания'+KR.icon('arrow',16)+'</a></div>';
   h+=D.h;
-  if(!ctx.teacher){
+  if(!ctx.teacher&&(items.length||!KR.noCourses())){
     h+='<div class="card glass"><h3>'+KR.icon('pin',20)+'Назначено преподавателем</h3>'+(items.length?items.map(assignedRow).join(''):'<p class="muted">'+(ctx.ok?'В этом разделе пока ничего не назначено. Преподаватель откроет тебе задания, и они появятся здесь.':'Нет связи с сервером: задания не загружены.')+'</p>')+'</div>';
   }
   if(D.hw.length)h+='<div class="card glass"><h3>'+KR.icon('home',20)+'Домашка по урокам</h3>'+D.hw.map(hwRow).join('')+'</div>';
