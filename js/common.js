@@ -122,8 +122,13 @@ function applyLang(){
 async function loadCtx(){
   const u=U();const prev=J("kr_ctx:"+u,null)||{teacher:false,items:[],ok:false};let ctx=prev;
   if(cloud.on&&u){
-    try{const t=await api("is_teacher");const items=t?[]:(await api("my_assignments"))||[];
-      ctx={teacher:!!t,items,ok:true};
+    try{
+      // роль: owner, teacher, pending (заявка ждёт подтверждения) или student. my_role появляется с supabase/teachers.sql;
+      // пока его нет, действует прежняя схема: единственный преподаватель — он же владелец школы
+      let role=null;try{role=await api("my_role")}catch(e){if(e.code==="wrong_pin")throw e;role=null}
+      const t=role?(role==="owner"||role==="teacher"):!!(await api("is_teacher"));
+      const items=t?[]:(await api("my_assignments"))||[];
+      ctx={teacher:t,owner:role?role==="owner":t,pending:role==="pending",role:role||(t?"owner":"student"),items,ok:true};
       ctx.langs=langsOf(ctx);
       // преподавателю на странице без каталога оставляем прежний список языков: он мог быть шире
       if(t&&!window.MATERIALS&&Array.isArray(prev.langs)&&prev.langs.length>ctx.langs.length)ctx.langs=prev.langs;
@@ -319,13 +324,14 @@ window.KR={
     return{err:local?"pin":"none"};
   },
   // регистрация: режим задаёт преподаватель (closed | code | open), см. supabase/registration.sql
+  // teacher: true — владелец школы задал код преподавателя, и можно подать заявку (supabase/teachers.sql)
   async signupInfo(){
     if(!cloud.on)return{mode:"closed"};
     try{const r=await cloud.rpc("signup_info",{});return r&&r.mode?r:{mode:"closed"}}catch(e){return{mode:"closed"}}
   },
-  async register(login,email,pin,code){
+  async register(login,email,pin,code,teacher){
     const n=String(login||"").trim().toLowerCase();
-    try{await cloud.rpc("register_student",{p_login:n,p_email:String(email||"").trim(),p_new_pin:pin,p_code:String(code||"").trim()})}
+    try{await cloud.rpc(teacher?"register_teacher":"register_student",{p_login:n,p_email:String(email||"").trim(),p_new_pin:pin,p_code:String(code||"").trim()})}
     catch(e){const m=String(e.message||"");return{err:(/exists|bad_code|signup_closed|too_many|bad_input/.exec(m)||["net"])[0]}}
     return KR.login(n,pin);
   },
@@ -345,6 +351,7 @@ window.KR={
   lang(){const ls=KR.langs(),l=LS("kr_lang:"+U());return ls.indexOf(l)>=0?l:(ls[0]||"ko")},
   // карточка для ученика, которому ещё не открыли ни одного курса
   noCoursesCard(){
+    if((window.KR.ctx||{}).pending)return '<div class="card glass nocourse"><h3>'+icon("users",20)+'Заявка преподавателя отправлена</h3><p class="muted">Владелец школы подтвердит её, и здесь откроется панель преподавателя. Обычно это занимает не больше дня.</p></div>';
     return '<div class="card glass nocourse"><h3>'+icon("lock",20)+'Курсы пока не открыты</h3><p class="muted">Доступ открывает преподаватель. Когда тебе назначат уроки и материалы, здесь появится страница твоего языка: курс, слова и упражнения.</p></div>';
   },
   // у вошедшего ученика курсы не открыты (учитываем, что роль уже загружена)
