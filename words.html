@@ -237,7 +237,8 @@ function drawPrefs(){
   h+='<div class="card glass prefs"><h3>Озвучка · '+KR.LANGS[lang].name+'</h3>'+(KR.canSay()?
     '<label class="field" for="p-voice">Голос</label><select id="p-voice">'+(vs.length?vs.map(function(v){return '<option value="'+esc(v.name)+'"'+(cur&&cur.name===v.name?' selected':'')+'>'+esc(v.name)+'</option>'}).join(''):'<option value="">голос для этого языка не найден</option>')+'</select>'+
     '<label class="field" for="p-rate">Скорость: <span id="p-ratev">'+KR.rate().toFixed(2)+'</span></label><input type="range" id="p-rate" min="0.5" max="1.2" step="0.05" value="'+KR.rate()+'">'+
-    '<div class="done-row"><span class="muted">Самые живые голоса: в браузере Microsoft Edge («Natural»), на iPhone в Safari.</span><button type="button" data-x="voice">'+KR.icon('volume',16)+' Проверить</button></div>'
+    (lang==='en'?'<span class="field">Произношение</span><div class="opts" role="group" aria-label="Произношение английского">'+[['gb','Британское'],['us','Американское']].map(function(a){return '<button type="button" data-accent="'+a[0]+'" class="'+(KR.accent()===a[0]?'sel':'')+'" aria-pressed="'+(KR.accent()===a[0])+'">'+a[1]+'</button>'}).join('')+'</div>':'')+
+    '<div class="done-row"><span class="muted">'+(KR.ttsCloud()?'Говорит облачный нейроголос, голос устройства выше — запасной.':'Самые живые голоса: в браузере Microsoft Edge («Natural»), на iPhone в Safari.')+'</span><button type="button" data-x="voice">'+KR.icon('volume',16)+' Проверить</button></div>'
     :'<p class="muted">В этом браузере нет озвучки.</p>')+'</div>';
   $('#prefs').innerHTML=h;
 }
@@ -327,6 +328,7 @@ document.addEventListener('click',function(e){
   if(d.x==='more'){shown+=60;return drawList()}
   if(d.x==='reset')return savePrefs(true);
   if(d.x==='voice')return KR.say(lang==='ko'?'안녕하세요! 같이 공부해요.':'Hello! Let’s learn together.',lang);
+  if(d.accent){KR.setAccent(d.accent);drawPrefs();return KR.say('Hello! Let’s learn together.','en')}
   if(d.x==='bulk-translate')return bulkTranslate();
   if(d.x==='bulk-save')return bulkSave();
 });
