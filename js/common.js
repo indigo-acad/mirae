@@ -140,16 +140,21 @@ function finish(n,pin){localStorage.setItem("kr_user",n);localStorage.setItem("k
 // ---------- озвучка ----------
 // Берём лучший голос, который есть на устройстве: сначала «живые» (Natural, Neural), потом улучшенные системные.
 // Ученик может выбрать голос и скорость сам (KR.voices, KR.setVoice, KR.setRate).
-// Если в config.js задан TTS_URL, фразы озвучивает облачный голос, а встроенный остаётся запасным.
+// Если в config.js задан TTS_URL, фразы вошедшего ученика озвучивает облачный нейроголос (supabase/functions/tts),
+// а голос устройства остаётся запасным: если облако не ответило, 10 минут говорим голосом устройства.
+// Для английского ученик выбирает британский или американский вариант (KR.setAccent).
 const V0=/Natural|Online|Neural|SunHi|InJoon|Hyunsu|Sonia|Libby|Ryan|Jenny|Aria/i,V1=/Google|Yuna|Siri|Premium|Enhanced|Improved|Samantha|Daniel|Karen|Serena|Kate/i;
 const vRank=v=>V0.test(v.name)?0:V1.test(v.name)?1:2;
 const vLang=v=>String(v.lang||"").replace("_","-");
 const hasTTS=()=>("speechSynthesis" in window)&&!!window.SpeechSynthesisUtterance;
 function voices(lang){
   if(!hasTTS())return[];
-  const p=String(lang||"ko").slice(0,2).toLowerCase(),want=(LANGS[p]||{}).tts||lang;
+  const p=String(lang||"ko").slice(0,2).toLowerCase(),chosen=p==="en"&&!!LS("kr_accent");
+  const want=p==="en"?(accent()==="us"?"en-US":"en-GB"):(LANGS[p]||{}).tts||lang;
+  const loc=(a,b)=>(vLang(b)===want)-(vLang(a)===want);
+  // выбранное произношение важнее качества голоса: британский ученик не должен слышать американский голос
   return speechSynthesis.getVoices().filter(v=>vLang(v).toLowerCase().indexOf(p)===0)
-    .sort((a,b)=>vRank(a)-vRank(b)||((vLang(b)===want)-(vLang(a)===want)));
+    .sort((a,b)=>chosen?(loc(a,b)||vRank(a)-vRank(b)):(vRank(a)-vRank(b)||loc(a,b)));
 }
 function pickVoice(lang){
   const p=String(lang||"ko").slice(0,2),vs=voices(p);
@@ -157,12 +162,16 @@ function pickVoice(lang){
   return vs.find(v=>v.name===saved)||vs[0]||null;
 }
 function rate(){const r=parseFloat(LS("kr_rate"));return r>=.5&&r<=1.2?r:.9}
-const ttsCache=new Map();let ttsAudio=null;
+function accent(){return LS("kr_accent")==="us"?"us":"gb"}
+const ttsCache=new Map();let ttsAudio=null,ttsOff=0;
+// облачный голос: задан адрес, есть связь с базой и ученик вошёл (функция проверяет логин и PIN)
+const cloudVoice=()=>!!(CFG.TTS_URL&&cloud.on&&U()&&localStorage.getItem("kr_pin")&&Date.now()>ttsOff);
 async function cloudSay(text,lang,cb){
-  const key=lang+"|"+text;let url=ttsCache.get(key);
+  const ac=lang==="en"?accent():"",key=lang+"|"+ac+"|"+text;let url=ttsCache.get(key);
   if(!url){
-    const r=await fetch(CFG.TTS_URL,{method:"POST",headers:{"Content-Type":"application/json",apikey:CFG.SUPABASE_ANON_KEY,Authorization:"Bearer "+CFG.SUPABASE_ANON_KEY},body:JSON.stringify({text:text,lang:lang})});
-    if(!r.ok)throw new Error("tts "+r.status);
+    const r=await fetch(CFG.TTS_URL,{method:"POST",headers:{"Content-Type":"application/json",apikey:CFG.SUPABASE_ANON_KEY,Authorization:"Bearer "+CFG.SUPABASE_ANON_KEY},
+      body:JSON.stringify({text:text,lang:lang,accent:ac||undefined,p_name:U(),p_pin:localStorage.getItem("kr_pin")||""})});
+    if(!r.ok){ttsOff=Date.now()+600000;throw new Error("tts "+r.status)}
     url=URL.createObjectURL(await r.blob());if(ttsCache.size>300)ttsCache.clear();ttsCache.set(key,url);
   }
   if(!ttsAudio)ttsAudio=new Audio();
@@ -183,7 +192,7 @@ function say(text,lang,cb){
   cb=cb||{};text=String(text||"").trim();if(!text)return;
   lang=String(lang||"ko").slice(0,2);
   if(ttsAudio)ttsAudio.pause();
-  if(CFG.TTS_URL&&cloud.on){cloudSay(text,lang,cb).catch(()=>localSay(text,lang,cb));return}
+  if(cloudVoice()&&(lang==="ko"||lang==="en")){cloudSay(text,lang,cb).catch(()=>localSay(text,lang,cb));return}
   localSay(text,lang,cb);
 }
 function hush(){try{if(ttsAudio)ttsAudio.pause();if(hasTTS())speechSynthesis.cancel()}catch(e){}}
@@ -351,6 +360,8 @@ window.KR={
   // озвучка
   say,hush,voices,pickVoice,canSay:hasTTS,
   rate,setRate(r){LS("kr_rate",String(r))},
+  accent,setAccent(a){LS("kr_accent",a==="us"?"us":"gb");LS("kr_voice:en",null);ttsCache.clear()},cloudVoice,
+  ttsCloud:()=>!!(CFG.TTS_URL&&cloud.on&&U()),
   setVoice(lang,name){LS("kr_voice:"+String(lang).slice(0,2),name||null)},
 
   // Шапка бывает трёх видов:
