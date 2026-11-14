@@ -3,14 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MIRAÉ · The Indigo Language Academy</title>
-<meta name="description" content="MIRAÉ — The Indigo Language Academy. Уроки, отработка и личный кабинет в одном месте.">
+<title>MIRAÉ · школа языков</title>
+<meta name="description" content="MIRAÉ — школа иностранных языков: корейский и английский с преподавателем. Уроки по шагам, тренажёр слов и личный кабинет в одном месте.">
 <meta name="theme-color" content="#0B1535">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
-<script>document.documentElement.className+=" js"</script>
+<script>
+/* Режим главной известен до отрисовки, чтобы страница не «прыгала»:
+   m-guest — гость видит школу языков; m-school — ученик видит школу своего языка;
+   m-wait — ученик вошёл, но преподаватель ещё не открыл ему курсы. */
+(function(){
+  var d=document.documentElement,m="m-guest";
+  try{var u=localStorage.getItem("kr_user");
+    if(u){var c=JSON.parse(localStorage.getItem("kr_ctx:"+u)||"null")||{};m=(c.teacher||(c.langs&&c.langs.length))?"m-school":"m-wait"}}catch(e){}
+  d.className+=" js "+m;
+})();
+</script>
 </head>
 <body>
 <div id="topbar"></div>
@@ -19,12 +29,12 @@
   <canvas class="sky" id="sky" aria-hidden="true"></canvas>
   <div class="hero-art" aria-hidden="true"></div>
   <div class="hero-in">
-    <p class="eyebrow rise">The Indigo Language Academy</p>
-    <h1 class="hero-title rise d1">Languages <em>open worlds.</em></h1>
-    <p class="hero-sub rise d2">Уроки, отработка и личный кабинет в одном месте</p>
+    <p class="eyebrow rise" id="hEye">Школа иностранных языков</p>
+    <h1 class="hero-title rise d1" id="hTitle">Languages <em>open worlds.</em></h1>
+    <p class="hero-sub rise d2" id="hSub" data-for="guest wait">Корейский и английский с преподавателем: уроки по шагам, тренажёр слов и личный кабинет</p>
 
-    <!-- стеклянная карточка: первая фраза на новом языке, её можно послушать -->
-    <section class="phrase glass frost rise d3" aria-label="Первая фраза на новом языке">
+    <!-- гость: первая фраза на новом языке, её можно послушать -->
+    <section class="phrase glass frost rise d3" data-for="guest wait" aria-label="Первая фраза на новом языке">
       <div class="phrase-tabs" role="tablist" aria-label="Язык фразы">
         <button type="button" role="tab" id="ph-ko" data-l="ko" lang="ko" aria-controls="phBody" aria-selected="true">한국어</button>
         <button type="button" role="tab" id="ph-en" data-l="en" lang="en" aria-controls="phBody" aria-selected="false" tabindex="-1">English</button>
@@ -40,56 +50,151 @@
         <a class="cta" id="phGo" href="auth.html"><span id="phGoT">Войти в кабинет</span><span data-ic="arrow" data-s="18"></span></a>
       </div>
     </section>
+
+    <!-- ученик: школа его языка -->
+    <div class="hero-orn rise d2" data-for="school" aria-hidden="true"><i></i></div>
+    <p class="hero-hi rise d2" data-for="school"><span id="hiT"></span><span class="muted" id="hiR"></span></p>
+    <div class="hero-cta rise d3" data-for="school">
+      <a class="cta" href="course.html"><span>Продолжить обучение</span><span data-ic="arrow" data-s="18"></span></a>
+      <a class="cta ghost" href="words.html"><span data-ic="abc" data-s="18"></span><span>Слова на сегодня</span></a>
+      <button type="button" class="round frost" id="hiSay" aria-label="Послушать приветствие" data-ic="volume"></button>
+    </div>
   </div>
   <button type="button" class="round frost sky-toggle" id="skyBtn" hidden></button>
 </header>
 
 <main class="home">
-  <section class="tiles" aria-label="Разделы сайта">
+  <!-- ученик без открытых курсов -->
+  <div id="waitBox" data-for="wait"></div>
+
+  <!-- ученик: разделы его школы -->
+  <section class="tiles four" data-for="school" aria-label="Разделы школы">
     <a class="tile glass reveal" href="course.html">
       <div class="tile-top"><span class="tile-ic" data-ic="book" data-s="22"></span><span class="tile-go" data-ic="arrowUp" data-s="18"></span></div>
-      <div class="tile-tx"><h3>Основной курс</h3><p>Уроки по программе <span class="ko" lang="ko">서울대 한국어+</span></p></div>
+      <div class="tile-tx"><h3>Курс</h3><p id="tCourse">Программа по шагам</p></div>
+    </a>
+    <a class="tile glass reveal" href="words.html">
+      <div class="tile-top"><span class="tile-ic" data-ic="abc" data-s="22"></span><span class="tile-go" data-ic="arrowUp" data-s="18"></span></div>
+      <div class="tile-tx"><h3>Слова</h3><p>Тренажёр с интервальным повторением</p></div>
     </a>
     <a class="tile glass reveal" href="practice.html">
       <div class="tile-top"><span class="tile-ic" data-ic="repeat" data-s="22"></span><span class="tile-go" data-ic="arrowUp" data-s="18"></span></div>
       <div class="tile-tx"><h3>Доп. упражнения</h3><p>Отработка, если тема не закрепилась</p></div>
     </a>
-    <a class="tile glass reveal" id="cab" href="cabinet.html">
+    <a class="tile glass reveal" href="cabinet.html">
       <div class="tile-top"><span class="tile-ic" data-ic="user" data-s="22"></span><span class="tile-go" data-ic="arrowUp" data-s="18"></span></div>
-      <div class="tile-tx"><h3>Личный кабинет</h3><p id="cabtxt">Прогресс, домашние задания, слова</p></div>
+      <div class="tile-tx"><h3>Личный кабинет</h3><p>Прогресс, домашние задания, настройки</p></div>
     </a>
   </section>
 
-  <section class="reveal" aria-labelledby="langsH">
-    <h2 class="sec" id="langsH">Языки</h2>
-    <div class="langs">
-      <div>KOREAN <b class="ko" lang="ko">한국어</b></div>
-      <div>ENGLISH <b lang="en">English</b></div>
-      <div>JAPANESE <b lang="ja">日本語</b></div>
-      <div>CHINESE <b lang="zh-Hans">中文</b></div>
+  <!-- гость: языки школы -->
+  <section class="reveal" id="langs" data-for="guest wait" aria-labelledby="langsH">
+    <h2 class="sec orn-h" id="langsH">Языки</h2>
+    <p class="sec-sub">У каждого языка своя школа: после входа сайт показывает программу, слова и упражнения твоего языка</p>
+    <div class="lcards">
+      <article class="lc glass fr" data-l="ko">
+        <i class="lc-art" aria-hidden="true"></i>
+        <span class="lc-emb" aria-hidden="true"></span>
+        <h3 class="ko" lang="ko">한국어</h3>
+        <p class="lc-ru">Корейский</p>
+        <p class="lc-tx">Курс по учебнику <span class="ko" lang="ko">서울대 한국어+</span>, слова к TOPIK, квесты и игры</p>
+        <span class="badge ok">программа открыта</span>
+      </article>
+      <article class="lc glass fr" data-l="en">
+        <i class="lc-art" aria-hidden="true"></i>
+        <span class="lc-emb" aria-hidden="true"></span>
+        <h3 lang="en">English</h3>
+        <p class="lc-ru">Английский</p>
+        <p class="lc-tx">Подготовка к IELTS: уроки с нуля, тренажёры, домашние задания и проверочные</p>
+        <span class="badge ok">программа открыта</span>
+      </article>
+      <article class="lc glass soon" data-l="ja">
+        <h3 lang="ja">日本語</h3>
+        <p class="lc-ru">Японский</p>
+        <p class="lc-tx">Программа готовится</p>
+        <span class="badge">скоро</span>
+      </article>
+      <article class="lc glass soon" data-l="zh">
+        <h3 lang="zh-Hans">中文</h3>
+        <p class="lc-ru">Китайский</p>
+        <p class="lc-tx">Программа готовится</p>
+        <span class="badge">скоро</span>
+      </article>
     </div>
   </section>
 
-  <div class="card sk reveal">Здесь позже: о школе, преподаватели, расписание, контакты</div>
+  <!-- гость: как устроена учёба -->
+  <section class="reveal" id="how" data-for="guest wait" aria-labelledby="howH">
+    <h2 class="sec orn-h" id="howH">Как учим</h2>
+    <div class="tiles">
+      <div class="tile glass">
+        <div class="tile-top"><span class="tile-ic" data-ic="book" data-s="22"></span></div>
+        <div class="tile-tx"><h3>Курс как путь</h3><p>Уроки идут по шагам, как главы истории: видно, что пройдено и что дальше</p></div>
+      </div>
+      <div class="tile glass">
+        <div class="tile-top"><span class="tile-ic" data-ic="abc" data-s="22"></span></div>
+        <div class="tile-tx"><h3>Тренажёр слов</h3><p>Новые и трудные слова возвращаются в нужный день. Слово можно выделить прямо в тексте урока</p></div>
+      </div>
+      <div class="tile glass">
+        <div class="tile-top"><span class="tile-ic" data-ic="users" data-s="22"></span></div>
+        <div class="tile-tx"><h3>Живой преподаватель</h3><p>Открывает курсы и материалы, задаёт домашние задания и видит твой прогресс</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- гость: как начать -->
+  <section class="reveal" id="start" data-for="guest" aria-labelledby="startH">
+    <h2 class="sec orn-h" id="startH">Как начать</h2>
+    <ol class="steps">
+      <li class="glass"><b>1</b><div><h3>Получи логин и PIN-код</h3><p>Их выдаёт преподаватель, когда открывает тебе курс</p></div></li>
+      <li class="glass"><b>2</b><div><h3>Войди в кабинет</h3><p>Сайт станет школой твоего языка: корейского или английского</p></div></li>
+      <li class="glass"><b>3</b><div><h3>Занимайся</h3><p>Курс, слова и упражнения появляются по мере того, как их назначает преподаватель</p></div></li>
+    </ol>
+    <p class="start-cta"><a class="cta" href="auth.html"><span>Войти в кабинет</span><span data-ic="arrow" data-s="18"></span></a></p>
+  </section>
+
+  <div class="card sk reveal" data-for="guest wait">Здесь позже: о школе, преподаватели, расписание, контакты</div>
 </main>
 
 <footer class="foot"><span>MIRAÉ · The Indigo Language Academy</span><i>Languages open worlds.</i></footer>
 
 <script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/sky.js"></script>
 <script>
-KR.topbar("home");
-var $=function(s){return document.querySelector(s)};
-if(KR.user()){$("#phGo").href="course.html";$("#phGoT").textContent="Продолжить обучение"}
-else $("#cabtxt").textContent="Войти или зарегистрироваться";
+KR.topbar("home");KR.koFont();
+var $=function(s){return document.querySelector(s)},root=document.documentElement;
 
-// ---------- карточка фразы ----------
+// ---------- три вида главной: гость, школа языка, ученик без открытых курсов ----------
+var SCHOOL={
+  ko:{eye:"MIRAÉ · школа корейского языка",title:'<span class="wm-ko" lang="ko">한국어</span>',sub:"Курс по учебнику 서울대 한국어+, слова и упражнения: всё, что открыл преподаватель",
+      hi:"안녕하세요! 오늘도 같이 공부해요.",ru:"Здравствуйте! Давайте и сегодня учиться вместе.",course:"Уроки по программе 서울대 한국어+"},
+  en:{eye:"MIRAÉ · школа английского языка",title:'<em lang="en">English</em>',sub:"IELTS и английский с нуля: уроки, слова и упражнения, которые открыл преподаватель",
+      hi:"Welcome back! Ready for today’s lesson?",ru:"С возвращением! Готовы к сегодняшнему уроку?",course:"Уроки и материалы программы IELTS"}
+};
+var GUEST={eye:"Школа иностранных языков",title:"Languages <em>open worlds.</em>",sub:"Корейский и английский с преподавателем: уроки по шагам, тренажёр слов и личный кабинет"};
+function mode(){return !KR.user()?"guest":(KR.hasLang()?"school":"wait")}
+function render(){
+  var m=mode(),l=KR.lang(),S=m==="school"?(SCHOOL[l]||{eye:"MIRAÉ · "+KR.LANGS[l].tag,title:'<span lang="'+l+'">'+KR.LANGS[l].wm+"</span>",sub:"",hi:"",ru:"",course:"Программа по шагам"}):GUEST;
+  root.className=root.className.replace(/\bm-(guest|school|wait)\b/g,"").trim()+" m-"+m;
+  $("#hEye").textContent=S.eye;$("#hTitle").innerHTML=S.title;$("#hSub").textContent=S.sub;
+  if(m==="school"){
+    $("#hiT").textContent=S.hi;$("#hiT").lang=l;$("#hiR").textContent=S.ru;$("#tCourse").textContent=S.course;
+    $("#hiSay").hidden=!KR.canSay()||!S.hi;
+  }else{
+    $("#phGo").href=m==="wait"?"cabinet.html":"auth.html";$("#phGoT").textContent=m==="wait"?"Открыть кабинет":"Войти в кабинет";
+    if(m==="wait")$("#waitBox").innerHTML=KR.noCoursesCard();
+  }
+  KR.hush();
+  if(sky){sky.set({flat:m==="school"});sky.refresh()}else horizon();
+}
+
+// ---------- карточка фразы (гость) ----------
 var PH={
   ko:{t:"안녕하세요! 같이 공부해요."},
   en:{t:"Hello! Let’s learn together."},
   ja:{t:"こんにちは！一緒に勉強しましょう。"},
   zh:{t:"你好！我们一起学习吧。",lang:"zh-Hans"}
 };
-var cur="ko",tabs=[].slice.call(document.querySelectorAll(".phrase-tabs button")),body=$("#phBody"),say=$("#phSay");
+var cur="ko",tabs=[].slice.call(document.querySelectorAll(".phrase-tabs button")),body=$("#phBody"),say=$("#phSay"),hiSay=$("#hiSay");
 function pick(l,focus){
   cur=l;
   tabs.forEach(function(b){var on=b.dataset.l===l;b.setAttribute("aria-selected",on);b.tabIndex=on?0:-1;if(on&&focus)b.focus()});
@@ -101,28 +206,33 @@ tabs.forEach(function(b,i){
   b.onclick=function(){pick(b.dataset.l)};
   b.onkeydown=function(e){var d=e.key==="ArrowRight"?1:e.key==="ArrowLeft"?-1:0;if(d){e.preventDefault();pick(tabs[(i+d+tabs.length)%tabs.length].dataset.l,true)}};
 });
+var speak=function(btn,text,l){KR.say(text,l,{start:function(){btn.classList.add("speaking")},end:function(){btn.classList.remove("speaking")}})};
 if(!KR.canSay())say.hidden=true;
-else say.onclick=function(){
-  KR.say(PH[cur].t,cur,{start:function(){say.classList.add("speaking")},end:function(){say.classList.remove("speaking")}});
-};
+else{
+  say.onclick=function(){speak(say,PH[cur].t,cur)};
+  hiSay.onclick=function(){var l=KR.lang();if(SCHOOL[l])speak(hiSay,SCHOOL[l].hi,l)};
+}
 
-// ---------- живой фон: линия горизонта проходит за нижним краем карточки, под строкой кнопок ----------
-// У вошедшего ученика горизонт ровный, и на нём стоит пейзаж его языкового раздела (см. .hero-art в css).
+// ---------- живой фон ----------
+// Гость: линия горизонта проходит за нижним краем карточки, под строкой кнопок.
+// Школа языка: горизонт ровный, на нём стоит пейзаж раздела (.hero-art в css), высота задана в --hz.
 var hero=$("#hero"),card=$(".phrase"),sb=$("#skyBtn");
 function horizon(){
-  var h=1-(card.offsetTop+card.offsetHeight*.86)/hero.offsetHeight;
-  hero.style.setProperty("--hz",Math.round(h*hero.offsetHeight)+"px");return h;
+  var H=hero.offsetHeight||1,px;
+  if(mode()==="school")px=Math.max(54,Math.round(H*.085));
+  else px=Math.round(H-(card.offsetTop+card.offsetHeight*.86));
+  hero.style.setProperty("--hz",px+"px");return px/H;
 }
-var themed=function(){return !!KR.user()};
-var sky=window.Sky&&Sky.mount($("#sky"),{horizon:horizon,flat:themed()});
-if(!sky){horizon();window.addEventListener("resize",horizon)}
-KR.onLang=function(){if(sky)sky.set({flat:themed()})};
+var sky=window.Sky&&Sky.mount($("#sky"),{horizon:horizon,flat:mode()==="school"});
+if(!sky)window.addEventListener("resize",horizon);
 if(sky){
   var paint=function(){sb.innerHTML=KR.icon(sky.paused?"play":"pause",16);sb.setAttribute("aria-label",sky.paused?"Запустить анимацию фона":"Остановить анимацию фона")};
   sb.hidden=false;sb.onclick=function(){sky.toggle();paint()};paint();
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(sky.refresh);
 }
-KR.reveal();
+KR.onLang=render;
+render();KR.reveal();
+if(KR.user())KR.load().then(render);
 </script>
 </body>
 </html>

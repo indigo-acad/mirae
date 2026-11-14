@@ -72,33 +72,60 @@ campus:`<path d="M6 24L32 10l26 14z" fill="${G}"/><path d="M10 24h44M12 52h40M8 
 };
 const ic=(n,cls="")=>`<svg viewBox="0 0 64 64" class="${cls}" aria-hidden="true"><g fill="none" stroke="${N}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${IC[n]||""}</g></svg>`;
 
-/* разрез дома: подписи (labels=true) или номера для упражнения */
+/* разрез дома: подписи (labels=true) или номера для упражнения.
+   Подпись каждой комнаты — табличка у потолка, мебель стоит внизу, поэтому ничего не перекрывается. */
 function houseSVG(labels){
- const R=[ // x,y,w,h,label,num
-  [190,70,220,60,"attic",1],[190,130,120,80,"bedroom",2],[310,130,100,80,"bathroom",3],
-  [190,210,130,80,"living room",4],[320,210,90,80,"kitchen",5],[190,290,220,50,"basement",6],
-  [70,200,120,90,"garage",7]];
- let s=`<svg viewBox="0 0 600 360" role="img" aria-label="House"><rect width="600" height="360" fill="#F8F7F2"/>
- <path d="M0 290h600v70H0z" fill="#E7DCC4"/><circle cx="530" cy="60" r="26" fill="${G}" opacity=".5"/>
- <g stroke="${N}" stroke-width="2.5" stroke-linejoin="round">
- <path d="M175 130L300 40l125 90z" fill="#EAD8B4"/><rect x="190" y="130" width="220" height="210" fill="#fff"/>
- <path d="M60 200l65-40 65 40z" fill="#EAD8B4"/><rect x="70" y="200" width="120" height="90" fill="#fff"/>
- <path d="M190 210h220M190 290h220M310 130v80M320 210v80M190 130h220" fill="none"/>
- <path d="M88 220h84v70H88z" fill="${F}"/><path d="M88 240h84M88 260h84" fill="none" stroke-width="1.5"/>
- <rect x="206" y="160" width="60" height="20" rx="4" fill="${F}"/><rect x="206" y="150" width="14" height="10" rx="3" fill="${G}"/>
- <path d="M326 170h70v8c0 8-5 12-12 12h-46c-7 0-12-4-12-12z" fill="${F}"/>
- <rect x="206" y="250" width="56" height="22" rx="6" fill="${F}"/><rect x="214" y="226" width="40" height="18" rx="2" fill="${N}"/>
- <rect x="350" y="248" width="40" height="42" rx="2" fill="${F}"/><path d="M350 260h40" fill="none"/>
- <path d="M206 330h14v-10h14v-10h14" fill="none" stroke="${G}" stroke-width="4"/>
- <circle cx="300" cy="100" r="11" fill="#fff"/>
- <path d="M500 290v-50" fill="none"/><circle cx="500" cy="225" r="32" fill="#CFD8C4"/>
- <path d="M440 290v-22M455 290v-22M470 290v-22M432 274h46" fill="none" stroke-width="2"/></g>`;
- R.forEach(([x,y,w,h,l,n])=>{
-  const cx=x+w/2, cy=y+(l==="attic"?h-10:16);
-  s+=labels?`<text x="${cx}" y="${cy}" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="600" fill="${N}" paint-order="stroke" stroke="#fff" stroke-width="4">${l}</text>`
-   :`<circle cx="${cx}" cy="${cy-5}" r="12" fill="${N}"/><text x="${cx}" y="${cy}" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="${G}">${n}</text>`});
- s+=labels?`<text x="500" y="230" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="600" fill="${N}">garden</text>`
-  :`<circle cx="500" cy="220" r="12" fill="${N}"/><text x="500" y="225" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="${G}">8</text>`;
+ const R=[ // центр таблички x,y · подпись · номер
+  [320,112,"attic",1],[265,146,"bedroom",2],[385,146,"bathroom",3],
+  [267,231,"living room",4],[387,231,"kitchen",5],[320,316,"basement",6],
+  [135,222,"garage",7],[480,262,"garden",8]];
+ const E="#E7DCC4",GR="#CFD8C4";
+ let s=`<svg viewBox="40 22 560 336" role="img" aria-label="${labels?"Дом в разрезе: attic, bedroom, bathroom, living room, kitchen, basement, garage, garden":"Дом в разрезе: комнаты под номерами 1–8"}"><rect width="600" height="360" fill="#F8F7F2"/>
+ <circle cx="556" cy="54" r="24" fill="${G}" opacity=".45"/>
+ <path d="M0 300h600v60H0z" fill="${E}"/><path d="M0 300h600" stroke="#B9C4A6" stroke-width="5"/>
+ <g stroke="${N}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+ <!-- гараж -->
+ <path d="M56 206L135 160L214 206Z" fill="#EAD8B4"/><rect x="70" y="205" width="130" height="95" fill="#fff"/>
+ <rect x="86" y="244" width="98" height="56" rx="2" fill="${F}"/><path d="M86 258h98M86 272h98M86 286h98" fill="none" stroke-width="1.6"/><path d="M128 252h14" stroke="${G}" stroke-width="3"/>
+ <!-- дом: труба, крыша, стены, перекрытия -->
+ <rect x="380" y="54" width="20" height="44" fill="#fff"/>
+ <path d="M182 131L320 34L458 131Z" fill="#EAD8B4"/><rect x="200" y="130" width="240" height="222" fill="#fff"/>
+ <path d="M200 215h240M200 300h240M330 130v85M335 215v85" fill="none"/>
+ <!-- чердак: круглое окно и коробки -->
+ <circle cx="320" cy="76" r="13" fill="#fff"/><path d="M320 63v26M307 76h26" fill="none" stroke-width="1.6"/>
+ <rect x="220" y="114" width="26" height="16" fill="${F}"/><rect x="226" y="102" width="18" height="12" fill="${G}"/><rect x="392" y="116" width="24" height="14" fill="${F}"/>
+ <!-- спальня: кровать, тумбочка, лампа -->
+ <rect x="210" y="176" width="8" height="39" rx="3" fill="${G}"/><rect x="216" y="194" width="80" height="13" rx="3" fill="#fff"/>
+ <rect x="222" y="186" width="22" height="9" rx="4" fill="${F}"/><path d="M248 194c0-6 4-8 10-8h34c4 0 6 3 6 8v13h-50z" fill="${F}"/><path d="M220 207v8M292 207v8" fill="none"/>
+ <rect x="302" y="198" width="20" height="17" rx="2" fill="${F}"/><path d="M312 198v-8" fill="none"/><path d="M305 190h14l-3-9h-8z" fill="${G}"/>
+ <!-- ванная: ванна на ножках, душ, полотенце -->
+ <path d="M346 186v-22q0-6 6-6h8" fill="none" stroke-width="2.2"/><path d="M358 155h8l-2 6h-4z" fill="${G}" stroke-width="1.8"/>
+ <path d="M342 188h76v6c0 9-6 13-14 13h-48c-8 0-14-4-14-13z" fill="${F}"/><path d="M350 207l-3 7M410 207l3 7" fill="none"/>
+ <path d="M424 166h12M428 166v22h6v-22" fill="none" stroke-width="2"/><rect x="427" y="168" width="8" height="18" fill="${G}" stroke-width="1.6"/>
+ <!-- гостиная: телевизор на тумбе, диван с подушками, торшер -->
+ <rect x="210" y="284" width="38" height="16" rx="2" fill="${F}"/><rect x="212" y="256" width="34" height="22" rx="3" fill="${N}"/><path d="M229 278v6" fill="none"/>
+ <rect x="262" y="266" width="58" height="16" rx="5" fill="#fff"/><path d="M256 278a5 5 0 0 1 10 0v12h48v-12a5 5 0 0 1 10 0v16h-68z" fill="${F}"/>
+ <rect x="270" y="270" width="14" height="9" rx="3" fill="${G}"/><rect x="298" y="270" width="14" height="9" rx="3" fill="#fff"/><path d="M260 294v6M320 294v6" fill="none"/>
+ <!-- кухня: шкафчики, плита с духовкой, вытяжка, холодильник -->
+ <rect x="344" y="248" width="30" height="16" rx="2" fill="${F}"/><path d="M359 248v16" fill="none" stroke-width="1.6"/>
+ <path d="M378 250h24l3 10h-30z" fill="#fff"/>
+ <rect x="342" y="270" width="62" height="30" fill="${F}"/><path d="M342 270h62" fill="none"/><rect x="374" y="276" width="26" height="18" rx="2" fill="#fff"/><path d="M378 280h18" fill="none" stroke-width="1.6"/>
+ <path d="M378 267h8M392 267h8" fill="none" stroke="${G}" stroke-width="3"/><path d="M352 278v14" fill="none" stroke-width="1.6"/>
+ <rect x="408" y="246" width="26" height="54" rx="3" fill="#fff"/><path d="M408 266h26M413 252v8M413 272v12" fill="none" stroke-width="1.8"/>
+ <!-- подвал: коробки, стиральная машина, лестница -->
+ <rect x="212" y="330" width="24" height="22" fill="${F}"/><rect x="238" y="336" width="20" height="16" fill="${G}"/><rect x="218" y="318" width="18" height="12" fill="#fff"/>
+ <rect x="268" y="324" width="28" height="28" rx="3" fill="#fff"/><circle cx="282" cy="339" r="8" fill="${F}"/><path d="M272 329h8" fill="none" stroke-width="1.6"/>
+ <path d="M376 352h14v-12h14v-12h14v-12h14" fill="none" stroke="${G}" stroke-width="4"/>
+ <!-- сад: дерево, забор, цветы, табличка -->
+ <path d="M540 300v-44" fill="none" stroke-width="4"/><circle cx="540" cy="232" r="28" fill="${GR}"/><circle cx="520" cy="248" r="16" fill="${GR}"/><circle cx="562" cy="248" r="16" fill="${GR}"/>
+ <path d="M462 300v-24M478 300v-24M494 300v-24M510 300v-24M456 286h60" fill="none" stroke-width="2"/>
+ <path d="M572 300v-12M584 300v-10" fill="none" stroke="#6f8f5f" stroke-width="2"/><circle cx="572" cy="286" r="4" fill="${G}"/><circle cx="584" cy="288" r="4" fill="#E99A8C"/>
+ <path d="M480 300v-28" fill="none" stroke-width="3"/>
+ </g>`;
+ const pill=(x,y,t)=>{const w=Math.round(t.length*8.6+22);
+  return `<rect x="${x-w/2}" y="${y-12}" width="${w}" height="24" rx="12" fill="#fff" stroke="${N}" stroke-width="1.5"/><text x="${x}" y="${y+5}" text-anchor="middle" font-family="Inter,sans-serif" font-size="15" font-weight="600" fill="${N}">${t}</text>`};
+ const num=(x,y,n)=>`<circle cx="${x}" cy="${y}" r="12.5" fill="${N}"/><text x="${x}" y="${y+5}" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="${G}">${n}</text>`;
+ R.forEach(([x,y,l,n])=>{s+=labels?pill(x,y,l):num(x,y,n)});
  return s+`</svg>`;
 }
 
