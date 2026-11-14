@@ -20,12 +20,15 @@ var $=function(s){return document.querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
 var MAP={};MATERIALS.forEach(function(m){MAP[m.id]=m});
 var cur=null,students=[],assigned=[],filt='all',sel={},signup=null,voc=null,vlang='ko';
+var teachers=null;   // список преподавателей для владельца школы; null — на сервере ещё нет supabase/teachers.sql
+function isOwner(){return !!(KR.ctx&&KR.ctx.owner)}
 function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.className='msg '+(ok?'ok':'bad')}}
 function genPin(){var a=new Uint32Array(1);crypto.getRandomValues(a);return String(100000+a[0]%900000)}
 function loginFrom(email,login){var l=(login||'').trim()||String(email||'').split('@')[0];return l.toLowerCase().replace(/[^a-z0-9а-яё._-]/g,'').slice(0,40)}
 function inviteText(login,pin){var u=location.href.replace(/[^\/]*$/,'')+'auth.html';return 'Привет! Твой личный кабинет в MIRAÉ готов.\nСсылка: '+u+'\nЛогин: '+login+'\nPIN: '+pin+'\nС ними можно войти с любого устройства.'}
-function showInvite(id,login,pin){var t=inviteText(login,pin);
-  $('#'+id).innerHTML='<p style="margin:10px 0 4px"><b>Сообщение ученику</b></p><textarea id="invt" readonly style="width:100%;min-height:110px;box-sizing:border-box;padding:8px;font:inherit">'+esc(t)+'</textarea><div class="done-row"><span class="muted">PIN больше нигде не показывается, скопируй сейчас</span><button class="pri" id="cp">Скопировать</button></div>';
+function teacherInviteText(login,pin){var u=location.href.replace(/[^\/]*$/,'')+'auth.html';return 'Здравствуйте! Ваш кабинет преподавателя в MIRAÉ готов.\nСсылка: '+u+'\nЛогин: '+login+'\nPIN: '+pin+'\nПосле входа откроется панель «Ученики»: там ваши ученики и задания.'}
+function showInvite(id,login,pin,teacher){var t=teacher?teacherInviteText(login,pin):inviteText(login,pin);
+  $('#'+id).innerHTML='<p style="margin:10px 0 4px"><b>'+(teacher?'Сообщение преподавателю':'Сообщение ученику')+'</b></p><textarea id="invt" readonly style="width:100%;min-height:110px;box-sizing:border-box;padding:8px;font:inherit">'+esc(t)+'</textarea><div class="done-row"><span class="muted">PIN больше нигде не показывается, скопируй сейчас</span><button class="pri" id="cp">Скопировать</button></div>';
   $('#cp').onclick=function(){var ta=$('#invt');ta.select();var done=function(){msg('Скопировано',true)};
     if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,function(){document.execCommand('copy');done()});else{document.execCommand('copy');done()}}}
 var LESS=(window.COURSE0?COURSE0.lessons.map(function(l){return [l.id,'한글 · '+l.tag+' · '+l.title]}):[]).concat([['l12-jiyo','1급 · 12과 · -지요?'],['l11-adaju','2급 · 11과 · -아/어다 주다'],['p12-jiyo-1','Отработка -지요']]);
@@ -77,18 +80,40 @@ async function boot(){
   if(!KR.require())return;KR.topbar('teacher');
   var ctx=await KR.load();KR.topbar('teacher');
   if(!ctx.ok){$('#m').innerHTML='<div class="card"><p>Нет связи с сервером. Панель преподавателя работает только онлайн.</p></div>';return}
+  if(ctx.pending){$('#m').innerHTML='<div class="card"><h3>Заявка ждёт подтверждения</h3><p class="muted">Владелец школы подтвердит заявку, и здесь откроется панель преподавателя.</p></div>';return}
   if(!ctx.teacher){$('#m').innerHTML='<div class="card"><h3>Только для преподавателя</h3><p class="muted">Этот раздел открыт для аккаунта преподавателя.</p></div>';return}
   try{students=await KR.api('teacher_students')||[]}catch(e){$('#m').innerHTML='<div class="card"><p>Не удалось загрузить учеников.</p></div>';return}
   try{signup=await KR.api('teacher_signup_settings')}catch(e){signup=null}
+  if(isOwner()){try{teachers=await KR.api('owner_teachers')||[]}catch(e){teachers=null}}
   draw();
 }
+
+// ---------- преподаватели (только владелец школы, supabase/teachers.sql) ----------
+var ROLE={owner:'владелец',teacher:'преподаватель',pending:'заявка'};
+function teachersCard(){
+  if(teachers===null)return '<div class="card"><h3>Преподаватели</h3><p class="muted">Чтобы добавлять преподавателей и принимать заявки, выполните в Supabase файл supabase/teachers.sql (SQL Editor → New query → вставить → Run) и обновите эту страницу.</p></div>';
+  var h='<div class="card"><h3>Преподаватели</h3>';
+  h+=teachers.map(function(t){var st=t.status==='pending'?'pending':t.role;
+    var btn=st==='pending'?'<button class="pri" data-tok="'+esc(t.name)+'">Подтвердить</button><button data-tno="'+esc(t.name)+'">Отклонить</button>'
+      :st==='teacher'?'<button data-trm="'+esc(t.name)+'">Снять роль</button>':'';
+    return '<div class="line" style="align-items:center;justify-content:space-between;gap:10px"><div style="min-width:0"><div class="cap">'+esc(t.name)+' <span class="badge'+(st==='pending'?' warn':st==='owner'?' ok':'')+'">'+ROLE[st]+'</span></div><div class="muted">'+
+      esc(t.email||'email не указан')+(st==='pending'?' · заявка от '+fmtDate(t.created_at):' · учеников: '+(st==='owner'?'все':t.students))+'</div></div><span style="display:inline-flex;gap:8px;flex-wrap:wrap">'+btn+'</span></div>'}).join('');
+  h+='<p style="margin:16px 0 6px"><b>Добавить преподавателя</b></p><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="tem" type="email" class="name" placeholder="Email преподавателя" style="flex:2;min-width:200px;margin:0"><input id="tlg" class="name" placeholder="Логин (по желанию)" style="flex:1;min-width:140px;margin:0" autocomplete="off"></div><div class="done-row"><span class="muted">Преподаватель видит только своих учеников, вы — всех</span><button class="pri" id="tadd">Создать</button></div><div id="tinv"></div>';
+  var code=signup&&signup.teacher_code||'';
+  h+='<p style="margin:16px 0 6px"><b>Код преподавателя</b></p><p class="muted" style="margin:0 0 8px">По нему преподаватель подаёт заявку сам: страница входа → «Регистрация» → «Я преподаватель». Доступ к ученикам появится после вашего подтверждения. Пустой код выключает заявки.</p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="tcode" class="name" aria-label="Код преподавателя" placeholder="Код, от 6 символов" maxlength="40" value="'+esc(code)+'" style="flex:1;min-width:180px;margin:0" autocomplete="off"><button id="tcg">Придумать код</button><button class="pri" id="tcs">Сохранить</button></div></div>';
+  return h;
+}
+async function reloadTeachers(){try{teachers=await KR.api('owner_teachers')||[]}catch(e){}try{students=await KR.api('teacher_students')||students}catch(e){}draw()}
 function draw(){
   var h='<div class="card"><h3>Ученики</h3>';
   var list=students.filter(function(s){return s.name!==KR.user()});
   if(!list.length)h+='<p class="muted">Пока нет учеников. Добавь первого ниже.</p>';
-  h+='<div class="opts">'+list.map(function(s){return '<button data-st="'+esc(s.name)+'" class="'+(cur===s.name?'sel':'')+' cap">'+esc(s.name)+' · '+s.assigned+(isNew(s)?'<span class="badge new">новый</span>':'')+'</button>'}).join('')+'</div></div>';
+  h+='<div class="opts">'+list.map(function(s){var lead=isOwner()&&s.teacher&&s.teacher!==KR.user()?'<span class="badge">'+esc(s.teacher)+'</span>':'';
+    return '<button data-st="'+esc(s.name)+'" class="'+(cur===s.name?'sel':'')+' cap">'+esc(s.name)+' · '+s.assigned+(isNew(s)?'<span class="badge new">новый</span>':'')+lead+'</button>'}).join('')+'</div>'+
+    (isOwner()&&teachers&&teachers.length>1?'<p class="muted" style="margin:8px 0 0">У учеников других преподавателей рядом с именем стоит их преподаватель.</p>':'')+'</div>';
   h+='<div class="card"><h3>Добавить ученика</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="nem" type="email" class="name" placeholder="Email ученика" style="flex:2;min-width:200px;margin:0"><input id="nlg" class="name" placeholder="Логин (по желанию)" style="flex:1;min-width:140px;margin:0" autocomplete="off"></div><div class="done-row"><span class="muted">Если логин пустой, возьмётся часть email до «@»</span><button class="pri" id="add">Создать</button></div><div id="inv"></div></div>';
-  h+=regCard();
+  if(isOwner()){h+=regCard();h+=teachersCard()}
   if(cur)h+='<div id="stud"></div>';
   h+='<p id="msg" class="msg" role="status" aria-live="polite"></p>';
   $('#m').innerHTML=h;
@@ -146,7 +171,10 @@ async function drawStudent(){
   try{voc=await KR.api('teacher_vocab',{p_student:cur})||[]}catch(e){voc=null}   // null — на сервере ещё нет supabase/vocab.sql
   assigned=as;var have={};as.forEach(function(a){have[a.id]=1});
   var info=students.filter(function(x){return x.name===cur})[0]||{};
-  var h='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><h3 class="cap" style="margin:0">'+esc(cur)+'</h3><div class="muted">'+esc(info.email||'email не указан')+(info.signup_at?' · зарегистрировался сам '+fmtDate(info.signup_at):'')+'</div></div><span style="display:inline-flex;gap:8px;flex-wrap:wrap"><button id="rst">Сбросить PIN</button>'+(signup?'<button id="del">'+KR.icon('trash',15)+' Удалить</button>':'')+'</span></div><div id="inv2"></div><p style="margin:12px 0 4px"><b>Назначено</b></p>';
+  var others=isOwner()&&teachers?teachers.filter(function(t){return t.role!=='owner'&&t.status==='active'}):[];
+  var leadSel=others.length?'<label class="muted" style="display:inline-flex;align-items:center;gap:8px;margin-top:8px">Ведёт <select id="lead" style="margin:0">'+
+    '<option value="">я</option>'+others.map(function(t){return '<option value="'+esc(t.name)+'"'+(info.teacher===t.name?' selected':'')+'>'+esc(t.name)+'</option>'}).join('')+'</select></label>':'';
+  var h='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><h3 class="cap" style="margin:0">'+esc(cur)+'</h3><div class="muted">'+esc(info.email||'email не указан')+(info.signup_at?' · регистрация на сайте '+fmtDate(info.signup_at):'')+'</div>'+leadSel+'</div><span style="display:inline-flex;gap:8px;flex-wrap:wrap"><button id="rst">Сбросить PIN</button>'+(signup?'<button id="del">'+KR.icon('trash',15)+' Удалить</button>':'')+'</span></div><div id="inv2"></div><p style="margin:12px 0 4px"><b>Назначено</b></p>';
   if(!as.length)h+='<p class="muted">Пока ничего не назначено.</p>';
   h+=as.map(function(a){var m=MAP[a.id]||{title:a.id,kind:''};
     return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><button data-un="'+esc(a.id)+'">Убрать</button></div>'}).join('');
@@ -203,6 +231,24 @@ document.addEventListener('click',async function(e){
     if(!confirm('Убрать слово из словаря ученика?'))return;
     try{await KR.api('teacher_vocab_delete',{p_student:cur,p_ids:[b.dataset.vdel]});await drawStudent();msg('Слово убрано',true)}catch(x){msg('Не получилось убрать слово')}
   }
+  else if(b.dataset.tok||b.dataset.tno){var who=b.dataset.tok||b.dataset.tno,ok=!!b.dataset.tok;
+    if(!ok&&!confirm('Отклонить заявку '+who+'? Аккаунт останется обычным, его можно удалить из списка учеников.'))return;
+    try{await KR.api('owner_approve_teacher',{p_login:who,p_ok:ok});await reloadTeachers();msg(ok?'Заявка подтверждена: '+who:'Заявка отклонена',true)}catch(x){msg('Не получилось')}}
+  else if(b.dataset.trm){var tr=b.dataset.trm;
+    if(!confirm('Снять с '+tr+' роль преподавателя? Его ученики вернутся к вам.'))return;
+    try{await KR.api('owner_remove_teacher',{p_login:tr});await reloadTeachers();msg('Роль снята: '+tr,true)}catch(x){msg('Не получилось снять роль')}}
+  else if(b.id==='tadd'){
+    var tem=($('#tem').value||'').trim(),tlg=loginFrom(tem,$('#tlg').value);
+    if(!/^\S+@\S+\.\S+$/.test(tem)){msg('Введите email преподавателя');return}
+    if(tlg.length<2){msg('Логин получился слишком коротким, впишите свой');return}
+    var tpin=genPin();b.disabled=true;
+    try{await KR.api('owner_add_teacher',{p_login:tlg,p_email:tem,p_new_pin:tpin});await reloadTeachers();showInvite('tinv',tlg,tpin,true);msg('Преподаватель создан: '+tlg,true)}
+    catch(x){b.disabled=false;msg(/exists/.test(x.message)?'Такой логин уже есть, впишите другой':'Не получилось создать преподавателя')}
+  }
+  else if(b.id==='tcg'){var ab='ABCDEFGHJKMNPQRSTUVWXYZ23456789',rr=new Uint32Array(6),cc='';crypto.getRandomValues(rr);for(var q=0;q<6;q++)cc+=ab[rr[q]%ab.length];$('#tcode').value='TEACH-'+cc}
+  else if(b.id==='tcs'){var tc=($('#tcode').value||'').trim();
+    if(tc&&tc.length<6){msg('Код преподавателя: от 6 символов');return}
+    try{await KR.api('owner_set_teacher_code',{p_code:tc});signup=Object.assign({},signup,{teacher_code:tc});draw();msg(tc?'Код сохранён: заявки включены':'Заявки преподавателей выключены',true)}catch(x){msg('Не получилось сохранить код')}}
   else if(b.dataset.st){cur=b.dataset.st;sel={};draw()}
   else if(b.dataset.f){filt=b.dataset.f;drawStudent()}
   else if(b.dataset.un){try{await KR.api('teacher_unassign',{p_student:cur,p_material:b.dataset.un});students=await KR.api('teacher_students')||students;draw();msg('Убрано',true)}catch(x){msg('Не получилось убрать')}}
@@ -214,6 +260,13 @@ document.addEventListener('click',async function(e){
   }
 });
 document.addEventListener('change',function(e){var t=e.target;if(t.dataset&&t.dataset.m){sel[t.dataset.m]=t.checked;count()}});
+// владелец передаёт ученика другому преподавателю («Ведёт» в карточке ученика)
+document.addEventListener('change',async function(e){
+  if(e.target.id!=='lead')return;
+  try{await KR.api('owner_assign_student',{p_student:cur,p_teacher:e.target.value});students=await KR.api('teacher_students')||students;
+    teachers=await KR.api('owner_teachers')||teachers;draw();msg(e.target.value?'Теперь ученика ведёт '+e.target.value:'Ученик снова у вас',true)}
+  catch(x){msg('Не получилось передать ученика')}
+});
 boot();
 </script>
 </body>
