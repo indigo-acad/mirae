@@ -20,6 +20,28 @@ function say(t){if(window.KR)KR.say(t,LANG)}
 window.say=say;
 const sayBtn=t=>`<button class="say" data-say="${esc(t)}" title="Послушать" aria-label="Послушать">${ic("volume",16)}</button>`;
 
+/* Сборка слогов из букв (для блока build): ㄱ ㅏ ㄴ → 간, ㄴ ㅏ ㅁ ㅜ → 나무, две гласные подряд сливаются (ㅗ+ㅏ → ㅘ). */
+const CHO="ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ",JUNG="ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ";
+const JONG=["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+const VV={"ㅗㅏ":"ㅘ","ㅗㅐ":"ㅙ","ㅗㅣ":"ㅚ","ㅜㅓ":"ㅝ","ㅜㅔ":"ㅞ","ㅜㅣ":"ㅟ","ㅡㅣ":"ㅢ","ㅏㅣ":"ㅐ","ㅓㅣ":"ㅔ","ㅑㅣ":"ㅒ","ㅕㅣ":"ㅖ","ㅘㅣ":"ㅙ","ㅝㅣ":"ㅞ"};
+const CC={"ㄱㅅ":"ㄳ","ㄴㅈ":"ㄵ","ㄴㅎ":"ㄶ","ㄹㄱ":"ㄺ","ㄹㅁ":"ㄻ","ㄹㅂ":"ㄼ","ㄹㅅ":"ㄽ","ㄹㅌ":"ㄾ","ㄹㅍ":"ㄿ","ㄹㅎ":"ㅀ","ㅂㅅ":"ㅄ"};
+const isV=c=>JUNG.indexOf(c)>=0;
+function compose(str){
+  const a=[];for(const c of String(str||"")){const l=a[a.length-1];if(l&&isV(l)&&isV(c)&&VV[l+c])a[a.length-1]=VV[l+c];else a.push(c)}
+  let out="",i=0;
+  while(i<a.length){
+    const c=a[i];
+    if(CHO.indexOf(c)>=0&&isV(a[i+1])){
+      const L0=CHO.indexOf(c),V0=JUNG.indexOf(a[i+1]);i+=2;let T=0;
+      if(a[i]&&!isV(a[i])&&JONG.indexOf(a[i])>0&&!isV(a[i+1])){
+        const two=a[i+1]&&CC[a[i]+a[i+1]];
+        if(two&&!isV(a[i+2])){T=JONG.indexOf(two);i+=2}else{T=JONG.indexOf(a[i]);i++}
+      }
+      out+=String.fromCharCode(0xAC00+(L0*21+V0)*28+T);
+    }else{out+=c;i++}
+  }
+  return out;
+}
 const VOC=window.KR&&KR.vocab&&!L.back?KR.vocab:null;   // словарь ученика: слова урока попадают в интервальное повторение
 const blocks=[]; // flat list of {key,done}
 L.sections.forEach(s=>s.blocks.forEach((b,i)=>{b._key=s.id+"-"+i;blocks.push(b)}));
@@ -76,13 +98,14 @@ function extra(){
   const hw=(window.HOMEWORK||[]).filter(h=>h.lesson===id);
   let h="";
   if(hw.length)h+=`<h2 class="sec">${ic("home",24)} Домашка к уроку</h2><div class="card">${hw.map(x=>{const ok=x.blocks.every(k=>P[k]&&P[k].done);return `<div class="line" style="justify-content:space-between;align-items:center"><span>${esc(x.title)}</span><span class="badge ${ok?"ok":"warn"}">${ok?"сделано":"к выполнению"}</span></div>`}).join("")}</div>`;
+  if(L.games)return h+`<div class="card"><h3>Закрепить в игре</h3><p class="muted">Бинго, звуковая охота, конструктор слогов, найди ошибку и Reading Challenge по всему алфавиту.</p><a class="btn pri" href="${L.games}">${ic("spark",16)}Игры хангыля</a></div>`;
   const cl=window.COURSE?COURSE.lessons.concat((window.COURSE2||{lessons:[]}).lessons).find(l=>l.id===id):null;const pno=cl?cl.no:"all";
   h+=`<div class="card"><h3>Не получилось закрепить?</h3><p class="muted">Если какие-то задания не удались, возьми дополнительную отработку к этому уроку.</p><a class="btn pri" href="practice.html?l=${pno}">${ic("repeat",16)}Доп. упражнения</a></div>`;
   return h;
 }
 const doneLabel=d=>d?ic("check",16)+" Пройдено":"Отметить пройденным";
 function doneRow(b){
-  const interactive=["fill","choice"].includes(b.type);
+  const interactive=["fill","choice","build"].includes(b.type);
   const d=P[b._key]&&P[b._key].done;
   if(interactive)return `<div class="done-row"><span class="score" id="sc-${b._key}"></span><button data-check="${b._key}" class="pri">Проверить</button></div>`;
   return `<div class="done-row"><span class="muted"></span><button data-done="${b._key}">${doneLabel(d)}</button></div>`;
@@ -111,11 +134,17 @@ function block(b){
     h+=`<p class="muted">${esc(b.instr)}</p>`;
     h+=b.items.map((it,i)=>{
       const sel=(P[b._key]&&P[b._key].v&&P[b._key].v[i])||"";
-      return `<div class="ex"><div class="q ko">${esc(it.q)}</div>${it.r?`<div class="ru ko">→ ${esc(it.r)}</div>`:""}<div class="opts" data-b="${b._key}" data-i="${i}">${b.bank.map(o=>`<button class="${sel===o?"sel":""}" data-o="${esc(o)}">${esc(o)}</button>`).join("")}<span class="fb" id="fb-${b._key}-${i}"></span></div></div>`}).join("")+doneRow(b);
+      return `<div class="ex">${it.say?`<div class="q">${sayBtn(it.say).replace('class="say"','class="say big"')}${it.q?` <span class="ko">${esc(it.q)}</span>`:""}</div>`:`<div class="q ko">${esc(it.q)}</div>`}${it.r?`<div class="ru ko">→ ${esc(it.r)}</div>`:""}<div class="opts" data-b="${b._key}" data-i="${i}">${(it.opts||b.bank).map(o=>`<button class="${sel===o?"sel":""}" data-o="${esc(o)}">${esc(o)}</button>`).join("")}<span class="fb" id="fb-${b._key}-${i}"></span></div></div>`}).join("")+doneRow(b);
+  }else if(b.type==="build"){
+    h+=`<p class="muted">${esc(b.instr)}</p>`+b.items.map((it,i)=>{
+      const v=(P[b._key]&&P[b._key].v&&P[b._key].v[i])||"";
+      return `<div class="ex build" data-i="${i}"><div class="q">${it.say?sayBtn(it.say).replace('class="say"','class="say big"')+" ":""}<span class="ko">${esc(it.p||"")}</span></div>
+      <div class="bk-row"><output class="built ko" id="bt-${b._key}-${i}" aria-live="polite">${esc(compose(v))}</output><span class="fb" id="fb-${b._key}-${i}"></span></div>
+      <div class="kb ko" data-b="${b._key}" data-i="${i}">${b.keys.map(k=>`<button data-k="${esc(k)}">${esc(k)}</button>`).join("")}<button data-k="⌫" class="kb-del" aria-label="Стереть букву">${ic("back",15)}</button></div></div>`}).join("")+doneRow(b);
   }else if(b.type==="talk"){
     h+=`<p class="muted">${esc(b.instr)}</p>`+b.prompts.map(p=>`<div class="line"><div class="kolg ko">${esc(p)} ${sayBtn(p)}</div></div>`).join("");
   }
-  if(!["fill","choice"].includes(b.type))h+=doneRow(b);
+  if(!["fill","choice","build"].includes(b.type))h+=doneRow(b);
   return h+"</div>";
 }
 function getItems(b){return b.items}
@@ -125,6 +154,7 @@ function check(key){
   b.items.forEach((it,i)=>{
     let good=false;
     if(b.type==="fill"){const inp=document.querySelector(`input[data-b="${key}"][data-i="${i}"]`);v[i]=inp.value;good=it.a.some(a=>norm(a)===norm(inp.value));inp.className="ans ko "+(good?"ok":"bad")}
+    else if(b.type==="build"){good=compose(v[i]||"")===it.a;const o=document.getElementById(`bt-${key}-${i}`);if(o)o.className="built ko "+(good?"ok":"bad")}
     else{const g=document.querySelector(`.opts[data-b="${key}"][data-i="${i}"]`);const sel=v[i];good=sel===it.a;g.querySelectorAll("button").forEach(bt=>{bt.classList.remove("ok","bad");if(bt.dataset.o===sel)bt.classList.add(good?"ok":"bad")})}
     const fb=document.getElementById(`fb-${key}-${i}`);
     if(fb){fb.textContent=good?"✓":"✗ "+(Array.isArray(it.a)?it.a[0]:it.a);fb.className="fb "+(good?"ok":"bad")}
@@ -158,6 +188,12 @@ function wire(){
     if(t.dataset.say)return say(t.dataset.say);
     if(t.dataset.wstar!==undefined&&VOC){const c=VOC.find(LANG,t.dataset.wstar);if(c)VOC.star(c.id);else VOC.add(LANG,t.dataset.wstar,t.dataset.wt,{star:1,src:"lesson:"+id});return stars()}
     if(t.dataset.check)return check(t.dataset.check);
+    if(t.dataset.k!==undefined){const g=t.parentElement,k=g.dataset.b,i=g.dataset.i;P[k]=P[k]||{};P[k].v=P[k].v||{};let v=P[k].v[i]||"";
+      v=t.dataset.k==="⌫"?[...v].slice(0,-1).join(""):v+t.dataset.k;P[k].v[i]=v;P[k].t=Date.now();
+      const o=document.getElementById(`bt-${k}-${i}`);if(o){o.textContent=compose(v);o.className="built ko"}
+      const f=document.getElementById(`fb-${k}-${i}`);if(f){f.textContent="";f.className="fb"}
+      if(t.dataset.k!=="⌫"&&/[가-힣]$/.test(compose(v)))say(compose(v).slice(-1));
+      save();return}
     if(t.dataset.done){const k=t.dataset.done;P[k]=P[k]||{};P[k].done=!P[k].done;P[k].t=Date.now();save();return refresh()}
     if(t.dataset.o!==undefined){const g=t.parentElement,k=g.dataset.b;P[k]=P[k]||{};P[k].v=P[k].v||{};P[k].v[g.dataset.i]=t.dataset.o;P[k].t=Date.now();g.querySelectorAll("button").forEach(x=>x.classList.remove("sel","ok","bad"));t.classList.add("sel");save()}
   });

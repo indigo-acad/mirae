@@ -360,5 +360,93 @@ window.MATERIALS=[
   "title": "12과 · -지요: формы и времена (отработка)",
   "path": "lesson.html?l=p12-jiyo-1",
   "level": "1급"
+ },
+ {
+  "id": "ko-hangul-games",
+  "section": "korean",
+  "kind": "game",
+  "title": "Хангыль с нуля · игры и итоговый тест",
+  "path": "materials/korean/ko-hangul-games/",
+  "level": "с нуля"
+ },
+ {
+  "id": "lesson-h01",
+  "section": "course",
+  "kind": "lesson",
+  "title": "한글 · Занятие 1 · Что такое хангыль",
+  "path": "lesson.html?l=h01",
+  "level": "с нуля"
+ },
+ {
+  "id": "lesson-h02",
+  "section": "course",
+  "kind": "lesson",
+  "title": "한글 · Занятие 2 · Базовые гласные",
+  "path": "lesson.html?l=h02",
+  "level": "с нуля"
+ },
+ {
+  "id": "lesson-h03",
+  "section": "course",
+  "kind": "lesson",
+  "title": "한글 · Занятие 3 · Йотированные и составные гласные",
+  "path": "lesson.html?l=h03",
+  "level": "с нуля"
+ },
+ {
+  "id": "lesson-h04",
+  "section": "course",
+  "kind": "lesson",
+  "title": "한글 · Занятие 4 · Основные согласные",
+  "path": "lesson.html?l=h04",
+  "level": "с нуля"
+ },
+ {
+  "id": "lesson-h05",
+  "section": "course",
+  "kind": "lesson",
+  "title": "한글 · Занятие 5 · Придыхательные и напряжённые",
+  "path": "lesson.html?l=h05",
+  "level": "с нуля"
+ },
+ {
+  "id": "lesson-h06",
+  "section": "course",
+  "kind": "lesson",
+  "title": "한글 · Занятие 6 · Как собирать слоговой блок",
+  "path": "lesson.html?l=h06",
+  "level": "с нуля"
+ },
+ {
+  "id": "lesson-h07",
+  "section": "course",
+  "kind": "lesson",
+  "title": "한글 · Занятие 7 · 받침 — конечная согласная",
+  "path": "lesson.html?l=h07",
+  "level": "с нуля"
+ },
+ {
+  "id": "lesson-h08",
+  "section": "course",
+  "kind": "lesson",
+  "title": "한글 · Занятие 8 · Семь звуков 받침",
+  "path": "lesson.html?l=h08",
+  "level": "с нуля"
+ },
+ {
+  "id": "lesson-h09",
+  "section": "course",
+  "kind": "lesson",
+  "title": "한글 · Занятие 9 · Первые правила чтения",
+  "path": "lesson.html?l=h09",
+  "level": "с нуля"
+ },
+ {
+  "id": "lesson-h10",
+  "section": "course",
+  "kind": "lesson",
+  "title": "한글 · Занятие 10 · Читаем настоящие слова",
+  "path": "lesson.html?l=h10",
+  "level": "с нуля"
  }
 ];

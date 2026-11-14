@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Хангыль с нуля · игры · MIRAÉ</title>
+<meta name="theme-color" content="#0B1535">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B1535;--navy:#1E2A56;--gold:#D4AF7C;--gold-ink:#8A6431;--ivory:#F8F7F2;--silver:#C0C6D4;--ink:#161c3a;--muted:#686d86;--line:#e2dac7;--soft:#efead9;--ok:#3f8a5a;--bad:#b9473b;
+  --ko:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;background:radial-gradient(120% 70% at 50% -10%,#24336b 0%,var(--bg) 60%);color:var(--ivory);font:16px/1.5 Inter,system-ui,sans-serif}
+.ko{font-family:var(--ko)}
+header{max-width:960px;margin:0 auto;padding:22px 16px 8px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font:600 34px/1.1 "Cormorant Garamond",Georgia,serif;margin:0;color:var(--ivory)}
+h1 small{display:block;font:500 13px Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+main{max-width:960px;margin:0 auto;padding:8px 16px 60px}
+a{color:var(--gold)}
+.top a{font-size:14px;text-decoration:none}
+.sets{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px}
+.chip{border:1px solid rgba(192,198,212,.35);background:rgba(255,255,255,.06);color:var(--ivory);border-radius:999px;padding:7px 13px;font:500 14px Inter,sans-serif;cursor:pointer}
+.chip.on{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.tile{text-align:left;background:rgba(255,255,255,.06);border:1px solid rgba(192,198,212,.18);border-radius:18px;padding:16px;color:var(--ivory);cursor:pointer;font:inherit;transition:transform .15s,background .15s}
+.tile:hover{transform:translateY(-2px);background:rgba(255,255,255,.1)}
+.tile b{display:block;font:600 22px "Cormorant Garamond",serif;color:var(--gold);margin-bottom:2px}
+.tile span{font-size:14px;color:var(--silver)}
+.tile .big{font:700 30px var(--ko);color:var(--ivory);float:right;opacity:.8}
+.card{background:var(--ivory);color:var(--ink);border-radius:20px;padding:18px;margin:12px 0;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.card h2{margin:0 0 4px;font:600 26px "Cormorant Garamond",serif;color:var(--navy)}
+.muted{color:var(--muted);font-size:14px}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:12px;padding:9px 14px;font-weight:500}
+.btn.pri{background:var(--navy);color:var(--gold);border-color:var(--navy)}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.between{justify-content:space-between}
+.say{width:56px;height:56px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--navy);display:inline-grid;place-items:center}
+.say:hover{background:var(--navy);color:var(--gold)}
+.grid{display:grid;gap:8px}
+.cell{aspect-ratio:1;border-radius:16px;border:1.5px solid var(--line);background:#fff;font:600 clamp(26px,7vw,44px) var(--ko);color:var(--navy);display:grid;place-items:center;position:relative}
+.cell.hit{background:var(--navy);color:var(--gold);border-color:var(--navy)}
+.cell.win{box-shadow:0 0 0 3px var(--gold)}
+.cell.no{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.opt{min-width:64px;padding:10px 14px;border-radius:14px;border:1.5px solid var(--line);background:#fff;color:var(--navy);font:600 24px var(--ko)}
+.opt.ok{background:#dcefd8;border-color:var(--ok)}.opt.bad{background:#fbe6e2;border-color:var(--bad)}
+.opt.txt{font:500 15px Inter,sans-serif}
+.flip{min-height:220px;border-radius:20px;background:#fff;border:1.5px solid var(--line);display:grid;place-items:center;text-align:center;cursor:pointer;padding:16px}
+.flip .glyph{font:700 110px/1 var(--ko);color:var(--navy)}
+.flip .back{font-size:18px}
+.flip .back b{font:700 44px var(--ko);color:var(--navy);display:block}
+.built{display:inline-grid;place-items:center;min-width:110px;min-height:70px;padding:4px 16px;border:2px dashed #d9d0b9;border-radius:16px;background:#fff;font:700 42px var(--ko);color:var(--navy)}
+.built.ok{border:2px solid var(--ok);background:#dcefd8}.built.bad{border:2px solid var(--bad);background:#fbe6e2}
+.kb{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.kb button{min-width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--navy);font:600 22px var(--ko)}
+.blk{width:96px;height:96px;position:relative;border-radius:14px;border:1.5px solid var(--line);background:#fff;cursor:pointer}
+.blk span{position:absolute;display:grid;place-items:center;font-family:var(--ko);font-weight:600;color:var(--navy);line-height:1}
+.blk.sel{box-shadow:0 0 0 3px var(--gold)}
+.blk.good{border-color:var(--ok);background:#eef7ec}.blk.wrong{border-color:var(--bad);background:#fbe6e2}
+.score{font:600 20px "Cormorant Garamond",serif;color:var(--gold-ink)}
+.fb{min-height:24px;margin-top:8px;font-weight:500}
+.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.bar{height:6px;border-radius:6px;background:var(--soft);overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--gold);width:0;transition:width .3s}
+input.name{padding:10px 12px;border-radius:12px;border:1px solid var(--line);font:inherit;min-width:220px}
+table{border-collapse:collapse;width:100%;font-size:15px}td,th{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left}
+.hidden{display:none!important}
+textarea{width:100%;min-height:120px;margin-top:8px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1><small>MIRAÉ · 한글</small>Хангыль с нуля · игры</h1>
+  <a href="../../../course.html">← к курсу</a>
+</header>
+<main id="app"></main>
+<script>
+/* ============ НАСТРОЙКИ ============ */
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";   // тот же бот, что в проверочных
+const TG_CHAT_ID = "347625701";
+
+/* ============ АЛФАВИТ ============
+   j — буква, s — слог для озвучки (гласные с ㅇ, согласные с ㅏ), h — подсказка (только ориентир). */
+const SETS = {
+  v:  { name: "Базовые гласные", items: [["ㅏ","아","примерно «а»"],["ㅓ","어","открытый, между «о» и «а»"],["ㅗ","오","«о», губы вытянуты"],["ㅜ","우","примерно «у»"],["ㅡ","으","губы растянуты, не «ы»"],["ㅣ","이","примерно «и»"]] },
+  y:  { name: "Йотированные и составные", items: [["ㅑ","야","«я»"],["ㅕ","여","«йо» открытое"],["ㅛ","요","«ё»"],["ㅠ","유","«ю»"],["ㅐ","애","примерно «э»"],["ㅔ","에","примерно «э»"],["ㅘ","와","«ва»"],["ㅝ","워","«во» открытое"],["ㅚ","외","«ве»"],["ㅟ","위","«ви»"],["ㅢ","의","ㅡ, скользящее в ㅣ"]] },
+  c:  { name: "Основные согласные", items: [["ㄱ","가","между к и г"],["ㄴ","나","н"],["ㄷ","다","между т и д"],["ㄹ","라","между р и л"],["ㅁ","마","м"],["ㅂ","바","между п и б"],["ㅅ","사","с"],["ㅇ","아","в начале не звучит, в конце [ŋ]"],["ㅈ","자","примерно ч/дж"]] },
+  a:  { name: "Придыхательные и напряжённые", items: [["ㅋ","카","к с выдохом"],["ㅌ","타","т с выдохом"],["ㅍ","파","п с выдохом"],["ㅊ","차","ч с выдохом"],["ㅎ","하","лёгкий выдох"],["ㄲ","까","напряжённый, без выдоха"],["ㄸ","따","напряжённый"],["ㅃ","빠","напряжённый"],["ㅆ","싸","напряжённый"],["ㅉ","짜","напряжённый"]] }
+};
+const SET_KEYS = Object.keys(SETS);
+let chosen = new Set(SET_KEYS);
+const pool = () => { const a=[]; chosen.forEach(k=>SETS[k].items.forEach(x=>a.push({j:x[0],s:x[1],h:x[2]}))); return a; };
+
+/* ============ ОБЩЕЕ ============ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]} return a; };
+const pick = (a,n) => shuffle(a).slice(0,n);
+const rnd = a => a[Math.random()*a.length|0];
+const SPK = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+let voice=null;
+function pickVoice(){ const vs=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang)); voice=vs.find(v=>/natural|online|neural|yuna|sun-?hi|google/i.test(v.name))||vs[0]||null; }
+if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
+function say(t,rate){ if(!("speechSynthesis" in window))return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang="ko-KR"; if(voice)u.voice=voice; u.rate=rate||0.8; speechSynthesis.speak(u); }
+const sayBtn = t => `<button class="say" data-say="${esc(t)}" aria-label="Послушать">${SPK}</button>`;
+document.addEventListener("click",e=>{const b=e.target.closest("[data-say]"); if(b)say(b.dataset.say)});
+
+/* Сборка слогов из букв: ㄱ ㅏ ㄴ → 간; две гласные подряд сливаются (ㅗ+ㅏ → ㅘ) */
+const CHO="ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ",JUNG="ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ";
+const JONG=["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+const VV={"ㅗㅏ":"ㅘ","ㅗㅐ":"ㅙ","ㅗㅣ":"ㅚ","ㅜㅓ":"ㅝ","ㅜㅔ":"ㅞ","ㅜㅣ":"ㅟ","ㅡㅣ":"ㅢ","ㅏㅣ":"ㅐ","ㅓㅣ":"ㅔ","ㅑㅣ":"ㅒ","ㅕㅣ":"ㅖ"};
+const isV=c=>JUNG.indexOf(c)>=0;
+function compose(str){
+  const a=[];for(const c of String(str||"")){const l=a[a.length-1];if(l&&isV(l)&&isV(c)&&VV[l+c])a[a.length-1]=VV[l+c];else a.push(c)}
+  let out="",i=0;
+  while(i<a.length){const c=a[i];
+    if(CHO.indexOf(c)>=0&&isV(a[i+1])){const L0=CHO.indexOf(c),V0=JUNG.indexOf(a[i+1]);i+=2;let T=0;
+      if(a[i]&&!isV(a[i])&&JONG.indexOf(a[i])>0&&!isV(a[i+1])){T=JONG.indexOf(a[i]);i++}
+      out+=String.fromCharCode(0xAC00+(L0*21+V0)*28+T);}
+    else{out+=c;i++}}
+  return out;
+}
+function decompose(syl){ const n=syl.charCodeAt(0)-0xAC00; if(n<0||n>11171)return [syl]; const T=n%28,V=(n/28|0)%21,L=n/588|0; return [CHO[L],JUNG[V]].concat(T?[JONG[T]]:[]); }
+const syl=(c,v,t)=>compose(c+v+(t||""));
+
+/* ============ МЕНЮ ============ */
+const GAMES = [
+  ["cards","Карточки","Узнавание: смотри на букву, вспомни звук, переверни.","ㄱ"],
+  ["bingo","Бинго","Слушай слог и закрывай клетку. Нужна линия из трёх.","빙"],
+  ["hunt","Звуковая охота","10 раундов: услышал — быстро нажми нужную карточку.","소"],
+  ["build","Конструктор слогов","Собери слог из букв. Можно с 받침.","간"],
+  ["oops","Найди ошибку","Какие блоки собраны неправильно?","?"],
+  ["batchim","Сортировка 받침","К какому из семи звуков сводится 받침?","밥"],
+  ["challenge","Reading Challenge","20 карточек: читай вслух, сверяйся, набирай баллы.","책"],
+  ["test","Итоговый тест","30 баллов, 15–20 минут, без подсказок. Отчёт уходит преподавателю.","✓"]
+];
+function menu(){
+  location.hash="";
+  $("app").innerHTML = `<p class="muted" style="color:var(--silver)">Наборы букв для игр (итоговый тест берёт всё сразу):</p>
+  <div class="sets">${SET_KEYS.map(k=>`<button class="chip ${chosen.has(k)?"on":""}" data-set="${k}">${SETS[k].name}</button>`).join("")}</div>
+  <div class="menu">${GAMES.map(g=>`<button class="tile" data-go="${g[0]}"><span class="big">${g[3]}</span><b>${g[1]}</b><span>${g[2]}</span></button>`).join("")}</div>
+  <p class="muted" style="color:var(--silver);margin-top:18px">Звук берётся из голоса устройства. Лучше всего звучит в Safari на iPhone и в браузере Edge. Русские подсказки — только ориентир: слушай и повторяй образец.</p>`;
+}
+document.addEventListener("click",e=>{
+  const s=e.target.closest("[data-set]"); if(s){const k=s.dataset.set; if(chosen.has(k)&&chosen.size>1)chosen.delete(k); else chosen.add(k); return menu();}
+  const g=e.target.closest("[data-go]"); if(g){ location.hash=g.dataset.go; }
+  if(e.target.closest("[data-menu]")) menu();
+});
+const head = (t,sub) => `<div class="row between"><div><h2>${t}</h2><div class="muted">${sub||""}</div></div><button class="btn" data-menu>← все игры</button></div>`;
+
+/* ============ 1. КАРТОЧКИ ============ */
+function cards(){
+  let deck=shuffle(pool()),i=0,open=false,known=0;
+  const draw=()=>{const x=deck[i];
+    $("app").innerHTML=`<div class="card">${head("Карточки",`Карточка ${i+1} из ${deck.length} · знаю: ${known}`)}
+    <div class="flip" id="fl" style="margin-top:12px">${open?`<div class="back"><b>${x.s}</b>${esc(x.h)}<div style="margin-top:10px">${sayBtn(x.s)}</div></div>`:`<div><div class="glyph">${x.j}</div><div class="muted">вспомни звук и нажми</div></div>`}</div>
+    <div class="row" style="margin-top:12px;justify-content:center">${open?`<button class="btn" id="again">Ещё повторить</button><button class="btn pri" id="know">Знаю</button>`:""}</div></div>`;
+    $("fl").onclick=e=>{if(e.target.closest("[data-say]"))return; open=!open; draw(); if(open)say(x.s)};
+    if(open){$("know").onclick=()=>{known++;next()};$("again").onclick=()=>{deck.push(x);next()}}
+  };
+  const next=()=>{i++;open=false;if(i>=deck.length){$("app").innerHTML=`<div class="card">${head("Карточки","Колода пройдена")}<p>Знаю с первого раза: <b>${known}</b>. Перемешай и пройди ещё раз без подсказок.</p><button class="btn pri" onclick="cards()">Ещё раз</button></div>`;return}draw()};
+  draw();
+}
+
+/* ============ 2. БИНГО ============ */
+const LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function bingo(){
+  const cells=pick(pool(),9),hit=new Set();let target=null,miss=0;
+  const call=()=>{const left=cells.map((c,i)=>i).filter(i=>!hit.has(i));target=rnd(left);say(cells[target].s)};
+  const draw=(win)=>{
+    $("app").innerHTML=`<div class="card">${head("Бинго","Нажми на динамик, послушай и закрой клетку с этой буквой.")}
+    <div class="row" style="margin:12px 0">${`<button class="say" id="rep" aria-label="Повторить">${SPK}</button>`}<span class="muted">Ошибок: ${miss}</span></div>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);max-width:360px">${cells.map((c,i)=>`<button class="cell ${hit.has(i)?"hit":""} ${win&&win.includes(i)?"win":""}" data-c="${i}">${c.j}</button>`).join("")}</div>
+    <div class="fb ok" id="fb">${win?"Бинго! Теперь назови вслух все закрытые буквы в линии.":""}</div>
+    ${win?`<button class="btn pri" onclick="bingo()">Новая карточка</button>`:""}</div>`;
+    $("rep").onclick=()=>{if(target==null)call();else say(cells[target].s)};
+    if(!win)document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.c;if(target==null)return call();
+      if(i===target){hit.add(i);target=null;const w=LINES.find(l=>l.every(x=>hit.has(x)));draw(w);if(!w)setTimeout(call,450)}
+      else{miss++;b.classList.add("no");setTimeout(()=>b.classList.remove("no"),400)}
+    });
+  };
+  draw();
+}
+
+/* ============ 3. ЗВУКОВАЯ ОХОТА ============ */
+function hunt(){
+  let round=0,ok=0,t0=Date.now(),cards,target;
+  const next=()=>{
+    if(round>=10){const s=Math.round((Date.now()-t0)/1000);$("app").innerHTML=`<div class="card">${head("Звуковая охота","Готово")}<p>Верно: <b>${ok} из 10</b> · время ${s} с.</p><p class="muted">Сначала точность, потом скорость. Если ошибок больше двух, сыграй ещё раз медленнее.</p><button class="btn pri" onclick="hunt()">Ещё раз</button></div>`;return}
+    cards=pick(pool(),6);target=rnd(cards);round++;
+    $("app").innerHTML=`<div class="card">${head("Звуковая охота",`Раунд ${round} из 10 · верно ${ok}`)}<div class="bar"><i style="width:${round*10}%"></i></div>
+    <div class="row" style="margin:10px 0"><button class="say" id="rep">${SPK}</button><span class="muted">услышал — нажми</span></div>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);max-width:380px">${cards.map((c,i)=>`<button class="cell" data-c="${i}">${c.j}</button>`).join("")}</div><div class="fb" id="fb"></div></div>`;
+    $("rep").onclick=()=>say(target.s);setTimeout(()=>say(target.s),250);
+    document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{
+      const c=cards[+b.dataset.c],good=c===target;if(good)ok++;
+      b.classList.add(good?"hit":"no");$("fb").className="fb "+(good?"ok":"bad");$("fb").textContent=good?"Верно":"Это было "+target.j+" ("+target.s+")";
+      document.querySelectorAll("[data-c]").forEach(x=>x.onclick=null);setTimeout(next,good?600:1300);
+    });
+  };
+  next();
+}
+
+/* ============ 4. КОНСТРУКТОР ============ */
+const C_ALL="ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ".split(""),V_ALL="ㅏㅓㅗㅜㅡㅣㅑㅕㅛㅠㅐㅔ".split("");
+const T_ALL="ㄱㄴㄹㅁㅂㅇ".split("");
+function build(){
+  let useT=false,byEar=false,n=0,ok=0,cur="",target;
+  const cs=()=>{const p=pool().map(x=>x.j);const c=C_ALL.filter(x=>p.includes(x));return c.length?c:"ㄱㄴㄷㄹㅁㅂㅅㅇㅈ".split("")};
+  const vs=()=>{const p=pool().map(x=>x.j);const v=V_ALL.filter(x=>p.includes(x));return v.length?v:"ㅏㅓㅗㅜㅡㅣ".split("")};
+  const newT=()=>{const t=useT?rnd(T_ALL):"";target=syl(rnd(cs()),rnd(vs()),t);cur="";n++;draw();if(byEar)say(target)};
+  const keys=()=>{const set=new Set(decompose(target));const extra=shuffle(cs().concat(vs()).concat(useT?T_ALL:[])).filter(x=>!set.has(x)).slice(0,7);return shuffle([...set,...extra])};
+  let kset=[];
+  const draw=(state)=>{
+    if(!state)kset=keys();
+    const parts=decompose(target);
+    $("app").innerHTML=`<div class="card">${head("Конструктор слогов",`Слог ${n} · верно ${ok}`)}
+    <div class="row" style="margin:10px 0"><label><input type="checkbox" id="t" ${useT?"checked":""}> с 받침</label><label><input type="checkbox" id="e" ${byEar?"checked":""}> на слух</label></div>
+    <div class="row" style="font:600 26px var(--ko);color:var(--navy);margin:8px 0">${byEar?`<button class="say" data-say="${target}">${SPK}</button> собери то, что слышишь`:parts.join(" + ")}</div>
+    <div class="row"><output class="built ${state||""}">${esc(compose(cur))}</output><span class="fb ${state==="ok"?"ok":"bad"}">${state==="ok"?"Верно: "+target:state==="bad"?"Должно быть: "+target:""}</span></div>
+    <div class="kb">${kset.map(k=>`<button data-k="${k}">${k}</button>`).join("")}<button data-k="⌫">⌫</button></div>
+    <div class="row" style="margin-top:12px"><button class="btn pri" id="chk">Проверить</button><button class="btn" id="nx">Следующий</button></div></div>`;
+    $("t").onchange=e=>{useT=e.target.checked;newT()};$("e").onchange=e=>{byEar=e.target.checked;newT()};
+    document.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{cur=b.dataset.k==="⌫"?[...cur].slice(0,-1).join(""):cur+b.dataset.k;draw("keep")});
+    $("chk").onclick=()=>{const g=compose(cur)===target;if(g)ok++;say(target);draw(g?"ok":"bad")};
+    $("nx").onclick=newT;
+  };
+  newT();
+}
+
+/* ============ 5. НАЙДИ ОШИБКУ ============ */
+// раскладки блока: [x,y,w,h] в процентах для начальной, гласной и 받침
+const LAY={V:[[0,0,50,100],[50,0,50,100]],H:[[0,0,100,50],[0,50,100,50]],VT:[[0,0,50,58],[50,0,50,58],[0,58,100,42]],HT:[[0,0,100,36],[0,34,100,30],[0,64,100,36]]};
+const VERT="ㅏㅓㅣㅑㅕㅐㅔ",HOR="ㅗㅜㅡㅛㅠ";
+function blockHtml(spec,i){
+  return `<div class="blk" data-b="${i}">${spec.map(p=>`<span style="left:${p[1]}%;top:${p[2]}%;width:${p[3]}%;height:${p[4]}%;font-size:${Math.min(p[3],p[4])*0.8}px">${p[0]}</span>`).join("")}</div>`;
+}
+function oops(){
+  const make=(bad)=>{
+    const c=rnd("ㄱㄴㄷㅁㅂㅅㅈ".split("")),vert=Math.random()<.5,v=rnd((vert?VERT:HOR).split("")),t=Math.random()<.4?rnd(T_ALL):"";
+    const ok=t?(vert?LAY.VT:LAY.HT):(vert?LAY.V:LAY.H);
+    if(!bad)return {spec:[[c,...ok[0]],[v,...ok[1]]].concat(t?[[t,...ok[2]]]:[]),why:""};
+    const kind=rnd(t?["swap","noInit","tTop"]:["swap","noInit"]);
+    if(kind==="swap"){const L=t?(vert?LAY.HT:LAY.VT):(vert?LAY.H:LAY.V);return {spec:[[c,...L[0]],[v,...L[1]]].concat(t?[[t,...L[2]]]:[]),why:vert?"вертикальная гласная должна стоять справа":"горизонтальная гласная должна стоять снизу"}}
+    if(kind==="noInit"){const tt=t||rnd(T_ALL);return {spec:[[v,...(vert?[25,0,50,58]:[0,0,100,58])],[tt,0,58,100,42]],why:"нет начальной согласной (нужна хотя бы ㅇ)"}}
+    const L=vert?[[0,42,50,58],[50,42,50,58]]:[[0,36,100,32],[0,66,100,34]];return {spec:[[t,0,0,100,40],[c,...L[0]],[v,...L[1]]],why:"받침 должна быть внизу, а не сверху"};
+  };
+  const badIdx=new Set(pick([0,1,2,3,4,5],2)),blocks=[0,1,2,3,4,5].map(i=>make(badIdx.has(i)));const sel=new Set();
+  $("app").innerHTML=`<div class="card">${head("Найди ошибку","Здесь 6 блоков, два собраны неправильно. Отметь их и нажми «Проверить».")}
+  <div class="row" style="gap:12px;margin:14px 0">${blocks.map((b,i)=>blockHtml(b.spec,i)).join("")}</div>
+  <div class="row"><button class="btn pri" id="chk">Проверить</button><button class="btn" onclick="oops()">Новые блоки</button></div><div id="why" class="fb"></div></div>`;
+  document.querySelectorAll(".blk").forEach(el=>el.onclick=()=>{const i=+el.dataset.b;sel.has(i)?sel.delete(i):sel.add(i);el.classList.toggle("sel")});
+  $("chk").onclick=()=>{let good=0;document.querySelectorAll(".blk").forEach(el=>{const i=+el.dataset.b;el.classList.remove("sel");el.classList.add(badIdx.has(i)?"wrong":"good");if(badIdx.has(i)===sel.has(i))good++});
+    $("why").className="fb "+(good===6?"ok":"bad");$("why").innerHTML=(good===6?"Всё верно! ":"Есть промахи. ")+"Ошибки: "+[...badIdx].map(i=>"<br>• "+blocks[i].why).join("")};
+}
+
+/* ============ 6. СОРТИРОВКА 받침 ============ */
+const BAT=[["밥","[ㅂ]"],["앞","[ㅂ]"],["집","[ㅂ]"],["옆","[ㅂ]"],["산","[ㄴ]"],["눈","[ㄴ]"],["문","[ㄴ]"],["옷","[ㄷ]"],["낮","[ㄷ]"],["꽃","[ㄷ]"],["밭","[ㄷ]"],["있다","[ㄷ]"],["달","[ㄹ]"],["물","[ㄹ]"],["발","[ㄹ]"],["밤","[ㅁ]"],["곰","[ㅁ]"],["봄","[ㅁ]"],["공","[ㅇ]"],["강","[ㅇ]"],["방","[ㅇ]"],["밖","[ㄱ]"],["부엌","[ㄱ]"],["책","[ㄱ]"],["국","[ㄱ]"]];
+const SEVEN=["[ㄱ]","[ㄴ]","[ㄷ]","[ㄹ]","[ㅁ]","[ㅂ]","[ㅇ]"];
+function batchim(){
+  const deck=pick(BAT,12);let i=0,ok=0;
+  const draw=()=>{if(i>=deck.length){$("app").innerHTML=`<div class="card">${head("Сортировка 받침","Готово")}<p>Верно: <b>${ok} из ${deck.length}</b>.</p><p class="muted">Главное: ㅅ ㅆ ㅈ ㅊ ㅌ ㅎ в конце звучат как [ㄷ], ㅍ как [ㅂ], ㄲ ㅋ как [ㄱ].</p><button class="btn pri" onclick="batchim()">Ещё раз</button></div>`;return}
+    const w=deck[i];
+    $("app").innerHTML=`<div class="card">${head("Сортировка 받침",`Слово ${i+1} из ${deck.length} · верно ${ok}`)}<div class="bar"><i style="width:${i/deck.length*100}%"></i></div>
+    <div class="row" style="margin:14px 0"><span style="font:700 56px var(--ko);color:var(--navy)">${w[0]}</span>${sayBtn(w[0])}</div><p class="muted">Каким звуком заканчивается слог с 받침?</p>
+    <div class="row">${SEVEN.map(s=>`<button class="opt" data-o="${s}">${s}</button>`).join("")}</div><div class="fb" id="fb"></div></div>`;
+    document.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{const g=b.dataset.o===w[1];if(g)ok++;b.classList.add(g?"ok":"bad");if(!g)document.querySelector(`[data-o="${w[1]}"]`).classList.add("ok");say(w[0]);
+      document.querySelectorAll("[data-o]").forEach(x=>x.onclick=null);i++;setTimeout(draw,g?700:1500)});
+  };
+  draw();
+}
+
+/* ============ 7. READING CHALLENGE ============ */
+const KNOWN=["아버지","어머니","우유","학교","친구","가방","모자","김치","사람","시간"];
+const NEWW=["바나나","도서관","라디오","노래","하늘","구두","지하철","토마토","냉면","거북이"];
+function challenge(){
+  const deck=shuffle(KNOWN.slice(0,10).concat(NEWW.slice(0,10)));let i=0,pts=0,heard=false;
+  const draw=()=>{if(i>=deck.length){$("app").innerHTML=`<div class="card">${head("Korean Reading Challenge","Финиш")}<p>Баллы: <b>${pts}</b> из ${deck.length*2}.</p><p class="muted">1 балл — правильно прочитал, ещё 1 — аккуратное произношение и можешь показать 받침. На уроке баллы ставит преподаватель.</p><button class="btn pri" onclick="challenge()">Ещё раз</button></div>`;return}
+    const w=deck[i];
+    $("app").innerHTML=`<div class="card">${head("Korean Reading Challenge",`Карточка ${i+1} из ${deck.length} · баллы ${pts}`)}<div class="bar"><i style="width:${i/deck.length*100}%"></i></div>
+    <div class="flip" style="min-height:160px;cursor:default;margin:12px 0"><div style="font:700 64px var(--ko);color:var(--navy)">${w}</div></div>
+    <p class="muted">${heard?"Сверь со своим чтением и поставь себе баллы.":"Прочитай вслух сам. Потом нажми динамик и сверься."}</p>
+    <div class="row">${`<button class="say" id="h">${SPK}</button>`}${heard?`<button class="btn" data-p="0">Не получилось</button><button class="btn" data-p="1">Прочитал верно (+1)</button><button class="btn pri" data-p="2">Верно + показал 받침 (+2)</button>`:""}</div></div>`;
+    $("h").onclick=()=>{say(w);if(!heard){heard=true;draw()}};
+    document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{pts+=+b.dataset.p;i++;heard=false;draw()});
+  };
+  draw();
+}
+
+/* ============ 8. ИТОГОВЫЙ ТЕСТ ============ */
+const T_REC=[["ㄹ","라"],["ㅂ","바"],["ㅈ","자"],["ㅓ","어"],["ㅡ","으"],["ㅋ","카"],["ㄸ","따"],["ㅕ","여"],["ㅎ","하"],["ㅢ","의"],["ㅅ","사"],["ㅍ","파"],["ㅛ","요"],["ㅁ","마"]];
+const T_LIS=[["너",["너","노","누","나"]],["무",["무","므","모","미"]],["요",["요","여","유","오"]],["밥",["밥","방","박","반"]],["워",["워","와","위","외"]],["살",["살","산","삼","상"]],["기",["기","거","그","구"]]];
+const T_BLD=[["ㅂ ㅗ ㅁ","봄"],["ㅎ ㅏ ㄴ","한"],["ㄱ ㅗ ㅇ","공"],["ㅅ ㅜ","수"],["ㄴ ㅏ ㅁ ㅜ","나무"],["ㅁ ㅜ ㄹ","물"],["ㅈ ㅣ ㅂ","집"]];
+const T_READ=[["모리",["모리","보리","노리"]],["두바",["두바","주바","두마"]],["고누",["고누","구누","고노"]],["버마",["버마","보마","버나"]],["소미",["소미","조미","소비"]],["마루",["마루","나루","마수"]],["나구",["나구","나고","라구"]]];
+const T_PRO=[["가","카","까"],["다","타","따"],["바","파","빠"],["자","차","짜"],["사","싸"]];
+function test(){
+  const name=localStorage.getItem("hg_name")||"";
+  $("app").innerHTML=`<div class="card">${head("Итоговый тест","30 баллов · 15–20 минут · без подсказок")}
+  <table><tr><th>Раздел</th><th>Задание</th><th>Баллы</th></tr>
+  <tr><td>1. Узнавание</td><td>Какой слог даёт буква</td><td>10</td></tr><tr><td>2. Аудирование</td><td>Услышь и выбери слог</td><td>5</td></tr>
+  <tr><td>3. Сборка</td><td>Собери слог из букв</td><td>5</td></tr><tr><td>4. Чтение</td><td>Прочитай незнакомое и найди его на слух</td><td>5</td></tr>
+  <tr><td>5. Контрасты</td><td>Обычный, придыхательный или напряжённый</td><td>5</td></tr></table>
+  <p class="muted">Включи звук. Динамик в задании можно нажимать сколько угодно.</p>
+  <div class="row"><input class="name" id="nm" placeholder="Твоё имя" value="${esc(name)}"><button class="btn pri" id="go">Начать</button></div></div>`;
+  $("go").onclick=()=>{const n=$("nm").value.trim();if(!n){$("nm").focus();return}localStorage.setItem("hg_name",n);runTest(n)};
+}
+function runTest(name){
+  const Q=[];
+  pick(T_REC,10).forEach(x=>{const others=pick(T_REC.filter(y=>y!==x),3).map(y=>y[1]);Q.push({sec:1,kind:"rec",prompt:x[0],opts:shuffle([x[1],...others]),a:x[1]})});
+  pick(T_LIS,5).forEach(x=>Q.push({sec:2,kind:"lis",say:x[0],opts:shuffle(x[1]),a:x[0]}));
+  pick(T_BLD,5).forEach(x=>{const set=x[0].split(" ");Q.push({sec:3,kind:"bld",prompt:x[0].split(" ").join(" + "),keys:shuffle(set.concat(pick("ㄱㄴㄹㅁㅂㅅㅇㅏㅓㅗㅜㅣ".split("").filter(k=>!set.includes(k)),5))),a:x[1]})});
+  pick(T_READ,5).forEach(x=>Q.push({sec:4,kind:"read",prompt:x[0],auds:shuffle(x[1]),a:x[0]}));
+  pick(T_PRO,5).forEach(x=>{const t=rnd(x);Q.push({sec:5,kind:"pro",say:t,opts:x.slice(),a:t})});
+  const A=[],t0=Date.now();let i=0,cur="";
+  const SEC={1:"Узнавание",2:"Аудирование",3:"Сборка",4:"Чтение",5:"Контрасты"};
+  const draw=()=>{
+    if(i>=Q.length)return finish();
+    const q=Q[i];let body="";
+    if(q.kind==="rec")body=`<p class="muted">Какой слог даёт эта буква? (согласная + ㅏ, гласная — с ㅇ)</p><div style="font:700 72px var(--ko);color:var(--navy);margin:8px 0">${q.prompt}</div>`+opts(q.opts);
+    if(q.kind==="lis"||q.kind==="pro")body=`<p class="muted">${q.kind==="pro"?"Какой из похожих слогов прозвучал?":"Послушай и выбери слог."}</p><div class="row" style="margin:10px 0">${sayBtn(q.say)}</div>`+opts(q.opts);
+    if(q.kind==="bld")body=`<p class="muted">Собери из букв.</p><div style="font:600 28px var(--ko);color:var(--navy);margin:8px 0">${q.prompt}</div><output class="built" id="bt">${esc(compose(cur))}</output><div class="kb">${q.keys.map(k=>`<button data-k="${k}">${k}</button>`).join("")}<button data-k="⌫">⌫</button></div><div style="margin-top:12px"><button class="btn pri" id="ok">Готово</button></div>`;
+    if(q.kind==="read")body=`<p class="muted">Прочитай про себя. Какая запись звучит так же?</p><div style="font:700 60px var(--ko);color:var(--navy);margin:8px 0">${q.prompt}</div><div class="row">${q.auds.map((w,k)=>`<span class="row" style="gap:4px">${sayBtn(w)}<button class="opt txt" data-o="${esc(w)}">Вариант ${"АБВ"[k]}</button></span>`).join("")}</div>`;
+    $("app").innerHTML=`<div class="card"><div class="row between"><div><h2>${SEC[q.sec]}</h2><div class="muted">${name} · вопрос ${i+1} из ${Q.length}</div></div></div><div class="bar"><i style="width:${i/Q.length*100}%"></i></div>${body}</div>`;
+    if(q.say)setTimeout(()=>say(q.say),250);
+    document.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{A[i]=b.dataset.o;i++;cur="";draw()});
+    document.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{cur=b.dataset.k==="⌫"?[...cur].slice(0,-1).join(""):cur+b.dataset.k;$("bt").textContent=compose(cur)});
+    if($("ok"))$("ok").onclick=()=>{A[i]=compose(cur);i++;cur="";draw()};
+  };
+  const opts=o=>`<div class="row">${o.map(x=>`<button class="opt" data-o="${esc(x)}">${esc(x)}</button>`).join("")}</div>`;
+  const finish=()=>{
+    const secs=Math.round((Date.now()-t0)/1000);let total=0;const by={1:0,2:0,3:0,4:0,5:0};
+    Q.forEach((q,k)=>{if(A[k]===q.a){total++;by[q.sec]++}});
+    const verdict=total>=26?"Можно переходить к начальному учебнику и базовой лексике; продолжать короткое повторение.":total>=21?"Повторить слабый блок и провести короткую повторную проверку.":total>=15?"Закрепить узнавание букв, слоговую сборку и контрасты на слух.":"Вернуться к занятиям 2–6; уменьшить объём новых букв за занятие.";
+    const label=q=>q.kind==="rec"?q.prompt:q.kind==="bld"?q.prompt:q.kind==="read"?q.prompt:"🔊 "+q.say;
+    const rows=Q.map((q,k)=>`<tr><td>${A[k]===q.a?"✅":"❌"}</td><td>${SEC[q.sec]}</td><td class="ko">${esc(label(q))}</td><td class="ko">${A[k]===q.a?esc(q.a):"<s>"+esc(A[k]||"—")+"</s> <b>"+esc(q.a)+"</b>"}</td></tr>`).join("");
+    let rep="📝 <b>Итоговый тест · Хангыль с нуля</b>\n👤 "+esc(name)+"\n🕒 "+new Date(t0).toLocaleString("ru-RU")+" · "+Math.floor(secs/60)+":"+String(secs%60).padStart(2,"0")+"\n🎯 <b>"+total+" / 30</b>\n"+Object.keys(by).map(s=>SEC[s]+": "+by[s]+"/"+(s==="1"?10:5)).join(" · ")+"\n💡 "+verdict+"\n";
+    let last=0;Q.forEach((q,k)=>{if(q.sec!==last){rep+="\n<b>"+SEC[q.sec]+"</b>";last=q.sec}const ok=A[k]===q.a;rep+="\n"+(ok?"✅ ":"❌ ")+esc(label(q))+(ok?"":" — ответ: "+esc(A[k]||"—")+" → "+esc(q.a))});
+    $("app").innerHTML=`<div class="card">${head("Результат",name)}<div class="score">${total} / 30</div>
+    <p class="muted">${Object.keys(by).map(s=>SEC[s]+": "+by[s]+"/"+(s==="1"?10:5)).join(" · ")}</p><p><b>Что дальше:</b> ${verdict}</p>
+    <div class="row"><button class="btn pri" id="send">Отправить преподавателю</button><button class="btn" onclick="test()">Пройти заново</button></div><div class="fb" id="sfb"></div><textarea id="copy" class="hidden" readonly></textarea>
+    <table style="margin-top:12px">${rows}</table></div>`;
+    $("send").onclick=async()=>{$("send").disabled=true;$("sfb").textContent="Отправляю…";
+      try{const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:rep.slice(0,3900),parse_mode:"HTML"})});const j=await r.json();if(!j.ok)throw new Error(j.description);$("sfb").className="fb ok";$("sfb").textContent="✅ Отправлено! 수고했어요!"}
+      catch(e){$("send").disabled=false;$("sfb").className="fb bad";$("sfb").textContent="Не получилось отправить. Скопируй текст и отправь преподавателю:";const c=$("copy");c.value=rep.replace(/<\/?b>/g,"");c.classList.remove("hidden")}};
+  };
+  draw();
+}
+
+/* ============ ЗАПУСК ============ */
+const ROUTES={cards,bingo,hunt,build,oops,batchim,challenge,test};
+function route(){const g=location.hash.slice(1);if(ROUTES[g])ROUTES[g]();else menu()}
+window.addEventListener("hashchange",route);
+route();
+</script>
+</body>
+</html>
