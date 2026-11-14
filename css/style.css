@@ -374,35 +374,64 @@ main.auth>.login{margin:0}
 .seg button{flex:1;min-height:40px;padding:6px 12px;border-color:transparent;background:transparent;color:var(--fg-2);font-size:14.5px}
 .seg button[aria-selected=true],.seg button.on{background:rgba(255,255,255,.1);color:var(--fg);border-color:rgba(212,175,124,.5)}
 
-/* ---------- путь по программе («история») ---------- */
-.journey{display:flex;align-items:center;gap:20px;padding:22px 24px;border-radius:28px;margin:18px 0 8px}
-.journey .mid{flex:1;min-width:0}
+/* ---------- курс: шапка с кнопкой, «Твой путь» и карточки уроков ---------- */
+main.course{max-width:1120px;padding:0 24px}
+header.band.course-hero .in{max-width:1120px;padding:0 24px}
+header.band .hero-cta{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:10px;margin-top:24px}
+header.band .hero-cta:empty{display:none}
+header.band .hero-cta a{margin:0;height:50px;padding:0 24px;gap:8px;font-size:15.5px;font-weight:600;letter-spacing:.01em;white-space:nowrap}
+header.band .hero-cta a.pri{background:var(--gold);color:#0B1535;border-color:transparent;box-shadow:0 14px 32px -14px rgba(212,175,124,.7)}
+header.band .hero-cta a.pri:hover{background:var(--gold-hi);color:#0B1535}
+header.band .hero-cta a.ghost{background:rgba(11,21,53,.4);color:var(--ivory);border-color:rgba(212,175,124,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+header.band .hero-cta a.ghost:hover{border-color:var(--gold);color:var(--gold-hi)}
+.deco{display:none}
+.journey{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.3fr);align-items:center;gap:22px;padding:28px 34px;border-radius:28px;margin:18px 0 8px}
+.journey .mid{min-width:0}
 .journey h3{margin:0 0 4px;font-size:27px;font-weight:500}
 .journey .muted{font-size:15px}
-.path-part{display:flex;align-items:baseline;gap:12px;margin:34px 0 14px 4px;font-family:var(--font-ko);font-size:26px;font-weight:600;color:var(--ivory)}
+.journey .last{position:relative;z-index:2;display:flex;align-items:center;gap:14px;min-width:0;padding:10px 12px 10px 10px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(212,175,124,.3);color:inherit;text-decoration:none;transition:border-color .2s,background-color .2s}
+.journey .last:hover{border-color:rgba(212,175,124,.65);background:rgba(255,255,255,.08)}
+.journey .last img{flex:none;width:112px;height:70px;border-radius:12px;object-fit:cover}
+.last-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.last-tx small{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--la,var(--gold))}
+.last-tx b{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-family:var(--font-display);font-size:21px;font-weight:600;line-height:1.25;color:var(--ivory)}
+.last-tx b.ko{font-family:var(--font-ko);font-size:17px}
+.journey .last-tx .muted{font-size:13.5px}
+.journey .last .btn{flex:none;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;font-size:14.5px}
+.path-part{display:flex;align-items:baseline;gap:12px;margin:38px 0 16px 4px;font-family:var(--font-ko);font-size:26px;font-weight:600;color:var(--ivory);scroll-margin-top:calc(var(--nav-h,64px) + 16px)}
 .path-part small{font-family:var(--font-body);font-size:12px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
-.chapters{position:relative;list-style:none;margin:0;padding:0}
-.chapters::before,.chapters::after{content:"";position:absolute;left:25px;top:14px;bottom:14px;width:2px;border-radius:2px;background:rgba(192,198,212,.14)}
-.chapters::after{bottom:auto;height:var(--h,0px);background:linear-gradient(180deg,var(--gold),#b98f55);transform-origin:top;animation:draw 1.4s var(--ease) both}
-@keyframes draw{from{transform:scaleY(0)}}
-.ch{position:relative;z-index:1;display:grid;grid-template-columns:52px 1fr;gap:14px;align-items:center;padding:8px 0;animation:rise .6s var(--ease) both;animation-delay:calc(var(--i,0)*70ms)}
-.ch-node{position:relative;z-index:1;justify-self:center;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--bg);border:1.5px solid rgba(192,198,212,.3);color:var(--silver)}
-.ch.soon .ch-node{width:12px;height:12px;border-width:2px}
-.ch.open .ch-node{border-color:var(--gold);color:var(--gold)}
-.ch.done .ch-node{background:var(--gold);border-color:var(--gold);color:var(--bg)}
-.ch.now .ch-node{width:52px;height:52px;border:0;background:var(--bg);color:var(--gold)}
-.ch.now .ch-node .ring{width:100%;height:100%}
-.ch.now .ch-node .ring b{color:var(--gold)}
-.ch.now .ch-node::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1px solid rgba(212,175,124,.6);animation:halo 2.4s ease-out infinite}
-@keyframes halo{from{opacity:.9;transform:scale(.92)}to{opacity:0;transform:scale(1.35)}}
-.ch-card{min-width:0;padding:18px 20px;border-radius:22px}
-.ch-card .tag{display:block;margin-bottom:4px}
-.ch-card h3{margin:0;font-size:22px;line-height:1.3;color:var(--ivory)}
-.ch-card .scene{margin:8px 0 0;font-family:var(--font-display);font-style:italic;font-size:19px;line-height:1.35;color:var(--silver)}
-.ch-card .done-row{margin-top:14px}
-.ch-row{min-width:0;color:var(--silver);font-size:15px;padding:2px 0}
-.ch-row b{color:var(--ivory);font-weight:500}
-.ch.soon .ch-row,.ch.lock .ch-row{opacity:.8}
+.lgrid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+.lsn{position:relative;display:flex;flex-direction:column;min-width:0;overflow:hidden;border-radius:22px;border:1px solid rgba(212,175,124,.2);
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));box-shadow:inset 0 1px 1px rgba(255,255,255,.1),0 24px 60px -34px rgba(0,0,0,.7);
+  animation:rise .6s var(--ease) both;animation-delay:calc(min(var(--i,0),12)*55ms);transition:transform .25s var(--ease),border-color .2s,box-shadow .25s}
+.lsn:hover{transform:translateY(-3px);border-color:rgba(212,175,124,.45)}
+.lsn.now{border-color:rgba(212,175,124,.8);box-shadow:0 0 0 1px rgba(212,175,124,.3),0 26px 60px -30px rgba(212,175,124,.5)}
+.lsn-art{position:relative;display:block;aspect-ratio:16/10;overflow:hidden;background:#0B1535}
+.lsn-art img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .7s var(--ease),filter .3s}
+.lsn:hover .lsn-art img{transform:scale(1.045)}
+.lsn-art::after{content:"";position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(rgba(11,21,53,0),rgba(11,21,53,.6))}
+.lsn .chip{position:absolute;left:12px;top:12px;z-index:1;display:inline-flex;align-items:center;gap:6px;padding:5px 12px 5px 9px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--ivory);
+  background:rgba(7,13,36,.74);border:1px solid rgba(255,255,255,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.lsn.st-now .chip,.lsn.now .chip{color:#0B1535;background:var(--gold);border-color:transparent}
+.lsn.st-done .chip{color:var(--gold-hi);border-color:rgba(212,175,124,.6)}
+.lsn.st-lock .lsn-art img,.lsn.st-soon .lsn-art img{filter:grayscale(.55) brightness(.5)}
+.lsn.st-lock,.lsn.st-soon{border-color:rgba(192,198,212,.14)}
+.lsn.st-lock:hover,.lsn.st-soon:hover{transform:none;border-color:rgba(192,198,212,.24)}
+.lsn-body{display:flex;flex-direction:column;flex:1;padding:16px 18px 18px}
+.lsn-body .tag{margin-bottom:4px}
+.lsn-body h3{margin:0;font-size:23px;line-height:1.25;color:var(--ivory)}
+.lsn-body h3.ko{font-size:19px;line-height:1.35}
+.lsn-body h3 a{color:inherit;text-decoration:none;transition:color .2s}
+.lsn-body h3 a:hover{color:var(--gold-hi)}
+.lsn-body .scene{margin:8px 0 0;font-family:var(--font-display);font-style:italic;font-size:18px;line-height:1.35;color:var(--silver)}
+.lsn-body .muted{margin:6px 0 0;font-size:14px}
+.lsn-body .done-row{margin-top:auto;padding-top:14px;justify-content:flex-start}
+.lsn-body .done-row .btn,.lsn-body .done-row button{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;font-size:14.5px}
+.st-lock .lsn-body h3,.st-soon .lsn-body h3{color:var(--silver)}
+/* значки у пунктов меню в шапке школы */
+.top.school nav a{display:inline-flex;align-items:center;gap:7px}
+.top.school nav a .ic{flex:none;opacity:.75}
+.top.school nav a.on .ic{opacity:1}
 
 /* ---------- личный кабинет ---------- */
 .dash{display:flex;align-items:center;gap:24px;padding:24px;border-radius:28px}
@@ -510,8 +539,8 @@ input[type=range]{width:100%;margin:10px 0;accent-color:var(--gold)}
 textarea{resize:vertical}
 
 /* ---------- языковые разделы: то же оформление, но со своим акцентом, орнаментом и пейзажем ----------
-   Корейский: пять вершин и луна (по мотивам «Ирвор обондо»), сосны, беседка, меандр «нвемун», лотос из «танчхон».
-   Английский: холмы, Стоунхендж, дуб, деревенская церковь, плетёнка, роза Тюдоров.
+   Корейский: башня Намсан, горы, зал-ханок, сосны, волны, луна и ветка сливы, меандр «нвемун», лотос из «танчхон».
+   Английский: Биг-Бен, колесо обозрения, разводной мост, капелла, фонари и розы, лоза, щит с розой.
    Атрибут data-lang на <html> ставит js/common.js; рисунки лежат в img/ и их можно заменить своими. */
 html[data-lang=ko]{--la:#7CC4B5;--scene:url(../img/scene-ko.svg);--band:url(../img/band-ko.svg);--emblem:url(../img/emblem-ko.svg);--frame:url(../img/frame-ko.svg)}
 html[data-lang=en]{--la:#DC97A0;--scene:url(../img/scene-en.svg);--band:url(../img/band-en.svg);--emblem:url(../img/emblem-en.svg);--frame:url(../img/frame-en.svg)}
@@ -537,11 +566,13 @@ html:is([data-lang=ko],[data-lang=en]) .hero-art{display:block;position:absolute
 html:is([data-lang=ko],[data-lang=en]) .hero-art::before{content:"";position:absolute;left:0;right:0;top:100%;height:var(--hz,64px);background:linear-gradient(#070C26,rgba(7,12,38,0))}
 html:is([data-lang=ko],[data-lang=en]) .hero-art::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:16px;background:var(--band) 50% 0/auto 16px repeat-x;opacity:.9}
 /* луна корейского раздела: отдельный слой, чтобы не попадать под текст */
-html[data-lang=ko] header.band:not(.slim)::after,html[data-lang=ko] .hero::after{content:"";position:absolute;z-index:-1;width:132px;height:132px;pointer-events:none;
-  background:radial-gradient(circle,#FFF6DF 0,#F3E3BF 15%,rgba(243,227,191,.26) 17%,rgba(243,227,191,0) 50%)}
+html[data-lang=ko] header.band:not(.slim)::after,html[data-lang=ko] .hero::after{content:"";position:absolute;z-index:-1;width:150px;height:150px;pointer-events:none;
+  background:url(../img/moon.svg) center/contain no-repeat}
+html[data-lang=ko] header.band .deco{display:block;position:absolute;top:0;right:0;z-index:-1;width:clamp(190px,25vw,330px);aspect-ratio:230/130;pointer-events:none;
+  background:url(../img/branch-ko.svg) 0 0/contain no-repeat;transform:scaleX(-1)}
 html[data-lang=ko] header.band:not(.slim)::after{right:max(4%,calc(50% - 540px));bottom:clamp(96px,13vw,176px)}
 html[data-lang=ko] .hero::after{right:max(7%,calc(50% - 600px));top:clamp(84px,15vh,150px)}
-@media(max-width:640px){html[data-lang=ko] .hero::after{right:3%;top:76px;width:96px;height:96px}html[data-lang=ko] header.band:not(.slim)::after{width:100px;height:100px}}
+@media(max-width:640px){html[data-lang=ko] .hero::after{right:3%;top:76px;width:110px;height:110px}html[data-lang=ko] header.band:not(.slim)::after{width:110px;height:110px}html[data-lang=ko] header.band .deco{width:150px;opacity:.75}}
 /* рамка с орнаментом в углах: карточки-итоги в разделах и карточки языков на главной */
 .fr::after{content:"";position:absolute;inset:7px;z-index:1;pointer-events:none;border:24px solid transparent;border-image:var(--frame,none) 56/24px stretch;opacity:.85}
 
@@ -595,11 +626,17 @@ html[data-lang=ko] .hero::after{right:max(7%,calc(50% - 600px));top:clamp(84px,1
   .cta{padding:0 20px;font-size:13px}
   main.home,.foot{padding-left:16px;padding-right:16px}
   .login{padding:26px 20px 22px;border-radius:28px}
-  .journey{padding:18px;gap:14px;border-radius:24px}
-  .chapters::before,.chapters::after{left:19px}
-  .ch{grid-template-columns:40px 1fr;gap:10px}
-  .ch.now .ch-node{width:42px;height:42px}
-  .ch-card{padding:16px}
+  .journey{grid-template-columns:auto minmax(0,1fr);padding:24px 24px;gap:16px;border-radius:24px}
+  .journey .last{grid-column:1/-1;flex-wrap:wrap}
+  .journey .last img{width:88px;height:55px}
+  .journey .last .btn{flex:1 1 100%;justify-content:center}
+  main.course,header.band.course-hero .in{padding-left:16px;padding-right:16px}
+  header.band .hero-cta a{justify-content:center;padding:0 16px;font-size:15px}
+  header.band .hero-cta a.pri{flex:1 1 100%}
+  header.band .hero-cta a.ghost{display:none}
+  html[data-lang=ko] header.band.course-hero::after{display:none}
+  .lgrid{gap:14px}
+  .lsn-art{aspect-ratio:2/1}
   .asst-btn{right:12px;bottom:12px}
   .asst{right:12px;bottom:76px}
 }

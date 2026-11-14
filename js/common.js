@@ -353,7 +353,7 @@ window.KR={
         const L=LANGS[l];
         h='<div class="top user school"><a class="logo brand" href="index.html" aria-label="MIRAÉ, школа: '+L.tag+', на главную"><i class="emb" aria-hidden="true"></i>'+
           '<span class="wm"><b lang="'+l+'">'+L.wm+'</b><small>MIRAÉ · '+L.tag+'</small></span></a>'+
-          '<nav aria-label="Разделы сайта">'+a("course.html","Курс","course")+a("words.html","Слова","words")+a("practice.html",'<span class="xs-hide">Доп.&nbsp;</span>упражнения',"practice")+tl+"</nav>"+
+          '<nav aria-label="Разделы сайта">'+a("course.html",icon("book",17)+"Курс","course")+a("words.html",icon("cards",17)+"Слова","words")+a("practice.html",icon("pencil",17)+'<span class="xs-hide">Доп.&nbsp;</span>упражнения',"practice")+(cx.teacher?a("teacher.html",icon("users",17)+"Ученики","teacher"):"")+"</nav>"+
           '<div class="top-r">'+langSwitch()+acc+"</div></div>";
       }else{
         h='<div class="top user">'+logo+"<nav aria-label=\"Разделы сайта\">"+tl+"</nav><div class=\"top-r\">"+acc+"</div></div>";

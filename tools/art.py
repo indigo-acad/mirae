@@ -118,40 +118,171 @@ def waves(y0, rows=3, R=20, op=.45):
     return t
 
 
-def scene_ko():
-    W, H = 1600, 300
-    defs = (f'<linearGradient id="pk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22338A"/><stop offset="1" stop-color="#0E1A52"/></linearGradient>'
-            f'<linearGradient id="gs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{GOLD}" stop-opacity=".95"/><stop offset="1" stop-color="{GOLD}" stop-opacity=".12"/></linearGradient>'
-            f'<radialGradient id="mist"><stop offset="0" stop-color="#8FA2F2" stop-opacity=".30"/><stop offset="1" stop-color="#8FA2F2" stop-opacity="0"/></radialGradient>'
-            f'<radialGradient id="glow"><stop offset="0" stop-color="#FFE3A0" stop-opacity=".9"/><stop offset="1" stop-color="#FFE3A0" stop-opacity="0"/></radialGradient>')
+def hall(x, base, s=1.0):
+    """Зал-павильон на каменной террасе: две изогнутые крыши, колонны, окна с тёплым светом, фонари под стрехой."""
+    def r(dx, dy):
+        return f'{f(x + dx * s)} {f(base + dy * s)}'
+    c = '#060A20'
+    t = ''
+    # терраса и ступени
+    t += f'<path d="M{r(-112,0)}L{r(-104,-12)}L{r(104,-12)}L{r(112,0)}Z" fill="#0C1436"/>'
+    t += f'<path d="M{r(-104,-12)}L{r(104,-12)}" stroke="{GOLD}" stroke-width="1" opacity=".5"/>'
+    t += f'<path d="M{r(-22,0)}L{r(-16,-12)}L{r(16,-12)}L{r(22,0)}Z" fill="#141E4C"/>'
+    t += f'<path d="M{r(-20,-4)}L{r(20,-4)}M{r(-18,-8)}L{r(18,-8)}" stroke="{GOLD}" stroke-width=".7" opacity=".35"/>'
+    # нижний ярус: стена, окна с решёткой, колонны
+    t += f'<path d="M{r(-78,-12)}L{r(-78,-54)}L{r(78,-54)}L{r(78,-12)}Z" fill="{c}"/>'
+    cols = (-78, -47, -16, 16, 47, 78)
+    for i in range(5):
+        x0, x1 = cols[i] + 5, cols[i + 1] - 5
+        t += f'<path d="M{r(x0,-16)}L{r(x0,-46)}L{r(x1,-46)}L{r(x1,-16)}Z" fill="url(#wn)" opacity="{".95" if i != 2 else ".8"}"/>'
+        lat = ''
+        for k in (1, 2, 3):
+            xx = x0 + (x1 - x0) * k / 4
+            lat += f'M{r(xx,-46)}L{r(xx,-16)}'
+        lat += f'M{r(x0,-36)}L{r(x1,-36)}M{r(x0,-26)}L{r(x1,-26)}'
+        t += f'<path d="{lat}" stroke="#5A3F1E" stroke-width="{f(max(.6, .8*s))}" opacity=".7" fill="none"/>'
+    for dx in cols:
+        t += f'<path d="M{r(dx-2.5,-12)}L{r(dx-2.5,-56)}L{r(dx+2.5,-56)}L{r(dx+2.5,-12)}Z" fill="{c}"/>'
+    # нижняя крыша с приподнятыми углами
+    low = (f'M{r(-116,-62)}Q{r(-98,-56)} {r(-76,-68)}L{r(76,-68)}Q{r(98,-56)} {r(116,-62)}'
+           f'Q{r(104,-52)} {r(90,-52)}L{r(-90,-52)}Q{r(-104,-52)} {r(-116,-62)}Z')
+    t += f'<path d="{low}" fill="{c}"/>'
+    t += f'<path d="M{r(-116,-62)}Q{r(-98,-56)} {r(-76,-68)}L{r(76,-68)}Q{r(98,-56)} {r(116,-62)}" fill="none" stroke="{GOLD}" stroke-width="1.2" opacity=".85"/>'
+    # верхний ярус
+    t += f'<path d="M{r(-52,-68)}L{r(-52,-88)}L{r(52,-88)}L{r(52,-68)}Z" fill="{c}"/>'
+    for dx in (-34, -11, 12):
+        t += f'<path d="M{r(dx,-71)}L{r(dx,-84)}L{r(dx+22,-84)}L{r(dx+22,-71)}Z" fill="url(#wn)" opacity=".85"/>'
+        t += f'<path d="M{r(dx+11,-84)}L{r(dx+11,-71)}" stroke="#5A3F1E" stroke-width="{f(max(.6, .8*s))}" opacity=".7"/>'
+    up = (f'M{r(-88,-96)}Q{r(-70,-90)} {r(-52,-102)}Q{r(-42,-114)} {r(-34,-118)}L{r(34,-118)}Q{r(42,-114)} {r(52,-102)}'
+          f'Q{r(70,-90)} {r(88,-96)}Q{r(76,-87)} {r(64,-87)}L{r(-64,-87)}Q{r(-76,-87)} {r(-88,-96)}Z')
+    t += f'<path d="{up}" fill="{c}"/>'
+    t += (f'<path d="M{r(-88,-96)}Q{r(-70,-90)} {r(-52,-102)}Q{r(-42,-114)} {r(-34,-118)}L{r(34,-118)}Q{r(42,-114)} {r(52,-102)}Q{r(70,-90)} {r(88,-96)}" '
+          f'fill="none" stroke="{GOLD}" stroke-width="1.2" opacity=".85"/>')
+    tiles = ''
+    for k in range(-5, 6):
+        tiles += f'M{r(k*11,-116)}L{r(k*13.5,-92)}'
+    for k in range(-7, 8):
+        tiles += f'M{r(k*10.5,-67)}L{r(k*12.2,-54)}'
+    t += f'<path d="{tiles}" stroke="{GOLD}" stroke-width=".6" opacity=".22" fill="none"/>'
+    t += f'<circle cx="{f(x-34*s)}" cy="{f(base-120*s)}" r="{f(2.2*s)}" fill="{GOLD}"/><circle cx="{f(x+34*s)}" cy="{f(base-120*s)}" r="{f(2.2*s)}" fill="{GOLD}"/>'
+    # фонари
+    for dx in (-104, 104):
+        t += f'<circle cx="{f(x+dx*s)}" cy="{f(base-46*s)}" r="{f(13*s)}" fill="url(#glow)" opacity=".8"/>'
+        t += f'<path d="M{r(dx,-56)}L{r(dx,-50)}" stroke="{c}" stroke-width="1"/>'
+        t += f'<rect x="{f(x+dx*s-2.6*s)}" y="{f(base-50*s)}" width="{f(5.2*s)}" height="{f(7*s)}" rx="{f(1.6*s)}" fill="#FFE2A0"/>'
+    return t
+
+
+def ntower(x, base, s=1.0, hill=True):
+    """Башня на горе Намсан: холм, тонкая мачта, смотровая площадка и антенна."""
+    def r(dx, dy):
+        return f'{f(x + dx * s)} {f(base + dy * s)}'
+    c = '#1B2A72'
+    t = ''
+    if hill:
+        t += f'<path d="M{r(-190,0)}Q{r(-80,-70)} {r(0,-76)}Q{r(86,-70)} {r(210,0)}Z" fill="#132060"/>'
+        t += f'<path d="M{r(-190,0)}Q{r(-80,-70)} {r(0,-76)}Q{r(86,-70)} {r(210,0)}" fill="none" stroke="{GOLD}" stroke-width="1" opacity=".35"/>'
+    y0 = -74
+    t += f'<path d="M{r(-3.4,y0)}L{r(-2.2,y0-74)}L{r(2.2,y0-74)}L{r(3.4,y0)}Z" fill="{c}"/>'
+    t += f'<path d="M{r(-2.6,y0-74)}L{r(-2.6,y0)}" stroke="{GOLD}" stroke-width=".8" opacity=".5"/>'
+    t += f'<path d="M{r(-8,y0-74)}L{r(-12,y0-80)}L{r(-12,y0-90)}L{r(-8,y0-96)}L{r(8,y0-96)}L{r(12,y0-90)}L{r(12,y0-80)}L{r(8,y0-74)}Z" fill="{c}"/>'
+    t += f'<path d="M{r(-11,y0-84)}L{r(11,y0-84)}" stroke="{LAMP}" stroke-width="{f(1.6*s)}" stroke-dasharray="{f(2*s)} {f(1.6*s)}" opacity=".9"/>'
+    t += f'<path d="M{r(-11,y0-89)}L{r(11,y0-89)}" stroke="{LAMP}" stroke-width="{f(1*s)}" stroke-dasharray="{f(1.4*s)} {f(2*s)}" opacity=".6"/>'
+    t += f'<path d="M{r(-5,y0-96)}L{r(-3.6,y0-108)}L{r(3.6,y0-108)}L{r(5,y0-96)}Z" fill="{c}"/>'
+    t += f'<path d="M{r(0,y0-108)}L{r(0,y0-152)}" stroke="{c}" stroke-width="{f(2.2*s)}"/>'
+    t += f'<path d="M{r(-3,y0-124)}L{r(3,y0-124)}M{r(-2.2,y0-136)}L{r(2.2,y0-136)}" stroke="{c}" stroke-width="{f(1.4*s)}"/>'
+    t += f'<circle cx="{f(x)}" cy="{f(base+(y0-153)*s)}" r="{f(1.7*s)}" fill="#F08A7A"/>'
+    return t
+
+
+def blossom(x, y, r, rot=0, col='#F2B9C6', mid='#C9647F'):
+    t = ''
+    for i in range(5):
+        a = math.radians(rot + i * 72)
+        t += f'<circle cx="{f(x+r*.62*math.cos(a))}" cy="{f(y+r*.62*math.sin(a))}" r="{f(r*.52)}" fill="{col}"/>'
+    t += f'<circle cx="{f(x)}" cy="{f(y)}" r="{f(r*.3)}" fill="{mid}"/>'
+    for i in range(5):
+        a = math.radians(rot + 36 + i * 72)
+        t += f'<circle cx="{f(x+r*.5*math.cos(a))}" cy="{f(y+r*.5*math.sin(a))}" r="{f(max(.5, r*.07))}" fill="#FFE9B0"/>'
+    return t
+
+
+def branch_ko(raw=False):
+    """Ветка цветущей сливы для левого верхнего угла заголовка."""
+    c = '#5B3A40'
+    b = (f'<path d="M-6 8C30 14 60 22 92 44C118 62 140 70 176 74" fill="none" stroke="{c}" stroke-width="5.5" stroke-linecap="round"/>'
+         f'<path d="M-6 6.4C30 12.4 60 20.4 92 42.4C118 60.4 140 68.4 176 72.4" fill="none" stroke="{GOLD}" stroke-width="1" stroke-linecap="round" opacity=".45"/>'
+         f'<path d="M58 24C70 44 74 62 70 86M112 58C128 50 142 38 150 22M92 44C96 30 104 20 118 12M150 72C162 84 170 96 172 112" fill="none" stroke="{c}" stroke-width="3" stroke-linecap="round"/>'
+         f'<path d="M70 86C66 96 60 104 52 110M176 74C190 74 202 70 212 62" fill="none" stroke="{c}" stroke-width="2" stroke-linecap="round"/>')
+    for x, y, r, rot in [(30, 16, 9, 10), (60, 52, 10, 40), (74, 88, 8, 0), (118, 12, 9, 20), (150, 22, 10, 55), (112, 60, 8, 30),
+                         (170, 112, 8.5, 12), (148, 74, 7, 60), (212, 62, 8, 0), (52, 110, 6.5, 25)]:
+        b += blossom(x, y, r, rot)
+    for x, y in [(92, 30), (134, 44), (190, 76), (66, 70), (160, 96)]:
+        b += f'<circle cx="{x}" cy="{y}" r="3.2" fill="#E38FA6"/>'
+    for x, y, rot in [(96, 96, 20), (128, 108, -30), (40, 70, 50), (196, 104, 10)]:
+        b += f'<ellipse cx="{x}" cy="{y}" rx="4" ry="2.2" transform="rotate({rot} {x} {y})" fill="#F2B9C6" opacity=".7"/>'
+    if raw:
+        return b
+    return svg(230, 130, b, 'width="230" height="130"')
+
+
+def moon(raw=False):
+    """Полная луна: тёплый диск с мягкими пятнами и ореолом."""
+    b = (f'<defs><radialGradient id="h"><stop offset=".36" stop-color="#FFE9B8" stop-opacity=".55"/><stop offset=".62" stop-color="#F6D892" stop-opacity=".16"/><stop offset="1" stop-color="#F6D892" stop-opacity="0"/></radialGradient>'
+         f'<radialGradient id="m" cx=".4" cy=".36" r=".75"><stop offset="0" stop-color="#FFF6DC"/><stop offset=".6" stop-color="#F8E3AE"/><stop offset="1" stop-color="#E9C680"/></radialGradient></defs>'
+         f'<circle cx="100" cy="100" r="100" fill="url(#h)"/><circle cx="100" cy="100" r="40" fill="url(#m)"/>')
+    for cx, cy, rx, ry, o in [(88, 86, 11, 8, .16), (112, 104, 13, 9, .14), (96, 118, 8, 5, .13), (118, 82, 6, 5, .12), (78, 104, 5, 4, .12)]:
+        b += f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" fill="#B98D4A" opacity="{o}"/>'
+    if raw:
+        return b
+    return svg(200, 200, b)
+
+
+KO_DEFS = (f'<linearGradient id="pk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A3C98"/><stop offset="1" stop-color="#0E1A52"/></linearGradient>'
+           f'<linearGradient id="gs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{GOLD_HI}" stop-opacity="1"/><stop offset="1" stop-color="{GOLD}" stop-opacity=".12"/></linearGradient>'
+           f'<radialGradient id="mist"><stop offset="0" stop-color="#8FA2F2" stop-opacity=".30"/><stop offset="1" stop-color="#8FA2F2" stop-opacity="0"/></radialGradient>'
+           f'<radialGradient id="glow"><stop offset="0" stop-color="#FFE3A0" stop-opacity=".9"/><stop offset="1" stop-color="#FFE3A0" stop-opacity="0"/></radialGradient>'
+           f'<linearGradient id="wn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7AE"/><stop offset="1" stop-color="#E2A955"/></linearGradient>')
+
+
+def peaks(spec, base=300, lines=(.84, .68, .52, .36, .2)):
     b = ''
-    # дальний хребет
-    far = [(0, 214), (90, 190), (190, 176), (290, 196), (390, 170), (470, 150), (560, 176), (640, 140), (720, 120), (800, 112), (880, 124),
-           (960, 138), (1050, 118), (1140, 150), (1230, 168), (1320, 150), (1410, 184), (1500, 170), (1600, 200), (1600, 300), (0, 300)]
-    b += f'<path d="{smooth(far)}" fill="{FAR}" opacity=".55"/>'
-    b += f'<path d="{smooth(far[:-2], False)}" fill="none" stroke="{GOLD}" stroke-width="1" opacity=".28"/>'
-    # облака «сун» на дальнем плане
-    for x, y, s, o, fl in [(60, 34, 1.05, .6, 1), (300, 96, .62, .45, 1), (1180, 52, .8, .55, -1), (1360, 20, 1.15, .62, 1), (1486, 112, .6, .42, -1), (620, 22, .6, .4, 1)]:
-        b += cloud(x, y, s, o, fl)
-    # пять вершин
-    for cx, w, h, sk in [(455, 250, 150, -.05), (635, 272, 208, .03), (800, 304, 266, 0), (968, 270, 202, -.03), (1146, 250, 150, .05)]:
-        p = peak(cx, w, h, 300, sk)
+    for cx, w, h, sk in spec:
+        p = peak(cx, w, h, base, sk)
         b += f'<path d="{smooth(p)}" fill="url(#pk)"/>'
-        b += f'<path d="{smooth(p, False)}" fill="none" stroke="url(#gs)" stroke-width="1.5" stroke-linejoin="round"/>'
-        for k, o in ((.80, .36), (.60, .26), (.40, .16)):
-            b += f'<path d="{smooth(inner(p, cx, 300, k), False)}" fill="none" stroke="{GOLD}" stroke-width="1" opacity="{o}"/>'
-    # дымка между хребтами
-    for cx, cy, rx, ry in [(560, 262, 300, 26), (1050, 266, 320, 24), (800, 280, 420, 20)]:
+        b += f'<path d="{smooth(p, False)}" fill="none" stroke="url(#gs)" stroke-width="1.6" stroke-linejoin="round"/>'
+        for i, k in enumerate(lines):
+            b += f'<path d="{smooth(inner(p, cx, base, k), False)}" fill="none" stroke="{GOLD}" stroke-width=".9" opacity="{f(.4 - i * .06)}"/>'
+    return b
+
+
+def scene_ko(raw=False):
+    """Слева низкие холмы (там на странице стоит заголовок), правее гора Намсан с башней, пять вершин и зал-павильон."""
+    W, H = 1600, 300
+    b = ''
+    far = [(0, 236), (110, 222), (230, 228), (340, 212), (450, 220), (560, 198), (680, 176), (790, 150), (900, 132), (1010, 120), (1120, 134),
+           (1230, 150), (1340, 140), (1440, 172), (1530, 164), (1600, 190), (1600, 300), (0, 300)]
+    b += f'<path d="{smooth(far)}" fill="{FAR}" opacity=".5"/>'
+    b += f'<path d="{smooth(far[:-2], False)}" fill="none" stroke="{GOLD}" stroke-width="1" opacity=".26"/>'
+    for x, y, s, o, fl in [(70, 120, .7, .42, 1), (330, 150, .55, .36, 1), (560, 60, .8, .5, 1), (1010, 26, .62, .42, -1), (1290, 60, .9, .5, 1)]:
+        b += cloud(x, y, s, o, fl)
+    b += ntower(650, 268, .82)
+    b += peaks([(800, 230, 142, -.05), (930, 262, 204, .03), (1075, 300, 262, 0), (1225, 264, 198, -.03), (1372, 240, 146, .05)])
+    for cx, cy, rx, ry in [(820, 262, 300, 26), (1280, 266, 320, 24), (1050, 282, 440, 20)]:
         b += f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" fill="url(#mist)"/>'
-    # ближние холмы
-    hill = 'M0 300V238Q150 198 300 234T560 252Q720 270 860 254T1150 248Q1320 214 1460 238T1600 230V300Z'
+    hill = 'M0 300V250Q140 226 300 246T600 256Q760 270 900 256T1180 250Q1340 222 1470 240T1600 234V300Z'
     b += f'<path d="{hill}" fill="{MID}"/>'
-    b += f'<path d="M0 238Q150 198 300 234T560 252Q720 270 860 254T1150 248Q1320 214 1460 238T1600 230" fill="none" stroke="{GOLD}" stroke-width="1" opacity=".45"/>'
-    b += pine(1196, 252, .55, -1) + pavilion(1318, 250, .95) + pine(1486, 258, 1.1, -1) + pine(156, 266, 1.3, 1) + pine(268, 258, .6, 1)
-    b += waves(268, 3, 20, .42)
-    b += f'<rect x="0" y="292" width="{W}" height="8" fill="{NEAR}"/>'
-    d2, g = fade(W, H, b)
-    return svg(W, H, f'<defs>{defs}{d2}</defs>{g}', 'preserveAspectRatio="xMidYMax slice"')
+    b += f'<path d="M0 250Q140 226 300 246T600 256Q760 270 900 256T1180 250Q1340 222 1470 240T1600 234" fill="none" stroke="{GOLD}" stroke-width="1" opacity=".45"/>'
+    b += pine(1106, 256, .5, -1) + hall(1292, 254, 1.08) + pine(1490, 262, 1.16, -1) + pine(96, 268, .78, 1) + pine(186, 262, .42, 1)
+    # огни на берегу
+    for x, y in [(420, 262), (470, 264), (540, 263), (742, 266), (796, 264), (968, 262), (1010, 264), (1122, 262), (1440, 258)]:
+        b += f'<circle cx="{x}" cy="{y}" r="5" fill="url(#glow)" opacity=".8"/><circle cx="{x}" cy="{y}" r="1.2" fill="#FFE2A0"/>'
+    b += waves(270, 3, 20, .42)
+    b += f'<rect x="0" y="293" width="{W}" height="7" fill="{NEAR}"/>'
+    if raw:
+        return KO_DEFS, b
+    d2, g = fade(W, H, b, .06)
+    return svg(W, H, f'<defs>{KO_DEFS}{d2}</defs>{g}', 'preserveAspectRatio="xMidYMax slice"')
 
 
 # ============================== АНГЛИЙСКИЙ ==============================
@@ -364,6 +495,27 @@ def dome(x, base, s=1.0, col='#1D2C74', o=.8):
     return t
 
 
+def london_eye(cx, base, r=76):
+    """Колесо обозрения на дальнем плане: обод, спицы, светящиеся кабинки и опоры-«А»."""
+    cy = base - r - 8
+    t = ''
+    for sgn in (-1, 1):
+        t += f'<path d="M{f(cx)} {f(cy)}L{f(cx+sgn*r*.42)} {base}" stroke="#25348A" stroke-width="4" stroke-linecap="round"/>'
+    d = ''
+    for i in range(28):
+        a = math.tau * i / 28
+        d += f'M{f(cx)} {f(cy)}L{f(cx+math.cos(a)*(r-5))} {f(cy+math.sin(a)*(r-5))}'
+    t += f'<path d="{d}" stroke="#4657AE" stroke-width=".6" opacity=".55"/>'
+    t += f'<circle cx="{f(cx)}" cy="{f(cy)}" r="{r}" fill="none" stroke="#5C6EC6" stroke-width="2.2" opacity=".85"/>'
+    t += f'<circle cx="{f(cx)}" cy="{f(cy)}" r="{r-5}" fill="none" stroke="#4657AE" stroke-width="1" opacity=".7"/>'
+    for i in range(28):
+        a = math.tau * (i + .5) / 28
+        x, y = cx + math.cos(a) * (r + 3), cy + math.sin(a) * (r + 3)
+        t += f'<ellipse cx="{f(x)}" cy="{f(y)}" rx="3" ry="2.3" fill="url(#wn)" opacity=".8"/>'
+    t += f'<circle cx="{f(cx)}" cy="{f(cy)}" r="5" fill="#25348A" stroke="{GOLD}" stroke-width="1"/>'
+    return t
+
+
 def skyline(rng, y, x0=0, x1=1600, op=.5, skip=()):
     t = ''; d = ''; lights = ''
     x = x0
@@ -440,7 +592,7 @@ def rose(x, y, r, red=True, rot=0):
     return t
 
 
-def scene_en():
+def scene_en(raw=False):
     W, H = 1600, 300
     rng = random.Random(11)
     base = 250
@@ -455,6 +607,7 @@ def scene_en():
     # дальний берег
     b += skyline(rng, base, 0, 1600, .55, skip=((1000, 1150),))
     b += dome(1085, base, .92)
+    b += london_eye(452, base, 78)
     b += oak(96, base + 4, .78) + oak(1540, base + 4, .9)
     # здания у воды
     bld = parliament(346, 560, base) + clock_tower(318, base) + bridge(800, base) + chapel(1196, base)
@@ -480,6 +633,8 @@ def scene_en():
     for x, y, r, red, rot in [(150, 286, 13, False, 20), (176, 290, 17, True, 0), (258, 289, 15, True, 50), (284, 292, 10, False, 10),
                               (1374, 291, 11, True, 30), (1400, 288, 16, False, 0), (1496, 288, 17, True, 15), (1524, 292, 11, False, 60)]:
         b += rose(x, y, r, red, rot)
+    if raw:
+        return defs, b
     d2, g = fade(W, H, b, .07)
     return svg(W, H, f'<defs>{defs}{d2}</defs>{g}', 'preserveAspectRatio="xMidYMax slice"')
 
@@ -594,12 +749,71 @@ def seigaiha():
     return svg(40, 20, t)
 
 
+
+# ============================== МИНИАТЮРЫ УРОКОВ ==============================
+# Карточки уроков на странице курса: фрагменты тех же пейзажей и пара отдельных сюжетов (луна, слива, беседка).
+# Размер 320×200; страница показывает их по кругу: урок 1 → thumb-ko-1, урок 6 → снова thumb-ko-1.
+
+TW, TH = 320, 200
+SKY = ('<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070D24"/><stop offset=".65" stop-color="#0E1A45"/><stop offset="1" stop-color="#22306A"/></linearGradient>'
+       '<radialGradient id="hz" cx=".5" cy="1" r=".75"><stop offset="0" stop-color="#E6BE82" stop-opacity=".42"/><stop offset=".5" stop-color="#8C6E96" stop-opacity=".16"/><stop offset="1" stop-color="#0B1535" stop-opacity="0"/></radialGradient>')
+
+
+def stars(seed, n=14, ymax=110):
+    rng = random.Random(seed)
+    return ''.join(f'<circle cx="{rng.randint(6, TW-6)}" cy="{rng.randint(6, ymax)}" r="{f(rng.choice((.6, .8, 1, 1.2)))}" fill="#FFF3D6" opacity="{f(rng.uniform(.35, .85))}"/>' for _ in range(n))
+
+
+def thumb(defs, body, box, seed, front='', back=''):
+    """box — окно (x, y, ширина, высота) в координатах пейзажа; back рисуется под пейзажем, front — поверх."""
+    x, y, w, h = box
+    return svg(TW, TH, f'<defs>{defs}{SKY}</defs><rect width="{TW}" height="{TH}" fill="url(#sky)"/><rect width="{TW}" height="{TH}" fill="url(#hz)"/>'
+                       f'{stars(seed)}{back}<svg viewBox="{f(x)} {f(y)} {f(w)} {f(h)}" width="{TW}" height="{TH}" preserveAspectRatio="xMidYMid slice">{body}</svg>{front}')
+
+
+def small_moon(cx, cy, r):
+    return f'<g transform="translate({f(cx - r * 2.5)} {f(cy - r * 2.5)}) scale({f(r / 40)})">{moon(True)}</g>'
+
+
+def thumbs_ko():
+    defs, body = scene_ko(True)
+    out = [thumb(defs, body, (1150, 96, 288, 180), 1, back=small_moon(262, 44, 17)),          # зал-ханок
+           thumb(defs, body, (490, 70, 320, 200), 2, back=small_moon(70, 46, 15)),            # башня Намсан
+           thumb(defs, body, (812, 20, 336, 210), 3, back=small_moon(74, 46, 14))]          # пять вершин
+    # луна и ветка сливы
+    hills = (f'<path d="M0 200V170Q60 150 120 166T240 160Q290 150 320 158V200Z" fill="{MID}"/>'
+             f'<path d="M0 170Q60 150 120 166T240 160Q290 150 320 158" fill="none" stroke="{GOLD}" stroke-width="1" opacity=".5"/>')
+    out.append(svg(TW, TH, f'<defs>{KO_DEFS}{SKY}</defs><rect width="{TW}" height="{TH}" fill="url(#sky)"/><rect width="{TW}" height="{TH}" fill="url(#hz)"/>'
+                           f'{stars(4)}{small_moon(214, 84, 30)}{hills}<g transform="translate(-14 -6) scale(1.3)">{branch_ko(True)}</g>'))
+    # беседка у воды под соснами
+    t = (f'<path d="{smooth(peak(96, 210, 118, 172, -.02))}" fill="url(#pk)"/>'
+         f'<path d="{smooth(peak(236, 190, 92, 172, .03))}" fill="url(#pk)" opacity=".85"/>')
+    t += (f'<path d="M0 200V170Q80 160 160 168T320 164V200Z" fill="{MID}"/>'
+          f'<path d="M0 170Q80 160 160 168T320 164" fill="none" stroke="{GOLD}" stroke-width="1" opacity=".45"/>')
+    t += pavilion(150, 170, .78) + pine(268, 176, .62, -1) + pine(34, 178, .45, 1) + waves(178, 2, 12, .4)
+    out.append(svg(TW, TH, f'<defs>{KO_DEFS}{SKY}</defs><rect width="{TW}" height="{TH}" fill="url(#sky)"/><rect width="{TW}" height="{TH}" fill="url(#hz)"/>'
+                           f'{stars(5)}{small_moon(64, 42, 14)}{cloud(170, 40, .55, .45, -1)}{t}'))
+    return out
+
+
+def thumbs_en():
+    defs, body = scene_en(True)
+    return [thumb(defs, body, (236, 12, 416, 260), 11, back=small_moon(282, 40, 13)),        # Биг-Бен и колесо
+            thumb(defs, body, (596, 46, 408, 255), 12, back=small_moon(52, 40, 13)),         # мост
+            thumb(defs, body, (1150, 58, 320, 200), 13, back=small_moon(40, 38, 12)),        # капелла
+            thumb(defs, body, (872, 96, 304, 190), 14, back=small_moon(150, 30, 12)),        # купол за мостом
+            thumb(defs, body, (1296, 100, 320, 200), 15, back=small_moon(70, 36, 12))]       # фонарь, дуб и розы
+
 if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
     for name, fn in [('scene-ko', scene_ko), ('scene-en', scene_en), ('band-ko', band_ko), ('band-en', band_en),
                      ('emblem-ko', emblem_ko), ('emblem-en', emblem_en), ('corner-ko', corner_ko), ('corner-en', corner_en),
-                     ('frame-ko', frame_ko), ('frame-en', frame_en),
+                     ('frame-ko', frame_ko), ('frame-en', frame_en), ('branch-ko', branch_ko), ('moon', moon),
                      ('seigaiha', seigaiha)]:
         s = fn()
         open(os.path.join(OUT, name + '.svg'), 'w', encoding='utf8').write(s)
         print(name, len(s))
+    for lang, fn in (('ko', thumbs_ko), ('en', thumbs_en)):
+        for i, s in enumerate(fn(), 1):
+            open(os.path.join(OUT, f'thumb-{lang}-{i}.svg'), 'w', encoding='utf8').write(s)
+            print(f'thumb-{lang}-{i}', len(s))
