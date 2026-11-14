@@ -96,6 +96,27 @@ function draw(){
 }
 /* Словарь ученика: сколько слов, какие даются трудно, добавление новых. Слово, которое у ученика уже есть,
    после повторного добавления вернётся к нему на повторение раньше. */
+// материалы из папки materials/: отчёты «Отправить учителю», время занятий и отметки «Пройдено» (их пишет js/bridge.js)
+function mins(sec){sec=sec||0;if(sec<60)return 'меньше минуты';var m=Math.round(sec/60);return m<60?m+' мин':Math.floor(m/60)+' ч '+(m%60)+' мин'}
+function matTitle(id){var m=MAP[id];return m?m.title:id}
+function materialsCard(state){
+  var mat=(state&&state.mat)||{},rep=((state&&state.rep)||[]).slice().sort(function(a,b){return (b.t||0)-(a.t||0)}),
+      taken=(state&&state.taken&&state.taken.l)||[];
+  var h='<p style="margin:16px 0 4px"><b>Отчёты из тестов и игр</b> <span class="muted">(кнопка «Отправить учителю» в материале)</span></p>';
+  h+=rep.length?rep.slice(0,15).map(function(r,i){
+    return '<details class="rep"'+(i===0?' open':'')+'><summary><b>'+esc(matTitle(r.m))+'</b> <span class="muted">· '+fmtDate(r.t)+'</span></summary><pre>'+esc(r.x)+'</pre></details>'}).join('')+
+    (rep.length>15?'<p class="muted">Показаны последние 15 отчётов из '+rep.length+'.</p>':'')
+    :'<p class="muted">Отчётов пока нет. Они появятся здесь, когда ученик пройдёт тест или игру и нажмёт «Отправить учителю».</p>';
+  var ids=Object.keys(mat);taken.forEach(function(id){if(ids.indexOf(id)<0)ids.push(id)});
+  ids.sort(function(a,b){return ((mat[b]||{}).l||0)-((mat[a]||{}).l||0)});
+  h+='<p style="margin:16px 0 4px"><b>Занятия в материалах</b></p>';
+  h+=ids.length?ids.map(function(id){var m=mat[id]||{},done=taken.indexOf(id)>=0;
+    return '<div class="line" style="align-items:center;justify-content:space-between;gap:10px"><div style="min-width:0"><div>'+esc(matTitle(id))+'</div><div class="muted">'+
+      (m.o?'открыт '+m.o+' '+(m.o%10===1&&m.o%100!==11?'раз':(m.o%10>=2&&m.o%10<=4&&(m.o%100<10||m.o%100>=20))?'раза':'раз')+' · '+mins(m.s)+' · последний раз '+fmtDate(m.l):'отмечено учеником')+'</div></div>'+
+      (done?'<span class="badge ok">пройдено</span>':'')+'</div>'}).join('')
+    :'<p class="muted">Ученик ещё не открывал материалы. Время и открытия считаются с этого обновления сайта, когда ученик вошёл на сайт.</p>';
+  return h;
+}
 function vocabCard(){
   if(!voc)return '<div class="card"><h3>Словарь ученика</h3><p class="muted">Чтобы видеть словарь ученика и добавлять ему слова, выполни в Supabase файл supabase/vocab.sql (SQL Editor → New query → вставить → Run) и обнови эту страницу. До этого словарь хранится только на устройстве ученика.</p></div>';
   var now=Date.now(),day=SRS.dayStart(now)+SRS.DAY;
@@ -129,7 +150,7 @@ async function drawStudent(){
   if(!as.length)h+='<p class="muted">Пока ничего не назначено.</p>';
   h+=as.map(function(a){var m=MAP[a.id]||{title:a.id,kind:''};
     return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><button data-un="'+esc(a.id)+'">Убрать</button></div>'}).join('');
-  h+=''+lessonProgress(st)+'<p class="note" style="margin-top:8px">Тренажёры и игры хранят прогресс внутри себя, здесь он пока не виден.</p></div>';
+  h+=''+lessonProgress(st)+materialsCard(st)+'</div>';
   h+=vocabCard();
   h+='<div class="card"><h3>Назначить материалы</h3><div class="opts" id="flt"><button data-f="all" class="'+(filt==='all'?'sel':'')+'">Все</button>'+Object.keys(SECTIONS).map(function(k){return '<button data-f="'+k+'" class="'+(filt===k?'sel':'')+'">'+esc(SECTIONS[k])+'</button>'}).join('')+'</div><div style="margin-top:8px;max-height:340px;overflow:auto">';
   MATERIALS.filter(function(m){return !have[m.id]&&(filt==='all'||m.section===filt)}).forEach(function(m){

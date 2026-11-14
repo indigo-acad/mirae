@@ -25,8 +25,10 @@ const cloud={
 
 // ---------- локальное состояние и слияние ----------
 function takenObj(u){const v=J("kr_taken:"+u,[]);return Array.isArray(v)?{l:v,t:0}:v}
+// Материалы из папки materials/ пишут сюда через js/bridge.js: mat — открытия и время, rep — отчёты «Отправить учителю».
+function matObj(u){const v=J("kr_mat:"+u,{});return{mat:v.mat||{},rep:Array.isArray(v.rep)?v.rep:[]}}
 function collect(){
-  const u=U(),pre="kr_progress:"+u+":",s={progress:{},taken:takenObj(u)};
+  const u=U(),pre="kr_progress:"+u+":",m=matObj(u),s={progress:{},taken:takenObj(u),mat:m.mat,rep:m.rep};
   for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith(pre))s.progress[k.slice(pre.length)]=J(k,{})}
   return s;
 }
@@ -34,11 +36,27 @@ function apply(s){
   const u=U();
   Object.entries(s.progress||{}).forEach(([id,P])=>localStorage.setItem("kr_progress:"+u+":"+id,JSON.stringify(P)));
   if(s.taken)localStorage.setItem("kr_taken:"+u,JSON.stringify(s.taken));
+  if(s.mat||s.rep)localStorage.setItem("kr_mat:"+u,JSON.stringify({mat:s.mat||{},rep:s.rep||[]}));
+}
+// те же правила, что в js/bridge.js: счётчики берут большее, отчёты объединяются без повторов (новые сверху, до 40)
+function mergeMat(a,b){
+  a=a||{};b=b||{};const out={};
+  Object.keys(a).concat(Object.keys(b)).forEach(id=>{const x=a[id]||{},y=b[id]||{};
+    out[id]={o:Math.max(x.o||0,y.o||0),s:Math.max(x.s||0,y.s||0),l:Math.max(x.l||0,y.l||0),f:Math.min(x.f||Infinity,y.f||Infinity)};
+    if(out[id].f===Infinity)out[id].f=out[id].l});
+  return out;
+}
+function mergeRep(a,b){
+  const seen={},out=[];
+  (a||[]).concat(b||[]).forEach(r=>{if(!r||!r.id)return;const k=seen[r.id];
+    if(k===undefined){seen[r.id]=out.length;out.push(r)}else if((r.x||"").length>(out[k].x||"").length)out[k]=r});
+  out.sort((x,y)=>(y.t||0)-(x.t||0));
+  let total=0;return out.filter((r,i)=>{total+=(r.x||"").length;return i<40&&total<90000});
 }
 const newer=(x,y)=>!x?y:!y?x:((y.t||0)>(x.t||0)?y:x);
 function mergeState(a,b){
   // незнакомые ключи состояния (например, будущий сюжет) не теряем: берём их из облака как есть
-  a=a||{};b=b||{};const out=Object.assign({},b,a,{email:a.email||b.email,progress:{},taken:newer(a.taken,b.taken)||{l:[],t:0}});
+  a=a||{};b=b||{};const out=Object.assign({},b,a,{email:a.email||b.email,progress:{},taken:newer(a.taken,b.taken)||{l:[],t:0},mat:mergeMat(a.mat,b.mat),rep:mergeRep(a.rep,b.rep)});
   const ids=new Set([...Object.keys(a.progress||{}),...Object.keys(b.progress||{})]);
   ids.forEach(id=>{const pa=(a.progress||{})[id]||{},pb=(b.progress||{})[id]||{},m={};
     new Set([...Object.keys(pa),...Object.keys(pb)]).forEach(k=>{m[k]=newer(pa[k],pb[k])});out.progress[id]=m});
@@ -276,6 +294,8 @@ window.KR={
     L.sections.forEach(s=>s.blocks.forEach((b,i)=>{tot++;const p=P[s.id+"-"+i];if(p&&p.done)n++}));
     return{n,tot,pct:tot?Math.round(n/tot*100):0,P}},
   taken:()=>takenObj(U()).l||[],
+  // что известно о материале из папки materials/: открытия и время (act) и последний отчёт преподавателю (rep)
+  matInfo(id){const m=matObj(U());return{act:m.mat[id]||null,rep:m.rep.filter(r=>r.m===id).sort((a,b)=>(b.t||0)-(a.t||0))[0]||null}},
   setTaken(a){localStorage.setItem("kr_taken:"+U(),JSON.stringify({l:a,t:Date.now()}));KR.push()},
   push(){clearTimeout(timer);timer=setTimeout(doPush,600)},
   async login(name,pin){

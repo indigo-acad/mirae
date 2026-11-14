@@ -27,8 +27,9 @@ function lessonRow(l){
   return '<a class="lessonlink" href="lesson.html?l='+l.id+'" style="display:block;padding:6px 0"><div class="lcard"><div class="no" style="width:40px;height:40px;font-size:17px">'+l.no+'</div><div class="mid"><b>'+l.no+'과 · <span class="ko">'+esc(l.title)+'</span></b> <span class="muted">'+p.pct+'%</span>'+KR.bar(p.pct)+'</div></div></a>';
 }
 function assignedRow(a){
-  var m=MAP[a.id]||{title:a.id,kind:'',path:'#'};
-  return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><a class="btn" href="'+esc(m.path)+'">Открыть'+KR.icon('arrow',15)+'</a></div>';
+  var m=MAP[a.id]||{title:a.id,kind:'',path:'#'},mi=KR.matInfo(a.id);
+  var sent=mi.rep?'<span class="badge ok" title="Отчёт сохранён на сайте, преподаватель видит его в своей панели">отчёт у преподавателя · '+new Date(mi.rep.t).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+'</span>':'';
+  return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">'+sent+'<a class="btn" href="'+esc(m.path)+'">Открыть'+KR.icon('arrow',15)+'</a></span></div>';
 }
 function hwRow(x){
   return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+x.title+'</div><div class="muted">'+x.due+'</div></div><span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><span class="badge '+(x.done?'ok':'warn')+'">'+(x.done?'сделано':'к выполнению')+'</span><a class="btn" href="lesson.html?l='+x.lesson+'#'+x.blocks[0].split('-')[0]+'">Открыть</a></span></div>';

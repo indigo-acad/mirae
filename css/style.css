@@ -670,3 +670,8 @@ button.say.big{width:46px;height:46px;margin:0 6px 0 0}
 .kb{display:flex;flex-wrap:wrap;gap:6px}
 .kb button{min-width:44px;height:44px;padding:0 8px;font-size:21px;border-radius:12px}
 .kb .kb-del{color:var(--fg-2)}
+
+/* ---------- панель преподавателя: отчёты из материалов ---------- */
+details.rep{margin:6px 0;border:1px solid var(--rule);border-radius:14px;background:var(--fill)}
+details.rep summary{cursor:pointer;padding:10px 14px;list-style-position:inside}
+details.rep pre{margin:0;padding:4px 14px 14px;max-height:420px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:14px/1.5 var(--font-body);color:var(--fg)}
