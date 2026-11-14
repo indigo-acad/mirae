@@ -24,7 +24,7 @@ function lessonRow(l){
   if(!l.id) return '<div class="lcard lock" style="padding:6px 0"><div class="no" style="width:40px;height:40px;font-size:17px">'+l.no+'</div><div class="mid muted">'+l.no+'과 · скоро</div></div>';
   if(!KR.can('lesson-'+l.id)) return '<div class="lcard lock" style="padding:6px 0"><div class="no" style="width:40px;height:40px;font-size:17px">'+l.no+'</div><div class="mid muted">'+l.no+'과 · не назначено</div></div>';
   var p=KR.progress(l.id);
-  return '<a class="lessonlink" href="lesson.html?l='+l.id+'" style="display:block;padding:6px 0"><div class="lcard"><div class="no" style="width:40px;height:40px;font-size:17px">'+l.no+'</div><div class="mid"><b>'+l.no+'과 · <span class="ko">'+esc(l.title)+'</span></b> <span class="muted">'+p.pct+'%</span>'+KR.bar(p.pct)+'</div></div></a>';
+  return '<a class="lessonlink" href="lesson.html?l='+l.id+'" style="display:block;padding:6px 0"><div class="lcard"><div class="no" style="width:40px;height:40px;font-size:17px">'+l.no+'</div><div class="mid"><b>'+esc(l.tag||l.no+'과')+' · <span class="ko">'+esc(l.title)+'</span></b> <span class="muted">'+p.pct+'%</span>'+KR.bar(p.pct)+'</div></div></a>';
 }
 function assignedRow(a){
   var m=MAP[a.id]||{title:a.id,kind:'',path:'#'},mi=KR.matInfo(a.id);
@@ -46,9 +46,11 @@ function dashKo(){
   var h='<section class="dash card glass fr" aria-label="Мой прогресс">'+KR.ring(pct,128,(first?'<span data-count="'+pct+'">0</span>':pct)+'<small>%</small>')+
     '<div class="stat"><div>'+num(real.length)+'<span class="muted">уроков назначено</span></div><div>'+num(n)+'<span class="muted">блоков пройдено</span></div><div><b>'+hwDone+'/'+hw.length+'</b><span class="muted">домашка</span></div></div></section>';
   if(next){var np=KR.progress(next.id);
-    h+='<a class="next card glass lessonlink" href="lesson.html?l='+next.id+'">'+KR.ring(np.pct,58,KR.icon('spark',18))+'<div class="mid"><span class="tag">'+(np.n?'Продолжить':'Начать')+' · '+next.no+'과</span><h3 class="ko">'+esc(next.title)+'</h3><div class="muted">'+np.n+' из '+np.tot+' блоков</div></div><span class="tile-go">'+KR.icon('arrow',18)+'</span></a>'}
+    h+='<a class="next card glass lessonlink" href="lesson.html?l='+next.id+'">'+KR.ring(np.pct,58,KR.icon('spark',18))+'<div class="mid"><span class="tag">'+(np.n?'Продолжить':'Начать')+' · '+esc(next.tag||next.no+'과')+'</span><h3 class="ko">'+esc(next.title)+'</h3><div class="muted">'+np.n+' из '+np.tot+' блоков</div></div><span class="tile-go">'+KR.icon('arrow',18)+'</span></a>'}
   h+=wordsCard();
-  h+='<div class="card glass"><h3>Прогресс по урокам</h3>'+ALL.map(lessonRow).join('')+'<div class="done-row"><span></span><a class="btn" href="course.html">Весь путь'+KR.icon('arrow',15)+'</a></div></div>';
+  // ученику — только открытые преподавателем уроки, преподавателю — вся программа
+  var rows=KR.ctx.teacher?ALL:real;
+  h+='<div class="card glass"><h3>Прогресс по урокам</h3>'+(rows.length?rows.map(lessonRow).join(''):'<p class="muted">Уроки появятся здесь, когда преподаватель их откроет.</p>')+'<div class="done-row"><span></span><a class="btn" href="course.html">Весь путь'+KR.icon('arrow',15)+'</a></div></div>';
   return {h:h,hw:hw};
 }
 // сводка английского раздела: материалы программы, пройденное ученик отмечает сам

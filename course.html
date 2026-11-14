@@ -72,6 +72,14 @@ function draw(){
     document.getElementById('list').innerHTML=KR.noCoursesCard();return;
   }
   var P=KR.lang()==='en'?programEn():programKo();
+  // Ученик видит только то, что ему открыл преподаватель: закрытые и ещё не готовые уроки не показываем.
+  // Преподаватель видит всю программу: так удобнее назначать.
+  if(!(KR.ctx&&KR.ctx.teacher)){
+    P.parts=P.parts.map(function(p){return Object.assign({},p,{items:p.items.filter(function(x){return x.state==='open'||x.state==='done'})})})
+      .filter(function(p){return p.items.length});
+    if(P.ko&&P.parts.length===1&&P.parts[0].t==='한글'&&window.COURSE0){   // открыт только хангыль: это курс «Хангыль с нуля»
+      P.title=COURSE0.title;P.sub=COURSE0.subtitle;P.note='Буквы, слоги и первые слова. Новые занятия открывает преподаватель.'}
+  }
   var ct=document.getElementById('ct');ct.textContent=P.title;ct.className=P.ko?'ko':'';
   document.getElementById('sub').textContent=P.sub;document.getElementById('cp').textContent=P.note;
   var all=[];P.parts.forEach(function(p){all=all.concat(p.items)});
