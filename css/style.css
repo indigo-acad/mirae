@@ -744,3 +744,8 @@ dialog.wdlg::backdrop{background:rgba(5,10,30,.62)}
 .flash-img{display:block;width:120px;height:120px;object-fit:cover;border-radius:14px;margin:0 auto 12px}
 .flash-pos{margin-top:4px;color:var(--silver);font-size:14px;letter-spacing:.08em;text-transform:uppercase}
 @media (max-width:560px){.fsel{flex:1 1 100%}.fsel select{flex:1;max-width:none}}
+/* озвучка списка слов */
+.listen{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 2px}
+.listen .muted{font-size:14px}
+button.linkish{background:none;border:0;padding:4px 2px;color:var(--gold);text-decoration:underline;text-underline-offset:3px;font-size:14px}
+.wrow.playing{background:rgba(212,175,124,.12);border-radius:12px;box-shadow:inset 3px 0 0 var(--gold)}

@@ -276,6 +276,42 @@ function saveNote(){
   if(c&&(c.note||'')!==v){c=Object.assign({},c);if(v)c.note=v;else delete c.note;V.update(c)}
 }
 
+// ---------- озвучка списка с паузами: слово, пауза, перевод ----------
+// Настройки — на этом устройстве (вкладка «Настройки» → «Озвучка списка»).
+var LISTROWS=[],LST=null;
+function listenCfg(){var d={pause:2,tr:1,rep:1};try{var x=JSON.parse(localStorage.getItem('kr_listen')||'null');if(x&&typeof x==='object')d=Object.assign(d,x)}catch(e){}
+  d.pause=Math.min(6,Math.max(1,+d.pause||2));d.rep=d.rep>1?2:1;d.tr=d.tr?1:0;return d}
+function setListenCfg(c){try{localStorage.setItem('kr_listen',JSON.stringify(c))}catch(e){}}
+function listenBar(){
+  var c=listenCfg(),n=LISTROWS.length,meta='пауза '+c.pause+' с'+(c.tr?' · с переводом':'')+(c.rep>1?' · слово дважды':'');
+  if(LST)return '<button type="button" class="btn pri" data-x="listen" aria-pressed="true">'+KR.icon('pause',16)+'Остановить</button><span class="muted" aria-live="polite">'+(LST.i+1)+' из '+LST.ids.length+'</span>';
+  return '<button type="button" data-x="listen">'+KR.icon('play',16)+'Слушать список · '+n+'</button><span class="muted">'+meta+'</span><button type="button" class="linkish" data-x="listen-cfg">Настроить</button>';
+}
+function drawListenBar(){var e=$('#listen');if(e)e.innerHTML=listenBar()}
+function markRow(id){
+  [].forEach.call(document.querySelectorAll('.wrow.playing'),function(r){r.classList.remove('playing')});
+  if(!id)return;var r=document.querySelector('.wrow[data-id="'+(window.CSS&&CSS.escape?CSS.escape(id):id)+'"]');
+  if(r){r.classList.add('playing');r.scrollIntoView({block:'nearest',behavior:KR.calm()?'auto':'smooth'})}
+}
+/* одна фраза до конца: ждём окончания звука, но не дольше разумного (у некоторых браузеров событие конца теряется) */
+function sayP(text,l){return new Promise(function(res){var done=false,fin=function(){if(!done){done=true;res()}};
+  KR.say(text,l,{end:fin});setTimeout(fin,Math.max(4000,String(text).length*450/KR.rate()))})}
+function pause(ms){return new Promise(function(r){setTimeout(r,ms)})}
+async function listen(ids){
+  if(!ids.length)return;var me={ids:ids,i:0};LST=me;drawListenBar();
+  var cfg=listenCfg();
+  for(;me.i<ids.length;me.i++){
+    if(LST!==me)return;
+    var c=V.get(ids[me.i]);if(!c)continue;
+    markRow(c.id);drawListenBar();
+    for(var k=0;k<cfg.rep;k++){await sayP(c.w,c.l);if(LST!==me)return;if(k+1<cfg.rep)await pause(800)}
+    var t=trOf(c);if(cfg.tr&&t){await pause(600);if(LST!==me)return;await sayP(t,'ru');if(LST!==me)return}
+    await pause(cfg.pause*1000);
+  }
+  if(LST===me){LST=null;markRow(null);drawListenBar()}
+}
+function stopListen(){if(!LST)return;LST=null;KR.hush();markRow(null);drawListenBar()}
+
 // ---------- список слов ----------
 function badge(c){
   if(!c.st)return '<span class="badge new">новое</span>';
@@ -293,6 +329,8 @@ function drawList(){
     h+='<div class="card glass" id="wlist"><div class="opts">'+Object.keys(F).map(function(k){var n=all.filter(F[k][1]).length;return '<button type="button" data-f="'+k+'" class="'+(filt===k?'sel':'')+'" aria-pressed="'+(filt===k)+'">'+F[k][0]+' · '+n+'</button>'}).join('')+'</div>'+
       '<input class="name" id="q" type="search" placeholder="Найти слово или перевод" aria-label="Поиск по словарю" value="'+esc(q)+'">'+selects(all);
     var qq=SRS.norm(q),rows=all.filter(F[filt][1]).filter(passV2).filter(function(c){return !qq||SRS.norm(c.w).indexOf(qq)>=0||SRS.norm(trOf(c)+' '+((info(c)||{}).tr_ru||[]).join(' ')).indexOf(qq)>=0});
+    LISTROWS=rows.slice(0,200).map(function(c){return c.id});
+    if(rows.length&&KR.canSay())h+='<div class="listen" id="listen">'+listenBar()+'</div>';
     h+=rows.length?'<div class="wl">'+rows.slice(0,shown).map(function(c){
       if(editing===c.id)return '<form class="wrow wedit" data-id="'+esc(c.id)+'"><div class="mid"><b>'+word(c)+'</b><input class="name" name="t" value="'+esc(c.t)+'" placeholder="Перевод" aria-label="Перевод" maxlength="160"><input class="name'+(c.l==='ko'?' ko':'')+'" name="ex" lang="'+c.l+'" value="'+esc(c.ex||'')+'" placeholder="Пример (по желанию)" aria-label="Пример" maxlength="240"><input class="name" name="et" value="'+esc(c.et||'')+'" placeholder="Перевод примера" aria-label="Перевод примера" maxlength="240"></div><div class="wact"><button type="submit" class="btn pri">Сохранить</button><button type="button" data-x="cancel">Отмена</button><button type="button" data-del="'+esc(c.id)+'">'+KR.icon('trash',15)+' Удалить</button></div></form>';
       var I=info(c)||{},meta=[I.pos?KR.W2.POS[I.pos]:'',I.level].filter(Boolean).join(' · ');
@@ -303,6 +341,7 @@ function drawList(){
     h+='</div>';
   }
   $('#list').innerHTML=h;
+  if(LST)markRow(LST.ids[LST.i]);
 }
 
 // ---------- настройки: интервалы, игры, голос ----------
@@ -325,6 +364,13 @@ function drawPrefs(){
     (lang==='en'?'<span class="field">Произношение</span><div class="opts" role="group" aria-label="Произношение английского">'+[['gb','Британское'],['us','Американское']].map(function(a){return '<button type="button" data-accent="'+a[0]+'" class="'+(KR.accent()===a[0]?'sel':'')+'" aria-pressed="'+(KR.accent()===a[0])+'">'+a[1]+'</button>'}).join('')+'</div>':'')+
     '<div class="done-row"><span class="muted">'+(KR.ttsCloud()?'Говорит облачный нейроголос, голос устройства выше — запасной.':'Самые живые голоса: в браузере Microsoft Edge («Natural»), на iPhone в Safari.')+'</span><button type="button" data-x="voice">'+KR.icon('volume',16)+' Проверить</button></div>'
     :'<p class="muted">В этом браузере нет озвучки.</p>')+'</div>';
+  if(KR.canSay()){var lc=listenCfg();
+    h+='<div class="card glass prefs" id="lcfg"><h3>Озвучка списка</h3><p class="hint">Кнопка «Слушать список» над словами читает их по очереди: слово, перевод, пауза. Удобно в дороге и перед сном.</p>'+
+      '<label class="field" for="l-pause">Пауза между словами: <span id="l-pausev">'+lc.pause+' с</span></label><input type="range" id="l-pause" min="1" max="6" step="1" value="'+lc.pause+'">'+
+      '<div class="opts" role="group" aria-label="Что читать"><button type="button" data-ltr="1" aria-pressed="'+(lc.tr===1)+'" class="'+(lc.tr?'sel':'')+'">С переводом</button><button type="button" data-ltr="0" aria-pressed="'+(lc.tr===0)+'" class="'+(lc.tr?'':'sel')+'">Только слово</button></div>'+
+      '<div class="opts" role="group" aria-label="Сколько раз читать слово"><button type="button" data-lrep="1" aria-pressed="'+(lc.rep===1)+'" class="'+(lc.rep===1?'sel':'')+'">Слово один раз</button><button type="button" data-lrep="2" aria-pressed="'+(lc.rep===2)+'" class="'+(lc.rep===2?'sel':'')+'">Дважды</button></div>'+
+      '<p class="hint">Скорость речи — ползунок «Скорость» выше.</p></div>';
+  }
   $('#prefs').innerHTML=h;
 }
 function savePrefs(reset){
@@ -395,7 +441,7 @@ function drawAll(){lang=KR.lang();KR.topbar('words');drawToday();if(!S){drawList
 document.addEventListener('click',function(e){
   var b=e.target.closest('button');if(!b)return;var d=b.dataset;
   if(d.say!==undefined){KR.say(d.say,d.l);return}
-  if(b.id==='go')return start();
+  if(b.id==='go'){stopListen();return start()}
   if(d.tab)return setTab(d.tab);
   if(d.x==='stop')return stop();
   if(d.x==='flip')return flip();
@@ -410,6 +456,8 @@ document.addEventListener('click',function(e){
   if(d.open)return openCard(d.open);
   if(d.sf){sfilt=String(sfilt)===d.sf?'':d.sf;shown=60;drawList();var wl=$('#wlist');if(sfilt&&wl)wl.scrollIntoView({block:'start'});return}
   if(d.sfirst)return setFirst(d.sfirst);
+  if(d.x==='listen')return LST?stopListen():listen(LISTROWS.slice());
+  if(d.x==='listen-cfg'){setTab('prefs');var lc=$('#lcfg');if(lc)lc.scrollIntoView({block:'start'});return}
   if(d.edit){var dl2=$('#wdlg');if(dl2&&dl2.open)dl2.close();editing=d.edit;drawList();var ed=document.querySelector('.wedit');if(ed)ed.scrollIntoView({block:'center'});return}
   if(d.x==='cancel'){editing=null;return drawList()}
   if(d.del){if(confirm('Удалить слово из словаря? Его история повторений тоже удалится.')){V.remove(d.del);editing=null;drawAll()}return}
@@ -417,6 +465,7 @@ document.addEventListener('click',function(e){
   if(d.x==='reset')return savePrefs(true);
   if(d.x==='voice')return KR.say(lang==='ko'?'안녕하세요! 같이 공부해요.':'Hello! Let’s learn together.',lang);
   if(d.accent){KR.setAccent(d.accent);drawPrefs();return KR.say('Hello! Let’s learn together.','en')}
+  if(d.ltr!==undefined||d.lrep!==undefined){var lc=listenCfg();if(d.ltr!==undefined)lc.tr=+d.ltr;else lc.rep=+d.lrep;setListenCfg(lc);drawPrefs();drawListenBar();return}
   if(d.x==='bulk-translate')return bulkTranslate();
   if(d.x==='bulk-save')return bulkSave();
 });
@@ -436,6 +485,7 @@ document.addEventListener('submit',function(e){
 document.addEventListener('input',function(e){
   if(e.target.id==='q'){q=e.target.value;shown=60;var pos=e.target.selectionStart;drawList();var n=$('#q');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}}}
   if(e.target.id==='p-rate'){KR.setRate(e.target.value);$('#p-ratev').textContent=(+e.target.value).toFixed(2)}
+  if(e.target.id==='l-pause'){var lc=listenCfg();lc.pause=+e.target.value;setListenCfg(lc);$('#l-pausev').textContent=lc.pause+' с';drawListenBar()}
 });
 document.addEventListener('change',function(e){
   var id=e.target.id;if(id==='p-voice')KR.setVoice(lang,e.target.value);
@@ -452,7 +502,7 @@ document.addEventListener('keydown',function(e){
 // пришли данные из облака: сводку обновляем всегда, а список — только если ученик сейчас ничего не вводит
 function typing(){var a=document.activeElement;return !!a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)}
 V.onchange=function(){drawToday();if(!S&&!typing()&&!editing)drawList()};
-KR.onLang=function(){if(S)stop();else drawAll()};
+KR.onLang=function(){stopListen();if(S)stop();else drawAll()};
 if(window.speechSynthesis)speechSynthesis.onvoiceschanged=function(){if(!$('#prefs').hidden&&!typing())drawPrefs()};
 if(KR.require()){KR.topbar('words');drawAll();KR.load().then(function(){
   var l=URLP.get('lang');if(l&&l!==KR.lang()&&KR.langs().indexOf(l)>=0)KR.setLang(l);
