@@ -77,6 +77,51 @@ var V={
     if(c.st===2){var ds=SRS.dayStart(Date.now());D.rv=D.rv&&D.rv.d===ds?{d:ds,n:D.rv.n+1}:{d:ds,n:1}}
     c=SRS.next(c,grade,D.s,Date.now());put(c);return c;
   },
+  /* Ответ в упражнении вне тренажёра (см. SRS.practice). res: {id карточки: верно ли}; если слово было в двух заданиях
+     и в одном из них ошибка, передавайте false. Возвращает {back: вернулись на повторение, done: засчитаны как повторение}. */
+  practice:function(res){
+    var now=Date.now(),ds=SRS.dayStart(now),out={back:[],done:[]};
+    Object.keys(res||{}).forEach(function(id){
+      var c=D.w[id];if(!c)return;var n=SRS.practice(c,!!res[id],D.s,now);if(!n)return;
+      if(res[id]){if(c.st===2)D.rv=D.rv&&D.rv.d===ds?{d:ds,n:D.rv.n+1}:{d:ds,n:1};out.done.push(n)}else out.back.push(n);
+      D.w[id]=n;D.d[id]=1;delete D.x[id];
+    });
+    if(out.back.length||out.done.length){save();push();changed()}
+    return out;
+  },
+  /* Слова ученика, которые есть в тексте (ответ или предложение из упражнения). Английский: слово целиком и с простым
+     окончанием (books, played, making, studies). Корейский: словарная форма или основа из двух и более слогов в начале
+     слова; основа из одного слога (가다, 사다) узнаётся только в словарной форме, иначе было бы много ложных совпадений.
+     Основа, которая меняется при спряжении (마시다 → 마셔요, 듣다 → 들어요), не узнаётся: такому заданию слово указывают явно.
+     Запись из нескольких слов ищется целиком; head = true — текст и есть ответ, тогда запись узнаётся и по первому слову
+     («사다 주다» по ответу «사다»). Варианты через «/» («갖다 주다 / 가져다 주다») проверяются по отдельности. */
+  wordsIn:function(lang,text,head){
+    var strip=function(t){return t.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,"")};
+    var toks=SRS.norm(text).split(" ").map(strip).filter(Boolean),whole=toks.join(" "),flat=" "+whole+" ";
+    if(!toks.length)return [];
+    var en=function(st,t){
+      if(t.indexOf(st)===0&&/^(s|es|d|ed|ing|'s|’s)?$/.test(t.slice(st.length)))return true;
+      var e=st.slice(-1),r=st.slice(0,-1);
+      if(e==="e"&&(t===r+"ing"||t===r+"ed"))return true;
+      if(e==="y"&&(t===r+"ies"||t===r+"ied"))return true;
+      return st.length>2&&/[bdgmnprt]$/.test(st)&&(t===st+e+"ing"||t===st+e+"ed");
+    };
+    return V.all(lang).filter(function(c){
+      return SRS.norm(c.w).split("/").some(function(w){
+        w=w.trim();if(!w)return false;var st=V.stem(lang,w);
+        if(w.indexOf(" ")>=0){
+          if(head&&whole===w.split(" ")[0])return true;
+          return lang==="ko"?flat.indexOf(" "+st)>=0:flat.indexOf(" "+w+" ")>=0;
+        }
+        if(lang==="ko"){
+          // глаголы на 하다 меняют основу (공부하다 → 공부해요, 공부했어요, 공부합니다): перечисляем её частые виды
+          var forms=/.하다$/.test(w)?["하","해","했","합","한","할"].map(function(x){return w.slice(0,-2)+x}):st.length>1?[st]:[];
+          return toks.some(function(t){return t===w||forms.some(function(f){return t.indexOf(f)===0})});
+        }
+        return toks.some(function(t){return en(w,t)});
+      });
+    }).map(function(c){return c.id});
+  },
   plan:function(lang){return SRS.plan(V.all(lang),D.s,Date.now(),revToday())},
   stats:function(lang){
     var p=V.plan(lang),all=V.all(lang),known=all.filter(function(c){return c.st===2}).length;

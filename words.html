@@ -239,7 +239,7 @@ function selects(all){
 function setsCard(){
   var ss=setsHere();if(!ss.length)return '';
   return '<div class="card glass wsets"><h3>'+KR.icon('book',20)+'Словари от преподавателя</h3>'+ss.map(function(s){
-    var ids=s.cards||[],cards=ids.map(function(id){return V.get(id)}).filter(Boolean),n=ids.length;
+    var ids=s.cards||[],cards=ids.map(function(id){return V.get(id)}).filter(Boolean),n=cards.length||ids.length;   // преподаватель мог дать часть слов: считаем те, что есть у ученика
     var known=cards.filter(function(c){return c.st===2}).length,fresh=cards.filter(function(c){return !c.st}).length,pct=n?Math.round(known/n*100):0,on=String(sfilt)===String(s.id);
     return '<div class="wset"><div class="wset-h"><div style="min-width:0"><b>'+esc(s.title)+'</b><div class="muted">'+[s.topic,s.level,s.due?'срок '+fmtDue(s.due):'',s.note].filter(Boolean).map(esc).join(' · ')+'</div></div>'+
       '<span class="muted">выучено '+known+' из '+n+'</span></div>'+

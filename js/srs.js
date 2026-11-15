@@ -4,7 +4,8 @@
    Карточка: id, l (язык), w (слово), t (перевод), ex / et (пример и его перевод), f (форма слова в примере),
    src (откуда слово), star (отмечено учеником), st (0 новое, 1 учу, 2 повторяю, 3 переучиваю),
    due (когда показать, мс), ivl (интервал, дни), ef (лёгкость), step (шаг изучения), reps, lap (забывания),
-   b (сколько раз слово добавляли повторно), fr / lr (первый и последний показ), a / u (добавлено / изменено).
+   b (сколько раз слово добавляли повторно), fr / lr (первый и последний показ), a / u (добавлено / изменено),
+   pe / pm (ошибок в упражнениях уроков и день последней такой ошибки).
 
    Оценки: 1 «Снова», 2 «Трудно», 3 «Хорошо», 4 «Легко». */
 (function(root){
@@ -84,6 +85,19 @@ function bump(c,now){
   else c.pri=now;                                       // новое слово поднимается в начало очереди
   return c;
 }
+/* Слово встретилось в упражнении вне тренажёра (урок, отработка). Упражнение не заменяет повторение, но сдвигает его:
+   ошибка — как повторное добавление слова: интервал вдвое короче, слово приходит на повторение сегодня;
+   верный ответ засчитывается как «Хорошо», только если слово и так пора повторять. Новое и изучаемое слово
+   от верного ответа не меняется: его сначала нужно пройти в тренажёре. Чтобы десять проверок одного упражнения
+   не сдвигали слово десять раз, ошибка считается раз в день, а после ошибки верные ответы в этот день не засчитываются.
+   Возвращает новую карточку или null, если менять нечего. pe — ошибок в упражнениях, pm — день последней ошибки. */
+function practice(c,ok,S,now){
+  var ds=dayStart(now),n;
+  if(c.pm===ds)return null;
+  if(!ok){n=bump(c,now);n.b=c.b;if(!n.b)delete n.b;n.pe=(c.pe||0)+1;n.pm=ds;return n}
+  if((c.st||0)!==2||c.due>=ds+DAY)return null;
+  return next(c,3,S,now);
+}
 function span(ms){
   if(ms<MIN)return "<1 мин";
   if(ms<60*MIN)return Math.round(ms/MIN)+" мин";
@@ -112,5 +126,5 @@ function plan(cards,S,now,revDone){
 }
 /* Следующая карточка: сначала то, что учим прямо сейчас, потом повторения, потом новые, потом ближайшие шаги. */
 function pick(p){return p.learn[0]||p.rev[0]||p.fresh[0]||p.soon[0]||null}
-root.SRS={DEF:DEF,GAMES:GAMES,MIN:MIN,DAY:DAY,cfg:cfg,norm:norm,id:makeId,make:make,next:next,bump:bump,label:label,span:span,plan:plan,pick:pick,dayStart:dayStart};
+root.SRS={DEF:DEF,GAMES:GAMES,MIN:MIN,DAY:DAY,cfg:cfg,norm:norm,id:makeId,make:make,next:next,bump:bump,practice:practice,label:label,span:span,plan:plan,pick:pick,dayStart:dayStart};
 })(typeof window!=="undefined"?window:globalThis);
