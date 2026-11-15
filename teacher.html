@@ -13,7 +13,7 @@
 <body>
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Преподаватель</small><h1>Ученики и задания</h1><p>Назначай материалы: ученик увидит только их</p></div></header>
-<main id="m"></main>
+<main><nav class="seg tnav" aria-label="Разделы преподавателя"><a href="teacher.html" class="on" aria-current="page">Ученики</a><a href="dict.html">Словари</a></nav><div id="m"></div></main>
 <script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/assistant.js"></script>
 <script>
 var $=function(s){return document.querySelector(s)};
@@ -21,6 +21,7 @@ var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){re
 var MAP={};MATERIALS.forEach(function(m){MAP[m.id]=m});
 var cur=null,students=[],assigned=[],filt='all',sel={},signup=null,voc=null,vlang='ko';
 var teachers=null;   // список преподавателей для владельца школы; null — на сервере ещё нет supabase/teachers.sql
+var wsets=null,SETMAP={};   // словари преподавателя (supabase/vocab2.sql); null — файла на сервере ещё нет
 function isOwner(){return !!(KR.ctx&&KR.ctx.owner)}
 function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.className='msg '+(ok?'ok':'bad')}}
 function genPin(){var a=new Uint32Array(1);crypto.getRandomValues(a);return String(100000+a[0]%900000)}
@@ -85,6 +86,7 @@ async function boot(){
   try{students=await KR.api('teacher_students')||[]}catch(e){$('#m').innerHTML='<div class="card"><p>Не удалось загрузить учеников.</p></div>';return}
   try{signup=await KR.api('teacher_signup_settings')}catch(e){signup=null}
   if(isOwner()){try{teachers=await KR.api('owner_teachers')||[]}catch(e){teachers=null}}
+  await loadWsets();
   draw();
 }
 
@@ -149,7 +151,7 @@ function vocabCard(){
   var due=voc.filter(function(c){return !c.st||(c.st===2?c.due<day:c.due<=now)}).length;
   var hard=voc.filter(function(c){return c.lap||c.b}).sort(function(a,b){return ((b.lap||0)*2+(b.b||0))-((a.lap||0)*2+(a.b||0))}).slice(0,8);
   var row=function(c,del){return '<div class="line" style="align-items:center;justify-content:space-between"><div><b'+(c.l==='ko'?' class="ko"':'')+' lang="'+esc(c.l)+'">'+esc(c.w)+'</b> <span class="muted">· '+esc(c.t||'без перевода')+
-    (c.lap?' · забывал: '+c.lap:'')+(c.b?' · добавляли повторно: '+c.b:'')+(c.star?' · отмечено учеником':'')+'</span></div>'+(del?'<button data-vdel="'+esc(c.id)+'" aria-label="Убрать слово">'+KR.icon('trash',15)+'</button>':'')+'</div>'};
+    (c.lap?' · забывал: '+c.lap:'')+(c.b?' · добавляли повторно: '+c.b:'')+(c.star?' · сложное для ученика':'')+'</span></div>'+(del?'<button data-vdel="'+esc(c.id)+'" aria-label="Убрать слово">'+KR.icon('trash',15)+'</button>':'')+'</div>'};
   var h='<div class="card"><h3>Словарь ученика</h3><p class="muted">Корейский: '+cnt('ko')+' · английский: '+cnt('en')+' · к повторению сегодня: '+due+'</p>';
   if(hard.length)h+='<p style="margin:12px 0 4px"><b>Даются трудно</b></p>'+hard.map(function(c){return row(c,false)}).join('');
   h+='<p style="margin:14px 0 4px"><b>Добавить слова</b></p><div class="opts">'+[['ko','Корейский'],['en','Английский']].map(function(x){return '<button data-vl="'+x[0]+'" class="'+(vlang===x[0]?'sel':'')+'" aria-pressed="'+(vlang===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
@@ -165,6 +167,21 @@ function parseWords(text,lang){
     return w&&w.length<=80?SRS.make(lang,w,t,{ex:parts[1],et:parts[2],src:'teacher'},now+i):null;
   }).filter(Boolean);
 }
+// словари преподавателя: названия в списке заданий и назначение словаря ученику (страница «Словари» — dict.html)
+async function loadWsets(){
+  try{wsets=await KR.api('teacher_sets')||[];SETMAP={};wsets.forEach(function(s){SETMAP[s.material]={title:'Словарь · '+s.title,kind:'words'}})}
+  catch(e){wsets=null}
+}
+function setsCard(){
+  if(wsets===null)return '';
+  var h='<div class="card"><h3>Словари</h3>';
+  if(!wsets.length)return h+'<p class="muted">Словарей пока нет. Создайте словарь на странице <a href="dict.html">«Словари»</a>: слова с переводами, транскрипцией и примерами.</p></div>';
+  var L={ko:'корейский',en:'английский'};
+  return h+'<p class="muted" style="margin-top:0">Слова словаря попадут в словарь ученика, а словарь — в его задания. Наполнить словари можно на странице <a href="dict.html">«Словари»</a>.</p>'+
+    '<div class="frow"><select id="wsel" aria-label="Словарь">'+wsets.map(function(s){return '<option value="'+s.id+'">'+esc(s.title)+' · '+L[s.lang]+' · слов: '+s.words+'</option>'}).join('')+'</select></div>'+
+    '<div class="frow"><input id="wdue" type="date" class="name" aria-label="Срок"><input id="wnote" class="name" placeholder="Комментарий (по желанию)" aria-label="Комментарий" maxlength="300"></div>'+
+    '<div class="done-row"><span></span><button class="pri" id="wgo">Назначить словарь</button></div></div>';
+}
 async function drawStudent(){
   var as=[],st=null;
   try{as=await KR.api('teacher_assignments',{p_student:cur})||[];st=await KR.api('teacher_student_state',{p_student:cur})}catch(e){}
@@ -176,10 +193,10 @@ async function drawStudent(){
     '<option value="">я</option>'+others.map(function(t){return '<option value="'+esc(t.name)+'"'+(info.teacher===t.name?' selected':'')+'>'+esc(t.name)+'</option>'}).join('')+'</select></label>':'';
   var h='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><h3 class="cap" style="margin:0">'+esc(cur)+'</h3><div class="muted">'+esc(info.email||'email не указан')+(info.signup_at?' · регистрация на сайте '+fmtDate(info.signup_at):'')+'</div>'+leadSel+'</div><span style="display:inline-flex;gap:8px;flex-wrap:wrap"><button id="rst">Сбросить PIN</button>'+(signup?'<button id="del">'+KR.icon('trash',15)+' Удалить</button>':'')+'</span></div><div id="inv2"></div><p style="margin:12px 0 4px"><b>Назначено</b></p>';
   if(!as.length)h+='<p class="muted">Пока ничего не назначено.</p>';
-  h+=as.map(function(a){var m=MAP[a.id]||{title:a.id,kind:''};
+  h+=as.map(function(a){var m=MAP[a.id]||SETMAP[a.id]||{title:a.id,kind:''};
     return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><button data-un="'+esc(a.id)+'">Убрать</button></div>'}).join('');
   h+=''+lessonProgress(st)+materialsCard(st)+'</div>';
-  h+=vocabCard();
+  h+=vocabCard()+setsCard();
   h+='<div class="card"><h3>Назначить материалы</h3><div class="opts" id="flt"><button data-f="all" class="'+(filt==='all'?'sel':'')+'">Все</button>'+Object.keys(SECTIONS).map(function(k){return '<button data-f="'+k+'" class="'+(filt===k?'sel':'')+'">'+esc(SECTIONS[k])+'</button>'}).join('')+'</div><div style="margin-top:8px;max-height:340px;overflow:auto">';
   MATERIALS.filter(function(m){return !have[m.id]&&(filt==='all'||m.section===filt)}).forEach(function(m){
     h+='<label class="line" style="align-items:center;cursor:pointer"><input type="checkbox" data-m="'+esc(m.id)+'" '+(sel[m.id]?'checked':'')+'><span style="flex:1">'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>'});
@@ -189,6 +206,15 @@ async function drawStudent(){
 function count(){var n=Object.keys(sel).filter(function(k){return sel[k]}).length;var e=$('#cnt');if(e)e.textContent=n?('Выбрано: '+n):''}
 document.addEventListener('click',async function(e){
   var b=e.target.closest('button');if(!b)return;
+  if(b.id==='wgo'){
+    var sid=+$('#wsel').value,s=wsets.filter(function(x){return x.id===sid})[0];
+    if(s&&!s.words){msg('В этом словаре пока нет слов. Добавьте их на странице «Словари».');return}
+    b.disabled=true;
+    try{var r=await KR.api('teacher_set_assign',{p_student:cur,p_id:sid,p_due:$('#wdue').value||null,p_note:($('#wnote').value||'').trim()});
+      await loadWsets();await drawStudent();msg('Словарь «'+(s?s.title:'')+'» назначен. Новых слов у ученика: '+(r&&r.added||0),true)}
+    catch(x){b.disabled=false;msg(/no_student/.test(x.message)?'Этого ученика ведёт другой преподаватель':/no_set/.test(x.message)?'Словарь не найден — обновите страницу':'Не получилось назначить словарь')}
+    return;
+  }
   if(b.id==='add'){
     var em=($('#nem').value||'').trim(),lg=loginFrom(em,$('#nlg').value);
     if(!/^\S+@\S+\.\S+$/.test(em)){msg('Введи email ученика');return}

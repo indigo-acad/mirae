@@ -152,27 +152,29 @@ const V0=/Natural|Online|Neural|SunHi|InJoon|Hyunsu|Sonia|Libby|Ryan|Jenny|Aria/
 const vRank=v=>V0.test(v.name)?0:V1.test(v.name)?1:2;
 const vLang=v=>String(v.lang||"").replace("_","-");
 const hasTTS=()=>("speechSynthesis" in window)&&!!window.SpeechSynthesisUtterance;
-function voices(lang){
+function voices(lang,ac){
   if(!hasTTS())return[];
-  const p=String(lang||"ko").slice(0,2).toLowerCase(),chosen=p==="en"&&!!LS("kr_accent");
-  const want=p==="en"?(accent()==="us"?"en-US":"en-GB"):(LANGS[p]||{}).tts||lang;
+  const p=String(lang||"ko").slice(0,2).toLowerCase(),chosen=p==="en"&&!!(ac||LS("kr_accent"));
+  const want=p==="en"?((ac||accent())==="us"?"en-US":"en-GB"):(LANGS[p]||{}).tts||lang;
   const loc=(a,b)=>(vLang(b)===want)-(vLang(a)===want);
   // выбранное произношение важнее качества голоса: британский ученик не должен слышать американский голос
   return speechSynthesis.getVoices().filter(v=>vLang(v).toLowerCase().indexOf(p)===0)
     .sort((a,b)=>chosen?(loc(a,b)||vRank(a)-vRank(b)):(vRank(a)-vRank(b)||loc(a,b)));
 }
-function pickVoice(lang){
-  const p=String(lang||"ko").slice(0,2),vs=voices(p);
+// ac — произношение для одного слова ("gb" или "us"), например в карточке слова; без него — выбранное учеником
+function pickVoice(lang,ac){
+  const p=String(lang||"ko").slice(0,2),vs=voices(p,ac);
   const saved=LS("kr_voice:"+p)||(p==="ko"?LS("topik_voice"):null);   // topik_voice — выбор из старых тренажёров
-  return vs.find(v=>v.name===saved)||vs[0]||null;
+  const want=ac==="us"?"en-US":"en-GB",mine=vs.find(v=>v.name===saved);
+  return (ac&&p==="en"?(mine&&vLang(mine)===want?mine:vs[0]):(mine||vs[0]))||null;
 }
 function rate(){const r=parseFloat(LS("kr_rate"));return r>=.5&&r<=1.2?r:.9}
 function accent(){return LS("kr_accent")==="us"?"us":"gb"}
 const ttsCache=new Map();let ttsAudio=null,ttsOff=0;
 // облачный голос: задан адрес, есть связь с базой и ученик вошёл (функция проверяет логин и PIN)
 const cloudVoice=()=>!!(CFG.TTS_URL&&cloud.on&&U()&&localStorage.getItem("kr_pin")&&Date.now()>ttsOff);
-async function cloudSay(text,lang,cb){
-  const ac=lang==="en"?accent():"",key=lang+"|"+ac+"|"+text;let url=ttsCache.get(key);
+async function cloudSay(text,lang,cb,acc){
+  const ac=lang==="en"?(acc||accent()):"",key=lang+"|"+ac+"|"+text;let url=ttsCache.get(key);
   if(!url){
     const r=await fetch(CFG.TTS_URL,{method:"POST",headers:{"Content-Type":"application/json",apikey:CFG.SUPABASE_ANON_KEY,Authorization:"Bearer "+CFG.SUPABASE_ANON_KEY},
       body:JSON.stringify({text:text,lang:lang,accent:ac||undefined,p_name:U(),p_pin:localStorage.getItem("kr_pin")||""})});
@@ -184,21 +186,23 @@ async function cloudSay(text,lang,cb){
   ttsAudio.onplay=()=>cb.start&&cb.start();ttsAudio.onended=ttsAudio.onerror=()=>cb.end&&cb.end();
   await ttsAudio.play();
 }
-function localSay(text,lang,cb){
+function localSay(text,lang,cb,acc){
   if(!hasTTS()){cb.end&&cb.end();return}
   try{
-    const p=String(lang||"ko").slice(0,2),u=new SpeechSynthesisUtterance(text),v=pickVoice(p);
+    const p=String(lang||"ko").slice(0,2),u=new SpeechSynthesisUtterance(text),v=pickVoice(p,acc);
     if(v){u.voice=v;u.lang=v.lang}else u.lang=(LANGS[p]||{}).tts||lang;
     u.rate=rate();u.onstart=()=>cb.start&&cb.start();u.onend=u.onerror=()=>cb.end&&cb.end();
     speechSynthesis.cancel();speechSynthesis.speak(u);
   }catch(e){cb.end&&cb.end()}
 }
+// lang: "ko", "en" или "en-gb" / "en-us" — английское слово с нужным произношением
 function say(text,lang,cb){
   cb=cb||{};text=String(text||"").trim();if(!text)return;
-  lang=String(lang||"ko").slice(0,2);
+  const m=String(lang||"ko").toLowerCase().match(/^([a-z]{2})(?:-(gb|us))?/)||[0,"ko"],acc=m[1]==="en"?m[2]||"":"";
+  lang=m[1];
   if(ttsAudio)ttsAudio.pause();
-  if(cloudVoice()&&(lang==="ko"||lang==="en")){cloudSay(text,lang,cb).catch(()=>localSay(text,lang,cb));return}
-  localSay(text,lang,cb);
+  if(cloudVoice()&&(lang==="ko"||lang==="en")){cloudSay(text,lang,cb,acc).catch(()=>localSay(text,lang,cb,acc));return}
+  localSay(text,lang,cb,acc);
 }
 function hush(){try{if(ttsAudio)ttsAudio.pause();if(hasTTS())speechSynthesis.cancel()}catch(e){}}
 

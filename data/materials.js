@@ -1,5 +1,5 @@
 window.SECTIONS={"korean": "Корейский язык", "english": "English · IELTS", "quests": "Квесты", "kids": "Для малышей", "course": "Основной курс"};
-window.KINDS={"trainer": "Тренажёр", "test": "Проверочная", "class": "Для урока", "game": "Игра", "quest": "Квест", "homework": "Домашка", "lesson": "Урок", "practice": "Отработка"};
+window.KINDS={"trainer": "Тренажёр", "test": "Проверочная", "class": "Для урока", "game": "Игра", "quest": "Квест", "homework": "Домашка", "lesson": "Урок", "practice": "Отработка", "words": "Словарь"};
 window.MATERIALS=[
  {
   "id": "en-ielts-unit1-places",
