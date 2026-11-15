@@ -19,15 +19,44 @@
   function save() { try { localStorage.setItem(key, JSON.stringify(state)); } catch (e) {} }
   function assignedCourseLessons() {
     if (!window.KR || !KR.user()) return [];
-    var catalogs = [window.COURSE0, window.COURSE, window.COURSE2], seen = {}, result = [];
-    catalogs.forEach(function (course) { (course && course.lessons || []).forEach(function (lesson) {
-      if (!lesson.id || seen[lesson.id] || !KR.can("lesson-" + lesson.id)) return;
-      seen[lesson.id] = true;
-      var p = KR.progress(lesson.id);
-      result.push({ id: lesson.id, title: lesson.title || lesson.tag || lesson.id, course: course.title || "Курс", n: p.n, total: p.tot, pct: p.pct, done: p.tot > 0 && p.pct >= 100 });
-    }); });
+    var catalogs = [window.COURSE0, window.COURSE, window.COURSE2];
+    var seen = {};
+    var result = [];
+    catalogs.forEach(function (course) {
+      (course && course.lessons || []).forEach(function (lesson) {
+        if (!lesson.id || seen[lesson.id] || !KR.can("lesson-" + lesson.id)) return;
+        seen[lesson.id] = true;
+        var p = KR.progress(lesson.id);
+        result.push({
+          id: lesson.id,
+          title: lesson.title || lesson.tag || lesson.id,
+          course: course.title || "Курс",
+          n: p.n,
+          total: p.tot,
+          pct: p.pct,
+          done: p.tot > 0 && p.pct >= 100
+        });
+      });
+    });
+    (window.MATERIALS || []).forEach(function (item) {
+      if (item.section !== "course" || item.kind !== "lesson" || !item.id || item.id.indexOf("lesson-") !== 0) return;
+      var id = item.id.slice("lesson-".length);
+      if (seen[id] || !KR.can(item.id)) return;
+      seen[id] = true;
+      var p = KR.progress(id);
+      result.push({
+        id: id,
+        title: item.title || id,
+        course: item.level ? "Курс · " + item.level : "Основной курс",
+        n: p.n,
+        total: p.tot,
+        pct: p.pct,
+        done: p.tot > 0 && p.pct >= 100
+      });
+    });
     return result;
   }
+
   function courseState() {
     var lessons = assignedCourseLessons(), done = lessons.filter(function (lesson) { return lesson.done; });
     var blocksDone = lessons.reduce(function (sum, lesson) { return sum + lesson.n; }, 0);
@@ -113,10 +142,11 @@
     if (!Recognition || !Recognition.prototype || !("processLocally" in Recognition.prototype) || typeof Recognition.available !== "function") { button.disabled = true; note.textContent = "В этом браузере нет локального распознавания корейской речи. Можно ответить текстом или выбрать реплику."; return; }
     Recognition.available({ langs: ["ko-KR"], processLocally: true }).then(function (availability) {
       if (availability === "available") { button.disabled = false; note.textContent = "Голос распознаётся на устройстве. Нажми микрофон и разреши браузеру доступ к нему."; }
-      else if (availability === "downloadable" || availability === "downloading") { button.disabled = true; install.hidden = false; note.textContent = "Для локального распознавания нужен корейский языковой пакет. Установи его кнопкой ниже или ответь текстом."; }
+      else if ((availability === "downloadable" || availability === "downloading") && typeof Recognition.install === "function") { button.disabled = true; install.hidden = false; note.textContent = "Для локального распознавания нужен корейский языковой пакет. Установи его кнопкой ниже или ответь текстом."; }
       else { button.disabled = true; note.textContent = "Локальный пакет корейского языка недоступен в этом браузере. Можно ответить текстом или выбрать реплику."; }
     }).catch(function () { button.disabled = true; note.textContent = "Не удалось проверить локальное распознавание. Можно ответить текстом или выбрать реплику."; });
     install.addEventListener("click", function () {
+      if (typeof Recognition.install !== "function") return;
       install.disabled = true; note.textContent = "Устанавливаю языковой пакет для обработки речи на устройстве…";
       Recognition.install({ langs: ["ko-KR"], processLocally: true }).then(function (installed) {
         install.disabled = false; install.hidden = true;
