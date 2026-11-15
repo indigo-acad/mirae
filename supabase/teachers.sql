@@ -66,6 +66,7 @@ begin
   return n;
 end;
 $fn$ language plpgsql security definer set search_path = public, extensions;
+revoke execute on function public._school_owner(text, text) from public, anon, authenticated;
 
 -- ученик доступен преподавателю: владельцу — любой, остальным — только свои. Вызывается только из функций ниже.
 create or replace function public._school_mine(p_teacher text, p_student text)
