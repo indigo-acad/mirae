@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Словари · MIRAÉ</title>
+<meta name="theme-color" content="#0B1535">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="topbar"></div>
+<header class="band"><div class="in"><small>Преподаватель</small><h1>Словари</h1><p>Наборы слов для учеников и база слов школы с полными карточками</p></div></header>
+<main id="m">
+  <nav class="seg tnav" aria-label="Разделы преподавателя"><a href="teacher.html">Ученики</a><a href="dict.html" class="on" aria-current="page">Словари</a></nav>
+  <div id="body"><div class="card"><p class="muted">Загрузка…</p></div></div>
+  <p id="msg" class="msg" role="status" aria-live="polite"></p>
+</main>
+<script src="js/config.js"></script><script src="js/common.js"></script><script src="js/words2.js"></script>
+<script>
+/* Словари преподавателя (supabase/vocab2.sql): наборы слов с порядком, назначение ученикам со сроком
+   и общая база слов школы — карточка слова со всеми полями. */
+var $=function(s){return document.querySelector(s)};
+var W2=KR.W2,esc=W2.esc;
+var LN={ko:'Корейский',en:'Английский'};
+var tab='sets',sets=[],cur=null,setWords=[],found=null,students=null;
+var bq='',blang='',bfilt='all',base=null,form=null,sq='';   // form: {w: слово, ctx: 'base' | 'set'}
+var missing=false;
+
+function msg(t,ok){var e=$('#msg');if(e){e.textContent=t||'';e.className='msg '+(ok?'ok':'bad')}}
+function errText(x){
+  var m=String(x&&x.message||'');
+  if(x&&x.status===404||/Could not find the function/.test(m))return 'На сервере ещё нет словарей 2.0: выполните в Supabase файл supabase/vocab2.sql.';
+  if(/exists/.test(m))return 'Такое слово с этой частью речи уже есть в базе школы. Если это другое значение, впишите его в поле «Значение»; если то же — найдите слово во вкладке «База слов» и измените.';
+  if(/in_use/.test(m))return form?'Слово уже есть у учеников: их карточки записаны под этим написанием, поэтому его нельзя переименовать или удалить.':'Нельзя поменять язык: в словаре уже есть слова.';
+  if(/not_author/.test(m))return 'Менять этот словарь может его автор или владелец школы.';
+  if(/no_student/.test(m))return 'Этого ученика ведёт другой преподаватель.';
+  if(/no_word/.test(m))return 'Слово не найдено: возможно, его удалили. Обновите страницу.';
+  if(/no_set/.test(m))return 'Словарь не найден: возможно, его удалили.';
+  if(/too_many/.test(m))return 'В словаре ученика слишком много слов (больше 5000).';
+  if(/bad_input/.test(m))return 'Проверьте поля: что-то заполнено неверно (картинка — ссылка https://, длина полей ограничена).';
+  return 'Не получилось сохранить. Проверьте связь и попробуйте ещё раз.';
+}
+function curSet(){return sets.filter(function(s){return s.id===cur})[0]||null}
+function wordLine(w){return '<b'+(w.lang==='ko'?' class="ko"':'')+' lang="'+esc(w.lang)+'">'+esc(w.word)+'</b>'+(w.pos?' <span class="muted">'+esc(W2.POS[w.pos]||w.pos)+'</span>':'')+(w.sense?' <span class="muted">«'+esc(w.sense)+'»</span>':'')+
+  '<div class="muted">'+esc((w.tr_ru||[]).join('; ')||'без перевода')+'</div>'}
+
+async function boot(){
+  if(!KR.require())return;KR.topbar('teacher');
+  var ctx=await KR.load();KR.topbar('teacher');
+  if(!ctx.ok){$('#body').innerHTML='<div class="card"><p>Нет связи с сервером. Словари работают только онлайн.</p></div>';return}
+  if(ctx.pending||!ctx.teacher){$('#body').innerHTML='<div class="card"><h3>Только для преподавателя</h3><p class="muted">Этот раздел открыт для аккаунта преподавателя.</p></div>';return}
+  var h=location.hash.match(/set=(\d+)/);if(h)cur=+h[1];if(location.hash==='#base')tab='base';
+  await loadSets();
+  if(cur&&curSet())await openSet(cur);else{cur=null;draw()}
+}
+async function loadSets(){
+  try{sets=await KR.api('teacher_sets')||[];missing=false}
+  catch(x){missing=x.status===404||/Could not find the function/.test(x.message);if(!missing)msg(errText(x))}
+}
+async function openSet(id){
+  cur=id;found=null;form=null;sq='';
+  try{setWords=await KR.api('teacher_set_words',{p_id:id})||[]}catch(x){setWords=[];msg(errText(x))}
+  if(students===null){try{students=await KR.api('teacher_students')||[]}catch(x){students=[]}}
+  history.replaceState(null,'','#set='+id);draw();
+  var e=$('#sed');if(e)e.scrollIntoView({block:'start'});
+}
+
+// ---------- отрисовка ----------
+function draw(){
+  if(missing){$('#body').innerHTML='<div class="card"><h3>Словари 2.0 ещё не включены</h3><p class="muted">Чтобы создавать словари и заполнять карточки слов, выполните в Supabase файл supabase/vocab2.sql (SQL Editor → New query → вставить → Run) и обновите страницу. Нынешний словарь учеников при этом продолжит работать как раньше.</p></div>';return}
+  var h='<div class="seg dtabs" role="tablist" aria-label="Словари и база слов">'+[['sets','Словари'],['base','База слов']].map(function(t){
+    return '<button type="button" role="tab" data-tab="'+t[0]+'" aria-selected="'+(tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div>';
+  h+=tab==='sets'?drawSets():drawBase();
+  $('#body').innerHTML=h;
+  if(form)preview();
+}
+function drawSets(){
+  var h='<div class="card"><h3>Словари школы</h3>';
+  if(!sets.length)h+='<p class="muted">Пока нет ни одного словаря. Создайте первый ниже: например, слова к уроку или теме.</p>';
+  h+=sets.map(function(s){
+    return '<div class="line" style="align-items:center;justify-content:space-between;gap:10px"><div style="min-width:0"><div><b>'+esc(s.title)+'</b> <span class="badge">'+esc(LN[s.lang])+'</span></div><div class="muted">'+
+      [s.topic,s.level,'слов: '+s.words,'назначен: '+s.students,s.author?'автор '+s.author:''].filter(Boolean).map(esc).join(' · ')+'</div></div>'+
+      '<button type="button" data-open="'+s.id+'" class="'+(cur===s.id?'pri':'')+'">'+(cur===s.id?'Открыт':'Открыть')+'</button></div>'}).join('');
+  h+='</div>';
+  h+='<form class="card" id="nset" autocomplete="off"><h3>Новый словарь</h3><div class="frow">'+
+    '<input class="name" name="title" placeholder="Название, например «Еда и кафе»" aria-label="Название словаря" maxlength="120" required>'+
+    '<select name="lang" aria-label="Язык словаря"><option value="en">Английский</option><option value="ko">Корейский</option></select></div><div class="frow">'+
+    '<input class="name" name="topic" placeholder="Тема (по желанию)" aria-label="Тема" maxlength="80">'+
+    '<input class="name" name="level" placeholder="Уровень: A2, 3급…" aria-label="Уровень" maxlength="20" list="levels"></div>'+
+    '<div class="done-row"><span class="muted">Слова добавите после создания</span><button type="submit" class="pri">'+KR.icon('plus',16)+'Создать</button></div></form>';
+  var s=curSet();if(s)h+=drawSet(s);
+  return h+levelsList();
+}
+function levelsList(){return '<datalist id="levels">'+W2.LEVELS.en.concat(W2.LEVELS.ko,['band 6','band 7','band 8','band 9']).map(function(l){return '<option value="'+esc(l)+'">'}).join('')+'</datalist>'}
+function drawSet(s){
+  var mine=!!s.mine,inSet={};setWords.forEach(function(w){inSet[w.id]=1});
+  var h='<section class="card" id="sed" aria-label="Словарь «'+esc(s.title)+'»"><h3>'+esc(s.title)+' <span class="badge">'+esc(LN[s.lang])+'</span></h3>';
+  if(mine){
+    h+='<form id="sform" autocomplete="off"><div class="frow"><input class="name" name="title" value="'+esc(s.title)+'" aria-label="Название" maxlength="120" required>'+
+      '<input class="name" name="topic" value="'+esc(s.topic)+'" placeholder="Тема" aria-label="Тема" maxlength="80">'+
+      '<input class="name" name="level" value="'+esc(s.level)+'" placeholder="Уровень" aria-label="Уровень" maxlength="20" list="levels"></div>'+
+      '<textarea class="name" name="description" placeholder="Описание для учеников (по желанию)" aria-label="Описание" maxlength="500">'+esc(s.description)+'</textarea>'+
+      '<div class="done-row"><button type="button" data-x="delset">'+KR.icon('trash',15)+' Удалить словарь</button><button type="submit">Сохранить</button></div></form>';
+  }else h+='<p class="muted">'+(s.description?esc(s.description)+' · ':'')+'Менять словарь может его автор'+(s.author?' ('+esc(s.author)+')':'')+' или владелец школы. Назначать ученикам можно.</p>';
+  h+='<p style="margin:16px 0 4px"><b>Слова · '+setWords.length+'</b></p>';
+  if(!setWords.length)h+='<p class="muted">Пока нет слов. '+(mine?'Найдите их в базе школы или добавьте новое.':'')+'</p>';
+  h+='<ol class="wlist">'+setWords.map(function(w,i){
+    return '<li class="line" style="align-items:center;justify-content:space-between;gap:8px"><div style="min-width:0">'+wordLine(w)+'</div>'+
+      '<span class="acts"><button type="button" class="icb" data-editw="'+w.id+'" aria-label="Карточка слова">'+KR.icon('pencil',15)+'</button>'+(mine?
+      '<button type="button" class="icb" data-up="'+i+'" aria-label="Выше"'+(i?'':' disabled')+'>↑</button><button type="button" class="icb" data-down="'+i+'" aria-label="Ниже"'+(i<setWords.length-1?'':' disabled')+'>↓</button>'+
+      '<button type="button" class="icb" data-rm="'+w.id+'" aria-label="Убрать из словаря">'+KR.icon('x',15)+'</button>':'')+'</span></li>'}).join('')+'</ol>';
+  if(mine){
+    h+='<form id="sfind" class="frow" autocomplete="off" style="margin-top:12px"><input class="name'+(s.lang==='ko'?' ko':'')+'" name="q" value="'+esc(sq)+'" lang="'+s.lang+'" placeholder="Найти слово или перевод в базе школы" aria-label="Поиск слова в базе школы" maxlength="80">'+
+      '<button type="submit">'+KR.icon('search',16)+'Найти</button><button type="button" data-x="neww">'+KR.icon('plus',16)+'Новое слово</button></form>';
+    if(found){
+      h+=found.length?'<div class="found">'+found.map(function(w){return '<div class="line" style="align-items:center;justify-content:space-between;gap:8px"><div style="min-width:0">'+wordLine(w)+'</div>'+
+        (inSet[w.id]?'<span class="badge ok">в словаре</span>':'<button type="button" class="pri" data-addw="'+w.id+'">Добавить</button>')+'</div>'}).join('')+'</div>'
+        :'<p class="muted">В базе школы такого слова нет. Нажмите «Новое слово», чтобы заполнить его карточку.</p>';
+    }
+  }
+  if(form&&form.ctx==='set')h+=drawForm();
+  // назначение
+  var list=(students||[]).filter(function(x){return x.name!==KR.user()});
+  h+='<p style="margin:18px 0 4px"><b>Назначить ученикам</b></p><p class="muted" style="margin:0 0 6px">Слова словаря попадут в словарь ученика, а сам словарь — в его задания со сроком. Слова, которые ученик уже учит, не сбрасываются.</p>';
+  h+=list.length?'<div class="opts">'+list.map(function(x){return '<label class="pick"><input type="checkbox" data-as="'+esc(x.name)+'"><span class="cap">'+esc(x.name)+'</span></label>'}).join('')+'</div>'+
+    '<div class="frow"><input id="due" type="date" class="name" aria-label="Срок"><input id="note" class="name" placeholder="Комментарий (по желанию)" aria-label="Комментарий" maxlength="300"></div>'+
+    '<div class="done-row"><span class="muted" id="ascnt"></span><button type="button" class="pri" data-x="assign"'+(setWords.length?'':' disabled')+'>Назначить</button></div>'
+    :'<p class="muted">У вас пока нет учеников.</p>';
+  return h+'</section>';
+}
+function drawBase(){
+  var h='<div class="card"><h3>База слов школы</h3><p class="muted" style="margin-top:0">Здесь слова всех словарей и слова, которые уже есть у учеников. «Не проверено» — слово появилось само, из словаря ученика: заполните карточку, и ученики увидят транскрипцию, примеры и картинку.</p>'+
+    '<form id="bfind" class="frow" autocomplete="off"><input class="name" name="q" value="'+esc(bq)+'" placeholder="Слово или перевод" aria-label="Поиск по базе слов" maxlength="80"><button type="submit">'+KR.icon('search',16)+'Найти</button><button type="button" data-x="neww">'+KR.icon('plus',16)+'Новое слово</button></form>'+
+    '<div class="opts">'+[['','Все языки'],['ko','Корейский'],['en','Английский']].map(function(x){return '<button type="button" data-bl="'+x[0]+'" aria-pressed="'+(blang===x[0])+'" class="'+(blang===x[0]?'sel':'')+'">'+x[1]+'</button>'}).join('')+'</div>'+
+    '<div class="opts">'+[['all','Все'],['unchecked','Не проверены'],['used','Есть у учеников']].map(function(x){return '<button type="button" data-bf="'+x[0]+'" aria-pressed="'+(bfilt===x[0])+'" class="'+(bfilt===x[0]?'sel':'')+'">'+x[1]+'</button>'}).join('')+'</div>';
+  if(base===null)h+='<p class="muted">Загрузка…</p>';
+  else if(!base.length)h+='<p class="muted">Ничего не найдено.</p>';
+  else h+='<div class="found">'+base.map(function(w){
+    return '<div class="line" style="align-items:center;justify-content:space-between;gap:8px"><div style="min-width:0">'+wordLine(w)+
+      '<div class="chips">'+(w.checked?'':'<span class="badge warn">не проверено</span>')+(w.students?'<span class="badge">у учеников: '+w.students+'</span>':'')+(w.sets?'<span class="badge">в словарях: '+w.sets+'</span>':'')+'</div></div>'+
+      '<button type="button" data-editw="'+w.id+'">Изменить</button></div>'}).join('')+(base.length>=200?'<p class="muted">Показаны первые 200. Уточните поиск.</p>':'')+'</div>';
+  h+='</div>';
+  if(form&&form.ctx==='base')h+=drawForm();
+  return h+levelsList();
+}
+// ---------- карточка слова: форма ----------
+function drawForm(){
+  var w=form.w,en=w.lang!=='ko',used=w.students>0;
+  var f=function(name,label,val,attrs){return '<label class="field" for="wf-'+name+'">'+label+'</label><input class="name" id="wf-'+name+'" name="'+name+'" value="'+esc(val)+'" '+(attrs||'')+'>'};
+  var t=function(name,label,val,hint,attrs){return '<label class="field" for="wf-'+name+'">'+label+'</label><textarea class="name" id="wf-'+name+'" name="'+name+'" '+(attrs||'')+'>'+esc(val)+'</textarea>'+(hint?'<p class="hint">'+hint+'</p>':'')};
+  var h='<form class="'+(form.ctx==='set'?'wform sub':'card wform')+'" id="wform" autocomplete="off" aria-label="Карточка слова"><h3>'+(w.id?'Карточка слова «'+esc(w.word)+'»':'Новое слово')+'</h3><div class="wgrid"><div>'+
+    '<label class="field" for="wf-lang">Язык</label><select id="wf-lang" name="lang"'+(used?' disabled':'')+'>'+['en','ko'].map(function(l){return '<option value="'+l+'"'+(w.lang===l?' selected':'')+'>'+LN[l]+'</option>'}).join('')+'</select>'+
+    f('word','Слово',w.word,'required maxlength="120" lang="'+esc(w.lang)+'" class="name'+(en?'':' ko')+'"'+(used?' readonly aria-describedby="wf-used"':''))+
+    (used?'<p class="hint" id="wf-used">Слово уже у учеников ('+w.students+'): написание и язык не меняются, остальное можно.</p>':'')+
+    '<label class="field" for="wf-pos">Часть речи</label><select id="wf-pos" name="pos"><option value="">не указана</option>'+Object.keys(W2.POS).map(function(k){return '<option value="'+k+'"'+(w.pos===k?' selected':'')+'>'+W2.POS[k]+'</option>'}).join('')+'</select>'+
+    f('sense','Значение',w.sense,'maxlength="80" placeholder="например: лёгкий (по весу)" aria-describedby="wf-sense-h"')+
+    '<p class="hint" id="wf-sense-h">Нужно, если у слова несколько значений одной части речи: light «лёгкий» и light «светлый» — разные карточки.</p>'+
+    f('level','Уровень',w.level,'maxlength="20" list="levels"')+
+    t('tr_ru','Перевод на русский',(w.tr_ru||[]).join('\n'),'Каждый вариант с новой строки.','rows="3"')+
+    (en?t('tr_ko','Перевод на корейский',(w.tr_ko||[]).join('\n'),'','rows="2" lang="ko"')+
+      '<div class="frow"><div>'+f('ipa_uk','IPA, британское',w.ipa_uk,'maxlength="120" placeholder="/bʊk/"')+'</div><div>'+f('ipa_us','IPA, американское',w.ipa_us,'maxlength="120" placeholder="/bʊk/"')+'</div></div>':'')+
+    t('examples','Примеры',W2.exFormat(w.examples),'По одному на строку: пример | перевод.','rows="3" lang="'+esc(w.lang)+'"')+
+    t('explanation','Объяснение',w.explanation,'','rows="2" maxlength="1000"')+
+    f('synonyms','Синонимы',(w.synonyms||[]).join(', '),'placeholder="через запятую"')+
+    f('topics','Темы',(w.topics||[]).join(', '),'placeholder="через запятую: еда, путешествия"')+
+    f('image','Картинка',w.image,'type="url" inputmode="url" placeholder="https://…" maxlength="500"')+
+    '</div><div class="wprev"><p class="muted" style="margin:0 0 6px">Так карточку увидит ученик</p><div id="wprev"></div></div></div>'+
+    '<div class="done-row"><span>'+(w.id&&!w.students?'<button type="button" data-x="delw">'+KR.icon('trash',15)+' Удалить из базы</button>':'')+'</span><span style="display:inline-flex;gap:8px;flex-wrap:wrap"><button type="button" data-x="cancelw">Отмена</button><button type="submit" class="pri">'+(form.ctx==='set'&&!w.inSet?'Сохранить и добавить в словарь':'Сохранить')+'</button></span></div></form>';
+  return h;
+}
+function readForm(){
+  var F=$('#wform');if(!F)return null;var g=function(n){var e=F.elements[n];return e?e.value:''};
+  var w=form.w,lang=w.students>0?w.lang:g('lang');
+  return {id:w.id||'',lang:lang,word:g('word').trim(),pos:g('pos'),sense:g('sense').trim(),level:g('level').trim(),tr_ru:W2.lines(g('tr_ru')),
+    tr_ko:lang==='en'?W2.lines(g('tr_ko')):[],ipa_uk:lang==='en'?g('ipa_uk').trim():'',ipa_us:lang==='en'?g('ipa_us').trim():'',
+    examples:W2.exParse(g('examples')),explanation:g('explanation').trim(),synonyms:W2.commas(g('synonyms')),topics:W2.commas(g('topics')),image:g('image').trim()};
+}
+function preview(){var e=$('#wprev'),w=readForm();if(e&&w)e.innerHTML=W2.card(w,null)}
+function openForm(w,ctx){form={w:w,ctx:ctx};draw();var e=$('#wform');if(e){e.scrollIntoView({block:'start'});var i=e.querySelector(w.id?'#wf-tr_ru':'#wf-word');if(i)i.focus()}}
+
+// ---------- действия ----------
+async function reloadBase(){
+  base=null;draw();
+  try{base=await KR.api('teacher_words',{p_lang:blang,p_query:bq,p_filter:bfilt,p_limit:200})||[]}catch(x){base=[];msg(errText(x))}
+  draw();
+}
+async function saveSetWords(ids,ok){
+  try{await KR.api('teacher_set_words_save',{p_id:cur,p_words:ids});setWords=await KR.api('teacher_set_words',{p_id:cur})||[];await loadSets();draw();if(ok)msg(ok,true)}
+  catch(x){msg(errText(x))}
+}
+document.addEventListener('submit',async function(e){
+  var F=e.target;e.preventDefault();var g=function(n){return (F.elements[n]&&F.elements[n].value||'').trim()};
+  if(F.id==='nset'){
+    try{var r=await KR.api('teacher_set_save',{p_set:{lang:g('lang'),title:g('title'),topic:g('topic'),level:g('level')}});await loadSets();await openSet(r.id);msg('Словарь создан. Добавьте в него слова.',true)}
+    catch(x){msg(errText(x))}
+  }else if(F.id==='sform'){
+    var s=curSet();
+    try{await KR.api('teacher_set_save',{p_set:{id:s.id,lang:s.lang,title:g('title'),topic:g('topic'),level:g('level'),description:g('description')}});await loadSets();draw();msg('Словарь сохранён',true)}
+    catch(x){msg(errText(x))}
+  }else if(F.id==='sfind'){
+    sq=g('q');
+    try{found=await KR.api('teacher_words',{p_lang:curSet().lang,p_query:sq,p_filter:'all',p_limit:30})||[];form=null;draw()}
+    catch(x){msg(errText(x))}
+  }else if(F.id==='bfind'){bq=g('q');reloadBase()}
+  else if(F.id==='wform'){
+    var w=readForm(),b=F.querySelector('[type=submit]');if(!w.word){msg('Впишите слово');return}
+    b.disabled=true;
+    try{
+      var saved=await KR.api('teacher_word_save',{p_word:w}),ctx=form.ctx;form=null;
+      if(ctx==='set'){var ids=setWords.map(function(x){return x.id});if(ids.indexOf(saved.id)<0)ids.push(saved.id);await saveSetWords(ids,'Слово «'+saved.word+'» сохранено в словаре');}
+      else{await reloadBase();msg('Карточка «'+saved.word+'» сохранена',true)}
+    }catch(x){b.disabled=false;msg(errText(x))}
+  }
+});
+document.addEventListener('input',function(e){if(e.target.closest('#wform'))preview()});
+document.addEventListener('change',function(e){
+  if(e.target.id==='wf-lang'){var w=readForm();form.w=Object.assign({},form.w,w);draw()}
+  if(e.target.dataset&&e.target.dataset.as!==undefined){var n=document.querySelectorAll('[data-as]:checked').length;$('#ascnt').textContent=n?'Выбрано: '+n:''}
+});
+document.addEventListener('click',async function(e){
+  var b=e.target.closest('button');if(!b)return;var d=b.dataset;
+  if(d.say!==undefined){KR.say(d.say,d.l);return}
+  if(d.tab){tab=d.tab;form=null;history.replaceState(null,'',tab==='base'?'#base':(cur?'#set='+cur:'#'));if(tab==='base'&&base===null)return reloadBase();return draw()}
+  if(d.open)return openSet(+d.open);
+  if(d.bl!==undefined){blang=d.bl;return reloadBase()}
+  if(d.bf){bfilt=d.bf;return reloadBase()}
+  if(d.addw){var ids=setWords.map(function(x){return x.id});ids.push(+d.addw);return saveSetWords(ids)}
+  if(d.rm){return saveSetWords(setWords.map(function(x){return x.id}).filter(function(x){return x!==+d.rm}))}
+  if(d.up!==undefined||d.down!==undefined){
+    var i=+(d.up!==undefined?d.up:d.down),j=d.up!==undefined?i-1:i+1,a=setWords.map(function(x){return x.id});
+    if(j<0||j>=a.length)return;var t=a[i];a[i]=a[j];a[j]=t;return saveSetWords(a);
+  }
+  if(d.editw){
+    var w=(base||[]).concat(setWords,found||[]).filter(function(x){return x.id===+d.editw})[0];
+    if(!w)return;
+    if(w.students===undefined){try{var r=await KR.api('teacher_words',{p_lang:w.lang,p_query:w.word,p_filter:'all',p_limit:50})||[];w=r.filter(function(x){return x.id===w.id})[0]||w}catch(x){}}
+    return openForm(Object.assign({},w,{inSet:setWords.some(function(x){return x.id===w.id})}),tab==='sets'?'set':'base');
+  }
+  if(d.x==='neww'){
+    var s=curSet(),q=tab==='sets'?sq:bq;
+    return openForm({lang:tab==='sets'&&s?s.lang:(blang||'en'),word:(q||'').trim(),pos:'',level:tab==='sets'&&s?s.level:'',students:0},tab==='sets'?'set':'base');
+  }
+  if(d.x==='cancelw'){form=null;return draw()}
+  if(d.x==='delw'){
+    if(!confirm('Удалить слово «'+form.w.word+'» из базы школы? Оно пропадёт и из словарей.'))return;
+    try{await KR.api('teacher_word_delete',{p_id:form.w.id});form=null;if(tab==='base')await reloadBase();else{setWords=await KR.api('teacher_set_words',{p_id:cur})||[];await loadSets();draw()}msg('Слово удалено',true)}
+    catch(x){msg(errText(x))}
+    return;
+  }
+  if(d.x==='delset'){
+    var s2=curSet();if(!confirm('Удалить словарь «'+s2.title+'»? Задание пропадёт у учеников, а слова останутся в их словарях.'))return;
+    try{await KR.api('teacher_set_delete',{p_id:s2.id});cur=null;setWords=[];history.replaceState(null,'','#');await loadSets();draw();msg('Словарь удалён',true)}
+    catch(x){msg(errText(x))}
+    return;
+  }
+  if(d.x==='assign'){
+    var who=[].map.call(document.querySelectorAll('[data-as]:checked'),function(x){return x.dataset.as});
+    if(!who.length){msg('Отметьте учеников');return}
+    var due=$('#due').value||null,note=($('#note').value||'').trim(),done=0,added=0,bad=[];b.disabled=true;
+    for(var k=0;k<who.length;k++){
+      try{var r2=await KR.api('teacher_set_assign',{p_student:who[k],p_id:cur,p_due:due,p_note:note});done++;added+=r2&&r2.added||0}
+      catch(x){bad.push(who[k]+': '+errText(x))}
+    }
+    await loadSets();draw();
+    msg(bad.length?('Не назначено — '+bad.join('; ')):('Назначено ученикам: '+done+'. Новых слов в их словарях: '+added+'.'),!bad.length);
+  }
+});
+boot();
+</script>
+</body>
+</html>

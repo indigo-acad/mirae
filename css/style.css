@@ -675,3 +675,72 @@ button.say.big{width:46px;height:46px;margin:0 6px 0 0}
 details.rep{margin:6px 0;border:1px solid var(--rule);border-radius:14px;background:var(--fill)}
 details.rep summary{cursor:pointer;padding:10px 14px;list-style-position:inside}
 details.rep pre{margin:0;padding:4px 14px 14px;max-height:420px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:14px/1.5 var(--font-body);color:var(--fg)}
+
+/* ---------- словарь 2.0: карточка слова, словари преподавателя (js/words2.js, dict.html) ---------- */
+.tnav{max-width:360px;margin:20px 0 0}
+.tnav a{flex:1;display:grid;place-items:center;min-height:40px;padding:6px 12px;border-radius:999px;border:1px solid transparent;color:var(--fg-2);text-decoration:none;font-size:14.5px;font-weight:500}
+.tnav a:hover{color:var(--fg)}
+.tnav a.on{background:rgba(255,255,255,.1);color:var(--fg);border-color:rgba(212,175,124,.5)}
+.dtabs{max-width:360px;margin:14px 0 0}
+.frow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.frow>*{flex:1 1 160px;min-width:0}
+.frow>button{flex:0 0 auto}
+.frow input.name,.frow select{margin:6px 0}
+.wlist{list-style:none;margin:0;padding:0;counter-reset:w}
+.wlist>li{counter-increment:w}
+.wlist>li>div:first-child::before{content:counter(w) ". ";color:var(--fg-2);font-size:14px}
+.acts{display:inline-flex;gap:2px;flex:none}
+.acts .icb{width:36px;height:36px;font-size:17px}
+.acts .icb:disabled{opacity:.3;cursor:default}
+.found{margin-top:8px;max-height:460px;overflow:auto}
+.pick{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:6px 14px;border:1px solid var(--rule);border-radius:999px;cursor:pointer;font-size:15px}
+.pick input{width:17px;height:17px;margin:0;accent-color:var(--navy)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0}
+.chip{display:inline-flex;align-items:center;font-size:13px;line-height:1.5;padding:2px 10px;border-radius:999px;background:var(--fill);color:var(--fg);border:1px solid var(--rule)}
+.chip.lv{border-color:rgba(212,175,124,.7);color:var(--accent)}
+.chip.ko{font-family:var(--font-ko)}
+.wform .wgrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:26px;align-items:start}
+.wform select{margin-top:6px}
+.wform.sub{margin-top:18px;padding-top:14px;border-top:1px solid var(--rule)}
+.wprev{position:sticky;top:calc(var(--nav-h) + 12px)}
+@media (max-width:760px){.wform .wgrid{grid-template-columns:1fr}.wprev{position:static}}
+.wcard{border:1px solid var(--rule);border-radius:16px;padding:16px 18px;background:var(--fill);overflow-wrap:anywhere}
+.wc-head{display:flex;gap:14px;justify-content:space-between;align-items:flex-start}
+.wc-title{min-width:0}
+.wc-w{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.wc-w b{font-size:28px;font-weight:600;line-height:1.2}
+.wc-w b.ko{font-family:var(--font-ko);font-weight:500}
+.wc-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.wc-img{width:96px;height:96px;object-fit:cover;border-radius:12px;flex:none;background:var(--fill)}
+.wc-ipa{display:flex;flex-wrap:wrap;gap:6px 18px;margin:10px 0 0}
+.wc-ipa .ipa{display:inline-flex;align-items:center;gap:4px;font-size:17px}
+.wc-ipa small{color:var(--fg-2);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.wc-sec{margin-top:12px}
+.wc-sec h4{margin:0 0 2px;font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-2)}
+.wc-sec p{margin:2px 0}
+.wc-ex+.wc-ex{margin-top:8px}
+.wc-sec p.chips{margin-top:4px}
+/* страница «Слова»: строка открывает карточку, фильтры, словари от преподавателя, карточка слова */
+.wrow .wopen{flex:1;min-width:0;display:block;text-align:left;padding:2px 4px;margin:0 -4px;border:0;border-radius:10px;background:none;color:inherit;font:inherit;cursor:pointer}
+.wrow .wopen:hover b{color:var(--gold)}
+.wrow .wopen:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.wrow .wopen .muted{display:block}
+.fsels{display:flex;flex-wrap:wrap;gap:8px 12px;margin:4px 0 0}
+.fsel{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--fg-2)}
+.fsel select{width:auto;max-width:220px;margin:0;padding:8px 12px;border-radius:999px;font-size:14.5px}
+.wset{padding:10px 0;border-bottom:1px solid var(--rule)}
+.wset:last-of-type{border-bottom:0}
+.wset-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.wset-h>.muted{white-space:nowrap}
+dialog.wdlg.card{width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 32px);overflow:auto;margin:auto;padding:16px 18px 18px}
+dialog.wdlg::backdrop{background:rgba(5,10,30,.62)}
+.wdlg-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:-4px -6px 8px 0}
+.wdlg .wcard{background:#fff}
+.wdlg-me{margin-top:12px}
+.wdlg-me textarea{margin-top:6px}
+.pick.on{border-color:var(--gold);color:var(--gold-ink);background:#f6eedc}
+.pick.on svg{fill:currentColor}
+.flash-ipa{margin-top:4px;color:var(--silver);font-size:18px;letter-spacing:.02em}
+.flash-img{display:block;width:120px;height:120px;object-fit:cover;border-radius:14px;margin:0 auto 12px}
+.flash-pos{margin-top:4px;color:var(--silver);font-size:14px;letter-spacing:.08em;text-transform:uppercase}
+@media (max-width:560px){.fsel{flex:1 1 100%}.fsel select{flex:1;max-width:none}}
