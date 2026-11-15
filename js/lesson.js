@@ -43,6 +43,7 @@ function compose(str){
   return out;
 }
 const VOC=window.KR&&KR.vocab&&!L.back?KR.vocab:null;   // словарь ученика: слова урока попадают в интервальное повторение
+const PV=window.KR&&KR.vocab||null;                      // ответы в упражнениях (и в отработке) сдвигают повторение слов
 const blocks=[]; // flat list of {key,done}
 L.sections.forEach(s=>s.blocks.forEach((b,i)=>{b._key=s.id+"-"+i;blocks.push(b)}));
 
@@ -148,6 +149,28 @@ function block(b){
   return h+"</div>";
 }
 function getItems(b){return b.items}
+/* Слова из словаря ученика, которые проверяет задание: явно (it.w — слово или список) или по правильному ответу. */
+function itemWords(it){
+  if(!PV)return [];
+  if(it.w)return [].concat(it.w).map(w=>PV.find(LANG,w)).filter(Boolean).map(c=>c.id);
+  const ids=[];
+  [].concat(it.a==null?[]:it.a).forEach(a=>PV.wordsIn(LANG,String(a),true).forEach(id=>{if(ids.indexOf(id)<0)ids.push(id)}));
+  return ids;
+}
+/* После проверки упражнения: ошибка возвращает слово на повторение сегодня, верный ответ засчитывает повторение,
+   если слово уже пора повторять (правила — SRS.practice). Под результатом показываем, что изменилось. */
+function practiceWords(b,key,wrong){
+  if(!PV)return;
+  const res={};
+  b.items.forEach((it,i)=>{const good=wrong.indexOf(i)<0;itemWords(it).forEach(id=>{res[id]=res[id]===false?false:good})});
+  const r=PV.practice(res),row=document.querySelector(`[data-check="${key}"]`),old=document.getElementById("pn-"+key);
+  if(old)old.remove();
+  if(!row||(!r.back.length&&!r.done.length))return;
+  const list=a=>a.slice(0,6).map(c=>`<b class="ko" lang="${LANG}">${esc(c.w)}</b>`).join(", ")+(a.length>6?" и ещё "+(a.length-6):"");
+  row.closest(".done-row").insertAdjacentHTML("afterend",`<p class="note pnote" id="pn-${key}" role="status">`+
+    (r.back.length?`Вернутся на повторение сегодня: ${list(r.back)}. `:"")+(r.done.length?`Засчитано как повторение: ${list(r.done)}. `:"")+
+    `<a href="words.html">Открыть «Слова»</a></p>`);
+}
 function check(key){
   const b=blocks.find(x=>x._key===key);const v=(P[key]=P[key]||{}).v=(P[key].v||{});
   let ok=0;const wr=[];
@@ -164,7 +187,7 @@ function check(key){
   const ms=P[key].miss=P[key].miss||{};wr.forEach(i=>{ms[i]=(ms[i]||0)+1});
   const hs=P[key].hist=P[key].hist||[];hs.push({t:Date.now(),s:ok,n:b.items.length,w:wr.map(i=>[i,String(v[i]==null?"":v[i])])});if(hs.length>10)hs.splice(0,hs.length-10);
   P[key].t=Date.now();P[key].score=ok;P[key].total=b.items.length;P[key].done=ok===b.items.length;
-  save();refresh();
+  save();refresh();practiceWords(b,key,wr);
 }
 function refresh(){
   let n=0;

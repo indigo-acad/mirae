@@ -749,3 +749,26 @@ dialog.wdlg::backdrop{background:rgba(5,10,30,.62)}
 .listen .muted{font-size:14px}
 button.linkish{background:none;border:0;padding:4px 2px;color:var(--gold);text-decoration:underline;text-underline-offset:3px;font-size:14px}
 .wrow.playing{background:rgba(212,175,124,.12);border-radius:12px;box-shadow:inset 3px 0 0 var(--gold)}
+/* слова с галочками: взять весь список или часть (словари, импорт, назначение) */
+.wpick{border:1px solid var(--rule);border-radius:14px;padding:6px 12px 4px;margin:10px 0 6px;background:var(--field)}
+.wpick-h{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:4px 0 8px;border-bottom:1px solid var(--rule)}
+.wpick-h .pick{min-height:40px}
+.wpick-h .muted{font-size:14px}
+.wpick-l{max-height:380px;overflow:auto;overscroll-behavior:contain}
+.wpick-i{display:flex;align-items:center;gap:10px;min-height:46px;padding:7px 2px;border-bottom:1px solid var(--rule);cursor:pointer}
+.wpick-i:last-child{border-bottom:0}
+.wpick-i input{flex:none;width:19px;height:19px;margin:0;accent-color:var(--navy)}
+.wpick-w{flex:1;min-width:0;overflow-wrap:anywhere;line-height:1.35}
+.wpick-w .muted{font-size:14.5px}
+.wpick-i .badge{flex:none;white-space:normal;text-align:center;max-width:46%}
+.wpick-i.off{cursor:default}
+.wpick-i.off .wpick-w{opacity:.62}
+details.wpd{margin:10px 0 4px}
+details.wpd summary{min-height:44px;display:flex;align-items:center;gap:6px}
+details.wpd .wpick{margin:0 10px 10px}
+details.howq{margin:12px 0 8px}
+.qsteps{margin:0;padding:2px 14px 8px 34px;font-size:15px;line-height:1.5}
+.qsteps li{margin:4px 0}
+.card:not(.glass) .seg.am{background:var(--fill);margin:4px 0 2px;max-width:420px}
+.seg.am button{padding:6px 6px;font-size:14px;white-space:nowrap}
+.card:not(.glass) .seg.am button[aria-selected=true]{background:#fff;color:var(--navy);border-color:var(--gold)}

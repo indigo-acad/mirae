@@ -303,8 +303,11 @@ function shooting(){
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-lang-set]");if(b)window.KR.setLang(b.getAttribute("data-lang-set"))});
 // пока ученик печатает ответ, нижняя панель не должна вставать над клавиатурой
 const typing=e=>{const t=e.target;return t&&(t.tagName==="TEXTAREA"||(t.tagName==="INPUT"&&!/^(checkbox|radio|range|button|submit)$/.test(t.type)))};
-document.addEventListener("focusin",e=>{if(typing(e))document.body.classList.add("typing")});
-document.addEventListener("focusout",e=>{if(typing(e))document.body.classList.remove("typing")});
+// Панель возвращается чуть позже, чем поле теряет фокус: иначе при нажатии на кнопку под полем («Проверить»)
+// она появляется прямо под пальцем, и нажатие достаётся ей, а не кнопке.
+let typingOff=0;
+document.addEventListener("focusin",e=>{if(typing(e)){clearTimeout(typingOff);document.body.classList.add("typing")}});
+document.addEventListener("focusout",e=>{if(typing(e)){clearTimeout(typingOff);typingOff=setTimeout(()=>document.body.classList.remove("typing"),400)}});
 
 window.KR={
   user:U,

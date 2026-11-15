@@ -469,12 +469,14 @@ begin
 end;
 $fn$ language plpgsql security definer set search_path = public, extensions;
 
--- назначить словарь ученику: задание со сроком и слова в его словарь (новые — в очередь новых слов, знакомые не трогаем)
-create or replace function public.teacher_set_assign(p_name text, p_pin text, p_student text, p_id bigint, p_due date, p_note text)
+-- назначить словарь ученику: задание со сроком и слова в его словарь (новые — в очередь новых слов, знакомые не трогаем).
+-- p_words — id отмеченных слов словаря, если ученику нужна только часть; null — весь словарь.
+create or replace function public.teacher_set_assign_words(p_name text, p_pin text, p_student text, p_id bigint, p_due date, p_note text, p_words jsonb)
 returns jsonb as $fn$
 declare
   t text; s text := lower(trim(coalesce(p_student, ''))); m text;
   ms numeric := floor(extract(epoch from clock_timestamp()) * 1000);
+  pick jsonb := case when p_words is null or jsonb_typeof(p_words) = 'null' then null else p_words end;
   v public.vocabulary; card text; i int := 0; added int := 0; linked int := 0;
 begin
   t := public._school_teacher(p_name, p_pin);
@@ -484,10 +486,20 @@ begin
   m := public._vocab2_material(p_id);
   if m is null then raise exception 'no_set'; end if;
   if length(coalesce(p_note, '')) > 300 then raise exception 'bad_input'; end if;
+  if pick is not null then
+    if jsonb_typeof(pick) <> 'array' or jsonb_array_length(pick) = 0 or jsonb_array_length(pick) > 500 then raise exception 'bad_input'; end if;
+    if exists (select 1 from jsonb_array_elements(pick) x where jsonb_typeof(x) <> 'number' or x::text !~ '^\d{1,18}$') then
+      raise exception 'bad_input';
+    end if;
+    if exists (select 1 from jsonb_array_elements_text(pick) x
+                where not exists (select 1 from public.vocabulary_set_items it where it.set_id = p_id and it.word_id = x::bigint)) then
+      raise exception 'no_word';
+    end if;
+  end if;
   insert into public.assignments(student, material_id, due, note) values (s, m, p_due, coalesce(p_note, ''))
     on conflict (student, material_id) do update set due = excluded.due, note = excluded.note;
   for v in select w.* from public.vocabulary_set_items it join public.vocabulary w on w.id = it.word_id
-            where it.set_id = p_id order by it.position, w.id loop
+            where it.set_id = p_id and (pick is null or pick @> to_jsonb(w.id)) order by it.position, w.id loop
     card := v.lang || ':' || v.norm;
     i := i + 1;
     if not exists (select 1 from public.vocab where student = s and id = card) then
@@ -508,6 +520,14 @@ begin
 end;
 $fn$ language plpgsql security definer set search_path = public, extensions;
 
+-- весь словарь целиком (прежний вызов сайта)
+create or replace function public.teacher_set_assign(p_name text, p_pin text, p_student text, p_id bigint, p_due date, p_note text)
+returns jsonb as $fn$
+begin
+  return public.teacher_set_assign_words(p_name, p_pin, p_student, p_id, p_due, p_note, null);
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
+
 grant execute on function public.my_words_info(text, text) to anon;
 grant execute on function public.my_word_sets(text, text) to anon;
 grant execute on function public.my_assignments(text, text) to anon;
@@ -520,3 +540,4 @@ grant execute on function public.teacher_set_delete(text, text, bigint) to anon;
 grant execute on function public.teacher_set_words(text, text, bigint) to anon;
 grant execute on function public.teacher_set_words_save(text, text, bigint, jsonb) to anon;
 grant execute on function public.teacher_set_assign(text, text, text, bigint, date, text) to anon;
+grant execute on function public.teacher_set_assign_words(text, text, text, bigint, date, text, jsonb) to anon;
