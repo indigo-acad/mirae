@@ -170,15 +170,20 @@ function pickVoice(lang,ac){
 }
 function rate(){const r=parseFloat(LS("kr_rate"));return r>=.5&&r<=1.2?r:.9}
 function accent(){return LS("kr_accent")==="us"?"us":"gb"}
+// ttsOff — до какого времени не просить облачный голос (ошибка функции). Хранится до конца сеанса браузера,
+// чтобы каждая страница не повторяла заведомо неудачный запрос: 503 — ключи голосов ещё не добавлены в Supabase.
 const ttsCache=new Map();let ttsAudio=null,ttsOff=0;
+try{ttsOff=+sessionStorage.getItem("kr_tts_off")||0}catch(e){}
 // облачный голос: задан адрес, есть связь с базой и ученик вошёл (функция проверяет логин и PIN)
 const cloudVoice=()=>!!(CFG.TTS_URL&&cloud.on&&U()&&localStorage.getItem("kr_pin")&&Date.now()>ttsOff);
 async function cloudSay(text,lang,cb,acc){
   const ac=lang==="en"?(acc||accent()):"",key=lang+"|"+ac+"|"+text;let url=ttsCache.get(key);
   if(!url){
-    const r=await fetch(CFG.TTS_URL,{method:"POST",headers:{"Content-Type":"application/json",apikey:CFG.SUPABASE_ANON_KEY,Authorization:"Bearer "+CFG.SUPABASE_ANON_KEY},
-      body:JSON.stringify({text:text,lang:lang,accent:ac||undefined,p_name:U(),p_pin:localStorage.getItem("kr_pin")||""})});
-    if(!r.ok){ttsOff=Date.now()+600000;throw new Error("tts "+r.status)}
+    let r;
+    try{r=await fetch(CFG.TTS_URL,{method:"POST",headers:{"Content-Type":"application/json",apikey:CFG.SUPABASE_ANON_KEY,Authorization:"Bearer "+CFG.SUPABASE_ANON_KEY},
+      body:JSON.stringify({text:text,lang:lang,accent:ac||undefined,p_name:U(),p_pin:localStorage.getItem("kr_pin")||""})})}
+    catch(e){ttsOff=Date.now()+600000;throw e}   // нет связи с функцией: 10 минут говорит голос устройства
+    if(!r.ok){ttsOff=Date.now()+(r.status===503?1800000:600000);try{sessionStorage.setItem("kr_tts_off",String(ttsOff))}catch(e){}throw new Error("tts "+r.status)}
     url=URL.createObjectURL(await r.blob());if(ttsCache.size>300)ttsCache.clear();ttsCache.set(key,url);
   }
   if(!ttsAudio)ttsAudio=new Audio();
