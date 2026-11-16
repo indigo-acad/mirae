@@ -28,7 +28,7 @@ function takenObj(u){const v=J("kr_taken:"+u,[]);return Array.isArray(v)?{l:v,t:
 // Материалы из папки materials/ пишут сюда через js/bridge.js: mat — открытия и время, rep — отчёты «Отправить учителю».
 function matObj(u){const v=J("kr_mat:"+u,{});return{mat:v.mat||{},rep:Array.isArray(v.rep)?v.rep:[]}}
 function collect(){
-  const u=U(),pre="kr_progress:"+u+":",m=matObj(u),s={progress:{},taken:takenObj(u),mat:m.mat,rep:m.rep};
+  const u=U(),pre="kr_progress:"+u+":",m=matObj(u),s={progress:{},taken:takenObj(u),mat:m.mat,rep:m.rep,wl:J("kr_wlog:"+u,{})};
   for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith(pre))s.progress[k.slice(pre.length)]=J(k,{})}
   return s;
 }
@@ -37,6 +37,14 @@ function apply(s){
   Object.entries(s.progress||{}).forEach(([id,P])=>localStorage.setItem("kr_progress:"+u+":"+id,JSON.stringify(P)));
   if(s.taken)localStorage.setItem("kr_taken:"+u,JSON.stringify(s.taken));
   if(s.mat||s.rep)localStorage.setItem("kr_mat:"+u,JSON.stringify({mat:s.mat||{},rep:s.rep||[]}));
+  if(s.wl)localStorage.setItem("kr_wlog:"+u,JSON.stringify(s.wl));
+}
+// журнал слов по дням (js/vocab.js): с двух устройств за один день берём большие счётчики, храним 60 дней
+function mergeWl(a,b){
+  a=a||{};b=b||{};const out={};
+  Object.keys(a).concat(Object.keys(b)).forEach(d=>{const x=a[d]||{},y=b[d]||{};out[d]={n:Math.max(x.n||0,y.n||0),r:Math.max(x.r||0,y.r||0),ok:Math.max(x.ok||0,y.ok||0),t:Math.max(x.t||0,y.t||0)}});
+  Object.keys(out).sort().slice(0,-60).forEach(d=>{delete out[d]});
+  return out;
 }
 // те же правила, что в js/bridge.js: счётчики берут большее, отчёты объединяются без повторов (новые сверху, до 40)
 function mergeMat(a,b){
@@ -58,7 +66,7 @@ function mergeRep(a,b){
 const newer=(x,y)=>!x?y:!y?x:((y.t||0)>(x.t||0)?y:x);
 function mergeState(a,b){
   // незнакомые ключи состояния (например, будущий сюжет) не теряем: берём их из облака как есть
-  a=a||{};b=b||{};const out=Object.assign({},b,a,{email:a.email||b.email,progress:{},taken:newer(a.taken,b.taken)||{l:[],t:0},mat:mergeMat(a.mat,b.mat),rep:mergeRep(a.rep,b.rep)});
+  a=a||{};b=b||{};const out=Object.assign({},b,a,{email:a.email||b.email,progress:{},taken:newer(a.taken,b.taken)||{l:[],t:0},mat:mergeMat(a.mat,b.mat),rep:mergeRep(a.rep,b.rep),wl:mergeWl(a.wl,b.wl)});
   const ids=new Set([...Object.keys(a.progress||{}),...Object.keys(b.progress||{})]);
   ids.forEach(id=>{const pa=(a.progress||{})[id]||{},pb=(b.progress||{})[id]||{},m={};
     new Set([...Object.keys(pa),...Object.keys(pb)]).forEach(k=>{m[k]=newer(pa[k],pb[k])});out.progress[id]=m});
@@ -250,6 +258,22 @@ const IC={
    домашку задаёт преподаватель (такой раздел он может выбрать в «Задать домашку»). Раздел может указать часть сам: part. */
 const PRACTICE_T=["fill","choice","build","talk"];
 function part(s){return s.part||(s.id==="hw"?"hw":s.blocks&&s.blocks.length&&s.blocks.every(b=>PRACTICE_T.indexOf(b.type)>=0)?"practice":"theory")}
+/* Слова урока (блоки «Слова») с примером из диалогов и примеров того же урока: {w,t,ex,et,f} — f — форма слова
+   в примере. У корейских глаголов пример ищется по основе без «다». Для тестов по словам (test.html, панель преподавателя). */
+function lessonWords(L){
+  const lang=L.lang||"ko",lines=[],out=[];
+  const stem=w=>{w=String(w).normalize("NFC").trim().replace(/\s+/g," ").toLowerCase();return lang==="ko"&&w.length>1&&w.slice(-1)==="다"?w.slice(0,-1):w};
+  const strip=t=>t.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,"");
+  L.sections.forEach(s=>s.blocks.forEach(b=>{
+    if(b.type==="dialogue")b.lines.forEach(x=>lines.push([x[1],x[2]]));
+    if(b.type==="examples")b.items.forEach(x=>lines.push([x[0],x[1]]));
+  }));
+  L.sections.forEach(s=>s.blocks.forEach(b=>{if(b.type!=="words")return;
+    b.items.forEach(x=>{const st=stem(x[0]),it={w:x[0],t:x[1]};
+      for(const l of lines){const tok=l[0].split(/\s+/).map(strip).find(t=>st.length>1?t.toLowerCase().indexOf(st)===0:t===st);if(tok){it.ex=l[0];it.et=l[1];it.f=tok;break}}
+      if(!out.some(o=>o.w===it.w))out.push(it)})}));
+  return out;
+}
 function icon(n,s){s=s||20;return '<svg class="ic" width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(IC[n]||"")+"</svg>"}
 // значки разделов в данных уроков заданы эмодзи: показываем их в общем стиле, незнакомые оставляем как есть
 const EMO={"💬":"chat","🔤":"abc","📘":"book","✏":"pencil","🗣":"speak","🔁":"repeat","🏠":"home","📌":"pin","📝":"pencil"};
@@ -326,7 +350,7 @@ window.KR={
     const P=J("kr_progress:"+u+":"+id,{});let tot=0,n=0;
     L.sections.forEach(s=>{if(part(s)==="hw")return;s.blocks.forEach((b,i)=>{tot++;const p=P[s.id+"-"+i];if(p&&p.done)n++})});
     return{n,tot,pct:tot?Math.round(n/tot*100):0,P}},
-  part,
+  part,lessonWords,
   /* Домашка от преподавателя (supabase/homework.sql): заданная и недавно сданная. null — на сервере ещё нет этих функций. */
   async homework(){try{const r=await api("my_homework");return Array.isArray(r)?r:[]}
     catch(e){return e&&(e.status===404||/Could not find the function/.test(e.message||""))?null:[]}},

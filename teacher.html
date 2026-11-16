@@ -24,6 +24,8 @@ var teachers=null;   // список преподавателей для вла�
 var wsets=null,SETMAP={};   // словари преподавателя (supabase/vocab2.sql); null — файла на сервере ещё нет
 var wp={id:null,words:null};   // слова выбранного словаря: ученику можно дать весь словарь или отмеченные слова
 var hws=null;   // домашка ученика (supabase/homework.sql); null — файла на сервере ещё нет
+var stw={};     // журнал занятий словами по дням (state.wl, пишет js/vocab.js): новые слова и повторения
+var tg={src:'week',lang:'ko',l:'',n:15,k:{tr:1,rev:1,ctx:1,wr:1},min:10};   // тест на начало урока: откуда слова, сколько, какие вопросы
 var hwf={lang:'ko',l:'',sel:{},th:{},mats:{},open:false};   // форма «Задать домашку»: язык, урок в списке, отмеченные задания, теория, материалы
 function isOwner(){return !!(KR.ctx&&KR.ctx.owner)}
 function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.className='msg '+(ok?'ok':'bad')}}
@@ -157,7 +159,7 @@ function vocabCard(){
   var hard=voc.filter(function(c){return c.lap||c.b||c.pe}).sort(function(a,b){return hw(b)-hw(a)}).slice(0,8);
   var row=function(c,del){return '<div class="line" style="align-items:center;justify-content:space-between"><div><b'+(c.l==='ko'?' class="ko"':'')+' lang="'+esc(c.l)+'">'+esc(c.w)+'</b> <span class="muted">· '+esc(c.t||'без перевода')+
     (c.lap?' · забывалось: '+c.lap:'')+(c.pe?' · ошибок в упражнениях: '+c.pe:'')+(c.b?' · добавляли повторно: '+c.b:'')+(c.star?' · сложное для ученика':'')+'</span></div>'+(del?'<button data-vdel="'+esc(c.id)+'" aria-label="Убрать слово">'+KR.icon('trash',15)+'</button>':'')+'</div>'};
-  var h='<div class="card"><h3>Словарь ученика</h3><p class="muted">Корейский: '+cnt('ko')+' · английский: '+cnt('en')+' · к повторению сегодня: '+due+'</p>';
+  var h='<div class="card"><h3>Словарь ученика</h3><p class="muted">Корейский: '+cnt('ko')+' · английский: '+cnt('en')+' · к повторению сегодня: '+due+'</p>'+wordActivity();
   if(hard.length)h+='<p style="margin:12px 0 4px"><b>Даются трудно</b></p>'+hard.map(function(c){return row(c,false)}).join('');
   h+='<p style="margin:14px 0 4px"><b>Добавить слова</b></p><div class="opts">'+[['ko','Корейский'],['en','Английский']].map(function(x){return '<button data-vl="'+x[0]+'" class="'+(vlang===x[0]?'sel':'')+'" aria-pressed="'+(vlang===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
     '<textarea id="vtext" aria-label="Слова для ученика" placeholder="Каждое слово с новой строки: слово — перевод&#10;Можно с примером: слово — перевод | пример | перевод примера" style="min-height:120px"></textarea>'+
@@ -165,6 +167,50 @@ function vocabCard(){
   if(voc.length)h+='<details style="margin-top:10px"><summary style="cursor:pointer;padding:4px 0"><b>Все слова</b> <span class="muted">· '+voc.length+'</span></summary>'+voc.slice().sort(function(a,b){return (b.a||0)-(a.a||0)}).map(function(c){return row(c,true)}).join('')+'</details>';
   return h+'</div>';
 }
+/* ---------- как ученик учит слова: новые и повторения ----------
+   По дням — из журнала ученика (state.wl: n — начато новых слов, r — повторений и шагов изучения, ok — верных ответов).
+   Пока журнала нет (ученик ещё не открывал обновлённый сайт), дни считаются по карточкам слов приблизительно:
+   первый показ слова — «новое», последнее повторение — «повторение». */
+function dayKeyT(t){var d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function wordDays(){
+  var now=Date.now(),days=[],by={},approx=!Object.keys(stw).length;
+  for(var i=13;i>=0;i--){var t=SRS.dayStart(now)-i*SRS.DAY,d={k:dayKeyT(t),t:t,n:0,r:0,ok:0,last:0};days.push(d);by[d.k]=d}
+  if(!approx)Object.keys(stw).forEach(function(k){var d=by[k],x=stw[k]||{};if(d){d.n=x.n||0;d.r=x.r||0;d.ok=x.ok||0;d.last=x.t||0}});
+  else (voc||[]).forEach(function(c){var f=c.fr&&by[dayKeyT(c.fr)],l=c.lr&&by[dayKeyT(c.lr)];if(f)f.n++;if(l&&l!==f)l.r++});
+  return {days:days,approx:approx};
+}
+function dayLabel(t){return new Date(t).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}
+function wordActivity(){
+  var D=wordDays(),days=D.days,wk=days.slice(7),now=Date.now(),W=7*SRS.DAY;
+  var sum=function(a,k){return a.reduce(function(s,d){return s+d[k]},0)},act=wk.filter(function(d){return d.n+d.r>0}).length;
+  var last=Math.max.apply(null,[0].concat(Object.keys(stw).map(function(k){return (stw[k]||{}).t||0}),(voc||[]).map(function(c){return c.lr||0})));
+  var started=(voc||[]).filter(function(c){return c.fr&&c.fr>=now-W}).sort(function(a,b){return b.fr-a.fr});
+  var reviewed=(voc||[]).filter(function(c){return c.lr&&c.lr>=now-W&&!(c.fr&&c.fr>=now-W)}).sort(function(a,b){return b.lr-a.lr});
+  var late=(voc||[]).filter(function(c){return c.st===2&&c.due<now-2*SRS.DAY}).length;
+  var mx=Math.max.apply(null,days.map(function(d){return d.n+d.r}).concat([1])),top=mx<=5?5:mx<=10?10:Math.ceil(mx/10)*10;
+  var lst=function(a){return a.slice(0,12).map(function(c){return '<b'+(c.l==='ko'?' class="ko"':'')+' lang="'+esc(c.l)+'">'+esc(c.w)+'</b>'}).join(', ')+(a.length>12?' и ещё '+(a.length-12):'')};
+  var tile=function(n,t){return '<div><b>'+n+'</b><span class="muted">'+t+'</span></div>'};
+  var h='<div class="wlog"><p class="wlog-h"><b>Как учит слова</b> <span class="muted">· последние 14 дней'+(D.approx?' · приблизительно, по карточкам слов':'')+'</span></p>'+
+    '<div class="wlog-t">'+tile(sum(wk,'n'),'новых начато за 7 дней')+tile(sum(wk,'r'),'повторений за 7 дней')+tile(act+' из 7','дней с занятиями')+'</div>'+
+    '<p class="muted wlog-l">'+(last?'Последнее занятие: '+fmtDate(last):'Словами ещё не занимался(-ась).')+(late?' · <span class="wlog-late">не повторено вовремя: '+late+'</span>':'')+'</p>';
+  // столбики по дням: снизу повторения, сверху новые; подсказка при наведении и таблица ниже
+  h+='<div class="wch-legend"><span><i class="wn"></i>новые слова</span><span><i class="wr"></i>повторения</span><span class="muted">шкала до '+top+'</span></div>'+
+    '<div class="wch" role="img" aria-label="Новые слова и повторения по дням за 14 дней; цифры — в таблице ниже">'+days.map(function(d,i){
+      var tip=dayLabel(d.t)+': новых '+d.n+' · повторений '+d.r+(d.ok&&!D.approx?' · верно '+d.ok+' из '+(d.n+d.r):'');
+      return '<div class="wch-c" tabindex="0" data-tip="'+esc(tip)+'"><div class="wch-b">'+(d.r?'<i class="wr" style="height:'+(d.r/top*100).toFixed(1)+'%"></i>':'')+(d.n?'<i class="wn" style="height:'+(d.n/top*100).toFixed(1)+'%"></i>':'')+'</div></div>'}).join('')+'<div class="wch-tip" hidden></div></div>'+
+    '<div class="wch-x" aria-hidden="true">'+days.map(function(d,i){return '<span>'+(i%2?'':new Date(d.t).getDate())+'</span>'}).join('')+'</div>'+
+    '<details class="wch-tbl"><summary>По дням</summary><table><tr><th>День</th><th>Новые</th><th>Повторения</th>'+(D.approx?'':'<th>Верно</th>')+'</tr>'+days.slice().reverse().filter(function(d){return d.n+d.r}).map(function(d){return '<tr><td>'+dayLabel(d.t)+'</td><td>'+d.n+'</td><td>'+d.r+'</td>'+(D.approx?'':'<td>'+d.ok+'</td>')+'</tr>'}).join('')+'</table></details>';
+  if(started.length)h+='<p class="wlog-w"><b>Начал(а) учить за неделю · '+started.length+':</b> '+lst(started)+'</p>';
+  if(reviewed.length)h+='<p class="wlog-w"><b>Повторил(а) старые за неделю · '+reviewed.length+':</b> '+lst(reviewed)+'</p>';
+  return h+'</div>';
+}
+// подсказка над столбиком дня (наведение, касание, фокус с клавиатуры)
+function wchTip(c){var box=c.closest('.wch'),tip=box&&box.querySelector('.wch-tip');if(!tip)return;
+  tip.textContent=c.dataset.tip;tip.hidden=false;var r=c.getBoundingClientRect(),br=box.getBoundingClientRect();
+  tip.style.left=Math.max(0,Math.min(br.width-tip.offsetWidth,r.left-br.left+r.width/2-tip.offsetWidth/2))+'px'}
+document.addEventListener('pointerover',function(e){var c=e.target.closest&&e.target.closest('.wch-c');if(c)wchTip(c)});
+document.addEventListener('focusin',function(e){var c=e.target.closest&&e.target.closest('.wch-c');if(c)wchTip(c)});
+document.addEventListener('pointerout',function(e){var c=e.target.closest&&e.target.closest('.wch');if(c&&!c.contains(e.relatedTarget)){var t=c.querySelector('.wch-tip');if(t)t.hidden=true}});
 function parseWords(text,lang){
   var now=Date.now();
   return text.split(/\n+/).map(function(l){return l.trim()}).filter(Boolean).map(function(l,i){
@@ -264,6 +310,7 @@ function hwForm(){
 }
 function hwItemsText(r){
   return (r.items||[]).map(function(it){if(it.m)return esc((MAP[it.m]||{title:it.m}).title);
+    if(it.wt)return 'Тест по словам: '+(it.wt.w||[]).length+' '+plural((it.wt.w||[]).length,'слово','слова','слов');
     var L=window.LESSONS[it.l],t=it.b.map(function(k){var i=k.lastIndexOf('-'),s=L&&L.sections.filter(function(x){return x.id===k.slice(0,i)})[0],b=s&&s.blocks[+k.slice(i+1)];return b?(b.title||s.title):k});
     return esc(lessLabel(it.l))+': '+esc(t.join(', '))}).join('<br>');
 }
@@ -292,6 +339,72 @@ function hwCardT(){
   if(chk.length)h+='<details class="hwt-old"><summary>Проверенные · '+chk.length+'</summary>'+chk.map(function(r){return '<div class="hwt-row"><div class="line" style="justify-content:space-between;align-items:center;gap:8px"><div><b>'+esc(r.title)+'</b><div class="muted">проверена '+fmtDate(r.checked)+(r.comment?' · «'+esc(r.comment)+'»':'')+'</div></div><span class="badge ok">'+esc(hwScore(r)||'проверена')+'</span></div><details class="hwt-res"><summary>Ответы</summary>'+hwResultHtml(r)+'</details></div>'}).join('')+'</details>';
   return h+'</div>';
 }
+/* ---------- тест на начало урока (test.html) ----------
+   Слова: «недели» — ученик начал их учить или повторял за 7 дней; «пора повторить» — к повторению сегодня;
+   «все слова» ученика; «слова урока» — из урока сайта. «С учителем» открывает тест для урока (вопросы по одному,
+   «Показать ответ», счёт), «Самостоятельно» — задаёт его домашкой: ученик проходит сам, результат приходит сюда. */
+var TG_SRC=[['week','Слова недели'],['due','Пора повторить'],['all','Все слова'],['lesson','Слова урока']];
+var TG_K=[['tr','Перевод (выбор)'],['rev','Слово по переводу (выбор)'],['ctx','Вставь в предложение'],['wr','Напиши слово']];
+function tgWords(src){
+  src=src||tg.src;
+  if(src==='lesson'){var L=window.LESSONS[tg.l];return L?KR.lessonWords(L).map(function(w){return Object.assign({l:L.lang||'ko'},w)}):[]}
+  var now=Date.now(),W=7*SRS.DAY,day=SRS.dayStart(now)+SRS.DAY;
+  var list=(voc||[]).filter(function(c){return c.l===tg.lang&&c.w&&c.t});
+  if(src==='week')list=list.filter(function(c){return (c.fr&&c.fr>=now-W)||(c.lr&&c.lr>=now-W)});
+  else if(src==='due')list=list.filter(function(c){return c.st&&(c.st===2?c.due<day:c.due<=now)});
+  return list.map(function(c){return {w:c.w,t:c.t,ex:c.ex||'',et:c.et||'',f:c.f||'',l:c.l}});
+}
+function tgCard(){
+  // в списке — уроки сайта, где есть блок «Слова»; сначала урок, назначенный ученику
+  var ls=LESS.filter(function(x){var L=window.LESSONS[x[0]];return L&&KR.lessonWords(L).length>=2});
+  if(!tg.l||!ls.some(function(x){return x[0]===tg.l})){var mine=ls.filter(function(x){return assigned.some(function(a){return a.id==='lesson-'+x[0]})});tg.l=((mine[0]||ls[0])||[''])[0]}
+  var ws=tgWords(),cnt=function(src){return src==='lesson'?'':' · '+tgWords(src).length};
+  var h='<div class="card" id="tgc"><h3>'+KR.icon('pencil',20)+' Тест на начало урока</h3><p class="muted">Соберите тест по словам ученика или урока. «С учителем» — вопросы по одному на экране, ответ проверяется сразу, ошибки обсуждаете вместе. «Самостоятельно» — ученик проходит тест сам, результат придёт в домашку.</p>'+
+    '<div class="opts tg-src" role="group" aria-label="Откуда слова">'+TG_SRC.map(function(x){return '<button type="button" data-tgsrc="'+x[0]+'" class="'+(tg.src===x[0]?'sel':'')+'" aria-pressed="'+(tg.src===x[0])+'">'+x[1]+cnt(x[0])+'</button>'}).join('')+'</div>';
+  if(tg.src==='lesson')h+='<label class="field" for="tgl">Урок</label><select id="tgl">'+ls.map(function(x){return '<option value="'+esc(x[0])+'"'+(x[0]===tg.l?' selected':'')+'>'+esc(x[1])+'</option>'}).join('')+'</select>';
+  else h+='<div class="seg hwt-lang" role="group" aria-label="Язык слов">'+[['ko','Корейский'],['en','Английский']].map(function(x){return '<button type="button" data-tglang="'+x[0]+'" class="'+(tg.lang===x[0]?'on':'')+'" aria-pressed="'+(tg.lang===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>';
+  h+='<p class="muted tg-prev">'+(ws.length?'Слов: '+ws.length+' · '+ws.slice(0,8).map(function(w){return '<span'+(w.l==='ko'?' class="ko" lang="ko"':'')+'>'+esc(w.w)+'</span>'}).join(', ')+(ws.length>8?' …':'')
+    :tg.src==='week'?'За неделю ученик не начинал и не повторял слова этого языка.':tg.src==='due'?'Сейчас нечего повторять.':tg.src==='lesson'?'В этом уроке нет блока «Слова».':'В словаре ученика нет слов этого языка.')+'</p>';
+  h+='<div class="wt-kinds">'+TG_K.map(function(x){return '<label><input type="checkbox" data-tgk="'+x[0]+'"'+(tg.k[x[0]]?' checked':'')+'> '+x[1]+'</label>'}).join('')+'</div>'+
+    '<div class="tg-row"><label>Вопросов <select id="tgn">'+[5,10,15,20,30,40].map(function(v){return '<option value="'+v+'"'+(v===tg.n?' selected':'')+'>'+v+'</option>'}).join('')+'</select></label>'+
+    '<label>Самостоятельно: время <select id="tgmin">'+[[0,'без таймера'],[5,'5 мин'],[10,'10 мин'],[15,'15 мин'],[20,'20 мин']].map(function(x){return '<option value="'+x[0]+'"'+(x[0]===tg.min?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label>'+
+    '<label>Срок <input id="tgdue" type="date" class="name" style="margin:0"></label></div>'+
+    '<div class="done-row"><button type="button" id="tgclass"'+(ws.length<2?' disabled':'')+'>'+KR.icon('users',16)+' С учителем ↗</button><button type="button" class="pri" id="tgself"'+(ws.length<2?' disabled':'')+'>Дать самостоятельно</button></div></div>';
+  return h;
+}
+function tgRedraw(){var c=$('#tgc');if(c)c.outerHTML=tgCard()}
+function tgKinds(){var k=Object.keys(tg.k).filter(function(x){return tg.k[x]});return k.length?k:['tr','rev','ctx','wr']}
+function tgTitle(){var x=TG_SRC.filter(function(y){return y[0]===tg.src})[0][1];return tg.src==='lesson'?'Слова урока · '+((window.LESSONS[tg.l]||{}).title||''):x}
+function tgPick(n){   // слова для теста: недавние и трудные — в первую очередь не нужны, берём случайные, но не больше n
+  var ws=tgWords(),a=ws.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}
+  return a.slice(0,Math.min(n,40)).map(function(w){return {w:String(w.w).slice(0,120),t:String(w.t).slice(0,200),ex:String(w.ex||'').slice(0,260),et:String(w.et||'').slice(0,260),f:String(w.f||'').slice(0,60)}});
+}
+document.addEventListener('change',function(e){var t=e.target;if(!t.closest||!t.closest('#tgc'))return;
+  if(t.dataset.tgk){tg.k[t.dataset.tgk]=t.checked?1:0}
+  else if(t.id==='tgn')tg.n=+t.value;
+  else if(t.id==='tgmin')tg.min=+t.value;
+  else if(t.id==='tgl'){tg.l=t.value;tgRedraw()}
+});
+document.addEventListener('click',async function(e){
+  var b=e.target.closest('button');if(!b||!b.closest('#tgc')||!cur)return;
+  if(b.dataset.tgsrc){tg.src=b.dataset.tgsrc;return tgRedraw()}
+  if(b.dataset.tglang){tg.lang=b.dataset.tglang;return tgRedraw()}
+  var lang=tg.src==='lesson'?((window.LESSONS[tg.l]||{}).lang||'ko'):tg.lang;
+  if(b.id==='tgclass'){
+    var all=tgWords(),id=Date.now().toString(36);
+    var spec={title:tgTitle(),who:cur,lang:lang,words:all.map(function(w){return {w:w.w,t:w.t,ex:w.ex||'',et:w.et||'',f:w.f||''}}),kinds:tgKinds(),n:tg.n,min:0,back:'teacher.html',backT:'ученики'};
+    try{Object.keys(localStorage).forEach(function(k){if(/^kr_wtest:/.test(k)&&k!=='kr_wtest:'+id)localStorage.removeItem(k)});localStorage.setItem('kr_wtest:'+id,JSON.stringify(spec))}catch(x){}
+    window.open('test.html?mode=class&id='+id,'_blank');return;
+  }
+  if(b.id==='tgself'){
+    if(hws===null){msg('Чтобы дать тест самостоятельно, выполните в Supabase файл supabase/homework.sql');return}
+    var w=tgPick(tg.n);if(w.length<2){msg('Для теста нужно хотя бы два слова');return}
+    var hw={title:'Тест по словам: '+tgTitle(),lang:lang,items:[{wt:{title:tgTitle(),lang:lang,k:tgKinds(),min:tg.min,w:w}}],theory:[],due:$('#tgdue').value||null,note:''};
+    b.disabled=true;
+    try{await KR.api('teacher_hw_save',{p_student:cur,p_hw:hw});await hwReload();tgRedraw();msg('Тест задан: '+w.length+' '+plural(w.length,'слово','слова','слов')+'. Ученик увидит его в домашке.',true)}
+    catch(x){b.disabled=false;msg(/no_student/.test(x.message||'')?'Этого ученика ведёт другой преподаватель':'Не получилось задать тест')}
+  }
+});
 async function hwReload(){try{hws=await KR.api('teacher_hw_list',{p_student:cur})||[]}catch(e){}var c=$('#hwt');if(c){c.outerHTML=hwCardT();hwSummary()}}
 document.addEventListener('change',function(e){var t=e.target;if(!t.dataset)return;
   if(t.dataset.hwb!==undefined){hwf.sel[t.dataset.hwb]=t.checked;hwSummary()}
@@ -321,7 +434,7 @@ async function drawStudent(){
   try{as=await KR.api('teacher_assignments',{p_student:cur})||[];st=await KR.api('teacher_student_state',{p_student:cur})}catch(e){}
   try{voc=await KR.api('teacher_vocab',{p_student:cur})||[]}catch(e){voc=null}   // null — на сервере ещё нет supabase/vocab.sql
   try{hws=await KR.api('teacher_hw_list',{p_student:cur})||[]}catch(e){hws=e&&(e.status===404||/Could not find the function/.test(e.message||''))?null:[]}
-  assigned=as;var have={};as.forEach(function(a){have[a.id]=1});
+  assigned=as;var have={};as.forEach(function(a){have[a.id]=1});stw=(st&&st.wl)||{};
   var info=students.filter(function(x){return x.name===cur})[0]||{};
   var others=isOwner()&&teachers?teachers.filter(function(t){return t.role!=='owner'&&t.status==='active'}):[];
   var leadSel=others.length?'<label class="muted" style="display:inline-flex;align-items:center;gap:8px;margin-top:8px">Ведёт <select id="lead" style="margin:0">'+
@@ -330,7 +443,7 @@ async function drawStudent(){
   if(!as.length)h+='<p class="muted">Пока ничего не назначено.</p>';
   h+=as.map(function(a){var m=MAP[a.id]||SETMAP[a.id]||{title:a.id,kind:''};
     return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><button data-un="'+esc(a.id)+'">Убрать</button></div>'}).join('');
-  h+='</div>'+hwCardT()+'<div class="card"><h3>Прогресс и ответы</h3>'+lessonProgress(st)+materialsCard(st)+'</div>';
+  h+='</div>'+hwCardT()+tgCard()+'<div class="card"><h3>Прогресс и ответы</h3>'+lessonProgress(st)+materialsCard(st)+'</div>';
   h+=vocabCard()+setsCard();
   h+='<div class="card"><h3>Назначить материалы</h3><div class="opts" id="flt"><button data-f="all" class="'+(filt==='all'?'sel':'')+'">Все</button>'+Object.keys(SECTIONS).map(function(k){return '<button data-f="'+k+'" class="'+(filt===k?'sel':'')+'">'+esc(SECTIONS[k])+'</button>'}).join('')+'</div><div style="margin-top:8px;max-height:340px;overflow:auto">';
   MATERIALS.filter(function(m){return !have[m.id]&&(filt==='all'||m.section===filt)}).forEach(function(m){

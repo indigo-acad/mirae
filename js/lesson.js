@@ -60,8 +60,8 @@ function setup(lid,lesson){
   blocks=[];SECS.forEach(s=>{const pt=partOf(s);s.blocks.forEach((b,i)=>{b._key=s.id+"-"+i;b._part=pt;blocks.push(b)})});
   SPLIT=!L.back&&!L.hw&&blocks.some(b=>b._part==="theory")&&blocks.some(b=>b._part==="practice");
 }
-// блок закрыт: пройден, а в домашке упражнение с проверкой засчитывается, когда его проверили (баллы видит преподаватель)
-const closed=b=>{const p=P[b._key];return !!(p&&(p.done||(L.hw&&EXT.includes(b.type)&&p.total!=null)))};
+// блок закрыт: пройден, а в домашке упражнение с проверкой и тест по словам засчитываются, когда их проверили (баллы видит преподаватель)
+const closed=b=>{const p=P[b._key];return !!(p&&(p.done||(L.hw&&(EXT.includes(b.type)||b.type==="wtest")&&p.total!=null)))};
 // с какой части открыть урок: ?part=…, раздел из адреса (#grammar) или там, где остались незакрытые блоки
 function firstPart(){
   const q=Q.get("part");if(q==="theory"||q==="practice")return q;
@@ -84,7 +84,7 @@ function render(){
   const fin=`<div class="card glass fin" id="fin" hidden><span class="spark">${ic("spark",34)}</span><h3>${L.back?"Отработка пройдена":"Глава пройдена"}</h3><p class="muted">Все блоки закрыты, прогресс сохранён.</p>${L.back?"":`<a class="btn pri" href="course.html">Вернуться на путь${ic("arrow",16)}</a>`}</div>`;
   if(SPLIT){
     ["theory","practice"].forEach(pt=>{
-      h+=`<div class="lpart" id="part-${pt}" data-lpart="${pt}" role="tabpanel" aria-labelledby="tab-${pt}"${pt===PART?"":" hidden"}>`+SECS.filter(s=>partOf(s)===pt).map(sec).join("");
+      h+=`<div class="lpart" id="part-${pt}" data-lpart="${pt}" role="tabpanel" aria-labelledby="tab-${pt}"${pt===PART?"":" hidden"}>`+(pt==="practice"?testCard():"")+SECS.filter(s=>partOf(s)===pt).map(sec).join("");
       h+=pt==="theory"?`<div class="card glass to-prac"><h3>${ic("repeat",20)} Теперь отработка</h3><p class="muted">Упражнения с проверкой и задания «поговорить» по этому уроку. Теория останется рядом: вкладка «Теория» наверху.</p><div class="done-row"><span></span><button type="button" class="btn pri big" data-part="practice">Отработать${ic("arrow",18)}</button></div></div>`
         :fin+extra()+`<p class="to-th"><button type="button" class="linkish" data-part="theory">${ic("back",14)} Вернуться к теории</button></p>`;
       h+="</div>";
@@ -95,6 +95,13 @@ function render(){
   if(window.KR){KR.theme(LANG);KR.onLang=()=>{location.href=L.hw?"cabinet.html":"course.html"};KR.topbar(L.hw?"cabinet":L.back?"practice":"course");if(KR.assistant)KR.assistant.sync()}
   drawNav();wire();refresh();vocabInit();
   if(!L.hw&&!L.back)hwHere();
+}
+// тест по словам урока (test.html): ученик проверяет себя, преподаватель проводит его на уроке
+function testCard(){
+  const n=window.KR&&KR.lessonWords?KR.lessonWords(L).length:0;if(n<2)return "";
+  const t=window.KR&&KR.ctx&&KR.ctx.teacher,q=encodeURIComponent(id);
+  return `<div class="card glass wt-card"><h3>${ic("abc",20)} Тест по словам урока</h3><p class="muted">${n} ${plural(n,"слово","слова","слов")}: перевод, слово по переводу, слово в предложении, написание.${t?" «С учителем» — вопросы по одному на экране, ответы обсуждаете вместе.":""}</p>`+
+    `<div class="done-row"><span></span><span class="wt-btns"><a class="btn${t?"":" pri"}" href="test.html?l=${q}&mode=self">Проверить себя${ic("arrow",16)}</a>${t?`<a class="btn pri" href="test.html?l=${q}&mode=class" target="_blank" rel="noopener">${ic("users",16)} С учителем ↗</a>`:""}</span></div></div>`;
 }
 // разделы в верхней навигации: только текущей части урока
 function drawNav(){
@@ -236,6 +243,11 @@ function block(b){
       <div class="kb ko" data-b="${b._key}" data-i="${i}">${b.keys.map(k=>`<button data-k="${esc(k)}">${esc(k)}</button>`).join("")}<button data-k="⌫" class="kb-del" aria-label="Стереть букву">${ic("back",15)}</button></div></div>`}).join("")+doneRow(b);
   }else if(b.type==="talk"){
     h+=`<p class="muted">${esc(b.instr)}</p>`+b.prompts.map(p=>`<div class="line"><div class="kolg ko">${esc(p)} ${sayBtn(p)}</div></div>`).join("");
+  }else if(b.type==="wtest"){   // тест по словам внутри домашки: проходится на test.html, результат пишется сюда
+    const t=b.wt,K={tr:"перевод",rev:"слово по переводу",ctx:"слово в предложении",wr:"написать слово"};
+    h+=`<p class="muted">${(t.w||[]).length} вопросов: ${(t.k||[]).map(k=>K[k]||k).join(", ")}. ${t.min?`Время: ${t.min} мин.`:"Без таймера."} Ответ сразу проверяется и не исправляется.</p>`+
+      `<div class="done-row"><span class="score" id="sc-${b._key}"></span><a class="btn pri" href="test.html?hw=${encodeURIComponent(L.hw.id)}&k=${encodeURIComponent(b._key)}">${P[b._key]&&P[b._key].total!=null?"Пройти ещё раз":"Начать тест"}${ic("arrow",16)}</a></div>`;
+    return h+"</div>";
   }else if(b.type==="mat"){   // тренажёр или тест из каталога внутри домашки
     const m=b.m;
     h+=`<p class="muted">${esc((window.KINDS||{})[m.kind]||"Материал")}${m.level?" · "+esc(m.level):""}. Открой, пройди и нажми в нём «Отправить учителю»: задание отметится само. Можно отметить и вручную.</p>`+
@@ -339,7 +351,9 @@ const plural=(n,f1,f2,f5)=>n%10===1&&n%100!==11?f1:n%10>=2&&n%10<=4&&(n%100<10||
 const fmtDue=d=>new Date(d+"T00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long"});
 function hwLesson(rec){
   const LS=window.LESSONS||{},MAT=window.MATERIALS||[],sections=[];let lang="",n=0;
-  (rec.items||[]).forEach(it=>{
+  (rec.items||[]).forEach((it,idx)=>{
+    if(it.wt){const t=it.wt;lang=lang||t.lang||"";
+      sections.push({id:"wt-"+idx,title:++n+". Тест по словам",icon:"🔤",blocks:[{type:"wtest",title:t.title||"Тест по словам",wt:t,idx}]});return}
     if(it.m){const m=MAT.find(x=>x.id===it.m)||{id:it.m,title:it.m,kind:"",path:"#"};
       sections.push({id:"m--"+String(it.m).replace(/[^a-z0-9_-]/gi,"_"),title:++n+". "+((window.KINDS||{})[m.kind]||"Материал"),icon:"📌",blocks:[{type:"mat",title:m.title,m}]});return}
     const src=LS[it.l];if(!src)return;lang=lang||src.lang||"ko";
@@ -384,6 +398,7 @@ function hwResult(){
     if(x.done)done++;
     if(b.src){x.l=b.src;x.b=b.srcKey}
     if(b.type==="mat"){x.m=b.m.id;const r=window.KR&&KR.matInfo(b.m.id).rep;if(r&&r.t>=L.hw.created)x.rep=String(r.x||"").slice(0,1500)}
+    if(b.type==="wtest"){x.score=p.score||0;x.total=p.total||(b.wt.w||[]).length;x.tries=p.tries||0;x.wrong=p.wrong||[];if(p.sec)x.sec=p.sec;score+=x.score;max+=x.total}
     if(EXT.includes(b.type)){
       x.score=p.score||0;x.total=b.items.length;x.tries=p.tries||0;score+=x.score;max+=x.total;
       const last=p.hist&&p.hist[p.hist.length-1];
