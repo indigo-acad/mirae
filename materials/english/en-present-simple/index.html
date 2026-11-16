@@ -14,7 +14,7 @@ main{max-width:760px;margin:0 auto}
 h1,h2{font-family:"Cormorant Garamond",serif;font-weight:600;margin:0}
 h1{font-size:clamp(34px,8vw,50px);color:var(--gold)}
 .hero{margin:0 -16px 18px;padding:40px 16px 120px;background:url(../../../img/scene-en.svg) bottom/100% 120px no-repeat}.hero>div{max-width:760px;margin:auto}
-.scene{background:#fff;border:1px solid #e3e0d4;border-radius:14px;margin:6px 0 12px;overflow:hidden}.scene svg{display:block;width:100%;height:auto}
+.scene{background:#F7FAFF;border:1px solid #DCE7F7;border-radius:18px;margin:6px 0 12px;overflow:hidden}.scene svg{display:block;width:100%;height:auto}
 .sub{color:var(--silver);margin:6px 0 0}
 nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
 nav a{color:var(--gold);border:1px solid rgba(212,175,124,.4);border-radius:99px;padding:3px 14px;text-decoration:none;font-size:14px}
@@ -203,105 +203,132 @@ f:`<div class="blk"><h3>Практика 7.6: расскажите о себе (
 <ul><li>В предложениях с be нет лишнего глагола?</li><li>Для he / she есть -s?</li><li>После don’t / doesn’t глагол без -s?</li></ul>
 <p>Это тот же ответ, который просят на IELTS Speaking Part 1: “Do you work or study?”</p></div>`}
 ];
-/* ---------- иллюстрации к шагам (палитра MIRAÉ) ----------
-   Люди нарисованы «по пояс»: голова, плечи, руки в разных позах. P(x, y, масштаб, {…}) — x по центру, y — макушка. */
-const cN="#1E2A56",cG="#D4AF7C",cF="#EFE3CC",cS="#F3D9BE",cI="#F8F7F2",cB="#4254AD",cR="#C2453C",cT="#68708a",cW="#DCE6F7";
-const svgW=(inner)=>`<svg viewBox="0 0 640 220" role="img" aria-hidden="true"><rect width="640" height="220" fill="${cI}"/><g stroke="${cN}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" font-family="Inter,sans-serif">${inner}</g></svg>`;
-// рука: толстая линия цвета рукава с контуром, на конце кисть
-const hand=(x,y,skin)=>`<circle cx="${x}" cy="${y}" r="6.5" fill="${skin}"/>`;
-const arm=(d,col,skin,hx,hy)=>`<path d="${d}" fill="none" stroke="${cN}" stroke-width="16"/><path d="${d}" fill="none" stroke="${col}" stroke-width="11"/>`+(hx!=null?`<circle cx="${hx}" cy="${hy}" r="6.5" fill="${skin}"/>`:"");
+/* ---------- иллюстрации к шагам: мягкий «детский» стиль (голубые панели, синие кофты, золотые формы) ----------
+   C(x, y, масштаб, {…}) — персонаж «по пояс»; x, y — центр головы. */
+const cN="#1B2B5E",cB="#2D4BB3",cG="#E3A32B",cGt="#C98512",cS="#FFE1C9",cI="#FFFFFF",cP="#D8E7FA",cY="#FDF0D2",cR="#D9493F",cW="#5AB3EE",cT="#5d6788",cH="#8A5530";
+let _u=0;
+function svgW(inner,h=250){const u="g"+(_u++);
+ return `<svg viewBox="0 0 640 ${h}" role="img" aria-hidden="true"><defs>
+ <linearGradient id="${u}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CFE2FA"/><stop offset="1" stop-color="#F2F7FE"/></linearGradient>
+ <linearGradient id="${u}w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7CC6F4"/><stop offset="1" stop-color="#2F8FDB"/></linearGradient></defs>
+ <rect width="640" height="${h}" fill="#F7FAFF"/><g stroke="${cN}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" font-family="Nunito,'Varela Round',Inter,system-ui,sans-serif">${inner.replace(/#SKY/g,`url(#${u}s)`).replace(/#WATER/g,`url(#${u}w)`)}</g></svg>`;}
+const T=(x,y,t,size=18,anchor="middle",col=cN,w=700)=>`<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="${size}" font-weight="${w}" fill="${col}" stroke="none">${t}</text>`;
+const gold=t=>`<tspan fill="${cGt}" font-weight="800">${t}</tspan>`;
+const panel=(x,y,w,h,fill="#SKY")=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="22" fill="${fill}" stroke="#E3ECF8" stroke-width="2"/>`;
+const pill=(cx,y,w,txt,size=17)=>`<rect x="${cx-w/2}" y="${y}" width="${w}" height="36" rx="18" fill="${cP}" stroke="none"/>${T(cx,y+25,txt,size)}`;
+// золотые «искорки» (три чёрточки)
+const spark=(x,y,r=0)=>`<g transform="translate(${x} ${y}) rotate(${r})" stroke="${cG}" stroke-width="3.5"><path d="M0 0V-12M9 4L17-4M12 14H23"/></g>`;
+const cloud=(x,y,k=1)=>`<path transform="translate(${x} ${y}) scale(${k})" d="M0 18C-2 6 10 0 18 6C22-6 42-6 46 6C56 2 66 10 62 18Z" fill="#fff" stroke="none"/>`;
+const arm=(d,col,hx,hy,skin=cS)=>`<path d="${d}" fill="none" stroke="${cN}" stroke-width="21"/><path d="${d}" fill="none" stroke="${col}" stroke-width="15"/>`+(hx!=null?`<circle cx="${hx}" cy="${hy}" r="8.5" fill="${skin}"/>`:"");
 const HAIR={
- short:`M-22 22C-23-3 23-3 22 22C18 10 6 6-5 8C-12 9-18 14-22 22Z`,
- long:`M-23 28C-25-4 25-4 23 28C21 12 11 5 1 5C-9 5-20 12-23 28Z`,
- bun:`M-22 24C-23-1 23-1 22 24C18 12 8 7 0 7C-8 7-18 12-22 24Z`,
- curly:`M-23 22C-28 12-20 2-12 4C-10-4 2-6 6 0C12-4 22 0 21 8C27 12 25 20 23 24C18 14 8 10-2 11C-10 12-18 16-23 22Z`
+ short:`M-36 6C-40-30-12-44 6-41C30-38 42-20 36 8C33-2 28-9 22-12C16-4 2-4-8-9C-14-2-26 0-36 6Z`,
+ long:`M-36 10C-38-28-10-42 6-39C28-36 40-18 36 12C30-4 20-14 8-17C-2-8-20-2-36 10Z`,
+ bun:`M-36 8C-38-28-10-42 6-39C28-36 40-18 36 10C31-4 20-13 6-15C-6-8-22-2-36 8Z`,
+ curly:`M-37 8C-44-6-34-22-24-22C-24-36-6-42 4-36C14-44 34-36 32-22C42-18 42-4 37 8C32-4 22-10 10-11C0-6-20-4-37 8Z`,
+ side:`M-34 6C-38-10-30-22-22-24C-22-14-28-6-30 6ZM34 6C38-10 30-22 22-24C22-14 28-6 30 6Z`
 };
-function P(x,y,k,o){
- o=Object.assign({skin:cS,hc:"#3b2a1e",hair:"short",shirt:cN,pose:"down",talk:false},o);
- const s=o.skin,sh=o.shirt;let h="",front="",hands="";
- if(o.hair==="long")h+=`<path d="M-25 18C-30 50-24 66-14 70H14C24 66 30 50 25 18Z" fill="${o.hc}"/>`;
- if(o.hair==="bun")h+=`<circle cx="0" cy="-2" r="10" fill="${o.hc}"/>`;
- // туловище и шея
- h+=`<path d="M-7 40V62H7V40Z" fill="${s}"/>`;
- h+=`<path d="M-42 134V84C-42 68-32 60-16 58H16C32 60 42 68 42 84V134Z" fill="${sh}"/>`;
- h+=`<path d="M-11 59L0 72L11 59" fill="${s}"/>`;
- if(o.tie)h+=`<path d="M0 72L-5 80L0 106L5 80Z" fill="${cG}"/>`;
+function C(x,y,k,o){
+ o=Object.assign({skin:cS,hc:cH,hair:"short",shirt:cB,pose:"down",mouth:"smile",eyes:"open"},o);
+ const s=o.skin,sh=o.shirt;let h="",front="";
+ if(o.hair==="long")h+=`<path d="M-37 4C-42 44-40 74-30 92H30C40 74 42 44 37 4Z" fill="${o.hc}"/>`;
+ if(o.hair==="bun")h+=`<circle cx="14" cy="-38" r="13" fill="${o.hc}"/>`;
+ // кофта
+ h+=`<path d="M-48 118V88C-48 62-34 50-15 48H15C34 50 48 62 48 88V118Z" fill="${sh}"/>`;
+ if(o.hoodie)h+=`<path d="M-20 50Q0 66 20 50" fill="none" stroke-width="2.4"/><path d="M-7 60V82M7 60V82" stroke-width="2.2"/><path d="M-26 100H26" stroke-width="2" opacity=".5"/>`;
  // руки
- const pose=o.pose;
- if(pose==="down")h+=`<path d="M-29 92V134M29 92V134" fill="none" stroke-width="2"/>`;
- if(pose==="wave"){h+=`<path d="M-29 92V134" fill="none" stroke-width="2"/>`;front+=arm("M29 74Q50 70 54 36",sh,s,55,30)}
- if(pose==="point")h+=`<path d="M-29 92V134" fill="none" stroke-width="2"/>`+arm("M30 76Q50 86 72 78",sh,s,76,76);
- if(pose==="hold"){h+=arm("M-31 76Q-36 96-27 100",sh,s)+arm("M31 76Q36 96 27 100",sh,s);hands=hand(-27,99,s)+hand(27,99,s)}
- if(pose==="guitar"){h+=arm("M30 78Q52 92 56 70",sh,s);front+=arm("M-30 78Q-38 104-14 110",sh,s);hands=hand(-10,110,s)+hand(56,66,s)}
- // уши, лицо, волосы
- h+=`<circle cx="-21" cy="27" r="5" fill="${s}"/><circle cx="21" cy="27" r="5" fill="${s}"/><ellipse cx="0" cy="24" rx="21" ry="23" fill="${s}"/>`;
- if(o.hair==="side")h+=`<path d="M-21 22C-22 10-16 4-9 3M21 22C22 10 16 4 9 3" fill="none" stroke="${o.hc}" stroke-width="6"/>`;
- else h+=`<path d="${HAIR[o.hair]}" fill="${o.hc}"/>`;
- h+=`<ellipse cx="-8" cy="26" rx="2.1" ry="2.6" fill="${cN}" stroke="none"/><ellipse cx="8" cy="26" rx="2.1" ry="2.6" fill="${cN}" stroke="none"/>`;
- h+=`<path d="M-12 18Q-8 15-4 18M4 18Q8 15 12 18" fill="none" stroke-width="2"/>`;
- h+=`<circle cx="-13" cy="33" r="3.6" fill="#E99A8C" opacity=".45" stroke="none"/><circle cx="13" cy="33" r="3.6" fill="#E99A8C" opacity=".45" stroke="none"/>`;
- h+=o.talk?`<path d="M-5 34Q0 41 5 34Z" fill="${cR}" stroke-width="2"/>`:`<path d="M-6 34Q0 39 6 34" fill="none" stroke-width="2.2"/>`;
- if(o.glasses)h+=`<circle cx="-8" cy="26" r="7" fill="none" stroke-width="2"/><circle cx="8" cy="26" r="7" fill="none" stroke-width="2"/><path d="M-1 26H1" stroke-width="2"/>`;
- return `<g transform="translate(${x} ${y}) scale(${k}${o.flip?" ":""}${o.flip?`) scale(-1 1`:""})">${h}${o.item||""}${front}${hands}</g>`;
+ const p=o.pose,R=[48,70];
+ if(p==="down")h+=`<path d="M-32 90V118M32 90V118" fill="none" stroke-width="2.2"/>`;
+ if(p==="hold"){h+=arm("M-38 66Q-44 92-24 98",sh)+arm("M38 66Q44 92 24 98",sh);front+=(o.item||"")+`<circle cx="-24" cy="96" r="8.5" fill="${s}"/><circle cx="24" cy="96" r="8.5" fill="${s}"/>`;o.item=""}
+ if(p==="wave"){h+=`<path d="M-32 90V118" fill="none" stroke-width="2.2"/>`;front+=arm("M38 66Q62 58 62 18",sh,62,10,s)}
+ if(p==="cheer"){front+=arm("M-38 66Q-62 56-60 18",sh,-60,10,s)+arm("M38 66Q62 56 60 18",sh,60,10,s)}
+ if(p==="point"){h+=`<path d="M-32 90V118" fill="none" stroke-width="2.2"/>`;front+=arm("M38 66Q62 84 90 72",sh,94,70,s)}
+ if(p==="guitar"){h+=arm("M38 68Q66 74 62 46",sh)+arm("M-38 68Q-46 96-16 98",sh);front+=(o.item||"")+`<circle cx="-12" cy="96" r="8.5" fill="${s}"/><circle cx="62" cy="42" r="8.5" fill="${s}"/>`;o.item=""}
+ // шея, голова
+ h+=`<path d="M-9 26V50H9V26Z" fill="${s}"/>`;
+ if(o.collar)h+=`<path d="M-16 47L0 60L-4 64L-20 52Z M16 47L0 60L4 64L20 52Z" fill="#fff" stroke-width="2.4"/>`;
+ h+=`<circle cx="-33" cy="6" r="7" fill="${s}"/><circle cx="33" cy="6" r="7" fill="${s}"/><ellipse cx="0" cy="2" rx="34" ry="33" fill="${s}"/>`;
+ h+=`<path d="${HAIR[o.hair]}" fill="${o.hair==="side"?"#C9CCD6":o.hc}"/>`;
+ if(o.hair==="side")h+=`<path d="M-14-30Q0-36 14-30" fill="none" stroke-width="2" opacity=".5"/>`;
+ // лицо
+ if(o.eyes==="happy")h+=`<path d="M-17 6Q-12-1-7 6M7 6Q12-1 17 6" fill="none" stroke-width="3.2"/>`;
+ else h+=`<ellipse cx="-12" cy="5" rx="4" ry="5" fill="${cN}" stroke="none"/><ellipse cx="12" cy="5" rx="4" ry="5" fill="${cN}" stroke="none"/><circle cx="-10.6" cy="3" r="1.5" fill="#fff" stroke="none"/><circle cx="13.4" cy="3" r="1.5" fill="#fff" stroke="none"/>`;
+ h+=`<path d="M-17-6Q-12-9-7-6M7-6Q12-9 17-6" fill="none" stroke-width="2.2" stroke="${o.hair==="side"?cN:o.hc}"/>`;
+ h+=`<ellipse cx="-21" cy="15" rx="6" ry="3.6" fill="#F5A09A" opacity=".55" stroke="none"/><ellipse cx="21" cy="15" rx="6" ry="3.6" fill="#F5A09A" opacity=".55" stroke="none"/>`;
+ h+=o.mouth==="open"?`<path d="M-8 15Q0 27 8 15Z" fill="${cR}" stroke-width="2.4"/><path d="M-4 21Q0 18 4 21" fill="#F48C8C" stroke="none"/>`:`<path d="M-7 16Q0 23 7 16" fill="none" stroke-width="2.6"/>`;
+ if(o.glasses)h+=`<circle cx="-12" cy="5" r="9" fill="none" stroke-width="2.4"/><circle cx="12" cy="5" r="9" fill="none" stroke-width="2.4"/><path d="M-3 5H3" stroke-width="2.4"/>`;
+ if(o.tie)h+=`<path d="M0 54L-6 62L0 92L6 62Z" fill="${cG}" stroke-width="2.2"/>`;
+ const fl=o.flip?" scale(-1 1)":"";
+ return `<g transform="translate(${x} ${y}) scale(${k})${fl}">${h}${o.item||""}${front}</g>`;
 }
-// пузырь реплики: хвостик указывает на говорящего (tx — x хвостика)
-function bubble(x,y,w,txt,tx){
- tx=tx||x+w/2;
- return `<path d="M${x+14} ${y}H${x+w-14}A14 14 0 0 1 ${x+w} ${y+14}V${y+32}A14 14 0 0 1 ${x+w-14} ${y+46}H${tx+9}L${tx} ${y+60}L${tx-9} ${y+46}H${x+14}A14 14 0 0 1 ${x} ${y+32}V${y+14}A14 14 0 0 1 ${x+14} ${y}Z" fill="#fff"/><text x="${x+w/2}" y="${y+29}" text-anchor="middle" font-size="17" fill="${cN}" stroke="none">${txt}</text>`;
+function bubble(x,y,w,txt,tx,size=19){
+ tx=tx||x+w/2;const hh=50;
+ return `<path d="M${x+18} ${y}H${x+w-18}A18 18 0 0 1 ${x+w} ${y+18}V${y+hh-18}A18 18 0 0 1 ${x+w-18} ${y+hh}H${tx+11}L${tx} ${y+hh+16}L${tx-11} ${y+hh}H${x+18}A18 18 0 0 1 ${x} ${y+hh-18}V${y+18}A18 18 0 0 1 ${x+18} ${y}Z" fill="#fff" stroke-width="3.4"/>${T(x+w/2,y+32,txt,size)}`;
 }
-const T=(x,y,t,size=18,anchor="middle",col=cN,w=600)=>`<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="${size}" font-weight="${w}" fill="${col}" stroke="none">${t}</text>`;
-const gold=t=>`<tspan fill="#A9803F" font-weight="700">${t}</tspan>`;
-const panel=(x,w)=>`<rect x="${x}" y="16" width="${w}" height="188" rx="16" fill="${cF}" stroke="none"/>`;
-// дом: стены, крыша с трубой, окна с рамами, дверь, дорожка
+const books=`<g><rect x="-32" y="74" width="64" height="11" rx="3" fill="#fff"/><rect x="-30" y="85" width="60" height="11" rx="3" fill="${cG}"/><rect x="-33" y="96" width="66" height="11" rx="3" fill="#fff"/><rect x="-31" y="107" width="62" height="10" rx="3" fill="${cW}"/></g>`;
+const flagIt=`<path d="M60 14V-58" stroke-width="3.4"/><g transform="rotate(-6 60 -58)"><rect x="60" y="-58" width="16" height="30" fill="#3E9A55" stroke-width="2.4"/><rect x="76" y="-58" width="16" height="30" fill="#fff" stroke-width="2.4"/><rect x="92" y="-58" width="16" height="30" fill="${cR}" stroke-width="2.4"/></g>`;
+const guitar=`<g transform="rotate(-30 0 90)"><rect x="18" y="84" width="92" height="11" rx="3" fill="#8A5530"/><path d="M40 86V93M60 86V93M80 86V93" stroke="#E9D5B4" stroke-width="1.6"/><rect x="106" y="80" width="22" height="19" rx="5" fill="#6B3F22"/>
+ <path d="M-48 90C-48 64-24 60-12 72C-2 60 26 62 26 90C26 118-2 120-12 108C-24 120-48 116-48 90Z" fill="#E9B46A"/><circle cx="-4" cy="90" r="9" fill="#6B3F22"/><path d="M-36 90H-24" stroke-width="2.4"/></g>`;
+const note=(x,y,k=1)=>`<g transform="translate(${x} ${y}) scale(${k})" fill="${cG}" stroke="none"><path d="M0 0V-26L20-32V-6" fill="none" stroke="${cG}" stroke-width="4"/><ellipse cx="-5" cy="0" rx="7" ry="5.5"/><ellipse cx="15" cy="-6" rx="7" ry="5.5"/></g>`;
 function house(x,y,k){
- return `<g transform="translate(${x} ${y}) scale(${k})"><path d="M-6 92H156" fill="none"/><rect x="104" y="6" width="16" height="30" fill="#fff"/>
- <rect x="10" y="44" width="130" height="48" fill="#fff"/><path d="M-6 50L75 0L156 50Z" fill="${cG}"/><path d="M8 38H142" fill="none" stroke-width="1.6" opacity=".35"/>
- <rect x="22" y="56" width="28" height="22" rx="2" fill="${cF}"/><path d="M36 56V78M22 67H50" fill="none" stroke-width="1.8"/>
- <rect x="100" y="56" width="28" height="22" rx="2" fill="${cF}"/><path d="M114 56V78M100 67H128" fill="none" stroke-width="1.8"/>
- <path d="M63 92V62A12 12 0 0 1 87 62V92Z" fill="${cB}"/><circle cx="82" cy="78" r="1.8" fill="${cG}" stroke="none"/></g>`;
+ return `<g transform="translate(${x} ${y}) scale(${k})"><rect x="104" y="-6" width="18" height="36" fill="#fff"/><rect x="100" y="-12" width="26" height="9" rx="2" fill="#E2643E"/>
+ <rect x="10" y="44" width="140" height="66" fill="#fff"/><path d="M-10 52L80-4L170 52Z" fill="#E2643E"/>
+ <rect x="24" y="58" width="32" height="26" rx="3" fill="${cP}"/><path d="M40 58V84M24 71H56" fill="none" stroke-width="2.2"/>
+ <rect x="104" y="58" width="32" height="26" rx="3" fill="${cP}"/><path d="M120 58V84M104 71H136" fill="none" stroke-width="2.2"/>
+ <path d="M66 110V76A14 14 0 0 1 94 76V110Z" fill="${cB}"/><circle cx="88" cy="94" r="2.4" fill="${cG}" stroke="none"/>
+ <ellipse cx="2" cy="108" rx="18" ry="12" fill="#5DB85B"/><ellipse cx="158" cy="108" rx="18" ry="12" fill="#5DB85B"/></g>`;
 }
-const books=`<rect x="-25" y="84" width="50" height="12" rx="2" fill="${cG}"/><rect x="-22" y="96" width="46" height="12" rx="2" fill="#fff"/><path d="M-22 102H24M-20 90H20" stroke-width="1.4"/>`;
-const flagIt=`<path d="M55 64V-10" stroke-width="3"/><rect x="55" y="-10" width="12" height="24" fill="#3d8a4f" stroke-width="2"/><rect x="67" y="-10" width="12" height="24" fill="#fff" stroke-width="2"/><rect x="79" y="-10" width="12" height="24" fill="${cR}" stroke-width="2"/>`;
-const guitar=`<g transform="rotate(-32 -4 114)"><path d="M-4 104H86" stroke-width="7"/><path d="M-4 104H86" stroke="#8a5a2b" stroke-width="3.5"/><rect x="84" y="97" width="16" height="14" rx="3" fill="${cN}"/>
- <path d="M-46 104C-46 86-30 84-20 92C-14 84 6 86 6 104C6 122-14 124-20 116C-30 124-46 122-46 104Z" fill="${cG}"/><circle cx="-14" cy="104" r="6" fill="${cN}"/></g>`;
 const SCN=[
-svgW(`${panel(16,190)}${panel(225,190)}${panel(434,190)}
- ${P(111,30,.92,{pose:"hold",item:books})}
- ${P(305,30,.92,{hair:"long",hc:"#6b3f22",shirt:cB,pose:"wave",item:flagIt})}
- ${P(497,46,.8,{hair:"curly",hc:"#2b1d14",skin:"#C98E62",shirt:cG,pose:"wave",flip:true})}${P(571,46,.8,{hair:"bun",hc:"#8a5a2b",shirt:cN,pose:"wave"})}
- ${T(111,192,`I ${gold("am")} a student.`,16)}${T(320,192,`She ${gold("is")} from Italy.`,16)}${T(529,192,`They ${gold("are")} friends.`,16)}`),
-svgW(`${house(30,96,1)}<path d="M18 188H200" fill="none" stroke-width="2" opacity=".5"/>
- ${P(270,88,.92,{hair:"long",hc:"#6b3f22",shirt:cB,pose:"point",flip:true})}
- ${T(370,62,`I ${gold("live")} with my parents.`,19,"start")}${T(370,100,`She live${gold("s")} in Rome.`,19,"start")}
- <rect x="370" y="126" width="252" height="70" rx="12" fill="${cF}" stroke="none"/>${T(386,154,`work → work${gold("s")} · go → go${gold("es")}`,15,"start",cN,500)}${T(386,182,`study → stud${gold("ies")} · have → ${gold("has")}`,15,"start",cN,500)}`),
-svgW(`${P(118,86,.95,{pose:"point",talk:true})}${P(522,86,.95,{hair:"bun",hc:"#6b3f22",shirt:cB})}
- ${bubble(14,8,236,`${gold("Does")} she live here?`,120)}${bubble(392,8,236,`No, she ${gold("doesn’t")}.`,520)}
- <rect x="226" y="102" width="188" height="86" rx="14" fill="${cF}" stroke="none"/>
- ${T(320,130,"после does / doesn’t",15,"middle",cN,500)}${T(320,152,"глагол без -s:",15,"middle",cN,500)}${T(320,176,`does she ${gold("live")}`,17)}`),
-svgW(`<path d="M320 60v150" stroke-width="6"/><path d="M290 212h60"/>
- <path d="M310 40H70l-26 26 26 26h240z" fill="${cF}"/><path d="M330 92h240l26 26-26 26H330z" fill="${cG}"/>
- ${T(186,62,"есть глагол (live, work)",16)}${T(186,84,`→ ${gold("do / does")}`,17)}
- ${T(454,114,"нет глагола (student, happy)",16)}${T(454,136,`→ am / is / are`,17,"middle","#fff",700)}
- ${T(140,180,`I live here. ✓`,16,"middle","#2e7d5b")}${T(140,204,`<tspan text-decoration="line-through">I am live here.</tspan>`,15,"middle","#b3433f",500)}${T(500,190,`I am a student. ✓`,16,"middle","#2e7d5b")}`),
-svgW(`<path d="M14 150Q40 140 66 150T118 150T170 150T222 150T274 150V214H14Z" fill="${cW}" stroke="none"/>
- <path d="M86 150c0-16 10-26 24-26s24 10 24 26" fill="${cS}"/><path d="M86 146c0-22 48-22 48 0" fill="${cR}"/><rect x="94" y="139" width="32" height="8" rx="4" fill="${cN}" stroke="none"/><circle cx="102" cy="143" r="3" fill="#BFE3F2" stroke="none"/><circle cx="118" cy="143" r="3" fill="#BFE3F2" stroke="none"/>
- ${arm("M136 150Q158 112 196 132",cS,cS)}${arm("M84 156Q70 162 54 156",cS,cS)}
- <path d="M14 150Q40 140 66 150T118 150T170 150T222 150T274 150M14 174Q40 164 66 174T118 174T170 174T222 174T274 174M14 198Q40 188 66 198T118 198T170 198T222 198T274 198" fill="none" stroke="${cB}" stroke-width="2"/>
- <circle cx="206" cy="124" r="3" fill="${cW}" stroke-width="1.6"/><circle cx="216" cy="136" r="2.4" fill="${cW}" stroke-width="1.4"/><circle cx="44" cy="146" r="2.4" fill="${cW}" stroke-width="1.4"/>
- ${bubble(40,20,180,`I ${gold("can")} swim!`,100)}
- ${P(452,90,.92,{pose:"guitar",item:guitar,shirt:cN})}
- ${bubble(352,8,250,`He ${gold("can")} play the guitar.`,452)}
- <path d="M548 112q6-8 12 0M556 98q4-6 8 0" fill="none" stroke="${cG}" stroke-width="2"/><path d="M570 128v-14l8-2v14" fill="none" stroke="${cG}" stroke-width="2"/><circle cx="568" cy="128" r="2.6" fill="${cG}" stroke="none"/><circle cx="576" cy="126" r="2.6" fill="${cG}" stroke="none"/>`),
-svgW(`${panel(16,190)}${panel(225,190)}${panel(434,190)}
- <path d="M86 66h50v40a20 20 0 0 1-20 20h-10a20 20 0 0 1-20-20z" fill="#fff"/><path d="M136 76h8a10 10 0 0 1 0 20h-8" fill="none"/><path d="M78 128h66" fill="none"/><path d="M102 56c-4-6 4-8 0-14M118 56c-4-6 4-8 0-14" fill="none" stroke="${cG}"/>
- <rect x="312" y="44" width="16" height="78" rx="8" fill="#fff"/><circle cx="320" cy="126" r="13" fill="${cR}"/><path d="M320 124V60" stroke="${cR}" stroke-width="6"/><path d="M334 60h8M334 76h8M334 92h8M334 108h8" stroke-width="2"/>
- <circle cx="529" cy="88" r="40" fill="#fff"/><path d="M529 58v4M529 114v4M499 88h4M555 88h4" stroke-width="2.4"/><path d="M529 88V68M529 88h18" fill="none" stroke="${cG}" stroke-width="4"/><circle cx="529" cy="88" r="3" fill="${cN}" stroke="none"/>
- ${T(111,160,"привычка",17)}${T(111,184,"every morning",14,"middle",cT,500)}${T(320,160,"факт",17)}${T(320,184,"water boils at 100°C",14,"middle",cT,500)}${T(529,160,"расписание",17)}${T(529,184,"starts at six",14,"middle",cT,500)}`),
-svgW(`<g transform="translate(480 70)"><path d="M0 34L70 2L140 34Z" fill="${cG}"/><path d="M70 2V-14" stroke-width="2"/><path d="M70-14h16l-4 5 4 5H70" fill="${cR}" stroke-width="1.6"/><path d="M4 36H136" fill="none"/>
- <path d="M18 40v84M46 40v84M94 40v84M122 40v84" stroke-width="6"/><path d="M6 126H134M0 136H140" fill="none"/><rect x="60" y="78" width="20" height="46" rx="10" fill="${cB}"/></g>
- ${P(118,92,.9,{hair:"side",hc:"#A7A9B4",glasses:true,shirt:cN,tie:true,talk:true})}${P(368,92,.9,{hair:"curly",hc:"#2b1d14",skin:"#E8B98F",shirt:cB})}
- ${bubble(10,8,236,`${gold("Do")} you live on campus?`,118)}${bubble(258,8,212,`No, I live at home.`,368)}
- <rect x="68" y="192" width="100" height="22" rx="11" fill="#fff"/>${T(118,207,"Andrew Taylor",12.5)}<rect x="330" y="192" width="76" height="22" rx="11" fill="#fff"/>${T(368,207,"Giorgio",12.5)}`)
+// 1. am / is / are
+svgW(`${panel(12,12,196,226)}${panel(222,12,196,226)}${panel(432,12,196,226)}
+ ${C(110,80,.88,{pose:"hold",item:books,collar:true})}${spark(54,52,-80)}
+ ${C(312,80,.88,{hair:"long",shirt:cB,pose:"wave",item:flagIt,mouth:"open"})}${spark(390,30,0)}
+ ${C(488,96,.72,{hair:"short",shirt:"#F3DDB5",hoodie:true,pose:"cheer",eyes:"happy",mouth:"open"})}${C(574,96,.72,{hair:"bun",shirt:cB,pose:"wave",eyes:"happy",mouth:"open"})}${spark(604,40,0)}
+ ${pill(110,192,176,`I ${gold("am")} a student.`)}${pill(320,192,176,`She ${gold("is")} from Italy.`)}${pill(530,192,176,`They ${gold("are")} friends.`)}`),
+// 2. live / lives
+svgW(`${panel(12,12,330,226)}<path d="M14 186Q170 170 340 186V224Q340 236 326 236H28Q14 236 14 224Z" fill="#9BD37A" stroke="none"/>
+ ${cloud(40,30)}${cloud(220,40,.8)}
+ ${house(40,82,.86)}${C(272,104,.84,{hair:"long",pose:"point",flip:true,mouth:"open"})}
+ ${T(362,72,`I ${gold("live")} with my parents.`,21,"start")}${T(362,114,`She ${gold("lives")} in Rome.`,21,"start")}
+ <rect x="358" y="140" width="268" height="86" rx="18" fill="${cY}" stroke="none"/>${T(374,175,`work → work${gold("s")} · go → go${gold("es")}`,16,"start",cN,700)}${T(374,207,`study → stud${gold("ies")} · have → ${gold("has")}`,16,"start",cN,700)}`),
+// 3. does / doesn't
+svgW(`${panel(12,96,190,142)}${panel(438,96,190,142)}
+ ${C(108,146,.76,{pose:"point",mouth:"open"})}${C(532,146,.76,{hair:"bun",shirt:cB,flip:true})}
+ ${bubble(12,10,236,`${gold("Does")} she live here?`,104)}${bubble(392,10,236,`No, she ${gold("doesn’t")}.`,532)}
+ <rect x="226" y="116" width="188" height="104" rx="18" fill="${cY}" stroke="none"/>
+ ${T(320,148,"после does / doesn’t",15,"middle",cN,600)}${T(320,172,"глагол без -s:",15,"middle",cN,600)}${T(320,202,`does she ${gold("live")}`,19)}`),
+// 4. be или do
+svgW(`${panel(12,12,616,226)}<path d="M14 196Q320 180 626 196V224Q626 236 612 236H28Q14 236 14 224Z" fill="#9BD37A" stroke="none"/>${cloud(500,24,.9)}
+ <rect x="312" y="48" width="16" height="164" rx="6" fill="#B07A45"/>
+ <path d="M310 44H76L48 72L76 100H310Z" fill="${cP}"/><path d="M330 104H588L616 132L588 160H330Z" fill="${cG}"/>
+ ${T(186,68,"есть глагол (live, work)",16)}${T(186,91,`→ ${gold("do / does")}`,18)}
+ ${T(466,126,"нет глагола (student, happy)",16,"middle","#fff")}${T(466,150,`→ am / is / are`,18,"middle",cN,800)}
+ ${pill(150,150,150,`I live here. ✓`,16)}${T(150,214,`<tspan text-decoration="line-through">I am live here.</tspan>`,15,"middle","#b3433f",600)}${pill(474,186,180,`I am a student. ✓`,16)}`),
+// 5. can
+svgW(`${panel(12,12,300,226)}<path d="M14 120Q60 108 110 120T210 120T310 120V224Q310 236 296 236H28Q14 236 14 224Z" fill="#WATER" stroke="none"/>
+ <path d="M14 168Q60 156 110 168T210 168T310 168M14 206Q60 194 110 206T210 206T310 206" fill="none" stroke="#fff" stroke-width="3" opacity=".6"/>
+ <g transform="translate(130 134)"><circle r="28" fill="${cS}"/><path d="M-29 0A29 29 0 0 1 29 0Z" fill="${cR}"/><path d="M-29 2H29" stroke-width="5" stroke="${cN}"/><circle cx="-11" cy="2" r="9" fill="#9BD6F5" stroke-width="3"/><circle cx="11" cy="2" r="9" fill="#9BD6F5" stroke-width="3"/><path d="M-6 16Q0 22 6 16" fill="none" stroke-width="2.4"/></g>
+ ${arm("M154 132Q190 76 246 104",cS,250,106)}
+ <path d="M14 128Q60 116 110 128T210 128T310 128V140H14Z" fill="#7CC6F4" stroke="none" opacity=".85"/>
+ <circle cx="266" cy="92" r="4" fill="#fff" stroke="${cW}" stroke-width="2"/><circle cx="280" cy="110" r="3" fill="#fff" stroke="${cW}" stroke-width="2"/><circle cx="72" cy="112" r="3.5" fill="#fff" stroke="${cW}" stroke-width="2"/>
+ ${bubble(48,14,200,`I ${gold("can")} swim!`,110,21)}
+ ${panel(328,12,300,226,"#fff")}
+ ${C(472,140,.76,{pose:"guitar",item:guitar,shirt:cB,mouth:"open"})}
+ ${bubble(340,14,276,`He ${gold("can")} play the guitar.`,470,19)}${note(586,132)}${note(600,170,.8)}`),
+// 6. когда употребляется
+svgW(`${panel(12,12,196,226)}${panel(222,12,196,226)}${panel(432,12,196,226)}
+ <g transform="translate(110 104)"><path d="M-30-30h52v40a22 22 0 0 1-22 22h-8a22 22 0 0 1-22-22z" fill="#fff"/><path d="M22-20h8a12 12 0 0 1 0 24h-8" fill="none"/><path d="M-40 34h72" fill="none"/><path d="M-14-40c-5-7 5-10 0-17M4-40c-5-7 5-10 0-17" fill="none" stroke="${cG}" stroke-width="3.4"/><path d="M-30-12h52" stroke="${cGt}" stroke-width="2" opacity=".5"/></g>
+ <g transform="translate(320 100)"><rect x="-10" y="-56" width="20" height="88" rx="10" fill="#fff"/><circle cx="0" cy="40" r="17" fill="${cR}"/><path d="M0 36V-36" stroke="${cR}" stroke-width="8"/><path d="M18-36h10M18-18h10M18 0h10M18 18h10" stroke-width="2.6"/></g>
+ <g transform="translate(530 100)"><circle r="46" fill="#fff" stroke-width="3.4"/><circle r="38" fill="${cP}" stroke="none"/><path d="M0-34v6M0 28v6M-34 0h6M28 0h6" stroke-width="3"/><path d="M0 0V-22M0 0h20" fill="none" stroke="${cGt}" stroke-width="5"/><circle r="4" fill="${cN}" stroke="none"/></g>
+ ${spark(146,48,0)}
+ ${pill(110,168,140,"привычка")}${T(110,226,"every morning",14,"middle",cT,600)}${pill(320,168,120,"факт")}${T(320,226,"water boils at 100°C",14,"middle",cT,600)}${pill(530,168,150,"расписание")}${T(530,226,"starts at six",14,"middle",cT,600)}`),
+// 7. диалог Andrew — Giorgio
+svgW(`${panel(12,96,456,142)}
+ <g transform="translate(490 92)"><path d="M0 40L70 4L140 40Z" fill="#F3C779"/><path d="M70 4V-14" stroke-width="2.6"/><path d="M70-14h18l-5 5 5 5H70" fill="${cR}" stroke-width="2"/><rect x="2" y="40" width="136" height="10" rx="3" fill="#fff"/>
+ <path d="M18 52V124M46 52V124M94 52V124M122 52V124" stroke="${cN}" stroke-width="12"/><path d="M18 52V124M46 52V124M94 52V124M122 52V124" stroke="${cP}" stroke-width="6"/>
+ <rect x="58" y="80" width="24" height="44" rx="12" fill="${cB}"/><rect x="-4" y="124" width="148" height="12" rx="3" fill="#fff"/><ellipse cx="-10" cy="130" rx="14" ry="10" fill="#5DB85B"/><ellipse cx="150" cy="130" rx="14" ry="10" fill="#5DB85B"/></g>
+ ${C(118,148,.76,{hair:"side",glasses:true,shirt:cN,tie:true,mouth:"open"})}${C(362,148,.76,{hair:"curly",hc:"#3A2416",skin:"#F2C49C",shirt:cB,flip:true})}
+ ${bubble(10,10,232,`${gold("Do")} you live on campus?`,118,18)}${bubble(258,10,206,`No, I live at home.`,362,18)}
+ ${pill(118,200,140,"Andrew Taylor",14)}${pill(362,200,100,"Giorgio",14)}`)
 ];
 const norm=s=>s.trim().toLowerCase().replace(/[’‘]/g,"'").replace(/\s*[–—-]\s*/g," - ").replace(/\s*([.!?])+$/,"").replace(/\s+([?,.])/g,"$1").replace(/\s+/g,' ');
 const S={};
