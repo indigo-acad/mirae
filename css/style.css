@@ -384,7 +384,6 @@ header.band .hero-cta a.pri{background:var(--gold);color:#0B1535;border-color:tr
 header.band .hero-cta a.pri:hover{background:var(--gold-hi);color:#0B1535}
 header.band .hero-cta a.ghost{background:rgba(11,21,53,.4);color:var(--ivory);border-color:rgba(212,175,124,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 header.band .hero-cta a.ghost:hover{border-color:var(--gold);color:var(--gold-hi)}
-.deco{display:none}
 .journey{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.3fr);align-items:center;gap:22px;padding:28px 34px;border-radius:28px;margin:18px 0 8px}
 .journey .mid{min-width:0}
 .journey h3{margin:0 0 4px;font-size:27px;font-weight:500}
@@ -565,14 +564,14 @@ html:is([data-lang=ko],[data-lang=en]) header.band.slim .in::after{content:"";di
 html:is([data-lang=ko],[data-lang=en]) .hero-art{display:block;position:absolute;left:0;right:0;bottom:var(--hz,64px);height:300px;z-index:-1;pointer-events:none;background:var(--scene) 50% 100%/max(1000px,min(100%,1600px)) auto no-repeat}
 html:is([data-lang=ko],[data-lang=en]) .hero-art::before{content:"";position:absolute;left:0;right:0;top:100%;height:var(--hz,64px);background:linear-gradient(#070C26,rgba(7,12,38,0))}
 html:is([data-lang=ko],[data-lang=en]) .hero-art::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:16px;background:var(--band) 50% 0/auto 16px repeat-x;opacity:.9}
-/* луна корейского раздела: отдельный слой, чтобы не попадать под текст */
-html[data-lang=ko] header.band:not(.slim)::after,html[data-lang=ko] .hero::after{content:"";position:absolute;z-index:-1;width:150px;height:150px;pointer-events:none;
+/* луна на главной: отдельный слой, чтобы не попадать под текст */
+html[data-lang=ko] .hero::after{content:"";position:absolute;z-index:-1;width:150px;height:150px;pointer-events:none;
   background:url(../img/moon.svg) center/contain no-repeat}
-html[data-lang=ko] header.band .deco{display:block;position:absolute;top:0;right:0;z-index:-1;width:clamp(190px,25vw,330px);aspect-ratio:230/130;pointer-events:none;
-  background:url(../img/branch-ko.svg) 0 0/contain no-repeat;transform:scaleX(-1)}
-html[data-lang=ko] header.band:not(.slim)::after{right:max(4%,calc(50% - 540px));bottom:clamp(96px,13vw,176px)}
+/* шапки корейского раздела: луна в правом верхнем углу неба */
+html[data-lang=ko] header.band:not(.slim)::after{content:"";position:absolute;top:clamp(10px,2.2vw,40px);right:clamp(10px,6vw,140px);z-index:-1;width:clamp(110px,9vw,170px);aspect-ratio:1;pointer-events:none;
+  background:url(../img/moon.svg) center/contain no-repeat}
 html[data-lang=ko] .hero::after{right:max(7%,calc(50% - 600px));top:clamp(84px,15vh,150px)}
-@media(max-width:640px){html[data-lang=ko] .hero::after{right:3%;top:76px;width:110px;height:110px}html[data-lang=ko] header.band:not(.slim)::after{width:110px;height:110px}html[data-lang=ko] header.band .deco{width:150px;opacity:.75}}
+@media(max-width:640px){html[data-lang=ko] .hero::after{right:3%;top:76px;width:110px;height:110px}html[data-lang=ko] header.band:not(.slim)::after{width:96px;top:6px;right:6px}}
 /* рамка с орнаментом в углах: карточки-итоги в разделах и карточки языков на главной */
 .fr::after{content:"";position:absolute;inset:7px;z-index:1;pointer-events:none;border:24px solid transparent;border-image:var(--frame,none) 56/24px stretch;opacity:.85}
 
@@ -634,7 +633,6 @@ html[data-lang=ko] .hero::after{right:max(7%,calc(50% - 600px));top:clamp(84px,1
   header.band .hero-cta a{justify-content:center;padding:0 16px;font-size:15px}
   header.band .hero-cta a.pri{flex:1 1 100%}
   header.band .hero-cta a.ghost{display:none}
-  html[data-lang=ko] header.band.course-hero::after{display:none}
   .lgrid{gap:14px}
   .lsn-art{aspect-ratio:2/1}
   .asst-btn{right:12px;bottom:12px}
@@ -644,7 +642,8 @@ html[data-lang=ko] .hero::after{right:max(7%,calc(50% - 600px));top:clamp(84px,1
   .top .logo{letter-spacing:.14em}
   .tabbar a{font-size:10.5px}
 }
-@media(min-width:641px) and (max-width:900px){.lang .lg-f{display:none}.lang .lg-s{display:inline}}
+@media(min-width:641px) and (max-width:1180px){.lang .lg-f{display:none}.lang .lg-s{display:inline}}   /* полные названия языков не помещаются рядом с меню */
+.lang button{white-space:nowrap}
 
 /* ---------- доступность ---------- */
 @supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
@@ -772,3 +771,24 @@ details.howq{margin:12px 0 8px}
 .card:not(.glass) .seg.am{background:var(--fill);margin:4px 0 2px;max-width:420px}
 .seg.am button{padding:6px 6px;font-size:14px;white-space:nowrap}
 .card:not(.glass) .seg.am button[aria-selected=true]{background:#fff;color:var(--navy);border-color:var(--gold)}
+
+/* ---------- шапка курса по макету: пейзаж во всю ширину экрана, текст слева над его низкой частью ----------
+   img/hero-*.svg (2000×300, рисует tools/art.py): левая половина рисунка низкая, справа ориентиры и луна.
+   Контент курса шире прежнего (--wrap), чтобы на больших мониторах не было пустых полей по бокам. */
+html[data-lang=ko]{--hero:url(../img/hero-ko.svg)}
+html[data-lang=en]{--hero:url(../img/hero-en.svg)}
+main.course,header.band.course-hero .in{max-width:min(2200px,max(1480px,86vw));padding:0 clamp(16px,3.6vw,56px)}
+header.band.course-hero h1{max-width:16em}
+header.band.course-hero p{max-width:40ch}
+html:is([data-lang=ko],[data-lang=en]) header.band.course-hero{
+  --hw:max(100vw,1080px);--hh:calc(var(--hw)*.15);
+  overflow:hidden;padding-top:clamp(30px,4.4vw,76px);padding-bottom:calc(var(--hh)*.5 + 16px)}
+html:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{
+  background:var(--hero) 100% calc(100% - 15px)/var(--hw) auto no-repeat,
+    radial-gradient(calc(var(--hw)*.3) calc(var(--hh)*.42) at 74% calc(100% - var(--hh)*.2),rgba(226,186,128,.34),rgba(150,120,160,.16) 46%,rgba(11,21,53,0) 76%),
+    linear-gradient(90deg,rgba(7,12,38,.5),rgba(7,12,38,0) 46%)}
+@media(max-width:1199px){html:is([data-lang=ko],[data-lang=en]) header.band.course-hero{padding-bottom:calc(var(--hh)*.84 + 16px)}}
+@media(max-width:720px){
+  html:is([data-lang=ko],[data-lang=en]) header.band.course-hero{--hw:max(100vw,980px);padding-bottom:calc(var(--hh) + 10px)}
+  html:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{background-position:78% calc(100% - 15px),74% 100%,0 0}
+}
