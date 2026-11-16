@@ -821,3 +821,72 @@ html:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{
 .wq .msg{margin:0}
 .wq .msg a{color:inherit;font-weight:600}
 .vnote button.linkish{color:var(--gold-ink);font-size:inherit;font-weight:600;padding:0}
+
+/* ---------- урок из двух частей: «Теория» и «Отработка» ---------- */
+.lparts{margin:16px 0 0;max-width:440px}
+.lparts button{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.lparts small{font-size:12px;font-variant-numeric:tabular-nums;opacity:.75}
+.lparts small:empty{display:none}
+.to-prac{margin-top:22px}
+.to-prac h3,.hw-note h3,.hw-theory h3,.hw-send h3{display:flex;align-items:center;gap:8px;margin:0 0 6px}
+.to-prac h3 svg,.hw-note h3 svg,.hw-theory h3 svg,.hw-send h3 svg{color:var(--gold);flex:none}
+.to-prac .btn.big,.hw-send .btn.big{display:inline-flex;align-items:center;gap:8px}
+.to-th{margin:16px 0 0;text-align:center}
+.to-th .linkish{display:inline-flex;align-items:center;gap:6px}
+/* ---------- домашка ---------- */
+.hw-from{margin:0 0 12px;font-size:13.5px}
+.hw-note,.hw-theory{margin-top:16px}
+.hw-note p{margin:0;white-space:pre-line}
+.hw-th{margin-top:10px}
+.hw-th>summary{display:inline-flex;align-items:center;gap:8px;cursor:pointer;list-style:none;padding:9px 16px;border-radius:999px;border:1px solid rgba(212,175,124,.55);color:var(--gold-hi);font-weight:500;font-size:15px}
+.hw-th>summary::-webkit-details-marker{display:none}
+.hw-th[open]>summary{background:rgba(212,175,124,.14)}
+.hw-th-in{margin-top:10px}
+.hw-th-in>.card{margin:12px 0 0}
+.hw-here{display:grid;grid-template-columns:1fr auto;gap:3px 12px;align-items:center;margin-top:16px;text-decoration:none;color:inherit}
+.hw-here>*:not(.tile-go){grid-column:1}
+.hw-here .tag{display:inline-flex;align-items:center;gap:6px}
+.hw-here .tile-go{grid-column:2;grid-row:1/4}
+.hw-here:hover .tile-go{color:var(--gold);border-color:rgba(212,175,124,.55)}
+/* кабинет: слова на сегодня и домашка */
+.wcab .tb-h h3,.hwc .tb-h h3{font-size:24px}
+.wcab-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.wcab-i{display:flex;flex-direction:column;gap:2px;padding:14px 16px;border-radius:16px;background:var(--fill);border:1px solid var(--rule);text-decoration:none;color:inherit;transition:border-color .2s}
+.wcab-i:hover{border-color:rgba(212,175,124,.55)}
+.wcab-i .tag{display:inline-flex;align-items:center;gap:6px}
+.wcab-i b{font-family:var(--font-display);font-size:38px;font-weight:500;line-height:1.05}
+.wcab-i .muted{font-size:13.5px}
+.wcab-f{margin:12px 0 0;font-size:14px}
+.wcab-f a{color:inherit;font-weight:600}
+.hw-row{display:flex;justify-content:space-between;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--rule)}
+.hwc .tb-h+.hw-row,.hwc .hw-cm+.hw-row{border-top:0}
+.hw-tx{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 220px}
+.hw-tx .muted{font-size:14px}
+.hw-nt{font-size:14px;color:var(--fg-2);white-space:pre-line}
+.hw-due.late{color:var(--bad-fg);font-weight:600}
+.hw-due.soon{color:var(--gold);font-weight:600}
+.hw-acts{display:inline-flex;gap:8px;flex-wrap:wrap}
+.hw-acts .btn{display:inline-flex;align-items:center;gap:6px}
+.hw-cm{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:12px 14px;margin:8px 0;border-radius:14px;background:rgba(143,211,166,.08);border:1px solid rgba(143,211,166,.3)}
+.hw-cm p{margin:4px 0 0;white-space:pre-line}
+.hw-cm button{flex:none}
+/* преподаватель: домашка ученика */
+.hwt-h{margin:14px 0 4px}
+.hwt-row{padding:10px 0;border-top:1px solid var(--rule)}
+.hwt-row.sub{padding:12px 14px;margin:8px 0;border:1px solid rgba(212,175,124,.45);border-radius:14px}
+.hwt-items{font-size:13.5px;margin-top:4px}
+.hwt-res>summary,.hwt-mats>summary,.hwt-old>summary{cursor:pointer;padding:6px 0}
+.hwt-it{margin:10px 0}
+.hwt-w{font-size:15px;padding:3px 0 3px 10px;margin:3px 0;border-left:3px solid var(--bad)}
+.hwt-chk{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.hwt-chk input{flex:1;min-width:200px;margin:0}
+.hwt-new{margin-top:14px}
+.hwt-new>summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none}
+.hwt-new>summary::-webkit-details-marker{display:none}
+.hwt-in{margin-top:12px;display:grid;gap:10px}
+.hwt-in .field{margin:0}
+.hwt-in select,.hwt-in .name{margin:0}
+.hwt-lang{max-width:340px}
+.hwt-pick{align-items:center;cursor:pointer}
+.hwt-old{margin-top:14px}
+@media (max-width:420px){.wcab-2{gap:8px}.wcab-i{padding:12px}.wcab-i b{font-size:32px}}

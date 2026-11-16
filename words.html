@@ -570,6 +570,10 @@ if(window.speechSynthesis)speechSynthesis.onvoiceschanged=function(){if(!$('#pre
 if(KR.require()){KR.topbar('words');drawAll();KR.load().then(function(){
   var l=URLP.get('lang');if(l&&l!==KR.lang()&&KR.langs().indexOf(l)>=0)KR.setLang(l);
   drawAll();loadInfo();
+  // из кабинета: words.html#new — сразу знакомство с новыми словами, #rev — отработка
+  var hs=location.hash,pl=V.plan(lang);
+  if(hs==='#new'||hs==='#rev'){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+    if(hs==='#new'&&pl.fresh.length)start('new');else if(hs==='#rev'&&pl.learn.length+pl.soon.length+pl.rev.length)start('rev')}
 })}
 </script>
 </body>
