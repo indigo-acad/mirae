@@ -62,13 +62,17 @@ var V={
     }else c=SRS.make(lang,word,tr,x,now);
     put(c);return {card:c,added:fresh};
   },
-  /* Слова урока добавляются один раз и без сокращения интервала. */
-  addLesson:function(lessonId,lang,items){
-    if(D.auto[lessonId])return 0;var now=Date.now(),n=0;
+  /* Решение ученика о словах урока: undefined — ещё не решал, 1 — добавлены, "no" — не добавлять. */
+  lessonState:function(lessonId){return D.auto[lessonId]},
+  /* Слова урока добавляются один раз и без сокращения интервала. force — добавить, даже если раньше ученик отказался. */
+  addLesson:function(lessonId,lang,items,force){
+    if(D.auto[lessonId]&&!force)return 0;var now=Date.now(),n=0;
     items.forEach(function(it,i){var id=SRS.id(lang,it.w);if(!it.w||D.w[id])return;
       var c=SRS.make(lang,it.w,it.t,{ex:it.ex,et:it.et,f:it.f,src:"lesson:"+lessonId},now+i);D.w[id]=c;D.d[id]=1;n++});
-    D.auto[lessonId]=1;D.st=Date.now();D.sd=1;save();push();return n;
+    D.auto[lessonId]=1;D.st=Date.now();D.sd=1;save();push();changed();return n;
   },
+  /* Ученик не хочет слова этого урока в словаре: больше не спрашиваем (решение синхронизируется с другими устройствами). */
+  skipLesson:function(lessonId){D.auto[lessonId]="no";D.st=Date.now();D.sd=1;save();push()},
   update:function(c){c=Object.assign({},c,{u:Date.now()});put(c);return c},
   star:function(id){var c=D.w[id];if(!c)return null;c=Object.assign({},c,{u:Date.now()});if(c.star)delete c.star;else{c.star=1;c=SRS.bump(c,Date.now())}put(c);return c},
   remove:function(id){delete D.w[id];delete D.d[id];D.x[id]=1;save();push()},

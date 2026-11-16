@@ -89,10 +89,58 @@ function stars(){
   if(!VOC)return;
   document.querySelectorAll("[data-wstar]").forEach(b=>{const c=VOC.find(LANG,b.dataset.wstar),on=!!(c&&c.star);b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
 }
+/* Слова урока попадают в словарь по выбору ученика (Слова → Настройки → «Слова из уроков»):
+   спросить при первом открытии урока (по умолчанию), добавить сразу или не добавлять. Выбор по уроку запоминается
+   и синхронизируется: если ученик уже ответил на другом устройстве, вопрос исчезнет после загрузки словаря. */
+const wordsN=n=>n%10===1&&n%100!==11?"слово":n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?"слова":"слов";
+const freshWords=()=>lessonWords().filter(it=>!VOC.find(LANG,it.w));
 function vocabInit(){
   if(!VOC)return;
-  const items=lessonWords();if(items.length)VOC.addLesson(id,LANG,items);
-  VOC.onchange=stars;KR.onVocab=stars;stars();
+  VOC.onchange=()=>{askSync();stars();wordsNote()};KR.onVocab=VOC.onchange;VOC.onchange();
+}
+/* Показать, обновить или убрать вопрос о словах урока по текущему состоянию словаря. */
+function askSync(){
+  const q=document.getElementById("wq");
+  if(q&&q.dataset.done)return;                                   // ученик ответил: остаётся подтверждение
+  const fresh=freshWords(),mode=VOC.settings().lw;
+  if(!fresh.length||VOC.lessonState(id)||mode!=="ask"){
+    if(q)q.remove();
+    if(fresh.length&&!VOC.lessonState(id)&&mode==="auto")VOC.addLesson(id,LANG,lessonWords());
+    return;
+  }
+  askWords(fresh,q);
+}
+function askWords(fresh,box){
+  const n=fresh.length,keep=document.getElementById("wq-keep"),kept=!!(keep&&keep.checked);
+  if(!box){
+    box=document.createElement("section");box.className="card glass wq";box.id="wq";box.setAttribute("aria-label","Слова урока");
+    const anchor=document.querySelector("main>.card.glass");   // карточка прогресса урока
+    if(!anchor)return;anchor.insertAdjacentElement("afterend",box);
+  }
+  box.innerHTML=`<h3>${ic("abc",20)} Слова урока · ${n}</h3><p class="muted">Добавить их в твой словарь? Тогда они придут на страницу «Слова»: сначала в блок новых слов, потом в отработку.</p>`+
+    `<div class="wq-prev">${fresh.slice(0,8).map(it=>`<span class="chip"><b${LANG==="ko"?' class="ko"':""} lang="${LANG}">${esc(it.w)}</b>${it.t?"&nbsp;· "+esc(it.t):""}</span>`).join("")}${n>8?`<span class="chip">ещё ${n-8}</span>`:""}</div>`+
+    `<label class="wq-keep"><input type="checkbox" id="wq-keep"${kept?" checked":""}> Запомнить выбор для следующих уроков</label>`+
+    `<div class="done-row"><button type="button" data-wq="no">Не добавлять</button><button type="button" class="btn pri" data-wq="yes">Добавить ${n} ${wordsN(n)}</button></div>`;
+}
+function answerWords(yes){
+  const keep=document.getElementById("wq-keep"),kept=!!(keep&&keep.checked),box=document.getElementById("wq");
+  if(box)box.dataset.done=1;
+  if(kept){const s=VOC.settings();s.lw=yes?"auto":"off";VOC.setSettings(s)}
+  let n=0;
+  if(yes)n=VOC.addLesson(id,LANG,lessonWords(),true);else VOC.skipLesson(id);
+  if(box)box.innerHTML=`<p class="msg ok" role="status">`+(yes?`Добавлено в словарь: ${n} ${wordsN(n)}. Они ждут на странице «Слова», в блоке новых слов. <a href="words.html">Открыть «Слова»</a>`
+    :`Слова урока не добавлены. Если передумаешь, кнопка есть под списком слов урока.`)+(kept?` Для следующих уроков выбор запомнен, поменять его можно в «Слова» → «Настройки».`:"")+`</p>`;
+  stars();wordsNote();
+}
+/* Подпись под словами урока: все ли они в словаре; если нет — кнопка добавить недостающие. */
+function wordsNote(){
+  if(!VOC)return;
+  const all=lessonWords().length,n=freshWords().length,btn=`<button type="button" class="linkish" data-wadd>`;
+  document.querySelectorAll(".vnote").forEach(p=>{
+    p.innerHTML=!n?`Слова урока в твоём словаре и придут на повторение. Отметь звёздочкой трудные: они вернутся раньше. <a href="words.html">Открыть словарь</a>`
+      :n<all?`В твоём словаре ${all-n} из ${all} слов урока. ${btn}Добавить остальные ${n}</button> или отметь звёздочкой только нужные.`
+      :`Этих слов пока нет в твоём словаре. ${btn}Добавить ${n} ${wordsN(n)}</button> или отметь звёздочкой только нужные.`;
+  });
 }
 function extra(){
   if(L.back)return `<div class="card glass"><a class="btn pri" href="${L.back}">${ic("back",16)}К списку отработок</a></div>`;
@@ -118,7 +166,7 @@ function block(b){
     if(b.task)h+=`<p class="muted">${ic("pencil",15)} ${esc(b.task)}</p>`;
   }else if(b.type==="words"){
     h+=`<div class="words">`+b.items.map(w=>`<div class="w"><span><b class="ko">${esc(w[0])}</b> ${sayBtn(w[0])}</span><span class="ru">${esc(w[1])}</span>${VOC?`<button class="icb" data-wstar="${esc(w[0])}" data-wt="${esc(w[1])}" aria-pressed="false" aria-label="Отметить слово: оно вернётся на повторение раньше">${ic("star",17)}</button>`:""}</div>`).join("")+`</div>`;
-    if(VOC)h+=`<p class="note vnote">Слова урока уже в твоём словаре и придут на повторение. Отметь звёздочкой трудные: они вернутся раньше. <a href="words.html">Открыть словарь</a></p>`;
+    if(VOC)h+=`<p class="note vnote"></p>`;   // текст ставит wordsNote(): в словаре слова урока или нет
   }else if(b.type==="text"){h+=b.html}
   else if(b.type==="examples"){
     if(b.note)h+=`<p class="muted">${esc(b.note)}</p>`;
@@ -209,8 +257,10 @@ function wire(){
   document.body.addEventListener("click",e=>{
     const t=e.target.closest("button");if(!t)return;
     if(t.dataset.say)return say(t.dataset.say);
-    if(t.dataset.wstar!==undefined&&VOC){const c=VOC.find(LANG,t.dataset.wstar);if(c)VOC.star(c.id);else VOC.add(LANG,t.dataset.wstar,t.dataset.wt,{star:1,src:"lesson:"+id});return stars()}
+    if(t.dataset.wstar!==undefined&&VOC){const c=VOC.find(LANG,t.dataset.wstar);if(c)VOC.star(c.id);else VOC.add(LANG,t.dataset.wstar,t.dataset.wt,{star:1,src:"lesson:"+id});return VOC.onchange()}
     if(t.dataset.check)return check(t.dataset.check);
+    if(t.dataset.wq&&VOC)return answerWords(t.dataset.wq==="yes");
+    if(t.dataset.wadd!==undefined&&VOC){const q=document.getElementById("wq");if(q)q.remove();VOC.addLesson(id,LANG,lessonWords(),true);return VOC.onchange()}
     if(t.dataset.k!==undefined){const g=t.parentElement,k=g.dataset.b,i=g.dataset.i;P[k]=P[k]||{};P[k].v=P[k].v||{};let v=P[k].v[i]||"";
       v=t.dataset.k==="⌫"?[...v].slice(0,-1).join(""):v+t.dataset.k;P[k].v[i]=v;P[k].t=Date.now();
       const o=document.getElementById(`bt-${k}-${i}`);if(o){o.textContent=compose(v);o.className="built ko"}

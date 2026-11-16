@@ -25,7 +25,8 @@ var DEF={
   maxIvl:365,     // потолок интервала, дни
   newDay:10,      // новых слов в день
   revDay:100,     // повторений в день
-  games:{cards:1,tr:1,ctx:1,wr:1,build:1,pairs:1}
+  games:{cards:1,tr:1,ctx:1,wr:1,build:1,pairs:1},
+  lw:"ask"        // слова нового урока: ask — спросить ученика, auto — добавить сразу, off — не добавлять
 };
 function num(v,d,lo,hi){v=parseFloat(v);return isFinite(v)?Math.max(lo,Math.min(hi,v)):d}
 function mins(a,d){
@@ -42,7 +43,8 @@ function cfg(s){
     grad:Math.round(num(s.grad,DEF.grad,1,30)),easy:Math.round(num(s.easy,DEF.easy,1,60)),
     ease:num(s.ease,DEF.ease,1.3,4),hard:num(s.hard,DEF.hard,1,2),bonus:num(s.bonus,DEF.bonus,1,2),
     lapse:num(s.lapse,DEF.lapse,0,1),mod:num(s.mod,DEF.mod,.5,2),maxIvl:Math.round(num(s.maxIvl,DEF.maxIvl,7,3650)),
-    newDay:Math.round(num(s.newDay,DEF.newDay,0,200)),revDay:Math.round(num(s.revDay,DEF.revDay,1,2000)),games:g};
+    newDay:Math.round(num(s.newDay,DEF.newDay,0,200)),revDay:Math.round(num(s.revDay,DEF.revDay,1,2000)),games:g,
+    lw:s.lw==="auto"||s.lw==="off"?s.lw:DEF.lw};
 }
 function dayStart(t){var d=new Date(t);d.setHours(0,0,0,0);return d.getTime()}
 function norm(w){return String(w==null?"":w).normalize("NFC").trim().replace(/\s+/g," ").toLowerCase()}
