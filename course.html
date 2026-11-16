@@ -14,7 +14,7 @@
 <div id="topbar"></div>
 <header class="band course-hero"><div class="in"><small id="sub"></small><h1 id="ct"></h1><p id="cp"></p><div id="cta" class="hero-cta"></div></div></header>
 <main class="course"><div id="list"></div></main>
-<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script>
+<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script>
 <script>
 /* Программа показана как путь: части и главы на одной линии. Раздел зависит от языка (переключатель в шапке).
    Корейский: уроки 서울대 한국어+ с прогрессом по блокам. Английский: материалы программы из каталога,
@@ -27,17 +27,19 @@ var esc=KR.esc;
 function programKo(){
   var C=COURSE,C2=window.COURSE2;
   var ch=function(l){
-    var x={key:l.id||('soon-'+l.no),tag:l.tag||l.no+'과',title:l.title,ko:true,scene:l.scene};
+    var x={key:l.id||('soon-'+l.no),tag:l.tag||l.no+'과',title:l.title,ko:!l.ru,scene:l.scene};
     if(!l.id){x.state='soon';return x}
     if(!KR.can('lesson-'+l.id)){x.state='lock';return x}
     var p=KR.progress(l.id);x.n=p.n;x.tot=p.tot;x.pct=p.pct;x.P=p.P;x.state=p.pct>=100?'done':'open';
     x.meta=p.n+' из '+p.tot+' блоков';x.href='lesson.html?l='+l.id;x.go=p.pct>=100?'Повторить':p.n?'Продолжить':'Начать';
-    x.extra=l.tag?'<a class="btn" href="materials/korean/ko-hangul-games/">'+KR.icon('spark',16)+'Игры</a>':'<a class="btn" href="practice.html">'+KR.icon('repeat',16)+'Доп. упражнения</a>';
+    x.extra=l.hangul?'<a class="btn" href="materials/korean/ko-hangul-games/">'+KR.icon('spark',16)+'Игры</a>':'<a class="btn" href="practice.html">'+KR.icon('repeat',16)+'Доп. упражнения</a>';
     return x;
   };
   var parts=[{t:C.title.split(' · ')[1]||'',ko:true,items:C.lessons.map(ch)}];
   var C0=window.COURSE0;   // хангыль идёт первой частью, если ученику назначено хотя бы одно занятие (преподаватель видит всегда)
-  if(C0&&C0.lessons.some(function(l){return KR.can('lesson-'+l.id)}))parts.unshift({t:'한글',ko:true,items:C0.lessons.map(ch)});
+  if(C0&&C0.lessons.some(function(l){return KR.can('lesson-'+l.id)}))parts.unshift({t:'한글',ko:true,items:C0.lessons.map(function(l){return ch(Object.assign({hangul:true},l))})});
+  var C3=window.COURSE3;   // CLT-синтез · A1: идёт после хангыля, если назначен хотя бы один урок (преподаватель видит всегда)
+  if(C3&&C3.lessons.some(function(l){return KR.can('lesson-'+l.id)}))parts.splice(C0&&parts[0].t==='한글'?1:0,0,{t:'CLT · A1',items:C3.lessons.map(function(l){return ch(Object.assign({ru:true},l))})});
   if(C2)parts.push({t:C2.title.split(' · ')[1]||'',ko:true,items:C2.lessons.map(ch)});
   return {sub:C.subtitle,title:C2?C.title.split(' · ')[0]:C.title,ko:true,note:'Основной курс идёт по учебнику, методику потом настроим под себя',unit:'блоков',parts:parts};
 }
