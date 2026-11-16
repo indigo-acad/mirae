@@ -39,6 +39,7 @@
       if (!r || !r.id) return;
       var k = seen[r.id];
       if (k === undefined) { seen[r.id] = out.length; out.push(r) }
+      else if (r.u || out[k].u) { if ((r.u || 0) > (out[k].u || 0)) out[k] = r }   // живой отчёт: берём более свежий
       else if ((r.x || "").length > (out[k].x || "").length) out[k] = r;   // длинная версия: отчёт, собранный из частей
     });
     out.sort(function (x, y) { return (y.t || 0) - (x.t || 0) });
@@ -98,6 +99,24 @@
   setTimeout(push, 4000);
   setInterval(function () { if (dirty) push() }, 120000);
   document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden" && dirty) push() });
+
+  // ---------- живой отчёт: материал сам сообщает результаты по ходу работы ----------
+  // window.MIRAE.live(text) — отчёт этой попытки (одна запись на открытие страницы, каждый раз перезаписывается
+  // свежей версией). Сохраняется на устройстве сразу, в облако — через 4 секунды после последнего ответа
+  // и при уходе со страницы. window.MIRAE.user — логин ученика.
+  var LIVE_ID = MID + "-live-" + now().toString(36), liveT = 0, liveTm = null;
+  window.MIRAE = {
+    user: USER,
+    live: function (text) {
+      var x = String(text || "").slice(0, 16000); if (!x) return;
+      var s = readLocal(), t = now(); if (!liveT) liveT = t;
+      s.rep = s.rep.filter(function (r) { return r.id !== LIVE_ID });
+      s.rep.unshift({ id: LIVE_ID, m: MID, t: t, u: t, x: x });
+      s.rep = mergeRep(s.rep, []); writeLocal(s); dirty = true;
+      clearTimeout(liveTm); liveTm = setTimeout(push, 4000);
+    },
+    flush: function () { return push() }
+  };
 
   // ---------- 2) «Отправить учителю» ----------
   function textOf(b) {

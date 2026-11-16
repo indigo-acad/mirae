@@ -49,7 +49,9 @@ function mergeMat(a,b){
 function mergeRep(a,b){
   const seen={},out=[];
   (a||[]).concat(b||[]).forEach(r=>{if(!r||!r.id)return;const k=seen[r.id];
-    if(k===undefined){seen[r.id]=out.length;out.push(r)}else if((r.x||"").length>(out[k].x||"").length)out[k]=r});
+    if(k===undefined){seen[r.id]=out.length;out.push(r)}
+    else if(r.u||out[k].u){if((r.u||0)>(out[k].u||0))out[k]=r}   // живой отчёт урока: берём более свежий
+    else if((r.x||"").length>(out[k].x||"").length)out[k]=r});
   out.sort((x,y)=>(y.t||0)-(x.t||0));
   let total=0;return out.filter((r,i)=>{total+=(r.x||"").length;return i<40&&total<90000});
 }

@@ -16,6 +16,7 @@ h1{font-size:clamp(34px,8vw,50px);color:var(--gold)}
 .hero{margin:0 -16px 18px;padding:40px 16px 120px;background:url(../../../img/scene-en.svg) bottom/100% 120px no-repeat}.hero>div{max-width:760px;margin:auto}
 .scene{background:#F7FAFF;border:1px solid #DCE7F7;border-radius:18px;margin:6px 0 12px;overflow:hidden}.scene svg{display:block;width:100%;height:auto}
 .sub{color:var(--silver);margin:6px 0 0}
+.sendstat{position:fixed;right:10px;bottom:10px;z-index:9999;background:#0B1535;color:#D4AF7C;border-radius:999px;padding:6px 14px;font:600 13px system-ui;opacity:0;transition:opacity .4s;pointer-events:none}.sendstat.on{opacity:.93}
 nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
 nav a{color:var(--gold);border:1px solid rgba(212,175,124,.4);border-radius:99px;padding:3px 14px;text-decoration:none;font-size:14px}
 .card{background:var(--ivory);color:#1a2040;border-radius:16px;padding:22px;margin:0 0 22px}
@@ -41,7 +42,9 @@ select{font:inherit;padding:3px 6px;border-radius:8px;border:1px solid #b9b5a4;b
 </head>
 <body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a>
 <header class="hero"><div><h1>Present Simple шаг за шагом</h1>
-<p class="sub">Подготовка к IELTS с нуля · 7 шагов · после каждого шага практика с подсказками</p></div></header>
+<p class="sub">Подготовка к IELTS с нуля · 7 шагов · после каждого шага практика с подсказками</p>
+<p class="sub" id="whoBox">Ваше имя: <input id="who" autocomplete="name" placeholder="чтобы преподаватель видел результаты" style="font:inherit;padding:4px 10px;border-radius:10px;border:1px solid #C0C6D4;width:min(320px,70vw)"></p></div></header>
+<div class="sendstat" id="sendStat"></div>
 <main>
 <nav id="nav"></nav>
 <div id="app"></div>
@@ -336,7 +339,7 @@ const app=document.getElementById("app"),nav=document.getElementById("nav");
 STEPS.forEach((s,si)=>{
  nav.insertAdjacentHTML("beforeend",`<a href="#s${si}">${si+1}</a>`);
  let h=`<section class="card" id="s${si}"><h2>${s.t}</h2>${SCN[si]?`<div class="scene">${SCN[si]}</div>`:""}${s.h}`;
- s.ex.forEach((e,ei)=>{const b=`b${si}_${ei}`,items=e.g||e.m||e.x;S[b]={n:items.length,done:{},tries:{},e};
+ s.ex.forEach((e,ei)=>{const b=`b${si}_${ei}`,items=e.g||e.m||e.x;S[b]={n:items.length,done:{},tries:{},wrong:{},shown:{},e};
   h+=`<div class="blk"><h3>${e.n}</h3>${e.p||""}`;
   if(e.g)e.g.forEach((it,i)=>h+=`<div class="q">${i+1}. ${it[0].replace("{}",`<input type="text" data-b="${b}" data-i="${i}" autocomplete="off" autocapitalize="none" spellcheck="false">`)}<span class="key" id="${b}_${i}k"></span></div>`);
   else if(e.x){h+=e.s.map((t,i)=>`<div class="ex"><b>${"ABCDEFGH"[i]}</b> ${t}</div>`).join("")+e.x.map((it,i)=>`<div class="q">Andrew: “${it[0]}”<br>Giorgio <b>${i+2}</b>: <select data-b="${b}" data-i="${i}"><option value="">–</option>${[..."ABCDEFGH"].map(l=>`<option>${l}</option>`).join("")}</select><span class="key" id="${b}_${i}k"></span><br>Andrew: “${it[1]}”</div>`).join("")}
@@ -344,17 +347,68 @@ STEPS.forEach((s,si)=>{
   h+=`<div class="res" id="${b}r">Верно: 0 из ${items.length}</div></div>`});
  app.insertAdjacentHTML("beforeend",h+(s.f||"")+`</section>`)});
 function upd(b){S[b].r=Object.keys(S[b].done).length;document.getElementById(b+"r").textContent=`Верно: ${S[b].r} из ${S[b].n}`+(S[b].r==S[b].n?" ✓ Отлично!":"")}
+/* ---------- проверка ответа: запоминаем ошибки, чтобы показать их преподавателю ---------- */
+const optTxt=(e,i,j)=>String(e.m[i][1][j]).replace(/<[^>]+>/g,"");
 document.addEventListener("change",ev=>{const el=ev.target,b=el.dataset.b;if(!b)return;const i=+el.dataset.i,st=S[b],id=b+"_"+i;
- st.tries[i]=(st.tries[i]||0)+1;
- if(el.tagName==="SELECT"){const a=st.e.x[i][2],ok=el.value===a,k=document.getElementById(id+"k");if(!el.value)return;
-  el.className=ok?"ok":"no";if(ok){st.done[i]=1;k.textContent="";}else k.textContent=st.tries[i]>=2?"Правильно: "+a:"Ещё раз";k.className="key"+(ok?" g":"");}
- else if(el.type==="text"){const a=st.e.g[i][1],ok=a.map(norm).includes(norm(el.value)),k=document.getElementById(id+"k");
-  if(el.value.trim()==="")return;
+ let ok,val;
+ if(el.tagName==="SELECT"){if(!el.value)return;const a=st.e.x[i][2];ok=el.value===a;val=el.value;
+  st.tries[i]=(st.tries[i]||0)+1;const k=document.getElementById(id+"k");
+  el.className=ok?"ok":"no";if(ok){st.done[i]=1;k.textContent="";}else{k.textContent=st.tries[i]>=2?"Правильно: "+a:"Ещё раз";if(st.tries[i]>=2)st.shown[i]=1}k.className="key"+(ok?" g":"");}
+ else if(el.type==="text"){if(el.value.trim()==="")return;const a=st.e.g[i][1];ok=a.map(norm).includes(norm(el.value));val=el.value.trim();
+  st.tries[i]=(st.tries[i]||0)+1;const k=document.getElementById(id+"k");
   el.className=ok?"ok":"no";if(ok){st.done[i]=1;k.textContent="";}
-  else k.textContent=st.tries[i]>=2?"Правильно: "+a[0].replace("'","’"):"Ещё раз";k.className="key"+(ok?" g":"");}
- else{const c=st.e.m[i][2],ok=+el.value===c,lab=document.getElementById(`${id}_${el.value}`);
-  lab.className="opt "+(ok?"ok":"no");if(ok)st.done[i]=1;else if(st.tries[i]>=2)document.getElementById(`${id}_${c}`).classList.add("ok");}
- upd(b)});
+  else{k.textContent=st.tries[i]>=2?"Правильно: "+a[0].replace("'","’"):"Ещё раз";if(st.tries[i]>=2)st.shown[i]=1}k.className="key"+(ok?" g":"");}
+ else{const c=st.e.m[i][2];ok=+el.value===c;val=optTxt(st.e,i,+el.value);
+  st.tries[i]=(st.tries[i]||0)+1;const lab=document.getElementById(`${id}_${el.value}`);
+  lab.className="opt "+(ok?"ok":"no");if(ok)st.done[i]=1;else if(st.tries[i]>=2){document.getElementById(`${id}_${c}`).classList.add("ok");st.shown[i]=1}}
+ if(!ok){const w=st.wrong[i]=st.wrong[i]||[];if(w[w.length-1]!==val)w.push(val)}
+ upd(b);changed()});
+
+/* ---------- отчёт преподавателю по ходу работы ----------
+   На сайте (ученик вошёл): живой отчёт обновляется через несколько секунд после каждого ответа (js/bridge.js → панель «Ученики»).
+   В Telegram: когда ученик уходит со страницы или сворачивает её (не чаще раза в 3 минуты, только если есть новые ответы),
+   и сразу, когда сделано всё. */
+const TG_TOKEN="9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU",TG_CHAT_ID="347625701",T0=Date.now();
+const plain=t=>String(t).replace(/<[^>]+>/g,"").replace(/\s+/g," ").trim();
+const short=n=>n.replace(/:.*/,"");
+function qText(e,i){if(e.g)return plain(e.g[i][0]).replace("{}","___");if(e.m)return plain(e.m[i][0]);return "Andrew: “"+e.x[i][0]+"”"}
+function qAns(e,i){if(e.g)return e.g[i][1][0];if(e.m)return optTxt(e,i,e.m[i][2]);return e.x[i][2]}
+function who(){const n=document.getElementById("who");return (window.MIRAE&&MIRAE.user)||(n&&n.value.trim())||"ученик без имени"}
+function report(){
+ let tot=0,ok=0,did=0;const bad=[],good=[],todo=[];
+ STEPS.forEach((s,si)=>s.ex.forEach((e,ei)=>{const st=S[`b${si}_${ei}`];tot+=st.n;
+  const att=Object.keys(st.tries).length,right=Object.keys(st.done).length;ok+=right;did+=att;
+  if(!att){todo.push(short(e.n));return}
+  const lines=[];
+  for(let i=0;i<st.n;i++){const w=st.wrong[i];if(!w)continue;
+   lines.push(`  • ${i+1}. ${qText(e,i)}\n     писал(а): ${w.slice(0,4).map(x=>"«"+x+"»").join(", ")} → ${st.done[i]?"потом исправил(а)":st.shown[i]?"ответ подсказан":"пока неверно"} · верно: ${qAns(e,i)}`)}
+  const head=`${short(e.n)} — верно ${right} из ${st.n}`+(att<st.n?`, не сделано ${st.n-att}`:"");
+  if(lines.length)bad.push(`❗ ${head}, ошибок: ${lines.length}\n`+lines.join("\n"));else good.push(head)}));
+ const mins=Math.max(1,Math.round((Date.now()-T0)/60000)),pct=tot?Math.round(ok*100/tot):0;
+ let t=`📘 Present Simple шаг за шагом\n👤 ${who()} · ${new Date().toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})} · ${mins} мин\n`+
+  `Сделано ${did} из ${tot} заданий, верно ${ok} (${pct}%)`+(did>=tot?" · урок пройден ✅":" · урок ещё в процессе")+"\n";
+ t+=bad.length?`\n⚠️ ГДЕ ПРОБЛЕМЫ\n${bad.join("\n")}\n`:"\nОшибок пока нет.\n";
+ if(good.length)t+=`\n✅ Без ошибок: ${good.join("; ")}\n`;
+ if(todo.length)t+=`\n⏳ Ещё не начато: ${todo.join(", ")}\n`;
+ return {t,did,tot};
+}
+let ver=0,tgVer=0,tgAt=0,liveTm=null;
+const stat=document.getElementById("sendStat");
+function changed(){ver++;clearTimeout(liveTm);liveTm=setTimeout(saveLive,2500);
+ const R=report();if(R.did>=R.tot)sendTG(true)}
+function saveLive(){if(window.MIRAE){MIRAE.live(report().t);stat.textContent="✓ Результаты сохраняются, преподаватель их видит";stat.className="sendstat on"}}
+function sendTG(force){
+ if(ver===tgVer||!ver)return;if(!force&&Date.now()-tgAt<180000)return;
+ let t=report().t;if(t.length>3900)t=t.slice(0,3850)+"\n… (полный отчёт — на сайте)";
+ const body=new URLSearchParams({chat_id:TG_CHAT_ID,text:t}),url="https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage";
+ tgVer=ver;tgAt=Date.now();
+ // sendBeacon доходит, даже если вкладку закрывают; мост сайта его не перехватывает, поэтому отчёт не задвоится
+ if(!(navigator.sendBeacon&&navigator.sendBeacon(url,body)))fetch(url,{method:"POST",body,keepalive:true}).catch(()=>{});
+ if(!window.MIRAE){stat.textContent="✓ Результаты отправлены преподавателю";stat.className="sendstat on"}
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){clearTimeout(liveTm);saveLive();sendTG(false)}});
+addEventListener("pagehide",()=>{saveLive();sendTG(true)});
+if(window.MIRAE)document.getElementById("whoBox").style.display="none";
 </script>
 </body>
 </html>
