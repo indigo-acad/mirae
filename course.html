@@ -12,7 +12,7 @@
 </head>
 <body>
 <div id="topbar"></div>
-<header class="band course-hero"><i class="deco" aria-hidden="true"></i><div class="in"><small id="sub"></small><h1 id="ct"></h1><p id="cp"></p><div id="cta" class="hero-cta"></div></div></header>
+<header class="band course-hero"><div class="in"><small id="sub"></small><h1 id="ct"></h1><p id="cp"></p><div id="cta" class="hero-cta"></div></div></header>
 <main class="course"><div id="list"></div></main>
 <script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script>
 <script>
@@ -113,7 +113,7 @@ function draw(){
       '<div class="done-row"><a class="btn pri" href="'+esc(x.href)+'">'+x.go+KR.icon('arrow',16)+'</a>'+(x.extra||'')+'</div></div></li>';
   };
   // кнопка в шапке ведёт туда, где ученик остановился
-  if(last)cta.innerHTML='<a class="btn pri big" href="'+esc(last.href)+'">'+(last.n?'Продолжить обучение':'Начать обучение')+KR.icon('arrow',18)+'</a><a class="btn ghost big" href="#lessons">Все уроки</a>';
+  if(last)cta.innerHTML='<a class="btn pri big" href="'+esc(last.href)+'">'+(last.n?'Продолжить обучение':'Начать обучение')+KR.icon('arrow',18)+'</a>';
   var h='<section class="journey card glass fr" aria-label="Общий прогресс">'+KR.ring(pct,92)+'<div class="mid"><h3>'+(avail&&pct>=100?'Путь пройден':'Твой путь')+'</h3><div class="muted">'+
     (avail?'Пройдено '+n+' из '+t+' '+P.unit+' · открыто уроков: '+avail:(KR.ctx.ok?'Преподаватель ещё не открыл тебе материалы этого раздела. Когда откроет, они появятся здесь.':'Нет связи с сервером: программа не загружена.'))+'</div></div>'+
     (last?'<a class="last" href="'+esc(last.href)+'"><img src="'+thumb(last.k)+'" alt="" width="320" height="200"><span class="last-tx"><small>'+(last.n?'Последний урок':'Следующий урок')+'</small>'+

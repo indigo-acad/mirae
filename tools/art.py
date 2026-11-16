@@ -51,14 +51,65 @@ def inner(pts, cx, base, k):
 
 
 def cloud(x, y, s=1.0, o=.6, flip=1):
-    """Облако «сун»: завиток слева, волнистая шапка и хвост справа, только контур."""
-    def p(dx, dy):
-        return f'{f(x + flip * dx * s)} {f(y + dy * s)}'
-    d = (f'M{p(0,22)}C{p(-8,10)} {p(6,0)} {p(16,7)}C{p(18,-5)} {p(36,-6)} {p(42,5)}C{p(52,-1)} {p(66,6)} {p(62,16)}'
-         f'C{p(72,14)} {p(78,24)} {p(68,29)}L{p(8,29)}C{p(-6,29)} {p(-9,25)} {p(0,22)}Z')
-    d += f'M{p(18,17)}C{p(15,10)} {p(26,8)} {p(28,15)}C{p(29,21)} {p(21,22)} {p(21,18)}'
-    d += f'M{p(68,24)}C{p(88,26)} {p(98,16)} {p(116,21)}C{p(124,23)} {p(130,19)} {p(136,21)}'
-    return f'<path d="{d}" fill="none" stroke="{GOLD}" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="{o}"/>'
+    """Облако «унмун» (구름무늬), как в танчхоне и на ширмах «десять символов долголетия»:
+    шапка из трёх лепестков, в каждом золотой завиток, снизу длинный изогнутый хвост с завитком на конце.
+    Лёгкая заливка чуть светлее неба и двойная золотая обводка. (x, y) — левый нижний угол шапки."""
+    lobes = [(13, 19, 11), (35, 10, 15), (58, 18, 12)]   # центр и радиус лепестка в своих координатах
+    b = 30                                                  # нижняя линия шапки
+
+    def P(px, py):
+        return f'{f(x + flip * px * s)} {f(y + (py - b) * s)}'
+
+    def meet(c1, c2):
+        """Верхняя точка пересечения двух соседних лепестков."""
+        (x1, y1, r1), (x2, y2, r2) = c1, c2
+        d = math.hypot(x2 - x1, y2 - y1)
+        a = (r1 * r1 - r2 * r2 + d * d) / (2 * d)
+        h = math.sqrt(max(r1 * r1 - a * a, 0))
+        mx, my = x1 + a * (x2 - x1) / d, y1 + a * (y2 - y1) / d
+        p1 = (mx + h * (y2 - y1) / d, my - h * (x2 - x1) / d)
+        p2 = (mx - h * (y2 - y1) / d, my + h * (x2 - x1) / d)
+        return p1 if p1[1] < p2[1] else p2
+
+    def foot(c, side):
+        """Точка лепестка на нижней линии шапки (слева или справа)."""
+        cx, cy, r = c
+        dy = b - cy
+        dx = math.sqrt(max(r * r - dy * dy, 0))
+        return (cx + side * dx, b)
+
+    sw = 1 if flip == 1 else 0
+    def arc(c, a_pt, b_pt):
+        cx, cy, r = c
+        t1 = math.atan2(a_pt[1] - cy, a_pt[0] - cx); t2 = math.atan2(b_pt[1] - cy, b_pt[0] - cx)
+        span = (t2 - t1) % (2 * math.pi)
+        return f'A{f(r*s)} {f(r*s)} 0 {1 if span > math.pi else 0} {sw} {P(*b_pt)}'
+
+    pts = [foot(lobes[0], -1), meet(lobes[0], lobes[1]), meet(lobes[1], lobes[2]), foot(lobes[2], 1)]
+    head = f'M{P(*pts[0])}' + ''.join(arc(lobes[i], pts[i], pts[i + 1]) for i in range(3))
+    # хвост: от правого лепестка вниз и вправо, сужается, на конце маленький завиток
+    tail = (f'C{P(80, 29)} {P(96, 25.5)} {P(112, 27.5)}C{P(126, 29.5)} {P(138, 31)} {P(150, 29)}'
+            f'C{P(140, 34)} {P(124, 34.5)} {P(110, 33.5)}C{P(94, 32.5)} {P(80, 36)} {P(64, 35.5)}'
+            f'C{P(44, 36.5)} {P(18, 36)} {P(*pts[0])}Z')
+    fill = f'<path d="{head}{tail}" fill="#22347E" opacity="{f(min(.62, o + .08))}"/>'
+    line = f'<path d="{head}{tail}" fill="none" stroke="{GOLD}" stroke-width="{f(max(.8, 1.15*s))}" stroke-linejoin="round" opacity="{f(min(1, o * 1.55))}"/>'
+    # завитки внутри лепестков: спираль из точек, сглаженная
+    curls = ''
+    for i, (cx, cy, r) in enumerate(lobes):
+        d = 1 if i else -1
+        t0 = math.pi / 2 + d * .35
+        sp = []
+        for k in range(26):
+            t = t0 + d * k / 25 * math.pi * 2.6
+            rr = r * (.74 - .5 * k / 25)
+            sp.append((cx + rr * math.cos(t), cy + 2 + rr * math.sin(t)))
+        dd = 'M' + P(*sp[0]) + ''.join('L' + P(*q) for q in sp[1:])
+        curls += f'<path d="{dd}" fill="none" stroke="{GOLD}" stroke-width="{f(max(.7, .95*s))}" stroke-linecap="round" opacity="{f(min(1, o * 1.45))}"/>'
+    # второй, внутренний контур хвоста и завиток на его конце
+    inner = (f'<path d="M{P(72, 32.2)}C{P(90, 31.2)} {P(104, 29.6)} {P(118, 31)}C{P(128, 32)} {P(138, 32.2)} {P(147, 30.4)}'
+             f'M{P(150, 29)}C{P(157, 28)} {P(158, 21)} {P(153, 20)}C{P(149, 19.4)} {P(147.5, 23.6)} {P(151, 24.4)}" fill="none" stroke="{GOLD}" '
+             f'stroke-width="{f(max(.6, .8*s))}" stroke-linecap="round" opacity="{f(min(1, o * 1.2))}"/>')
+    return fill + line + curls + inner
 
 
 def pine(x, base, s=1.0, flip=1):
@@ -99,7 +150,7 @@ def pavilion(x, base, s=1.0):
     return t
 
 
-def waves(y0, rows=3, R=20, op=.45):
+def waves(y0, rows=3, R=20, op=.45, x1=1700):
     """Волны «чхонхэ»: чешуя из вложенных дуг, ряды сдвинуты на полшага и перекрывают друг друга."""
     t = ''
     step = R * 2
@@ -108,7 +159,7 @@ def waves(y0, rows=3, R=20, op=.45):
         off = 0 if r % 2 == 0 else R
         d = ''
         x = -R * 2 + off
-        while x < 1700:
+        while x < x1:
             cx = x
             t += f'<path d="M{f(cx-R)} {f(y)}A{R} {R} 0 0 1 {f(cx+R)} {f(y)}Z" fill="{NEAR}"/>'
             for rr in (R, R * .7, R * .4):
@@ -264,7 +315,7 @@ def scene_ko(raw=False):
            (1230, 150), (1340, 140), (1440, 172), (1530, 164), (1600, 190), (1600, 300), (0, 300)]
     b += f'<path d="{smooth(far)}" fill="{FAR}" opacity=".5"/>'
     b += f'<path d="{smooth(far[:-2], False)}" fill="none" stroke="{GOLD}" stroke-width="1" opacity=".26"/>'
-    for x, y, s, o, fl in [(70, 120, .7, .42, 1), (330, 150, .55, .36, 1), (560, 60, .8, .5, 1), (1010, 26, .62, .42, -1), (1290, 60, .9, .5, 1)]:
+    for x, y, s, o, fl in [(70, 124, .84, .42, 1), (330, 152, .66, .36, 1), (560, 64, .96, .5, 1), (1010, 30, .74, .42, -1), (1290, 64, 1.04, .5, 1)]:
         b += cloud(x, y, s, o, fl)
     b += ntower(650, 268, .82)
     b += peaks([(800, 230, 142, -.05), (930, 262, 204, .03), (1075, 300, 262, 0), (1225, 264, 198, -.03), (1372, 240, 146, .05)])
@@ -282,6 +333,35 @@ def scene_ko(raw=False):
     if raw:
         return KO_DEFS, b
     d2, g = fade(W, H, b, .06)
+    return svg(W, H, f'<defs>{KO_DEFS}{d2}</defs>{g}', 'preserveAspectRatio="xMidYMax slice"')
+
+
+def hero_ko(raw=False):
+    """Шапка курса во всю ширину экрана (по макету): левая половина низкая, над ней стоит текст;
+    справа гора Намсан с башней, пять вершин, зал-ханок и сосны. Луна — отдельный слой шапки (moon.svg)."""
+    W, H = 2000, 300
+    b = ''
+    far = [(0, 256), (240, 250), (480, 252), (700, 244), (880, 232), (1000, 210), (1120, 180), (1240, 152), (1360, 130), (1480, 118), (1600, 130),
+           (1720, 150), (1830, 142), (1920, 170), (2000, 186), (2000, 300), (0, 300)]
+    b += f'<path d="{smooth(far)}" fill="{FAR}" opacity=".5"/>'
+    b += f'<path d="{smooth(far[:-2], False)}" fill="none" stroke="{GOLD}" stroke-width="1" opacity=".26"/>'
+    for x, y, s, o, fl in [(1130, 70, .9, .46, 1), (1470, 30, .76, .42, -1), (1640, 92, .96, .48, 1), (560, 200, .6, .3, 1)]:
+        b += cloud(x, y, s, o, fl)
+    b += ntower(1096, 270, .82)
+    b += peaks([(1250, 230, 142, -.05), (1380, 262, 204, .03), (1525, 300, 262, 0), (1675, 264, 198, -.03), (1822, 240, 146, .05)])
+    for cx, cy, rx, ry in [(1270, 262, 300, 26), (1730, 266, 320, 24), (1500, 282, 440, 20), (520, 280, 520, 18)]:
+        b += f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" fill="url(#mist)"/>'
+    hill = 'M0 300V262Q220 250 440 258T880 262Q1060 272 1200 258T1480 252Q1640 224 1790 240T2000 234V300Z'
+    b += f'<path d="{hill}" fill="{MID}"/>'
+    b += f'<path d="{hill[6:-8]}" fill="none" stroke="{GOLD}" stroke-width="1" opacity=".45"/>'
+    b += pine(1556, 258, .5, -1) + hall(1742, 256, 1.08) + pine(1946, 262, 1.1, -1) + pine(92, 272, .62, 1) + pine(176, 268, .38, 1)
+    for x, y in [(330, 264), (420, 266), (560, 265), (760, 266), (900, 264), (1190, 266), (1246, 264), (1416, 262), (1460, 264), (1572, 262), (1890, 258)]:
+        b += f'<circle cx="{x}" cy="{y}" r="5" fill="url(#glow)" opacity=".8"/><circle cx="{x}" cy="{y}" r="1.2" fill="#FFE2A0"/>'
+    b += waves(272, 3, 20, .42, 2100)
+    b += f'<rect x="0" y="293" width="{W}" height="7" fill="{NEAR}"/>'
+    if raw:
+        return KO_DEFS, b
+    d2, g = fade(W, H, b, .025)
     return svg(W, H, f'<defs>{KO_DEFS}{d2}</defs>{g}', 'preserveAspectRatio="xMidYMax slice"')
 
 
@@ -639,6 +719,44 @@ def scene_en(raw=False):
     return svg(W, H, f'<defs>{defs}{d2}</defs>{g}', 'preserveAspectRatio="xMidYMax slice"')
 
 
+def hero_en(raw=False):
+    """Шапка курса во всю ширину экрана (по макету): слева под текстом река и дальний берег,
+    справа фонарь, башня с часами, парламент, колесо обозрения, разводной мост и розы."""
+    W, H = 2000, 300
+    rng = random.Random(11)
+    base = 250
+    defs, _ = scene_en(True)
+    b = ''
+    b += skyline(rng, base, 0, 2000, .55, skip=((1600, 1800),))
+    b += dome(860, base, .8)
+    b += london_eye(1520, base, 82)
+    b += oak(60, base + 4, .6) + oak(1966, base + 4, .9)
+    bld = clock_tower(1100, base) + parliament(1128, 1370, base) + bridge(1730, base)
+    b += bld
+    b += f'<rect x="0" y="{base}" width="{W}" height="{H-base}" fill="url(#rv)"/>'
+    b += f'<g transform="translate(0 {2*base}) scale(1 -1)" opacity=".5">{bld}</g>'
+    b += f'<rect x="0" y="{base}" width="{W}" height="{H-base}" fill="url(#rf)"/>'
+    b += gl(f'M0 {base}H{W}', .45)
+    for lx, lw in ((1082, 36), (1620, 36), (1822, 36), (1470, 90), (840, 44)):
+        b += f'<rect x="{f(lx)}" y="{base+1}" width="{lw}" height="34" fill="url(#st)" opacity=".5"/>'
+    d = ''
+    for i in range(46):
+        y = base + 5 + (i % 6) * 5.5; x = rng.randint(0, 1960); w = rng.randint(24, 110)
+        d += f'M{x} {f(y)}h{w}'
+    b += gl(d, .22, .8)
+    quay = f'M0 {H}V286Q260 280 540 285T1040 289Q1300 292 1540 284T2000 282V{H}Z'
+    b += f'<path d="{quay}" fill="{NEAR}"/>'
+    b += gl('M0 286Q260 280 540 285T1040 289Q1300 292 1540 284T2000 282', .4)
+    b += lamp(1010, 285, 1.0) + lamp(1880, 285, .93)
+    for x, y, r, red, rot in [(40, 290, 11, True, 20), (66, 292, 8, False, 0), (950, 289, 13, True, 30), (976, 292, 9, False, 10),
+                              (1040, 290, 15, True, 50), (1792, 291, 11, True, 30), (1818, 288, 16, False, 0), (1914, 288, 17, True, 15), (1942, 292, 11, False, 60)]:
+        b += rose(x, y, r, red, rot)
+    if raw:
+        return defs, b
+    d2, g = fade(W, H, b, .025)
+    return svg(W, H, f'<defs>{defs}{d2}</defs>{g}', 'preserveAspectRatio="xMidYMax slice"')
+
+
 # ============================== ЛЕНТЫ ==============================
 
 def band_ko():
@@ -806,9 +924,9 @@ def thumbs_en():
 
 if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
-    for name, fn in [('scene-ko', scene_ko), ('scene-en', scene_en), ('band-ko', band_ko), ('band-en', band_en),
+    for name, fn in [('scene-ko', scene_ko), ('scene-en', scene_en), ('hero-ko', hero_ko), ('hero-en', hero_en), ('band-ko', band_ko), ('band-en', band_en),
                      ('emblem-ko', emblem_ko), ('emblem-en', emblem_en), ('corner-ko', corner_ko), ('corner-en', corner_en),
-                     ('frame-ko', frame_ko), ('frame-en', frame_en), ('branch-ko', branch_ko), ('moon', moon),
+                     ('frame-ko', frame_ko), ('frame-en', frame_en), ('moon', moon),
                      ('seigaiha', seigaiha)]:
         s = fn()
         open(os.path.join(OUT, name + '.svg'), 'w', encoding='utf8').write(s)
