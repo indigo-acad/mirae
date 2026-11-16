@@ -245,6 +245,11 @@ const IC={
   send:'<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
   trash:'<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>'
 };
+/* Часть урока, к которой относится раздел: theory — объяснения, слова, примеры; practice — упражнения с проверкой
+   и задания «поговорить»; hw — «Домашнее задание» из данных урока: в самом уроке не показывается и в прогресс не входит,
+   домашку задаёт преподаватель (такой раздел он может выбрать в «Задать домашку»). Раздел может указать часть сам: part. */
+const PRACTICE_T=["fill","choice","build","talk"];
+function part(s){return s.part||(s.id==="hw"?"hw":s.blocks&&s.blocks.length&&s.blocks.every(b=>PRACTICE_T.indexOf(b.type)>=0)?"practice":"theory")}
 function icon(n,s){s=s||20;return '<svg class="ic" width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(IC[n]||"")+"</svg>"}
 // значки разделов в данных уроков заданы эмодзи: показываем их в общем стиле, незнакомые оставляем как есть
 const EMO={"💬":"chat","🔤":"abc","📘":"book","✏":"pencil","🗣":"speak","🔁":"repeat","🏠":"home","📌":"pin","📝":"pencil"};
@@ -319,8 +324,12 @@ window.KR={
   require(){if(!U()){location.href="auth.html";return false}return true},
   progress(id){const u=U(),L=(window.LESSONS||{})[id];if(!L)return{n:0,tot:0,pct:0,P:{}};
     const P=J("kr_progress:"+u+":"+id,{});let tot=0,n=0;
-    L.sections.forEach(s=>s.blocks.forEach((b,i)=>{tot++;const p=P[s.id+"-"+i];if(p&&p.done)n++}));
+    L.sections.forEach(s=>{if(part(s)==="hw")return;s.blocks.forEach((b,i)=>{tot++;const p=P[s.id+"-"+i];if(p&&p.done)n++})});
     return{n,tot,pct:tot?Math.round(n/tot*100):0,P}},
+  part,
+  /* Домашка от преподавателя (supabase/homework.sql): заданная и недавно сданная. null — на сервере ещё нет этих функций. */
+  async homework(){try{const r=await api("my_homework");return Array.isArray(r)?r:[]}
+    catch(e){return e&&(e.status===404||/Could not find the function/.test(e.message||""))?null:[]}},
   taken:()=>takenObj(U()).l||[],
   // что известно о материале из папки materials/: открытия и время (act) и последний отчёт преподавателю (rep)
   matInfo(id){const m=matObj(U());return{act:m.mat[id]||null,rep:m.rep.filter(r=>r.m===id).sort((a,b)=>(b.t||0)-(a.t||0))[0]||null}},
