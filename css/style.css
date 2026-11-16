@@ -792,3 +792,32 @@ html:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{
   html:is([data-lang=ko],[data-lang=en]) header.band.course-hero{--hw:max(100vw,980px);padding-bottom:calc(var(--hh) + 10px)}
   html:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{background-position:78% calc(100% - 15px),74% 100%,0 0}
 }
+
+/* ---------- «Слова»: блок новых слов сверху, отработка ниже ---------- */
+.today2{display:grid;gap:16px}
+.today2>.today{margin:0}
+.tb-h{display:flex;align-items:center;gap:10px;margin:0 0 6px}
+.tb-h h3{display:flex;align-items:center;gap:9px;margin:0;font-size:26px;font-weight:500}
+.tb-h h3 svg{color:var(--gold);flex:none}
+.tb-sub{margin:0 0 10px;font-size:15px}
+.tb-prev{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}
+.tb-prev .chip{font-size:14px}
+.tb-prev .chip,.wq-prev .chip{display:inline-block;line-height:1.4;padding:4px 11px;border-radius:16px}   /* слово и перевод — одной строкой текста, длинный перевод переносится */
+.trev .stat{margin-top:6px}
+.newcard .flash-t{margin-top:14px}
+.newcard .flash-ex{margin-top:14px;font-size:17px}
+.newcard .flash-ex .muted{margin-top:4px;font-size:15px}
+.new-src{margin-top:14px;font-size:13.5px}
+.new-acts{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:16px}
+.new-acts .btn.pri{display:inline-flex;align-items:center;gap:8px;flex:1 1 200px;justify-content:center}
+.new-hint{margin:10px 2px 0;font-size:13.5px}
+.fin-acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+/* урок: вопрос, добавить ли слова урока в словарь */
+.wq h3{display:flex;align-items:center;gap:8px;margin:0 0 6px}
+.wq h3 svg{color:var(--gold)}
+.wq-prev{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.wq-keep{display:flex;align-items:center;gap:9px;margin:12px 0 0;font-size:14.5px;color:var(--fg-2);cursor:pointer}
+.wq-keep input{width:18px;height:18px;margin:0;accent-color:var(--gold)}
+.wq .msg{margin:0}
+.wq .msg a{color:inherit;font-weight:600}
+.vnote button.linkish{color:var(--gold-ink);font-size:inherit;font-weight:600;padding:0}

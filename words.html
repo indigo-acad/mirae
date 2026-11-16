@@ -14,7 +14,7 @@
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Словарь</small><h1>Слова</h1><p>Интервальное повторение: слово возвращается тогда, когда его пора вспомнить</p></div></header>
 <main>
-  <section id="today" class="card glass today" aria-label="На сегодня"></section>
+  <div id="today" class="today2"></div>
   <section id="play" class="card glass play" aria-live="polite" hidden></section>
   <div class="seg wtabs" id="tabs" role="tablist" aria-label="Словарь и настройки">
     <button type="button" role="tab" data-tab="list" aria-selected="true">Мои слова</button>
@@ -50,16 +50,29 @@ function cloze(c){
   if(!f)return null;var i=c.ex.indexOf(f);return {a:c.ex.slice(0,i),b:c.ex.slice(i+f.length),f:f};
 }
 
-// ---------- сводка «на сегодня» ----------
+// ---------- сводка: сверху новые слова, ниже отработка ----------
+/* Новые слова ученик сначала разбирает в своём блоке (перевод, пример, звук), и только потом они идут в отработку.
+   В отработке — упражнения по словам, которые уже в работе: учу сейчас и повторения на сегодня. */
 function drawToday(){
-  var st=V.stats(lang),G=KR.LANGS[lang];
+  var p=V.plan(lang),st=V.stats(lang),G=KR.LANGS[lang],set=V.settings(),now=Date.now();
   var cloud={cloud:['cloud','Словарь сохраняется в облаке'],local:['alert','Словарь пока хранится только на этом устройстве'],offline:['alert','Нет связи: изменения сохранятся на устройстве и отправятся позже']}[V.status];
   var box=function(n,t){return '<div><b>'+n+'</b><span class="muted">'+t+'</span></div>'};
-  var h='<div class="stat">'+box(st.fresh,'новых')+box(st.learn,'учу сейчас')+box(st.rev,'повторить')+'</div>';
-  if(S)h+='';
-  else if(st.due)h+='<div class="done-row"><span class="muted">'+G.name+' · слов в словаре: '+st.total+'</span><button type="button" class="cta" id="go">Начать занятие'+KR.icon('arrow',18)+'</button></div>';
-  else h+='<div class="done-row"><span class="muted">'+(st.total?'На сегодня всё. '+(st.nextAt?'Следующее слово вернётся через '+SRS.span(st.nextAt-Date.now())+'.':'Новые повторения появятся завтра.'):'В словаре пока нет слов: '+G.ru+' раздел.')+'</span></div>';
-  h+='<p class="muted cloudline">'+KR.icon(cloud[0],15)+' '+cloud[1]+'</p>';
+  var busy=S&&(S.mode==='new'||S.mode==='rev')?S.mode:'',nNew=p.fresh.length,inWork=p.learn.length+p.soon.length,rev=p.rev.length;
+  var h='<section class="card glass today tnew" aria-labelledby="tnew-h"><div class="tb-h"><h3 id="tnew-h">'+KR.icon('spark',20)+'Новые слова</h3>'+(nNew?'<span class="badge new">'+nNew+'</span>':'')+'</div>';
+  if(busy==='new')h+='<p class="muted tb-sub">Идёт знакомство с новыми словами.</p>';
+  else if(nNew){
+    h+='<p class="muted tb-sub">Сначала знакомство: перевод, пример и звук. Потом слово уходит в отработку.'+(p.allNew>nNew?' Сегодня '+nNew+' из '+p.allNew+', остальные завтра.':'')+'</p>'+
+      '<div class="tb-prev">'+p.fresh.slice(0,8).map(function(c){var t=trOf(c);return '<span class="chip"><b'+wcls(c)+' lang="'+c.l+'">'+esc(c.w)+'</b>'+(t?'&nbsp;· '+esc(t):'')+'</span>'}).join('')+(nNew>8?'<span class="chip">ещё '+(nNew-8)+'</span>':'')+'</div>'+
+      '<div class="done-row"><span></span><button type="button" class="cta" id="gonew">Учить новые слова'+KR.icon('arrow',18)+'</button></div>';
+  }
+  else if(p.allNew)h+='<p class="muted tb-sub">На сегодня новые слова закончились: в день '+set.newDay+'. Ещё '+p.allNew+' — завтра. Число меняется во вкладке «Настройки».</p>';
+  else h+='<p class="muted tb-sub">Новых слов нет. Они появятся из уроков, от преподавателя или когда добавишь их ниже.</p>';
+  h+='</section><section class="card glass today trev" aria-labelledby="trev-h"><div class="tb-h"><h3 id="trev-h">'+KR.icon('repeat',20)+'Отработка</h3></div>'+
+    '<div class="stat">'+box(inWork,'учу сейчас')+box(rev,'повторить')+box(st.total,'всего слов')+'</div>';
+  if(busy==='rev')h+='';
+  else if(inWork+rev)h+='<div class="done-row"><span class="muted">Упражнения по словам, которые уже в работе</span><button type="button" class="cta" id="go">Начать отработку'+KR.icon('arrow',18)+'</button></div>';
+  else h+='<div class="done-row"><span class="muted">'+(st.total?(p.waiting?'Сейчас отрабатывать нечего. Ближайшее слово вернётся через '+SRS.span(p.nextAt-now)+'.':st.total>p.allNew?'На сегодня отработка закончена. Повторения появятся завтра.':'Отработка начнётся, когда разберёшь новые слова.'):'В словаре пока нет слов: '+G.ru+' раздел.')+'</span></div>';
+  h+='<p class="muted cloudline">'+KR.icon(cloud[0],15)+' '+cloud[1]+'</p></section>';
   $('#today').innerHTML=h;
 }
 
@@ -82,24 +95,66 @@ function choose(c,d){
   var av=pref.filter(function(g){return f.indexOf(g)>=0});
   return av.length?av[av.length>1&&Math.random()>.65?1:0]:'cards';
 }
-function start(){S={done:0,sincePairs:99,right:0,wrong:0};$('#play').hidden=false;drawToday();nextCard();$('#play').scrollIntoView({block:'start',behavior:KR.calm()?'auto':'smooth'})}
+/* mode: new — знакомство с новыми словами на сегодня; rev — отработка (без новых слов) */
+function start(mode){
+  S={mode:mode==='new'?'new':'rev',done:0,known:0,sincePairs:99,right:0,wrong:0};
+  if(S.mode==='new'){S.queue=V.plan(lang).fresh.map(function(c){return c.id});S.qi=0}
+  $('#play').hidden=false;drawToday();nextCard();$('#play').scrollIntoView({block:'start',behavior:KR.calm()?'auto':'smooth'});
+}
 function stop(){KR.hush();S=null;$('#play').hidden=true;$('#play').innerHTML='';drawAll()}
 function nextCard(){
   if(!S)return;KR.hush();clearTimeout(S.timer);
-  var p=V.plan(lang),g=V.settings().games,pool=p.learn.concat(p.rev);
-  if((g.pairs&&S.sincePairs>=8&&pool.length>=4&&!FORCE)||(FORCE==='pairs'&&pool.concat(p.fresh,p.soon).length>=4)){S.sincePairs=0;return pairs((FORCE==='pairs'?pool.concat(p.fresh,p.soon):pool).slice(0,5))}
+  if(S.mode==='new'){
+    while(S.qi<S.queue.length){var c0=V.get(S.queue[S.qi]);if(c0&&!c0.st)break;S.qi++}   // слово могли удалить или разобрать на другом устройстве
+    if(S.qi>=S.queue.length)return finishNew();
+    S.card=V.get(S.queue[S.qi]);S.game='intro';S.lock=false;return gNew(S.card);
+  }
+  var p=V.plan(lang),g=V.settings().games;p.fresh=[];   // в отработке новых слов нет: они в своём блоке
+  var pool=p.learn.concat(p.rev);
+  if((g.pairs&&S.sincePairs>=8&&pool.length>=4&&!FORCE)||(FORCE==='pairs'&&pool.concat(p.soon).length>=4)){S.sincePairs=0;return pairs((FORCE==='pairs'?pool.concat(p.soon):pool).slice(0,5))}
   var c=SRS.pick(p);
   if(!c)return finish(p);
   S.sincePairs++;S.card=c;S.game=choose(c,deck());S.hint=false;S.retype=false;S.miss=0;S.lock=false;
   ({cards:gCards,intro:gCards,tr:gChoice,ctx:gChoice,wr:gWrite,build:gBuild})[S.game](c);
 }
 function frame(title,body){
-  var p=V.plan(lang),left=p.learn.length+p.rev.length+p.fresh.length+p.soon.length;
+  var p=V.plan(lang),left=S.mode==='new'?S.queue.length-S.qi:p.learn.length+p.rev.length+p.soon.length;
   $('#play').innerHTML='<div class="play-top"><span class="tag">'+title+'</span><span class="muted">осталось: '+left+'</span><button type="button" class="round" data-x="stop" aria-label="Закончить занятие">'+KR.icon('x',16)+'</button></div>'+body;
 }
 function finish(p){
-  var again=p.waiting?'Ближайшее слово вернётся через '+SRS.span(p.nextAt-Date.now())+'.':'Новые повторения появятся завтра.';
-  $('#play').innerHTML='<div class="fin"><span class="spark">'+KR.icon('spark',34)+'</span><h3>На сегодня всё</h3><p class="muted">Карточек пройдено: '+S.done+'. '+again+'</p><button type="button" class="btn pri" data-x="stop">Готово</button></div>';
+  var again=p.waiting?'Ближайшее слово вернётся через '+SRS.span(p.nextAt-Date.now())+'.':'Новые повторения появятся завтра.',nf=V.plan(lang).fresh.length;
+  S.mode='done';
+  $('#play').innerHTML='<div class="fin"><span class="spark">'+KR.icon('spark',34)+'</span><h3>Отработка на сегодня закончена</h3><p class="muted">Упражнений: '+S.done+'. '+again+(nf?' Новых слов на сегодня: '+nf+'.':'')+'</p>'+
+    '<div class="fin-acts">'+(nf?'<button type="button" class="btn pri" data-x="to-new">Учить новые слова</button>':'')+'<button type="button"'+(nf?'':' class="btn pri"')+' data-x="stop">Готово</button></div></div>';
+  drawToday();
+}
+// ---------- знакомство с новыми словами ----------
+/* Новое слово показано целиком: перевод, пример, звук, картинка. «Запомнить» — слово уходит в отработку
+   (вернётся через первый шаг изучения), «Уже знаю» — сразу в повторения с интервалом «Легко». */
+function gNew(c){
+  var I=info(c)||{},ipa=c.l==='en'?(KR.accent()==='us'?I.ipa_us||I.ipa_uk:I.ipa_uk||I.ipa_us):'',set=V.settings(),now=Date.now();
+  var src=KR.W2.source(c.src||I.src,(setById(String(c.src||'').replace('set:',''))||{}).title);
+  frame('Новое слово · '+(S.qi+1)+' из '+S.queue.length,'<div class="flash newcard">'+
+    (I.image?'<img class="flash-img" src="'+esc(I.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
+    '<div class="flash-w">'+word(c)+' '+sayBtn(c.w,c.l)+'</div>'+
+    (ipa?'<div class="flash-ipa" lang="en">'+esc(ipa)+'</div>':'')+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+
+    '<div class="flash-t">'+esc(trOf(c)||'перевод не указан')+'</div>'+
+    (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+(c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>':'')+
+    '<div class="muted new-src">'+esc(src)+'</div></div>'+
+    '<div class="new-acts"><button type="button" data-x="knew">Уже знаю</button><button type="button" class="btn pri" data-x="learn">Запомнить'+KR.icon('arrow',16)+'</button></div>'+
+    '<p class="muted new-hint">«Запомнить»: слово придёт в отработку через '+SRS.label(c,3,set,now)+'. «Уже знаю»: вернётся на проверку через '+SRS.label(c,4,set,now)+'.</p>');
+  var b=$('[data-x="learn"]');if(b)b.focus({preventScroll:true});
+  if(KR.canSay())KR.say(c.w,c.l);
+}
+function learnNew(g){
+  if(!S||S.mode!=='new'||!S.card||S.lock)return;S.lock=true;
+  V.answer(S.card.id,g);S.done++;if(g===4)S.known++;S.qi++;drawToday();nextCard();
+}
+function finishNew(){
+  var n=S.done,k=S.known,w=n-k;S.mode='done';
+  $('#play').innerHTML='<div class="fin"><span class="spark">'+KR.icon('spark',34)+'</span><h3>Новые слова разобраны</h3><p class="muted">'+
+    (n?(w?'В отработке: '+w+'.':'')+(k?' Уже знакомы: '+k+'.':'')+(w?' Закрепи их сразу: несколько минут упражнений, и слова запомнятся лучше.':''):'Новых слов на сегодня нет.')+'</p>'+
+    '<div class="fin-acts">'+(w?'<button type="button" class="btn pri" data-x="to-rev">Закрепить в отработке</button><button type="button" data-x="stop">Позже</button>':'<button type="button" class="btn pri" data-x="stop">Готово</button>')+'</div></div>';
   drawToday();
 }
 /* Записать оценку, показать, когда слово вернётся, и перейти дальше. */
@@ -254,7 +309,7 @@ function setFirst(id){
   ids.forEach(function(cid,k){var c=V.get(cid);if(c&&!c.st){V.update(Object.assign({},c,{pri:now+ids.length-k}));n++}});
   drawToday();drawList();
   var m=$('#wsmsg');if(!m){var box=document.querySelector('.wsets');if(box)box.insertAdjacentHTML('beforeend','<p class="msg ok" id="wsmsg" role="status"></p>');m=$('#wsmsg')}
-  if(m){m.textContent=n?'Новых слов в начале очереди: '+n+'. Нажми «Начать занятие».':'Новых слов в этом словаре нет.';m.className='msg ok'}
+  if(m){m.textContent=n?'Новых слов в начале очереди: '+n+'. Нажми «Учить новые слова» вверху.':'Новых слов в этом словаре нет.';m.className='msg ok'}
 }
 /* полная карточка слова: всё из базы школы + своё (сложное слово, заметка) */
 function openCard(id){
@@ -355,9 +410,13 @@ function drawPrefs(){
     '<div>'+f('p-mod','Множитель интервалов, %',Math.round(s.mod*100),'Меньше 100: повторять чаще. Больше 100: реже.')+'</div>'+
     '<div>'+f('p-new','Новых слов в день',s.newDay,'')+'</div>'+
     '<div>'+f('p-rev','Повторений в день',s.revDay,'')+'</div></div>'+
-    '<h3>Игры</h3><p class="hint">Отметь игры, в которых хочешь учить слова. Новое слово сначала показывается карточкой.</p><div class="games">'+
+    '<h3>Игры</h3><p class="hint">Отметь игры для отработки. Новые слова сначала разбираются в своём блоке, вверху страницы.</p><div class="games">'+
     SRS.GAMES.map(function(g){return '<label><input type="checkbox" name="g" value="'+g+'"'+(s.games[g]?' checked':'')+'><span><b>'+GAME[g][0]+'</b><small>'+GAME[g][1]+'</small></span></label>'}).join('')+'</div>'+
     '<div class="done-row"><button type="button" data-x="reset">Вернуть как было</button><button type="submit" class="btn pri">Сохранить</button></div><p class="msg" id="pmsg" role="status"></p></form>';
+  var lw=s.lw;
+  h+='<div class="card glass prefs" id="lwcfg"><h3>Слова из уроков</h3><p class="hint">Что делать со словами урока, когда открываешь его в первый раз.</p><div class="opts" role="group" aria-label="Слова из новых уроков">'+
+    [['ask','Спрашивать'],['auto','Добавлять сами'],['off','Не добавлять']].map(function(x){return '<button type="button" data-lw="'+x[0]+'" aria-pressed="'+(lw===x[0])+'" class="'+(lw===x[0]?'sel':'')+'">'+x[1]+'</button>'}).join('')+'</div>'+
+    '<p class="hint">'+{ask:'Урок спросит, добавить ли его слова в словарь.',auto:'Слова нового урока добавятся в словарь сами, без вопроса.',off:'Слова уроков в словарь не добавляются. Нужные слова можно отметить звёздочкой в уроке.'}[lw]+'</p></div>';
   h+='<div class="card glass prefs"><h3>Озвучка · '+KR.LANGS[lang].name+'</h3>'+(KR.canSay()?
     '<label class="field" for="p-voice">Голос</label><select id="p-voice">'+(vs.length?vs.map(function(v){return '<option value="'+esc(v.name)+'"'+(cur&&cur.name===v.name?' selected':'')+'>'+esc(v.name)+'</option>'}).join(''):'<option value="">голос для этого языка не найден</option>')+'</select>'+
     '<label class="field" for="p-rate">Скорость: <span id="p-ratev">'+KR.rate().toFixed(2)+'</span></label><input type="range" id="p-rate" min="0.5" max="1.2" step="0.05" value="'+KR.rate()+'">'+
@@ -376,7 +435,7 @@ function drawPrefs(){
 function savePrefs(reset){
   if(reset){V.setSettings(null);drawPrefs();drawToday();$('#pmsg').textContent='Настройки сброшены';$('#pmsg').className='msg ok';return}
   var g={};[].forEach.call(document.querySelectorAll('#pf input[name=g]'),function(i){g[i.value]=i.checked?1:0});
-  V.setSettings({steps:$('#p-steps').value,grad:$('#p-grad').value,easy:$('#p-easy').value,mod:parseFloat($('#p-mod').value)/100,newDay:$('#p-new').value,revDay:$('#p-rev').value,games:g});
+  V.setSettings({steps:$('#p-steps').value,grad:$('#p-grad').value,easy:$('#p-easy').value,mod:parseFloat($('#p-mod').value)/100,newDay:$('#p-new').value,revDay:$('#p-rev').value,games:g,lw:V.settings().lw});
   drawPrefs();drawToday();$('#pmsg').textContent='Сохранено';$('#pmsg').className='msg ok';
 }
 
@@ -441,7 +500,11 @@ function drawAll(){lang=KR.lang();KR.topbar('words');drawToday();if(!S){drawList
 document.addEventListener('click',function(e){
   var b=e.target.closest('button');if(!b)return;var d=b.dataset;
   if(d.say!==undefined){KR.say(d.say,d.l);return}
-  if(b.id==='go'){stopListen();return start()}
+  if(b.id==='go'||d.x==='to-rev'){stopListen();return start('rev')}
+  if(b.id==='gonew'||d.x==='to-new'){stopListen();return start('new')}
+  if(d.x==='learn')return learnNew(3);
+  if(d.x==='knew')return learnNew(4);
+  if(d.lw){var ls=V.settings();ls.lw=d.lw;V.setSettings(ls);return drawPrefs()}
   if(d.tab)return setTab(d.tab);
   if(d.x==='stop')return stop();
   if(d.x==='flip')return flip();

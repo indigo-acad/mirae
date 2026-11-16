@@ -68,8 +68,11 @@ function dashEn(){
 // слова на сегодня: интервальное повторение
 function wordsCard(){
   if(!KR.vocab)return '';var lang=KR.lang(),s=KR.vocab.stats(lang),pct=s.total?Math.round(s.known/s.total*100):0;
+  // как на странице «Слова»: новые слова и отработка отдельно
+  var today=[s.fresh?'новые слова: '+s.fresh:'',s.learn+s.rev?'отработка: '+(s.learn+s.rev):''].filter(Boolean).join(' · ');
+  today=today&&today.charAt(0).toUpperCase()+today.slice(1);
   return '<a class="next card glass lessonlink" href="words.html">'+KR.ring(pct,58,KR.icon('abc',18))+'<div class="mid"><span class="tag">Слова · '+KR.LANGS[lang].name+'</span><h3>'+
-    (s.due?'На сегодня: '+s.due:s.total?'На сегодня всё':'Словарь пока пуст')+'</h3><div class="muted">'+(s.total?'В словаре: '+s.total+' · выучено: '+s.known:'Слова появятся из уроков и по выделению в тексте')+'</div></div><span class="tile-go">'+KR.icon('arrow',18)+'</span></a>';
+    (today||(s.total?'На сегодня всё':'Словарь пока пуст'))+'</h3><div class="muted">'+(s.total?'В словаре: '+s.total+' · выучено: '+s.known:'Слова появятся из уроков и по выделению в тексте')+'</div></div><span class="tile-go">'+KR.icon('arrow',18)+'</span></a>';
 }
 function draw(){
   KR.topbar('cabinet');
