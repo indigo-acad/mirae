@@ -26,6 +26,14 @@ window.MATERIALS=[
   "level": "IELTS с нуля"
  },
  {
+  "id": "en-narrative-tenses",
+  "section": "english",
+  "kind": "lesson",
+  "title": "Narrative Tenses · рассказываем истории",
+  "path": "materials/english/en-narrative-tenses/",
+  "level": "B1"
+ },
+ {
   "id": "en-my-home-vocab",
   "section": "english",
   "kind": "lesson",

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Narrative Tenses · B1 · MIRAÉ</title>
+<meta name="theme-color" content="#0B1535">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#161a2b;--muted:#636a80;--line:#e6e8f0;--bg:#f4f3ef;--card:#fff;
+    --pc:#2f6fe4;--pcbg:#e8f0ff;   /* background = Past Continuous */
+    --ps:#e8622c;--psbg:#fff0e8;   /* action = Past Simple */
+    --pp:#7a4fd8;--ppbg:#f1ebff;   /* flashback = Past Perfect */
+    --ok:#18935a;--okbg:#e6f7ee;--bad:#d23f3f;--badbg:#fdecec;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;font-size:16.5px}
+  .wrap{max-width:860px;margin:0 auto;padding:16px 14px 90px}
+  .hero{background:linear-gradient(135deg,#161a2b 0%,#2a2350 60%,#4b2d7a 100%);color:#fff;border-radius:22px;padding:22px 22px 20px;margin-bottom:12px;position:relative;overflow:hidden}
+  .hero:after{content:"🎬";position:absolute;right:18px;top:10px;font-size:64px;opacity:.18}
+  .hero .tag{display:inline-block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;background:#ffffff22;padding:3px 10px;border-radius:99px}
+  .hero h1{margin:8px 0 4px;font-size:28px;line-height:1.15}
+  .hero p{margin:0;color:#d9d6f2}
+  .who{font-size:14px;color:#cfcaf0;margin-top:8px}
+  .card{background:var(--card);border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 2px 14px #1a1d3a0d}
+  h2{margin:0 0 6px;font-size:22px}
+  h3{margin:14px 0 6px;font-size:18px}
+  .muted{color:var(--muted);font-size:14.5px}
+  button{font:inherit;border:0;border-radius:12px;padding:10px 16px;cursor:pointer;background:#eceef4;color:var(--ink);margin:4px 4px 4px 0;transition:transform .08s}
+  button:active{transform:scale(.97)}
+  button.primary{background:var(--ink);color:#fff}
+  button.sm{font-size:14px;padding:6px 12px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text],textarea{font:inherit;padding:10px 12px;border:1.5px solid #cdd1dc;border-radius:11px;width:100%;background:#fff}
+  textarea{min-height:220px;resize:vertical;line-height:1.6}
+  input.gap{width:150px;padding:3px 8px;border:0;border-bottom:2px solid #8a91a6;border-radius:0;background:#f7f8fb;text-align:center}
+  input.ok{border-color:var(--ok)!important;background:var(--okbg)!important}
+  input.bad{border-color:var(--bad)!important;background:var(--badbg)!important}
+  .fix{color:var(--ok);font-weight:700;font-size:14px;margin-left:6px}
+  nav{display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  nav button{margin:0;font-size:14.5px;white-space:nowrap;background:#fff}
+  nav button.active{background:var(--ink);color:#fff}
+  nav .done:after{content:" ✓";color:var(--ok)}
+  nav button.active.done:after{color:#8ff0b5}
+  .bar{height:7px;background:#e3e4ea;border-radius:5px;overflow:hidden;margin:2px 0 4px}
+  .bar div{height:100%;background:linear-gradient(90deg,var(--pc),var(--pp),var(--ps));width:0;transition:width .4s}
+  .hidden{display:none!important}
+  /* roles */
+  .pc{color:var(--pc)} .ps{color:var(--ps)} .pp{color:var(--pp)}
+  .chip{display:inline-block;font-size:13px;font-weight:700;padding:2px 10px;border-radius:99px}
+  .chip.pc{background:var(--pcbg)} .chip.ps{background:var(--psbg)} .chip.pp{background:var(--ppbg)}
+  .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+  .role{border-radius:16px;padding:14px}
+  .role .ico{font-size:28px}
+  .role b{display:block;font-size:17px;margin:2px 0}
+  .role.pc{background:var(--pcbg);color:var(--ink)} .role.ps{background:var(--psbg);color:var(--ink)} .role.pp{background:var(--ppbg);color:var(--ink)}
+  .role .f{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;background:#ffffffaa;border-radius:8px;padding:4px 8px;margin:6px 0;display:inline-block}
+  .role .ex{font-size:14.5px;font-style:italic}
+  .ru{background:#fbf7e6;border-left:4px solid #e6c34a;border-radius:10px;padding:8px 12px;margin:10px 0;font-size:14.5px}
+  .ru:before{content:"RU ";font-weight:800;color:#b48a00;font-size:12px}
+  table.tbl{width:100%;border-collapse:collapse;font-size:15px;margin:8px 0}
+  table.tbl th,table.tbl td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+  table.tbl th{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .vs{display:grid;gap:8px;margin:10px 0}
+  .vs div{background:#f6f7fa;border-radius:12px;padding:10px 12px}
+  .vs div i{color:var(--muted);font-size:14px;display:block}
+  .warn{background:var(--badbg);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:15px}
+  .tip{background:var(--okbg);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:15px}
+  .signals{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+  .signals span{background:#f0f1f5;border-radius:99px;padding:3px 11px;font-size:14px}
+  /* story */
+  .story{background:#fffdf6;border:1px solid #eee5c7;border-radius:14px;padding:14px 16px;font-family:Georgia,serif;font-size:17px;line-height:1.75}
+  .story u{text-decoration:none;border-bottom:2px dashed #9aa0b3;padding:0 1px}
+  .story u.c-pc{border-color:var(--pc);background:var(--pcbg)}
+  .story u.c-ps{border-color:var(--ps);background:var(--psbg)}
+  .story u.c-pp{border-color:var(--pp);background:var(--ppbg)}
+  .clsrow{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .clsrow .v{min-width:130px;font-weight:700}
+  .clsrow button{font-size:14px;padding:6px 10px;margin:0}
+  .clsrow button.sel{outline:2px solid var(--ink)}
+  .clsrow button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .clsrow button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  /* mcq */
+  .q{padding:12px 0;border-bottom:1px dashed var(--line)}
+  .q .s{font-size:17px}
+  .q .n{display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:700;margin-right:6px}
+  .opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .opts button{margin:0;background:#f1f2f6}
+  .opts button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .opts button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  .why{font-size:14.5px;margin-top:6px;color:#37405a;background:#f6f7fa;border-radius:10px;padding:6px 10px}
+  .blank{display:inline-block;min-width:70px;border-bottom:2px solid #9aa0b3;text-align:center;font-weight:700}
+  .wrongw{background:var(--badbg);color:var(--bad);border-radius:5px;padding:0 4px;text-decoration:line-through;text-decoration-thickness:1.5px}
+  .gaptext{font-size:17px;line-height:2.1}
+  .score{font-size:18px;font-weight:700;margin-top:12px}
+  .actions{margin-top:12px}
+  .tl{width:100%;height:auto;margin:6px 0}
+  .prompts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .prompts button{margin:0;text-align:left;background:#f3f1fb;padding:12px}
+  .prompts button.sel{outline:2px solid var(--pp);background:var(--ppbg)}
+  .meter{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .meter span{font-size:14px;border-radius:99px;padding:4px 12px;font-weight:600}
+  .steps{counter-reset:s;padding-left:0;list-style:none}
+  .steps li{position:relative;padding:6px 0 6px 38px}
+  .steps li:before{counter-increment:s;content:counter(s);position:absolute;left:0;top:6px;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-size:13px;line-height:26px;font-weight:700}
+  table.res{width:100%;border-collapse:collapse;font-size:15.5px}
+  table.res td{padding:8px 4px;border-bottom:1px solid var(--line)}
+  .feedback{min-height:24px;margin-top:8px;font-weight:600}
+  .sub{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 4px}
+  @media(max-width:620px){.roles{grid-template-columns:1fr}.prompts{grid-template-columns:1fr}input.gap{width:118px}.hero h1{font-size:24px}}
+
+  /* ===== MIRAÉ brand ===== */
+  :root{--indigo:#0B1535;--indigo2:#1E2A56;--gold:#D4AF7C;--ivory:#F8F7F2;--silver:#C0C6D4}
+  body{background:linear-gradient(180deg,var(--indigo),var(--indigo2));background-attachment:fixed;font-family:Inter,system-ui,sans-serif}
+  .hero{background:url(../../../img/scene-en.svg) bottom/100% 110px no-repeat;border-radius:0;margin:0 -14px 10px;padding:40px 18px 120px}
+  .hero:after{display:none}
+  .hero h1{font-family:"Cormorant Garamond",serif;font-weight:600;color:var(--gold);font-size:clamp(36px,8vw,52px)}
+  .hero .tag{background:transparent;border:1px solid rgba(212,175,124,.5);color:var(--gold)}
+  .hero p,.who{color:var(--silver)}
+  .card{background:var(--ivory);color:#1a2040}
+  .card h2{font-family:"Cormorant Garamond",serif;font-weight:600;font-size:30px;color:var(--indigo)}
+  nav{background:transparent;backdrop-filter:blur(6px)}
+  nav button{background:transparent;color:var(--gold);border:1px solid rgba(212,175,124,.45);border-radius:99px}
+  nav button.active{background:var(--gold);color:var(--indigo)}
+  nav .done:after{color:#8fe0b0} nav button.active.done:after{color:var(--indigo)}
+  .bar{background:rgba(255,255,255,.12)}
+  .bar div{background:var(--gold)}
+  button.primary{background:var(--indigo);color:var(--gold)}
+  .q .n,.steps li:before{background:var(--indigo);color:var(--gold)}
+  .actions[style] button.primary{background:var(--gold);color:var(--indigo)}
+  .sendstat{position:fixed;right:10px;bottom:10px;z-index:9999;background:#0B1535;color:#D4AF7C;border-radius:999px;padding:6px 14px;font:600 13px system-ui;opacity:0;transition:opacity .4s;pointer-events:none}.sendstat.on{opacity:.93}
+</style>
+</head>
+<body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap"><div id="sendStat" class="sendstat"></div>
+
+<div class="hero">
+  <span class="tag">Grammar · B1</span>
+  <h1>Narrative Tenses</h1>
+  <p>Tell stories like a film director: background, action, flashback.</p>
+  <div class="who hidden" id="whoLine"></div>
+</div>
+
+<div id="login" class="card">
+  <h2>👋 Hi! What's your name?</h2>
+  <p class="muted">Your answers will be sent to your teacher at the end.</p>
+  <input type="text" id="nameInput" placeholder="Your name">
+  <div class="actions"><button class="primary" onclick="start()">Start →</button></div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="bar"><div id="pbar"></div></div>
+  <nav id="nav"></nav>
+  <div id="pane"></div>
+</div>
+
+</div>
+<script>
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID = "347625701";
+const KEY = "narrative_b1_v1";
+const $ = id => document.getElementById(id);
+let STATE = {name:"", res:{}, story:"", prompt:"", done:{}};
+let liveTm=null;
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){}
+  if(window.MIRAE&&STATE.name){ clearTimeout(liveTm); liveTm=setTimeout(saveLive,2500); } }
+function saveLive(){ if(!window.MIRAE) return; MIRAE.live(buildReport().replace(/<\/?b>/g,"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&")); const st=$("sendStat"); st.textContent="✓ Результаты сохраняются, преподаватель их видит"; st.className="sendstat on"; setTimeout(()=>st.className="sendstat",4000); }
+function load(){ try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.name) STATE=Object.assign(STATE,s);}catch(e){} }
+function esc(s){return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+
+/* normalise typed answers: case, spaces, apostrophes, contractions */
+function norm(s){
+  s=" "+String(s).toLowerCase().replace(/[’‘`]/g,"'").replace(/[.,!?;:"]/g," ")+" ";
+  s=s.replace(/n't /g," not ").replace(/ can not /g," cannot ").replace(/ could not /g," could not ")
+     .replace(/(\w)'d /g,"$1 had ").replace(/ wo not /g," will not ");
+  return s.replace(/\s+/g," ").trim();
+}
+function match(val,answers){ const v=norm(val); return answers.some(a=>norm(a)===v); }
+
+/* ============ CONTENT ============ */
+
+const TABS = [
+  {id:"warm",  t:"1 · Warm-up"},
+  {id:"learn", t:"2 · Learn"},
+  {id:"choose",t:"3 · Choose"},
+  {id:"meaning",t:"4 · Meaning"},
+  {id:"story", t:"5 · Story gaps"},
+  {id:"fix",   t:"6 · Fix it"},
+  {id:"join",  t:"7 · Join"},
+  {id:"book",  t:"📘 Coursebook"},
+  {id:"write", t:"✍️ Your story"},
+  {id:"send",  t:"🚀 Send"}
+];
+
+const WARM = {
+  text:`It was a rainy Friday evening. I [was sitting] on the bus, and everyone [was staring] at their phones. Suddenly the bus [stopped]. The driver [got out] and [ran] into a shop. Nobody [knew] what [was happening]. Five minutes later he [came back] with a tiny wet dog in his arms. Someone [had left] it outside the shop in the rain, and it [was shaking]. The driver [had seen] it from his window. Everyone on the bus [started] clapping. I [took] a video, and by the next morning it [had got] two million views.`,
+  key:{"was sitting":"pc","were staring":"pc","stopped":"ps","got out":"ps","ran":"ps","knew":"ps","was happening":"pc","came back":"ps","had left":"pp","was shaking":"pc","had seen":"pp","started":"ps","took":"ps","had got":"pp"}
+};
+
+const CHOOSE = [
+  {q:"I ___ a series on Netflix when my mum called me for dinner.",o:["watched","was watching","had watched"],a:1,why:"Long action in progress (background) + short action that interrupts it (called)."},
+  {q:"When we got to the cinema, the film ___. We missed the first 20 minutes!",o:["already started","was already starting","had already started"],a:2,why:"The film started BEFORE we got there → flashback → Past Perfect."},
+  {q:"She opened the app, ___ a pizza and waited.",o:["ordered","was ordering","had ordered"],a:0,why:"A chain of actions, one after another → Past Simple."},
+  {q:"While Tom ___, his brother was playing video games.",o:["studied","was studying","had studied"],a:1,why:"Two long actions at the same time → Past Continuous + Past Continuous."},
+  {q:"I couldn't log in because I ___ my password.",o:["had forgotten","was forgetting","have forgotten"],a:0,why:"Forgetting happened before 'couldn't log in' → Past Perfect."},
+  {q:"When I woke up, the sun ___ and the birds were singing.",o:["shone","was shining","had shone"],a:1,why:"Setting the scene → Past Continuous."},
+  {q:"Lisa ___ her phone when she was running for the bus.",o:["was dropping","dropped","had dropped"],a:1,why:"Short action that happened in the middle of a longer one → Past Simple."},
+  {q:"By the time the police arrived, the thief ___.",o:["escaped","was escaping","had escaped"],a:2,why:"'By the time' = it was already finished → Past Perfect."},
+  {q:"I ___ sushi before I went to Japan, so everything was new to me.",o:["never tried","had never tried","was never trying"],a:1,why:"Experience up to a moment in the past → had never + V3."},
+  {q:"What ___ at 10 pm last night? I called you three times!",o:["did you do","were you doing","had you done"],a:1,why:"Action in progress at a specific time in the past → Past Continuous."},
+  {q:"As soon as the teacher left the room, everyone ___ talking.",o:["had started","was starting","started"],a:2,why:"'As soon as' = one action right after another → Past Simple."},
+  {q:"I ___ a lot of homework, so I didn't go out with my friends.",o:["had","was having","had had"],a:0,why:"State/fact, no time difference needed → Past Simple. (Have = possess → no -ing!)"}
+];
+
+const MEANING = [
+  {q:"When I arrived at the party, Jake <b>left</b>.",o:["Jake left after I arrived (maybe because I arrived 😅)","Jake was already gone","Jake was at the door, leaving"],a:0,why:"Past Simple + Past Simple = one after the other."},
+  {q:"When I arrived at the party, Jake <b>had left</b>.",o:["Jake left after I arrived","Jake was already gone","Jake was at the door, leaving"],a:1,why:"Past Perfect = it happened earlier. I didn't see him."},
+  {q:"When I arrived at the party, Jake <b>was leaving</b>.",o:["Jake left after I arrived","Jake was already gone","Jake was at the door, leaving"],a:2,why:"Past Continuous = in the middle of the action."},
+  {q:"When the teacher came in, we <b>were talking</b>.",o:["We started talking because she came in","We were in the middle of a conversation","We had finished talking"],a:1,why:"Background action in progress."},
+  {q:"When the teacher came in, we <b>stopped</b> talking.",o:["We stopped because she came in","We were already quiet","We were in the middle of a conversation"],a:0,why:"Reaction → the second action → Past Simple."},
+  {q:"When the teacher came in, we <b>had stopped</b> talking.",o:["We stopped because she came in","We were already quiet","We continued talking"],a:1,why:"Already finished before she came in → Past Perfect."}
+];
+
+/* {answer|alt} placeholders */
+const STORY = {
+  title:"🎪 The Festival Bag",
+  text:`Last summer my friend Mia and I {went} (go) to a music festival. On the first evening we {were dancing} (dance) near the stage when Mia suddenly {stopped} (stop). "My bag!" she shouted. Someone {had taken|took} (take) it while we {weren't looking|were not looking} (not look). Her phone, her money and her ticket were all in it. We {felt} (feel) terrible. We {walked} (walk) to the information tent, and a young guy {was sitting} (sit) there with a very familiar bag on the table. "Is this yours?" he asked. A cleaner {had found} (find) it under a bench an hour before. Everything was still inside — except the snacks. Someone {had eaten} (eat) all of Mia's crisps! We {laughed} (laugh) for ten minutes and then {went} (go) back to the stage.`
+};
+
+const FIX = [
+  {s:"I [was knowing] the answer, but I was too shy to say it.",a:["knew"],why:"know = state verb → no -ing."},
+  {s:"When I got home, I realised I [left] my keys at work.",a:["had left"],why:"Leaving happened before realising → Past Perfect."},
+  {s:"While I [cooked] dinner, the lights went out.",a:["was cooking"],why:"While + long action in progress → Past Continuous."},
+  {s:"She [was waking up], had a shower and went to work.",a:["woke up"],why:"A chain of actions → Past Simple."},
+  {s:"We were watching the match when it [was starting] to rain.",a:["started"],why:"The short action that interrupts → Past Simple."},
+  {s:"[Did you sleep] when I called you last night?",a:["were you sleeping"],why:"In progress at that moment → Were you sleeping?"},
+  {s:"Yesterday I [had met] an old friend in town.",a:["met"],why:"Simple past event, nothing 'earlier' → Past Simple."},
+  {s:"The film [already finished] when we turned on the TV.",a:["had already finished","had finished"],why:"Finished before we turned on the TV → had already finished."}
+];
+
+const JOIN = [
+  {a:"The train left. Then I got to the station.",w:"ALREADY",ans:["When I got to the station, the train had already left.","The train had already left when I got to the station.","The train had already left by the time I got to the station."]},
+  {a:"I was walking home. I saw an accident.",w:"WHEN",ans:["I was walking home when I saw an accident."]},
+  {a:"Anna did yoga. At the same time her husband was cooking.",w:"WHILE",ans:["While Anna was doing yoga, her husband was cooking.","Anna was doing yoga while her husband was cooking.","Her husband was cooking while Anna was doing yoga.","While her husband was cooking, Anna was doing yoga."]},
+  {a:"I didn't eat lunch. I was really hungry in the evening.",w:"BECAUSE",ans:["I was really hungry in the evening because I hadn't eaten lunch.","Because I hadn't eaten lunch, I was really hungry in the evening.","I was really hungry in the evening because I didn't eat lunch.","Because I didn't eat lunch, I was really hungry in the evening."]},
+  {a:"Max looked at his phone. He realised he had 20 missed calls.",w:"AND",ans:["Max looked at his phone and realised he had 20 missed calls.","Max looked at his phone and realised that he had 20 missed calls.","Max looked at his phone and realized he had 20 missed calls.","Max looked at his phone and realized that he had 20 missed calls."]},
+  {a:"The show ended. Then we arrived.",w:"BY THE TIME",ans:["By the time we arrived, the show had ended.","The show had ended by the time we arrived.","By the time we arrived, the show had already ended.","The show had already ended by the time we arrived."]}
+];
+
+/* Coursebook: 2A, 2B, p.135 ex 1 & 3 */
+const BOOK_2A = [
+  {q:"I didn't go out last night because I ___ out the night before.",o:["go","was being","'d been"],a:2},
+  {q:"When we got to the hotel, we ___ that there was a problem with our room.",o:["found","had found","were finding"],a:0},
+  {q:"I stopped and had a chat with Naomi while I ___ in town.",o:["shopped","had shopped","was shopping"],a:2},
+  {q:"I couldn't call you because ___ my phone at home.",o:["I'd left","I've left","I was leaving"],a:0},
+  {q:"We ___ in a tent in the middle of a field when the storm hit.",o:["had slept","were sleeping","slept"],a:1},
+  {q:"When Jack got to college, he realised that he ___ to bring his laptop.",o:["forgot","was forgetting","had forgotten"],a:2}
+];
+const BOOK_2B = `About a year ago, I {was sitting} (sit) at home watching TV when the doorbell rang. It was a neighbour to say that my car had a flat tyre. I went outside and {saw} (see) he was right. Someone {had put} (put) a hole in the tyre during the night. I had it fixed, but when I got up a few mornings later, I discovered it {had happened} (happen) again, and then a third time. I was really angry and wanted to know who {had done|was doing|did} (do) it each time. So, I got a security company to put some cameras on the side of my house. A few mornings later, the tyre was flat again so I {watched} (watch) the video the camera {had recorded} (record) from the night before. Do you know what I found out while I {was doing} (do) my research? It wasn't a person who {had done|was doing|did} (do) all the damage. It was a neighbour's dog. I {couldn't|could not} (not can) believe it!`;
+const BOOK_135_1 = `1. John {was walking} (walk) towards the stadium when he {heard} (hear) some supporters singing.<br>
+2. The play {ended|had ended} (end) and everyone {left} (leave) the theatre.<br>
+3. {Was Sue working} (Sue/work) at the restaurant when she {met} (meet) Frank?<br>
+4. We {were crossing} (cross) Green Street when we {saw} (see) a bank robbery.<br>
+5. While I {was watching} (watch) tennis on TV, my sisters {were playing} (play) a video game.<br>
+6. What {were you doing} (you/do) when I {called} (call) you last night?`;
+const BOOK_135_3 = [
+  {q:"Sarah ___ in the park when she met her neighbour.",o:["jogged","had jogged","was jogging"],a:2},
+  {q:"Tim ___ at 7:30, had breakfast and went to the pool.",o:["got up","had got up","was getting up"],a:0},
+  {q:"We were cycling in the forest while Tom ___ in the lake.",o:["swam","was swimming","had swum"],a:1},
+  {q:"Adam didn't go horse-riding because he ___ his riding boots.",o:["was forgetting","had forgotten","forgot"],a:1},
+  {q:"She didn't believe that I ___ volleyball before.",o:["had never played","was never playing","never played"],a:0},
+  {q:"When we ___ at the court, the match had already finished.",o:["arrived","had arrived","were arriving"],a:0},
+  {q:"Kim ___ her skating boots and stepped onto the ice rink.",o:["was putting on","put on","had put on"],a:1},
+  {q:"Mark ___ injured while he was overtaking his rivals.",o:["was getting","had got","got"],a:2},
+  {q:"Nina realised she ___ her mobile at home when she was already on the bus.",o:["left","had left","has left"],a:1},
+  {q:"We ___ in a restaurant when we heard about the accident.",o:["were eating","ate","had eaten"],a:0}
+];
+
+const PROMPTS = [
+  "😳 The most embarrassing moment of my life",
+  "✈️ A trip that went wrong",
+  "📱 The day technology let me down",
+  "🍀 A lucky break",
+  "🐾 An animal surprised me",
+  "🎉 A party I will never forget"
+];
+
+/* ============ RENDER ============ */
+let cur = "warm";
+function start(){
+  const n=$("nameInput").value.trim(); if(!n){$("nameInput").focus();return;}
+  if(STATE.name && STATE.name!==n){ STATE={name:n,res:{},story:"",prompt:"",done:{}}; }
+  STATE.name=n; save();
+  $("login").classList.add("hidden"); $("app").classList.remove("hidden");
+  $("whoLine").textContent="Student: "+n; $("whoLine").classList.remove("hidden");
+  renderNav(); go(cur);
+}
+function renderNav(){
+  $("nav").innerHTML=TABS.map(t=>`<button id="nb-${t.id}" class="${t.id===cur?"active":""} ${STATE.done[t.id]?"done":""}" onclick="go('${t.id}')">${t.t}</button>`).join("");
+  const scored=TABS.filter(t=>!["learn","send"].includes(t.id));
+  $("pbar").style.width=Math.round(100*scored.filter(t=>STATE.done[t.id]).length/scored.length)+"%";
+}
+function markDone(id){ STATE.done[id]=true; save(); renderNav(); }
+function go(id){
+  cur=id; renderNav(); window.scrollTo({top:0,behavior:"smooth"});
+  const f={warm:rWarm,learn:rLearn,choose:()=>rMcq("choose","3 · Choose the correct form","Tap the best option. Read the explanation after each answer.",CHOOSE),
+    meaning:()=>rMcq("meaning","4 · What does it mean?","Same start, different tense → different story! Choose the meaning.",MEANING),
+    story:rStory,fix:rFix,join:rJoin,book:rBook,write:rWrite,send:rSend}[id];
+  $("pane").innerHTML=""; f();
+  const i=TABS.findIndex(t=>t.id===id);
+  if(i<TABS.length-1) $("pane").insertAdjacentHTML("beforeend",`<div class="actions" style="text-align:right"><button class="primary" onclick="go('${TABS[i+1].id}')">Next: ${TABS[i+1].t.replace(/^\S+ · /,"")} →</button></div>`);
+}
+function card(html){ $("pane").insertAdjacentHTML("beforeend",`<div class="card">${html}</div>`); }
+
+/* ---- 1. Warm-up ---- */
+function rWarm(){
+  const verbs=Object.keys(WARM.key);
+  const txt=WARM.text.replace(/\[([^\]]+)\]/g,(m,v)=>`<u id="sv-${v.replace(/ /g,"_")}">${v}</u>`);
+  card(`<h2>1 · Warm-up: The Bus Driver 🚌</h2>
+  <p class="muted">Read the story. Every story has three layers. Decide what each underlined verb does.</p>
+  <div class="story">${txt}</div>
+  <div class="roles" style="margin-top:14px">
+    <div class="role pc"><span class="chip pc">🎥 Background</span><div class="ex">What was going on around? The scene.</div></div>
+    <div class="role ps"><span class="chip ps">⚡ Action</span><div class="ex">What happened next? The main events.</div></div>
+    <div class="role pp"><span class="chip pp">⏪ Flashback</span><div class="ex">What had happened even earlier?</div></div>
+  </div>
+  <div id="cls" style="margin-top:10px">${verbs.map((v,i)=>`<div class="clsrow" data-v="${v}"><span class="v">${v}</span>
+    <button onclick="pickCls(${i},'pc',this)">🎥 Background</button><button onclick="pickCls(${i},'ps',this)">⚡ Action</button><button onclick="pickCls(${i},'pp',this)">⏪ Flashback</button></div>`).join("")}</div>
+  <div class="actions"><button class="primary" onclick="checkCls()">Check</button></div>
+  <div id="clsFb" class="score"></div>
+  <div id="clsQ" class="hidden">
+    <h3>💡 Now look at the forms</h3>
+    <p>All the 🎥 verbs look like <b>was/were + -ing</b>. All the ⏪ verbs look like <b>had + V3</b>. The ⚡ verbs are just <b>V2</b> (stopped, ran, took).</p>
+    <p>Can you name the three tenses? → <span class="chip pc">Past Continuous</span> <span class="chip ps">Past Simple</span> <span class="chip pp">Past Perfect</span></p>
+  </div>`);
+}
+const CLS={};
+function pickCls(i,r,b){ CLS[i]=r; b.parentNode.querySelectorAll("button").forEach(x=>x.classList.remove("sel","ok","bad")); b.classList.add("sel"); }
+function checkCls(){
+  const verbs=Object.keys(WARM.key); let ok=0; const wrong=[];
+  verbs.forEach((v,i)=>{
+    const row=document.querySelectorAll("#cls .clsrow")[i]; const bs=row.querySelectorAll("button"); const map={pc:0,ps:1,pp:2};
+    bs.forEach(x=>x.classList.remove("ok","bad"));
+    const right=WARM.key[v];
+    if(CLS[i]===right){ok++; bs[map[right]].classList.add("ok");}
+    else { if(CLS[i]) bs[map[CLS[i]]].classList.add("bad"); bs[map[right]].classList.add("ok"); wrong.push(v); }
+    const u=$("sv-"+v.replace(/ /g,"_")); if(u) u.className="c-"+right;
+  });
+  $("clsFb").textContent=`Score: ${ok} / ${verbs.length}`;
+  $("clsQ").classList.remove("hidden");
+  if(!STATE.res.warm){ STATE.res.warm={score:ok,total:verbs.length,wrong:wrong}; }
+  markDone("warm");
+}
+
+/* ---- 2. Learn ---- */
+function rLearn(){
+  card(`<h2>2 · Think like a film director 🎬</h2>
+  <p>In a story you need three "cameras". Each camera = one tense.</p>
+  <div class="roles">
+    <div class="role pc"><div class="ico">🎥</div><b class="pc">Past Continuous</b>The background. The camera is already filming.
+      <div class="f">was / were + V-ing</div><div class="ex">It was raining. People were waiting for the bus.</div></div>
+    <div class="role ps"><div class="ico">⚡</div><b class="ps">Past Simple</b>The action. Main events, one after another.
+      <div class="f">V2 / didn't + V</div><div class="ex">The bus stopped. The driver got out and ran into a shop.</div></div>
+    <div class="role pp"><div class="ico">⏪</div><b class="pp">Past Perfect</b>The flashback. Something happened even earlier.
+      <div class="f">had + V3 ('d)</div><div class="ex">Someone had left a dog in the rain.</div></div>
+  </div>
+  <div class="ru">По-русски у нас одно прошедшее время, а в английском у глагола в истории три роли: фон, событие и «что было ещё раньше».</div>`);
+
+  card(`<h2>⏱ On the timeline</h2>
+  <svg class="tl" viewBox="0 0 520 200" aria-label="Timeline of narrative tenses">
+    <line x1="10" y1="120" x2="500" y2="120" stroke="#161a2b" stroke-width="3"/>
+    <polygon points="500,112 516,120 500,128" fill="#161a2b"/>
+    <text x="505" y="152" font-size="18" fill="#636a80" text-anchor="end">NOW</text>
+    <circle cx="70" cy="120" r="12" fill="#7a4fd8"/>
+    <text x="70" y="88" font-size="22" fill="#7a4fd8" text-anchor="middle" font-weight="700">had left ⏪</text>
+    <text x="70" y="160" font-size="17" fill="#636a80" text-anchor="middle">earlier</text>
+    <rect x="170" y="104" width="250" height="32" rx="16" fill="#2f6fe4" opacity=".22"/>
+    <text x="295" y="60" font-size="22" fill="#2f6fe4" text-anchor="middle" font-weight="700">was sitting 🎥</text>
+    <line x1="295" y1="68" x2="295" y2="100" stroke="#2f6fe4" stroke-width="2" stroke-dasharray="4 4"/>
+    <circle cx="320" cy="120" r="12" fill="#e8622c"/>
+    <text x="320" y="180" font-size="22" fill="#e8622c" text-anchor="middle" font-weight="700">stopped ⚡</text>
+  </svg>
+  <p class="muted">I <b class="pc">was sitting</b> on the bus when it <b class="ps">stopped</b>. Someone <b class="pp">had left</b> a dog outside.</p>`);
+
+  card(`<h2>🔧 Form</h2>
+  <table class="tbl">
+    <tr><th></th><th>+</th><th>−</th><th>?</th></tr>
+    <tr><td><span class="chip ps">Past Simple</span></td><td>I <b>called</b> / <b>went</b></td><td>I <b>didn't call</b></td><td><b>Did</b> you <b>call</b>?</td></tr>
+    <tr><td><span class="chip pc">Past Continuous</span></td><td>she <b>was working</b><br>they <b>were working</b></td><td>she <b>wasn't working</b></td><td><b>Were</b> you <b>working</b>?</td></tr>
+    <tr><td><span class="chip pp">Past Perfect</span></td><td>I <b>had seen</b> = I<b>'d seen</b></td><td>I <b>hadn't seen</b></td><td><b>Had</b> you <b>seen</b>?</td></tr>
+  </table>
+  <div class="tip">💡 V3 = third form: go → went → <b>gone</b>, see → saw → <b>seen</b>, eat → ate → <b>eaten</b>, leave → left → <b>left</b>.</div>`);
+
+  card(`<h2>🧩 Top combinations</h2>
+  <div class="vs">
+    <div><span class="chip pc">long</span> + <span class="chip ps">short</span> — interrupted action<br>I <b class="pc">was scrolling</b> TikTok <b>when</b> my phone <b class="ps">died</b>.<i>The long action was in progress → the short one interrupted it.</i></div>
+    <div><span class="chip pc">long</span> + <span class="chip pc">long</span> — at the same time<br><b>While</b> I <b class="pc">was cooking</b>, my flatmate <b class="pc">was cleaning</b> the bathroom.</div>
+    <div><span class="chip ps">short</span> → <span class="chip ps">short</span> → <span class="chip ps">short</span> — a chain of events<br>I <b class="ps">grabbed</b> my bag, <b class="ps">locked</b> the door and <b class="ps">ran</b> to the station.</div>
+    <div><span class="chip pp">earlier</span> → <span class="chip ps">later</span> — flashback<br>When I <b class="ps">got</b> to the station, the train <b class="pp">had</b> already <b class="pp">left</b>.</div>
+  </div>
+  <h3>🤯 One sentence — three stories</h3>
+  <table class="tbl">
+    <tr><td>When I arrived, the film <b class="ps">started</b>.</td><td>I arrived → <i>then</i> it started. Perfect timing!</td></tr>
+    <tr><td>When I arrived, the film <b class="pc">was starting</b>.</td><td>The opening titles were on the screen.</td></tr>
+    <tr><td>When I arrived, the film <b class="pp">had started</b>.</td><td>I missed the beginning. 😩</td></tr>
+  </table>
+  <div class="ru">when + Past Simple → Past Simple = «и тогда». when + Past Perfect = «уже успело случиться».</div>`);
+
+  card(`<h2>🚦 Signal words</h2>
+  <p><span class="chip pc">🎥</span></p><div class="signals"><span>while</span><span>as</span><span>at 8 pm yesterday</span><span>all evening</span><span>when (+ short action)</span></div>
+  <p><span class="chip ps">⚡</span></p><div class="signals"><span>then</span><span>suddenly</span><span>after that</span><span>as soon as</span><span>finally</span><span>yesterday / last week / ago</span></div>
+  <p><span class="chip pp">⏪</span></p><div class="signals"><span>already</span><span>just</span><span>by the time</span><span>before</span><span>never … before</span><span>after (= when it was finished)</span></div>`);
+
+  card(`<h2>⚠️ Watch out</h2>
+  <div class="warn">❌ I <s>was knowing</s> the answer. → ✅ I <b>knew</b> the answer.<br><span class="muted">State verbs (know, want, like, need, believe, understand, own) usually don't take -ing.</span></div>
+  <div class="warn">❌ I <s>had woken up</s>, <s>had had</s> breakfast and <s>had gone</s> to work.<br>✅ I <b>woke up</b>, <b>had</b> breakfast and <b>went</b> to work.<br><span class="muted">Events in order → Past Simple. Use Past Perfect only to jump back in time.</span></div>
+  <div class="warn">❌ <s>When</s> I was cooking, he was cleaning. → ✅ <b>While</b> I was cooking…<br><span class="muted"><b>while</b> + long action; <b>when</b> + usually a short action.</span></div>
+  <div class="ru">Past Perfect — не «очень давно», а «раньше другого момента в прошлом». Нет второго момента — нет Past Perfect.</div>`);
+  markDone("learn");
+}
+
+/* ---- MCQ engine ---- */
+function rMcq(id,title,intro,items,host){
+  const html=`${title?`<h2>${title}</h2><p class="muted">${intro}</p>`:""}
+  ${items.map((it,i)=>`<div class="q" id="${id}-q${i}"><div class="s"><span class="n">${i+1}</span>${it.q.replace("___",'<span class="blank">___</span>')}</div>
+    <div class="opts">${it.o.map((o,j)=>`<button onclick="answerMcq('${id}',${i},${j})">${o}</button>`).join("")}</div><div class="why hidden"></div></div>`).join("")}
+  <div class="score" id="${id}-score"></div>`;
+  if(host) host.insertAdjacentHTML("beforeend",html); else card(html);
+  MCQ[id]={items,ans:{}};
+}
+const MCQ={};
+function answerMcq(id,i,j){
+  const M=MCQ[id]; if(M.ans[i]!==undefined) return;
+  M.ans[i]=j; const it=M.items[i]; const box=$(`${id}-q${i}`); const bs=box.querySelectorAll(".opts button");
+  bs[it.a].classList.add("ok"); if(j!==it.a) bs[j].classList.add("bad");
+  if(it.why){ const w=box.querySelector(".why"); w.innerHTML=(j===it.a?"✅ ":"❌ ")+it.why; w.classList.remove("hidden"); }
+  const n=Object.keys(M.ans).length;
+  if(n===M.items.length){
+    const ok=M.items.filter((x,k)=>M.ans[k]===x.a).length;
+    $(`${id}-score`).textContent=`Score: ${ok} / ${M.items.length}`+(ok===M.items.length?" 🔥":"");
+    STATE.res[id]={score:ok,total:M.items.length,wrong:M.items.map((x,k)=>M.ans[k]!==x.a?`${x.q.replace(/<[^>]+>/g,"")} → chose "${x.o[M.ans[k]]}" (✓ ${x.o[x.a]})`:null).filter(Boolean)};
+    save(); bookOrMark(id);
+  }
+}
+function bookOrMark(id){ if(id.startsWith("book")) checkBookDone(); else markDone(id); }
+
+/* ---- Gap engine: {ans|alt} (hint) ---- */
+function gapHTML(id,text){
+  let k=0; GAPS[id]=[];
+  return text.replace(/\{([^}]+)\}/g,(m,a)=>{ GAPS[id].push(a.split("|")); return `<input class="gap" id="${id}-g${k++}" autocomplete="off" autocapitalize="off" spellcheck="false">`; });
+}
+const GAPS={};
+function checkGaps(id){
+  const A=GAPS[id]; let ok=0; const wrong=[];
+  A.forEach((ans,i)=>{
+    const inp=$(`${id}-g${i}`); const old=inp.nextElementSibling; if(old&&old.classList.contains("fix")) old.remove();
+    inp.classList.remove("ok","bad");
+    if(match(inp.value,ans)){ ok++; inp.classList.add("ok"); }
+    else { inp.classList.add("bad"); inp.insertAdjacentHTML("afterend",`<span class="fix hidden">${esc(ans[0])}</span>`); wrong.push(`${i+1}) "${inp.value||"—"}" (✓ ${ans[0]})`); }
+  });
+  $(`${id}-score`).textContent=`Score: ${ok} / ${A.length}`+(ok===A.length?" 🔥":"");
+  $(`${id}-show`).classList.remove("hidden");
+  if(!STATE.res[id]){ STATE.res[id]={score:ok,total:A.length,wrong}; save(); }
+  bookOrMark(id);
+}
+function showGaps(id){ document.querySelectorAll(`[id^="${id}-g"]+.fix`).forEach(x=>x.classList.remove("hidden")); }
+function gapBlock(id,text){
+  return `<div class="gaptext">${gapHTML(id,text)}</div>
+  <div class="actions"><button class="primary" onclick="checkGaps('${id}')">Check</button><button id="${id}-show" class="hidden" onclick="showGaps('${id}')">Show answers</button></div>
+  <div class="score" id="${id}-score"></div>`;
+}
+
+/* ---- 5. Story ---- */
+function rStory(){
+  card(`<h2>5 · Story gaps: ${STORY.title}</h2>
+  <p class="muted">Put the verbs in brackets into Past Simple, Past Continuous or Past Perfect. Short forms (weren't, 'd) are OK. First try counts for your score.</p>
+  ${gapBlock("story",STORY.text)}`);
+}
+
+/* ---- 6. Fix ---- */
+function rFix(){
+  card(`<h2>6 · Fix the mistake 🛠</h2>
+  <p class="muted">The red part is wrong. Type the correct form.</p>
+  ${FIX.map((f,i)=>`<div class="q"><div class="s"><span class="n">${i+1}</span>${f.s.replace(/\[([^\]]+)\]/,'<span class="wrongw">$1</span>')}</div>
+    <div style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="text" id="fix-g${i}" placeholder="correct form" autocomplete="off" autocapitalize="off" spellcheck="false" style="max-width:280px"></div>
+    <div class="why hidden" id="fix-w${i}"></div></div>`).join("")}
+  <div class="actions"><button class="primary" onclick="checkFix()">Check</button></div><div class="score" id="fix-score"></div>`);
+}
+function checkFix(){
+  let ok=0; const wrong=[];
+  FIX.forEach((f,i)=>{ const inp=$(`fix-g${i}`); const w=$(`fix-w${i}`); inp.classList.remove("ok","bad");
+    const good=match(inp.value,f.a); if(good){ok++;inp.classList.add("ok");} else {inp.classList.add("bad"); wrong.push(`${f.s.replace(/\[|\]/g,"*")} → "${inp.value||"—"}" (✓ ${f.a[0]})`);}
+    w.innerHTML=(good?"✅ ":"❌ <b>"+esc(f.a[0])+"</b> — ")+f.why; w.classList.remove("hidden"); });
+  $("fix-score").textContent=`Score: ${ok} / ${FIX.length}`+(ok===FIX.length?" 🔥":"");
+  if(!STATE.res.fix){ STATE.res.fix={score:ok,total:FIX.length,wrong}; save(); }
+  markDone("fix");
+}
+
+/* ---- 7. Join ---- */
+function rJoin(){
+  card(`<h2>7 · Join the sentences 🔗</h2>
+  <p class="muted">Write ONE sentence with a similar meaning. Use the word in capitals. Think: which action came first?</p>
+  ${JOIN.map((j,i)=>`<div class="q"><div class="s"><span class="n">${i+1}</span>${j.a} <span class="chip pp">${j.w}</span></div>
+    <input type="text" id="join-g${i}" style="margin-top:8px" autocomplete="off" spellcheck="false"><div class="why hidden" id="join-w${i}"></div></div>`).join("")}
+  <div class="actions"><button class="primary" onclick="checkJoin()">Check</button></div><div class="score" id="join-score"></div>`);
+}
+function checkJoin(){
+  let ok=0; const wrong=[];
+  JOIN.forEach((j,i)=>{ const inp=$(`join-g${i}`); const w=$(`join-w${i}`); inp.classList.remove("ok","bad");
+    const good=match(inp.value,j.ans); if(good){ok++;inp.classList.add("ok");} else {inp.classList.add("bad"); wrong.push(`${j.w}: "${inp.value||"—"}"`);}
+    w.innerHTML=good?"✅ Great!":"Possible answer: <b>"+esc(j.ans[0])+"</b><br><span class='muted'>If your sentence is different but you think it's correct — your teacher will check it.</span>"; w.classList.remove("hidden"); });
+  $("join-score").textContent=`Score: ${ok} / ${JOIN.length}`;
+  if(!STATE.res.join){ STATE.res.join={score:ok,total:JOIN.length,wrong}; save(); }
+  markDone("join");
+}
+
+/* ---- Coursebook ---- */
+function rBook(){
+  card(`<h2>📘 Coursebook check</h2>
+  <p class="muted">Exercises from your book — do them here and check yourself.</p>
+  <div class="sub">Exercise 2A · Choose the correct word or phrase</div><div id="hostA"></div>
+  <div class="sub">Exercise 2B · Past Simple, Past Continuous or Past Perfect</div>${gapBlock("book2b",BOOK_2B)}
+  <div class="sub">p. 135 · Ex 1 · Past Simple or Past Continuous</div>${gapBlock("book135a",BOOK_135_1)}
+  <div class="sub">p. 135 · Ex 3 · Choose A, B or C</div><div id="hostB"></div>`);
+  rMcq("book2a","","",BOOK_2A,$("hostA"));
+  rMcq("book135c","","",BOOK_135_3,$("hostB"));
+}
+function checkBookDone(){ if(["book2a","book2b","book135a","book135c"].every(k=>STATE.res[k])) markDone("book"); }
+
+/* ---- Write ---- */
+function rWrite(){
+  card(`<h2>✍️ Your story</h2>
+  <p class="muted">Choose a topic (or tell a true story of your own). Write 80–150 words.</p>
+  <div class="prompts">${PROMPTS.map((p,i)=>`<button class="${STATE.prompt===p?"sel":""}" onclick="pickPrompt(${i},this)">${p}</button>`).join("")}</div>
+  <h3>Story plan</h3>
+  <ol class="steps">
+    <li><b class="pc">🎥 Set the scene.</b> Where were you? What was happening? <i class="muted">It was a hot day. We were waiting for…</i></li>
+    <li><b class="ps">⚡ Something happened.</b> <i class="muted">Suddenly…, when…</i></li>
+    <li><b class="pp">⏪ Flashback.</b> Explain what had happened before. <i class="muted">I had forgotten…, nobody had told us…</i></li>
+    <li><b class="ps">⚡ What happened next + the ending.</b> How did you feel? <i class="muted">In the end…, I'll never forget…</i></li>
+  </ol>
+  <textarea id="storyBox" placeholder="Start here… e.g. It was a cold Monday morning and I was standing at the bus stop when…" oninput="storyInput()">${esc(STATE.story)}</textarea>
+  <div class="meter" id="meter"></div>
+  <p class="muted">The counter is just a helper — it can't check grammar perfectly. 🙂</p>
+  <div class="card" style="background:#f6f7fa;box-shadow:none;margin-top:16px">
+    <h3 style="margin-top:0">🗣 Speaking in class</h3>
+    <p>Tell your story to your partner/teacher without reading. Your partner must ask <b>two questions</b>:</p>
+    <div class="signals"><span>What were you doing when…?</span><span>Had you ever … before?</span><span>What happened next?</span><span>How did you feel?</span></div>
+  </div>`);
+  storyInput();
+}
+function pickPrompt(i,b){ STATE.prompt=PROMPTS[i]; save(); document.querySelectorAll(".prompts button").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); }
+function storyStats(t){
+  const words=(t.trim().match(/\S+/g)||[]).length;
+  const pc=(t.match(/\b(was|were)(n't| not)?\s+\w+ing\b/gi)||[]).length;
+  const pp=(t.match(/\b(had(n't| not)?(\s+(already|just|never|ever))?\s+(?!to\b)\w+(ed|en|wn|ne|lt|ft|ht|ght|nt|ld|ok|un|ung|ad|id|ay|een|een|ept|ost|ot|ut|et|it|ade|old|ound|ard)\b|\w+'d\s+(already\s+|just\s+|never\s+)?\w+(ed|en|wn|ne|ft|ght|een|ept|ot|ut)\b)/gi)||[]).length;
+  return {words,pc,pp};
+}
+function storyInput(){
+  const b=$("storyBox"); if(!b) return; STATE.story=b.value; save();
+  const s=storyStats(b.value);
+  $("meter").innerHTML=`<span style="background:#eef0f4">📝 ${s.words} words</span>
+    <span class="chip pc" style="font-size:14px">🎥 Past Continuous: ${s.pc}</span>
+    <span class="chip pp" style="font-size:14px">⏪ Past Perfect: ${s.pp}</span>`;
+  if(s.words>=80 && s.pc>=1 && s.pp>=1) markDone("write");
+}
+
+/* ---- Send ---- */
+const NAMES={warm:"Warm-up (sorting)",choose:"Choose",meaning:"Meaning",story:"Story gaps",fix:"Fix it",join:"Join",book2a:"Book 2A",book2b:"Book 2B",book135a:"Book p.135 ex 1",book135c:"Book p.135 ex 3"};
+function rSend(){
+  const rows=Object.keys(NAMES).map(k=>{ const r=STATE.res[k]; return `<tr><td>${NAMES[k]}</td><td style="text-align:right">${r?`<b>${r.score} / ${r.total}</b>`:'<span class="muted">not done</span>'}</td></tr>`; }).join("");
+  const s=storyStats(STATE.story||"");
+  card(`<h2>🚀 Send to your teacher</h2>
+  <table class="res">${rows}<tr><td>Your story</td><td style="text-align:right">${s.words?`<b>${s.words} words</b>`:'<span class="muted">not written</span>'}</td></tr></table>
+  <div class="actions"><button class="primary" id="sendBtn" onclick="sendResults()">Send results 📩</button>
+  <button class="sm" onclick="if(confirm('Start again from zero?')){STATE={name:STATE.name,res:{},story:'',prompt:'',done:{}};save();go('warm')}">Reset</button></div>
+  <div class="feedback" id="sendFb"></div><textarea id="copyBox" class="hidden" readonly></textarea>`);
+}
+function buildReport(){
+  let t=`📒 <b>Narrative Tenses B1</b>\n👤 <b>${esc(STATE.name)}</b>\n🕒 ${new Date().toLocaleString("ru-RU")}\n`;
+  let tot=0,max=0;
+  Object.keys(NAMES).forEach(k=>{ const r=STATE.res[k]; if(!r){ t+=`\n▫️ ${NAMES[k]}: —`; return; }
+    tot+=r.score; max+=r.total; t+=`\n${r.score===r.total?"✅":"🔸"} <b>${NAMES[k]}: ${r.score}/${r.total}</b>`;
+    r.wrong.forEach(w=>t+=`\n   • ${esc(w)}`); });
+  t+=`\n\n<b>Total: ${tot}/${max}</b>`;
+  if(STATE.story && STATE.story.trim()){ const s=storyStats(STATE.story);
+    t+=`\n\n✍️ <b>Story</b>${STATE.prompt?" — "+esc(STATE.prompt):""} (${s.words} words, PC ${s.pc}, PP ${s.pp}):\n${esc(STATE.story.trim())}`; }
+  return t;
+}
+function chunks(text){ const out=[]; let cur=""; text.split("\n").forEach(l=>{ if((cur+"\n"+l).length>3800){ out.push(cur); cur=l; } else cur=cur?cur+"\n"+l:l; }); if(cur)out.push(cur); return out; }
+async function sendResults(){
+  const text=buildReport(); $("sendBtn").disabled=true; $("sendFb").textContent="Sending…";
+  try{ for(const part of chunks(text)){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+    $("sendFb").textContent="✅ Sent! Well done!"; $("sendBtn").disabled=false; }
+  catch(e){ $("sendBtn").disabled=false; $("sendFb").textContent="Couldn't send ("+e.message+"). Copy the text and send it to your teacher:"; const b=$("copyBox"); b.value=text.replace(/<\/?b>/g,""); b.classList.remove("hidden"); b.select(); }
+}
+
+load(); if(STATE.name) $("nameInput").value=STATE.name;
+if(window.MIRAE&&MIRAE.user){ $("nameInput").value=MIRAE.user; start(); }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden"){ clearTimeout(liveTm); saveLive(); } });
+addEventListener("pagehide",()=>saveLive());
+$("nameInput").addEventListener("keydown",e=>{ if(e.key==="Enter") start(); });
+</script>
+</body>
+</html>
