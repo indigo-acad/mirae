@@ -42,6 +42,14 @@ window.MATERIALS=[
   "level": "IELTS с нуля"
  },
  {
+  "id": "en-home-routine-ielts6",
+  "section": "english",
+  "kind": "lesson",
+  "title": "My Home, My Routine · how often + IELTS 6",
+  "path": "materials/english/en-home-routine-ielts6/",
+  "level": "IELTS с нуля → band 6"
+ },
+ {
   "id": "en-ielts-band6-transport",
   "section": "english",
   "kind": "trainer",

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Home, My Routine · IELTS 6 · MIRAÉ</title>
+<meta name="theme-color" content="#0B1535">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#161a2b;--muted:#636a80;--line:#e6e8f0;--bg:#f4f3ef;--card:#fff;
+    --pc:#2f6fe4;--pcbg:#e8f0ff;   /* background = Past Continuous */
+    --ps:#e8622c;--psbg:#fff0e8;   /* action = Past Simple */
+    --pp:#7a4fd8;--ppbg:#f1ebff;   /* flashback = Past Perfect */
+    --ok:#18935a;--okbg:#e6f7ee;--bad:#d23f3f;--badbg:#fdecec;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;font-size:16.5px}
+  .wrap{max-width:860px;margin:0 auto;padding:16px 14px 90px}
+  .hero{background:linear-gradient(135deg,#161a2b 0%,#2a2350 60%,#4b2d7a 100%);color:#fff;border-radius:22px;padding:22px 22px 20px;margin-bottom:12px;position:relative;overflow:hidden}
+  .hero:after{content:"🎬";position:absolute;right:18px;top:10px;font-size:64px;opacity:.18}
+  .hero .tag{display:inline-block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;background:#ffffff22;padding:3px 10px;border-radius:99px}
+  .hero h1{margin:8px 0 4px;font-size:28px;line-height:1.15}
+  .hero p{margin:0;color:#d9d6f2}
+  .who{font-size:14px;color:#cfcaf0;margin-top:8px}
+  .card{background:var(--card);border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 2px 14px #1a1d3a0d}
+  h2{margin:0 0 6px;font-size:22px}
+  h3{margin:14px 0 6px;font-size:18px}
+  .muted{color:var(--muted);font-size:14.5px}
+  button{font:inherit;border:0;border-radius:12px;padding:10px 16px;cursor:pointer;background:#eceef4;color:var(--ink);margin:4px 4px 4px 0;transition:transform .08s}
+  button:active{transform:scale(.97)}
+  button.primary{background:var(--ink);color:#fff}
+  button.sm{font-size:14px;padding:6px 12px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text],textarea{font:inherit;padding:10px 12px;border:1.5px solid #cdd1dc;border-radius:11px;width:100%;background:#fff}
+  textarea{min-height:220px;resize:vertical;line-height:1.6}
+  input.gap{width:150px;padding:3px 8px;border:0;border-bottom:2px solid #8a91a6;border-radius:0;background:#f7f8fb;text-align:center}
+  input.ok{border-color:var(--ok)!important;background:var(--okbg)!important}
+  input.bad{border-color:var(--bad)!important;background:var(--badbg)!important}
+  .fix{color:var(--ok);font-weight:700;font-size:14px;margin-left:6px}
+  nav{display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  nav button{margin:0;font-size:14.5px;white-space:nowrap;background:#fff}
+  nav button.active{background:var(--ink);color:#fff}
+  nav .done:after{content:" ✓";color:var(--ok)}
+  nav button.active.done:after{color:#8ff0b5}
+  .bar{height:7px;background:#e3e4ea;border-radius:5px;overflow:hidden;margin:2px 0 4px}
+  .bar div{height:100%;background:linear-gradient(90deg,var(--pc),var(--pp),var(--ps));width:0;transition:width .4s}
+  .hidden{display:none!important}
+  /* roles */
+  .pc{color:var(--pc)} .ps{color:var(--ps)} .pp{color:var(--pp)}
+  .chip{display:inline-block;font-size:13px;font-weight:700;padding:2px 10px;border-radius:99px}
+  .chip.pc{background:var(--pcbg)} .chip.ps{background:var(--psbg)} .chip.pp{background:var(--ppbg)}
+  .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+  .role{border-radius:16px;padding:14px}
+  .role .ico{font-size:28px}
+  .role b{display:block;font-size:17px;margin:2px 0}
+  .role.pc{background:var(--pcbg);color:var(--ink)} .role.ps{background:var(--psbg);color:var(--ink)} .role.pp{background:var(--ppbg);color:var(--ink)}
+  .role .f{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;background:#ffffffaa;border-radius:8px;padding:4px 8px;margin:6px 0;display:inline-block}
+  .role .ex{font-size:14.5px;font-style:italic}
+  .ru{background:#fbf7e6;border-left:4px solid #e6c34a;border-radius:10px;padding:8px 12px;margin:10px 0;font-size:14.5px}
+  .ru:before{content:"RU ";font-weight:800;color:#b48a00;font-size:12px}
+  table.tbl{width:100%;border-collapse:collapse;font-size:15px;margin:8px 0}
+  table.tbl th,table.tbl td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+  table.tbl th{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .vs{display:grid;gap:8px;margin:10px 0}
+  .vs div{background:#f6f7fa;border-radius:12px;padding:10px 12px}
+  .vs div i{color:var(--muted);font-size:14px;display:block}
+  .warn{background:var(--badbg);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:15px}
+  .tip{background:var(--okbg);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:15px}
+  .signals{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+  .signals span{background:#f0f1f5;border-radius:99px;padding:3px 11px;font-size:14px}
+  /* story */
+  .story{background:#fffdf6;border:1px solid #eee5c7;border-radius:14px;padding:14px 16px;font-family:Georgia,serif;font-size:17px;line-height:1.75}
+  .story u{text-decoration:none;border-bottom:2px dashed #9aa0b3;padding:0 1px}
+  .story u.c-pc{border-color:var(--pc);background:var(--pcbg)}
+  .story u.c-ps{border-color:var(--ps);background:var(--psbg)}
+  .story u.c-pp{border-color:var(--pp);background:var(--ppbg)}
+  .clsrow{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .clsrow .v{min-width:130px;font-weight:700}
+  .clsrow button{font-size:14px;padding:6px 10px;margin:0}
+  .clsrow button.sel{outline:2px solid var(--ink)}
+  .clsrow button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .clsrow button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  /* mcq */
+  .q{padding:12px 0;border-bottom:1px dashed var(--line)}
+  .q .s{font-size:17px}
+  .q .n{display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:700;margin-right:6px}
+  .opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .opts button{margin:0;background:#f1f2f6}
+  .opts button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .opts button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  .why{font-size:14.5px;margin-top:6px;color:#37405a;background:#f6f7fa;border-radius:10px;padding:6px 10px}
+  .blank{display:inline-block;min-width:70px;border-bottom:2px solid #9aa0b3;text-align:center;font-weight:700}
+  .wrongw{background:var(--badbg);color:var(--bad);border-radius:5px;padding:0 4px;text-decoration:line-through;text-decoration-thickness:1.5px}
+  .gaptext{font-size:17px;line-height:2.1}
+  .score{font-size:18px;font-weight:700;margin-top:12px}
+  .actions{margin-top:12px}
+  .tl{width:100%;height:auto;margin:6px 0}
+  .prompts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .prompts button{margin:0;text-align:left;background:#f3f1fb;padding:12px}
+  .prompts button.sel{outline:2px solid var(--pp);background:var(--ppbg)}
+  .meter{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .meter span{font-size:14px;border-radius:99px;padding:4px 12px;font-weight:600}
+  .steps{counter-reset:s;padding-left:0;list-style:none}
+  .steps li{position:relative;padding:6px 0 6px 38px}
+  .steps li:before{counter-increment:s;content:counter(s);position:absolute;left:0;top:6px;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-size:13px;line-height:26px;font-weight:700}
+  table.res{width:100%;border-collapse:collapse;font-size:15.5px}
+  table.res td{padding:8px 4px;border-bottom:1px solid var(--line)}
+  .feedback{min-height:24px;margin-top:8px;font-weight:600}
+  .sub{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 4px}
+  @media(max-width:620px){.roles{grid-template-columns:1fr}.prompts{grid-template-columns:1fr}input.gap{width:118px}.hero h1{font-size:24px}}
+
+  /* ===== MIRAÉ brand ===== */
+  :root{--indigo:#0B1535;--indigo2:#1E2A56;--gold:#D4AF7C;--ivory:#F8F7F2;--silver:#C0C6D4}
+  body{background:linear-gradient(180deg,var(--indigo),var(--indigo2));background-attachment:fixed;font-family:Inter,system-ui,sans-serif}
+  .hero{background:url(../../../img/scene-en.svg) bottom/100% 110px no-repeat;border-radius:0;margin:0 -14px 10px;padding:40px 18px 120px}
+  .hero:after{display:none}
+  .hero h1{font-family:"Cormorant Garamond",serif;font-weight:600;color:var(--gold);font-size:clamp(36px,8vw,52px)}
+  .hero .tag{background:transparent;border:1px solid rgba(212,175,124,.5);color:var(--gold)}
+  .hero p,.who{color:var(--silver)}
+  .card{background:var(--ivory);color:#1a2040}
+  .card h2{font-family:"Cormorant Garamond",serif;font-weight:600;font-size:30px;color:var(--indigo)}
+  nav{background:transparent;backdrop-filter:blur(6px)}
+  nav button{background:transparent;color:var(--gold);border:1px solid rgba(212,175,124,.45);border-radius:99px}
+  nav button.active{background:var(--gold);color:var(--indigo)}
+  nav .done:after{color:#8fe0b0} nav button.active.done:after{color:var(--indigo)}
+  .bar{background:rgba(255,255,255,.12)}
+  .bar div{background:var(--gold)}
+  button.primary{background:var(--indigo);color:var(--gold)}
+  .q .n,.steps li:before{background:var(--indigo);color:var(--gold)}
+  .actions[style] button.primary{background:var(--gold);color:var(--indigo)}
+  .sendstat{position:fixed;right:10px;bottom:10px;z-index:9999;background:#0B1535;color:#D4AF7C;border-radius:999px;padding:6px 14px;font:600 13px system-ui;opacity:0;transition:opacity .4s;pointer-events:none}.sendstat.on{opacity:.93}
+</style>
+<style>
+  .pill{display:inline-block;background:#efe9da;border-radius:99px;padding:2px 10px;font-size:14px;margin:2px 0}
+  .scale{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px}
+  .scale div{border-radius:12px;padding:10px 6px;text-align:center;color:#fff;font-size:14.5px}
+  .scale div span{display:block;font-size:12.5px;opacity:.85}
+  .scale div:nth-child(1){background:#0B1535}.scale div:nth-child(2){background:#1E2A56}.scale div:nth-child(3){background:#3a4a85}
+  .scale div:nth-child(4){background:#7d6a8f}.scale div:nth-child(5){background:#b08f6a}.scale div:nth-child(6){background:#c9b38c;color:#0B1535}
+  .formula{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0;font-weight:700}
+  .formula span{background:var(--indigo);color:var(--gold);border-radius:10px;padding:6px 10px;font-size:14.5px}
+  .card u{text-decoration:none;border-bottom:2px solid var(--gold)}
+  .built{display:inline-flex;flex-wrap:wrap;gap:4px;min-height:38px;align-items:center;border-bottom:2px dashed #c9c5b3;padding:2px 4px;border-radius:6px}
+  .built.good{background:var(--okbg)} .built.wrong{background:var(--badbg)}
+  .pool{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .tok{margin:0;padding:7px 12px;background:#fff;border:1.5px solid #d6d2c2;border-radius:10px;font-size:15.5px}
+  .tok.on{background:var(--indigo);color:var(--gold);border-color:var(--indigo)}
+  .story.tap{line-height:2}
+  .story .w{cursor:pointer;border-radius:5px;padding:1px 2px}
+  .story .w.sel{background:#ffe9a8}
+  .story .w.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .story .w.bad{background:var(--badbg);text-decoration:line-through}
+  .story .w.miss{outline:2px dashed var(--ok)}
+  .story h4{margin:0 0 8px;text-align:center;font-size:20px}
+  .story p{margin:6px 0}
+  select{font:inherit;padding:3px 6px;border-radius:8px;border:1.5px solid #b9b5a4;background:#fff}
+  select.ok{border-color:var(--ok);background:var(--okbg)} select.bad{border-color:var(--bad);background:var(--badbg)}
+  .hint{font-size:13.5px;color:var(--muted);margin-top:4px}
+  textarea.short{min-height:70px;margin-top:6px}
+  details summary{cursor:pointer;color:var(--indigo2);font-weight:600;margin-top:6px;font-size:14.5px}
+  .cue{background:#fff;border:2px solid var(--indigo);border-radius:12px;padding:14px 16px;margin:8px 0}
+  .cue ul{margin:6px 0;padding-left:22px}
+  .timer{font-size:26px;font-weight:700;color:var(--indigo);margin:6px 0 10px;min-height:34px}
+  @media(max-width:620px){.scale{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap"><div id="sendStat" class="sendstat"></div>
+
+<div class="hero">
+  <span class="tag">IELTS · Band 6 path</span>
+  <h1>My Home, My Routine</h1>
+  <p>Present Simple + adverbs of frequency + home vocabulary → IELTS Speaking &amp; Reading.</p>
+  <div class="who hidden" id="whoLine"></div>
+</div>
+
+<div id="login" class="card">
+  <h2>👋 Hi! What's your name?</h2>
+  <p class="muted">Напишите имя — результаты увидит преподаватель.</p>
+  <input type="text" id="nameInput" placeholder="Your name">
+  <div class="actions"><button class="primary" onclick="start()">Start →</button></div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="bar"><div id="pbar"></div></div>
+  <nav id="nav"></nav>
+  <div id="pane"></div>
+</div>
+</div>
+
+<script>
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID = "347625701";
+const KEY = "home_routine_b6_v1";
+const TITLE = "My Home, My Routine (Present Simple · IELTS 6)";
+const $ = id => document.getElementById(id);
+let STATE = {name:"", res:{}, texts:{}, done:{}};
+let liveTm=null;
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){}
+  if(window.MIRAE&&STATE.name){ clearTimeout(liveTm); liveTm=setTimeout(saveLive,2500); } }
+function load(){ try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.name) STATE=Object.assign(STATE,s);}catch(e){} }
+function saveLive(){ if(!window.MIRAE) return; MIRAE.live(plain(buildReport())); const st=$("sendStat"); st.textContent="✓ Результаты сохраняются, преподаватель их видит"; st.className="sendstat on"; setTimeout(()=>st.className="sendstat",4000); }
+function plain(t){ return t.replace(/<\/?b>/g,"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&"); }
+function esc(s){return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+function norm(s){
+  s=" "+String(s).toLowerCase().replace(/[’‘`]/g,"'").replace(/[.,!?;:"]/g," ")+" ";
+  s=s.replace(/n't /g," not ").replace(/ i'm /g," i am ").replace(/ (we|they|you)'re /g," $1 are ").replace(/ (he|she|it)'s /g," $1 is ").replace(/washing up/g,"washing-up");
+  return s.replace(/\s+/g," ").trim();
+}
+function match(val,answers){ const v=norm(val); return answers.some(a=>norm(a)===v); }
+
+/* ================= CONTENT ================= */
+const TABS=[
+ {id:"words",t:"1 · Words"},
+ {id:"learn",t:"2 · How often?"},
+ {id:"order",t:"3 · Word order"},
+ {id:"right",t:"4 · Which is right?"},
+ {id:"book", t:"📘 Giorgio (18–22)"},
+ {id:"read", t:"5 · IELTS Reading"},
+ {id:"me",   t:"6 · About me"},
+ {id:"speak",t:"🎤 IELTS Speaking"},
+ {id:"send", t:"🚀 Send"}
+];
+
+/* 1. Words: rooms & routine collocations */
+const WHERE=[
+ {q:"Where do you usually keep milk and cheese?",o:["in the freezer","in the fridge","in the cupboard"],a:1},
+ {q:"Where do you hang your clothes?",o:["in the wardrobe","in the drawers","in the oven"],a:0},
+ {q:"Where do you usually brush your teeth?",o:["in the kitchen","in the hall","in the bathroom"],a:2},
+ {q:"Where do you do your homework?",o:["at the desk","on the curtains","in the garage"],a:0},
+ {q:"Where do people usually park a car?",o:["in the attic","in the garage","in the basement"],a:1},
+ {q:"Where do you keep ice cream?",o:["in the fridge","in the freezer","in the sink"],a:1},
+ {q:"Where do you sit to watch TV?",o:["on the sofa","on the desk","in the drawers"],a:0},
+ {q:"Old boxes and things you don't need are often in the…",o:["living room","attic","kitchen"],a:1}
+];
+const COLLO=`Every weekday my alarm goes {off} at 7. I {get} up, {make} my bed and {brush} my teeth. After classes I {do} my homework at my desk. In the evening I sometimes {tidy} my room, and my brother {does} the washing-up. On Saturday we all {do} the housework together. On Sunday I {have} a lie-in and get up at 11!`;
+const BANK=["off","get","make","brush","do","tidy","does","do","have"];
+
+/* 3. Word order (adverb position) */
+const ORDER=[
+ {w:["always","I","breakfast","have"],a:["I always have breakfast."]},
+ {w:["is","late","never","She"],a:["She is never late."]},
+ {w:["usually","We","in the kitchen","eat"],a:["We usually eat in the kitchen."]},
+ {w:["tired","often","I","am","in the morning"],a:["I am often tired in the morning."]},
+ {w:["sometimes","My brother","the washing-up","does"],a:["My brother sometimes does the washing-up.","Sometimes my brother does the washing-up."]},
+ {w:["are","always","My housemates","noisy"],a:["My housemates are always noisy."]},
+ {w:["hardly ever","He","his room","tidies"],a:["He hardly ever tidies his room."]},
+ {w:["do","How often","the housework","you","do","?"],a:["How often do you do the housework?"]}
+];
+
+/* 4. Which is right? */
+const RIGHT=[
+ {q:"Choose the correct sentence.",o:["I usually am at home in the evening.","I am usually at home in the evening.","I am at home usually in the evening."],a:1,why:"to be → adverb AFTER it: I am usually…"},
+ {q:"Choose the correct sentence.",o:["She goes often to the gym.","She often goes to the gym.","Often she go to the gym."],a:1,why:"Other verbs → adverb BEFORE the verb: she often goes."},
+ {q:"Choose the correct sentence.",o:["I don't never watch TV.","I never watch TV.","I watch never TV."],a:1,why:"never = already negative. Not: don't never."},
+ {q:"How often ___ your room?",o:["you tidy","do you tidy","does you tidy"],a:1,why:"Question: How often + do/does + subject + verb."},
+ {q:"My sister ___ the dishes.",o:["never does","never do","does never"],a:0,why:"she → does; adverb before the verb."},
+ {q:"We do the shopping ___.",o:["once a week","once week","a week once"],a:0,why:"Expressions like once a week / every day go at the END."},
+ {q:"Which answer sounds best in IELTS Speaking? — “Do you cook at home?”",o:["Yes.","Yes, I do. I usually cook dinner because it's cheaper, but I hardly ever cook breakfast.","Yes, I am cook."],a:1,why:"Band 6: answer + reason + detail, with a frequency word."},
+ {q:"I ___ go to bed late, maybe once or twice a month.",o:["always","rarely","usually"],a:1,why:"once or twice a month = not often → rarely."}
+];
+
+/* 📘 Coursebook ex 18–22 (Giorgio) */
+const EX18 = [
+ {q:"my alarm goes 1 ___ at 8:30am",o:["up","on","off"],a:2},
+ {q:"Then, I 2 ___ up and go downstairs.",o:["get","go","put"],a:0},
+ {q:"I sometimes go to the 3 ___ and just get some juice.",o:["fridge","sink","freezer"],a:0},
+ {q:"I always talk to my housemates if they are there, in the 4 ___.",o:["basement","kitchen","bathroom"],a:1},
+ {q:"I go to the bathroom, 5 ___ my teeth,",o:["wash","tidy","brush"],a:2},
+ {q:"and sometimes 6 ___ my room.",o:["wash","tidy","brush"],a:1},
+ {q:"I sometimes help the others with the 7 ___",o:["homework","housework","workhouse"],a:1},
+ {q:"We sit down together on the 8 ___ and play games online.",o:["chair","desk","sofa"],a:2},
+ {q:"Before I go to sleep, I sit at my 9 ___ and do my homework.",o:["desk","bed","drawers"],a:0},
+ {q:"I have a lie 10 ___ until about 11:30am.",o:["on","up","in"],a:2}
+];
+const GIORGIO = "Every weekday morning, my alarm goes off at 8:30am. This gives me enough time to get ready before my lectures start at 10:00am. Then, I get up and go downstairs. I'm often too tired to eat breakfast, so I sometimes go to the fridge and just get some juice. I always talk to my housemates if they are there, in the kitchen. After that, I head back upstairs to get ready. I go to the bathroom, brush my teeth, and sometimes tidy my room. When it's time to leave, I pack my bag and go to college. At the end of the day when I get back home, I sometimes help the others with the housework – if we don't do it, all the rooms we share get very messy. When the house is clean again, we usually spend some time in the living room. We sit down together on the sofa and play games online for a while. We're always happy when we get the chance to do this, as it helps us relax. Before I go to sleep, I sit at my desk and do my homework. I never forget to do it. At the weekend, I can finally relax. I have a lie in until about 11:30am.";
+const ADVS=["often","sometimes","always","usually","never"];
+const BEFORMS=["i'm","we're"];
+
+/* 5. IELTS Reading */
+const LENA = `<h4>My home, my routine</h4>
+<p><b>A</b> I live in a semi-detached house near the university with three other students. It isn't big, but it's comfortable. Downstairs there is a small hall, a living room and a kitchen. Upstairs there are four bedrooms and only one bathroom, which is a bit of a problem in the mornings!</p>
+<p><b>B</b> On weekdays I usually get up at seven. I'm never hungry early in the morning, so I just have a cup of coffee in the kitchen. My housemate Tom is always in the bathroom first – he hardly ever spends less than twenty minutes there! While I wait, I make my bed and tidy my desk.</p>
+<p><b>C</b> In the evening we often cook together. We have a big fridge, but there's no freezer, so we go shopping twice a week. After dinner we sometimes watch a film on the sofa in the living room. I rarely watch TV alone – I prefer to read in my room.</p>
+<p><b>D</b> We share the housework. Every Saturday we clean the whole house together, and we do the washing-up every evening. At the weekend I always have a lie-in. I don't get up before ten.</p>`;
+const TFNG=[
+ {q:"Lena's house has more than one bathroom.",a:1},
+ {q:"Lena usually has a big breakfast.",a:1},
+ {q:"Tom spends a long time in the bathroom.",a:0},
+ {q:"Lena and Tom study the same subject.",a:2},
+ {q:"The housemates go shopping two times a week.",a:0},
+ {q:"Lena often watches TV on her own.",a:1},
+ {q:"Lena gets up late at the weekend.",a:0}
+];
+const SHORT=[
+ {q:"What does Lena tidy while she waits for the bathroom?",a:["her desk","desk","the desk","my desk"]},
+ {q:"In which room do the housemates watch films?",a:["living room","the living room"]},
+ {q:"Which kitchen appliance don't they have?",a:["freezer","a freezer","the freezer"]}
+];
+
+/* 7. Speaking */
+const P1=[
+ {q:"Do you live in a house or a flat?",m:"I live in a flat in the city centre. It's on the fifth floor, so I usually take the lift, but I sometimes walk up the stairs to keep fit."},
+ {q:"What's your favourite room in your home? Why?",m:"Probably my bedroom, because it's quiet and I can relax there. I often read on my bed in the evening, and I always do my homework at my desk by the window."},
+ {q:"What do you usually do in the evenings?",m:"I usually have dinner with my family and then I study for an hour or two. After that I sometimes watch a series on my laptop, but I hardly ever go to bed after midnight."},
+ {q:"How often do you do housework?",m:"Quite often, actually. I tidy my room every day and I do the washing-up most evenings. On Saturdays my family cleans the whole flat together."},
+ {q:"Do you prefer weekdays or weekends? Why?",m:"Definitely weekends! On weekdays I always get up early, but at the weekend I can have a lie-in and spend time with my friends."},
+ {q:"Is there anything you would like to change in your home?",m:"I'd like a bigger kitchen. Ours is quite small, so we never cook together — there just isn't enough space."}
+];
+
+/* ================= ENGINE ================= */
+let cur="words";
+function start(){
+  const n=$("nameInput").value.trim(); if(!n){$("nameInput").focus();return;}
+  if(STATE.name && STATE.name!==n){ STATE={name:n,res:{},texts:{},done:{}}; }
+  STATE.name=n; save();
+  $("login").classList.add("hidden"); $("app").classList.remove("hidden");
+  $("whoLine").textContent="Student: "+n; $("whoLine").classList.remove("hidden");
+  go(cur);
+}
+function renderNav(){
+  $("nav").innerHTML=TABS.map(t=>`<button id="nb-${t.id}" class="${t.id===cur?"active":""} ${STATE.done[t.id]?"done":""}" onclick="go('${t.id}')">${t.t}</button>`).join("");
+  const sc=TABS.filter(t=>!["learn","send"].includes(t.id));
+  $("pbar").style.width=Math.round(100*sc.filter(t=>STATE.done[t.id]).length/sc.length)+"%";
+  const a=$("nb-"+cur); if(a&&a.scrollIntoView) a.scrollIntoView({inline:"center",block:"nearest"});
+}
+function markDone(id){ STATE.done[id]=true; save(); renderNav(); }
+function go(id){
+  cur=id; renderNav(); window.scrollTo({top:0,behavior:"smooth"});
+  $("pane").innerHTML="";
+  ({words:rWords,learn:rLearn,order:rOrder,right:()=>rMcq("right","4 · Which is right?","Choose the correct option. <span class='muted'>Выберите правильный вариант — после ответа появится объяснение.</span>",RIGHT),
+    book:rBook,read:rRead,me:rMe,speak:rSpeak,send:rSend})[id]();
+  const i=TABS.findIndex(t=>t.id===id);
+  if(i<TABS.length-1) $("pane").insertAdjacentHTML("beforeend",`<div class="actions" style="text-align:right"><button class="primary" onclick="go('${TABS[i+1].id}')">Next: ${TABS[i+1].t.replace(/^\S+ · /,"")} →</button></div>`);
+}
+function card(html){ $("pane").insertAdjacentHTML("beforeend",`<div class="card">${html}</div>`); }
+function setRes(id,ok,total,wrong){ if(!STATE.res[id]){ STATE.res[id]={score:ok,total,wrong}; save(); } }
+
+/* --- MCQ --- */
+const MCQ={};
+function rMcq(id,title,intro,items,host){
+  const html=`${title?`<h2>${title}</h2><p>${intro}</p>`:""}
+  ${items.map((it,i)=>`<div class="q" id="${id}-q${i}"><div class="s"><span class="n">${i+1}</span>${it.q.replace("___",'<span class="blank">___</span>')}</div>
+    <div class="opts">${it.o.map((o,j)=>`<button onclick="answerMcq('${id}',${i},${j})">${o}</button>`).join("")}</div><div class="why hidden"></div></div>`).join("")}
+  <div class="score" id="${id}-score"></div>`;
+  if(host) host.insertAdjacentHTML("beforeend",html); else card(html);
+  MCQ[id]={items,ans:{}};
+}
+function answerMcq(id,i,j){
+  const M=MCQ[id]; if(M.ans[i]!==undefined) return;
+  M.ans[i]=j; const it=M.items[i]; const box=$(`${id}-q${i}`); const bs=box.querySelectorAll(".opts button");
+  bs[it.a].classList.add("ok"); if(j!==it.a) bs[j].classList.add("bad");
+  if(it.why){ const w=box.querySelector(".why"); w.innerHTML=(j===it.a?"✅ ":"❌ ")+it.why; w.classList.remove("hidden"); }
+  if(Object.keys(M.ans).length===M.items.length){
+    const ok=M.items.filter((x,k)=>M.ans[k]===x.a).length;
+    $(`${id}-score`).textContent=`Score: ${ok} / ${M.items.length}`+(ok===M.items.length?" 🔥":"");
+    setRes(id,ok,M.items.length,M.items.map((x,k)=>M.ans[k]!==x.a?`${x.q.replace(/<[^>]+>/g,"")} → "${x.o[M.ans[k]]}" (✓ ${x.o[x.a]})`:null).filter(Boolean));
+    after(id);
+  }
+}
+/* --- gaps --- */
+const GAPS={};
+function gapBlock(id,text){
+  let k=0; GAPS[id]=[];
+  const t=text.replace(/\{([^}]+)\}/g,(m,a)=>{ GAPS[id].push(a.split("|")); return `<input class="gap" id="${id}-g${k++}" autocomplete="off" autocapitalize="off" spellcheck="false">`; });
+  return `<div class="gaptext">${t}</div>
+  <div class="actions"><button class="primary" onclick="checkGaps('${id}')">Check</button><button id="${id}-show" class="hidden" onclick="document.querySelectorAll('[id^=${id}-g]+.fix').forEach(x=>x.classList.remove('hidden'))">Show answers</button></div>
+  <div class="score" id="${id}-score"></div>`;
+}
+function checkGaps(id){
+  const A=GAPS[id]; let ok=0; const wrong=[];
+  A.forEach((ans,i)=>{ const inp=$(`${id}-g${i}`); const old=inp.nextElementSibling; if(old&&old.classList.contains("fix")) old.remove();
+    inp.classList.remove("ok","bad");
+    if(match(inp.value,ans)){ok++;inp.classList.add("ok");}
+    else{inp.classList.add("bad");inp.insertAdjacentHTML("afterend",`<span class="fix hidden">${esc(ans[0])}</span>`);wrong.push(`${i+1}) "${inp.value||"—"}" (✓ ${ans[0]})`);} });
+  $(`${id}-score`).textContent=`Score: ${ok} / ${A.length}`+(ok===A.length?" 🔥":"");
+  $(`${id}-show`).classList.remove("hidden");
+  setRes(id,ok,A.length,wrong); after(id);
+}
+function after(id){
+  if(id==="where"||id==="collo"){ if(STATE.res.where&&STATE.res.collo) markDone("words"); }
+  else if(id.startsWith("b")&&id.length<5){ if(["b18","b19","b20","b21","b22"].every(k=>STATE.res[k])) markDone("book"); }
+  else if(id==="tfng"||id==="short"){ if(STATE.res.tfng&&STATE.res.short) markDone("read"); }
+  else markDone(id);
+}
+
+/* ---- 1. Words ---- */
+function rWords(){
+  card(`<h2>1 · Home &amp; routine words</h2>
+  <p>Remember the words from our <b>My Home</b> lesson? Let's check! <span class="muted">Вспоминаем слова урока «My Home».</span></p>
+  <div class="sub">A · Where…?</div><div id="hW"></div>
+  <div class="sub">B · Daily routine collocations</div>
+  <p class="muted">Fill in the gaps. Word bank: ${BANK.map(b=>`<span class="pill">${b}</span>`).join(" ")}</p>
+  ${gapBlock("collo",COLLO)}
+  <div class="tip">💡 <b>homework</b> = задания для учёбы · <b>housework</b> = уборка, дела по дому. <b>have a lie-in</b> = поспать подольше.</div>`);
+  rMcq("where","","",WHERE,$("hW"));
+}
+
+/* ---- 2. Learn ---- */
+function rLearn(){
+  card(`<h2>2 · How often? 🕒</h2>
+  <p>Adverbs of frequency tell us <b>how often</b> we do something. <span class="muted">Наречия частотности — «как часто».</span></p>
+  <div class="scale">
+    <div><b>always</b><span>100%</span></div><div><b>usually</b><span>90%</span></div><div><b>often</b><span>70%</span></div>
+    <div><b>sometimes</b><span>50%</span></div><div><b>rarely / hardly ever</b><span>10%</span></div><div><b>never</b><span>0%</span></div>
+  </div>`);
+  card(`<h2>📍 Where does the adverb go?</h2>
+  <table class="tbl">
+    <tr><th>to be (am / is / are)</th><th>other verbs</th></tr>
+    <tr><td>adverb <b>AFTER</b> the verb</td><td>adverb <b>BEFORE</b> the verb</td></tr>
+    <tr><td>I <b class="pp">am</b> <u>often</u> tired.<br>She <b class="pp">is</b> <u>never</u> late.</td><td>I <u>usually</u> <b class="ps">get up</b> at 7.<br>He <u>sometimes</u> <b class="ps">tidies</b> his room.</td></tr>
+  </table>
+  <div class="ru">Запомните: <b>BE — после, остальные — перед</b>. I am always… / I always go…</div>
+  <h3>❓ Questions</h3>
+  <div class="vs"><div><b>How often</b> do you do the housework? — <u>Every day</u>. / <u>Twice a week</u>. / <u>Hardly ever</u>.</div>
+  <div><b>Do</b> you <u>usually</u> have breakfast? — Yes, I <u>always</u> do. / No, I <u>never</u> do.</div></div>
+  <h3>⏰ Time expressions — at the END</h3>
+  <div class="signals"><span>every day</span><span>once a week</span><span>twice a month</span><span>three times a year</span><span>on Mondays</span><span>at the weekend</span></div>
+  <div class="vs"><div>I go to the gym <u>twice a week</u>. · We clean the house <u>every Saturday</u>.</div></div>`);
+  card(`<h2>🎯 IELTS Band 6 tip</h2>
+  <p>In Speaking Part 1 the examiner asks about your <b>home</b> and <b>daily routine</b>. For Band 6, don't stop after “Yes” or “No”.</p>
+  <div class="formula"><span>Answer</span> + <span>Reason (because…)</span> + <span>Detail / example with a frequency word</span></div>
+  <div class="vs"><div>❌ <i>Do you cook?</i> — Yes.</div>
+  <div>✅ <i>Do you cook?</i> — Yes, I do. I <u>usually</u> cook dinner <b>because</b> it's cheaper than eating out, but I <u>hardly ever</u> cook breakfast — I'm <u>always</u> in a hurry!</div></div>
+  <p>Extra phrases for a higher score: <span class="pill">most of the time</span> <span class="pill">from time to time</span> <span class="pill">once in a while</span> <span class="pill">I tend to…</span></p>
+  <div class="warn">⚠️ <b>never</b> is already negative: <s>I don't never cook</s> → I <b>never</b> cook.<br>⚠️ he/she/it + <b>-s</b>: She usually <b>goes</b>, he <b>does</b>, it <b>tidies</b>.</div>`);
+  markDone("learn");
+}
+
+/* ---- 3. Word order builder ---- */
+const ORD={};
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function rOrder(){
+  card(`<h2>3 · Put the words in order</h2>
+  <p>Tap the words to build a sentence. Tap a word in your sentence to remove it. <span class="muted">Нажимайте на слова по порядку.</span></p>
+  ${ORDER.map((o,i)=>`<div class="q"><div class="s"><span class="n">${i+1}</span><span class="built" id="ob${i}"></span></div><div class="pool" id="op${i}"></div><div class="why hidden" id="ow${i}"></div></div>`).join("")}
+  <div class="actions"><button class="primary" onclick="checkOrder()">Check</button></div><div class="score" id="order-score"></div>`);
+  ORDER.forEach((o,i)=>{ ORD[i]={pool:shuffle(o.w.map((w,k)=>({w,k}))),built:[]}; drawOrd(i); });
+}
+function drawOrd(i){
+  const O=ORD[i];
+  $("ob"+i).innerHTML=O.built.length?O.built.map((t,j)=>`<button class="tok on" onclick="ordBack(${i},${j})">${t.w}</button>`).join(""):'<span class="muted">…</span>';
+  $("op"+i).innerHTML=O.pool.map((t,j)=>`<button class="tok" onclick="ordPick(${i},${j})">${t.w}</button>`).join("");
+}
+function ordPick(i,j){ const O=ORD[i]; O.built.push(O.pool.splice(j,1)[0]); drawOrd(i); }
+function ordBack(i,j){ const O=ORD[i]; O.pool.push(O.built.splice(j,1)[0]); drawOrd(i); }
+function sentence(i){ let s=ORD[i].built.map(t=>t.w).join(" ").replace(/ \?$/,"?"); if(!/[?.]$/.test(s)) s+="."; return s.charAt(0).toUpperCase()+s.slice(1); }
+function checkOrder(){
+  const left=ORDER.map((o,i)=>ORD[i].pool.length?i+1:0).filter(Boolean);
+  if(left.length){ $("order-score").textContent="Finish all sentences first: "+left.join(", ")+" · Сначала соберите все предложения"; return; }
+  let ok=0; const wrong=[];
+  ORDER.forEach((o,i)=>{ const s=sentence(i); const good=ORD[i].pool.length===0&&match(s,o.a); const w=$("ow"+i);
+    $("ob"+i).className="built "+(good?"good":"wrong");
+    if(good) ok++; else wrong.push(`"${s}" (✓ ${o.a[0]})`);
+    w.innerHTML=good?"✅ "+o.a[0]:"❌ "+o.a[0]; w.classList.remove("hidden"); });
+  $("order-score").textContent=`Score: ${ok} / ${ORDER.length}`+(ok===ORDER.length?" 🔥":"");
+  setRes("order",ok,ORDER.length,wrong); after("order");
+}
+
+/* ---- 📘 Book ---- */
+function rBook(){
+  card(`<h2>📘 Giorgio's day (ex. 18–22)</h2>
+  <p class="muted">Exercises from your coursebook.</p>
+  <div class="sub">18 · Read how Giorgio describes his day. Choose A, B or C.</div><div id="h18"></div>
+  <div class="sub">19 · Tap all the adverbs of frequency</div>
+  <p class="muted">Example: I am <u>often</u> too tired to eat breakfast. (There are 8.)</p>
+  <div class="story tap" id="t19"></div>
+  <div class="actions"><button class="primary" onclick="checkTap('b19')">Check</button></div><div class="score" id="b19-score"></div>
+  <div class="sub">20 · Now tap the main verb next to each adverb</div>
+  <p class="muted">Example: I <b>am</b> often too tired… (Tip: <i>I'm</i> = I <b>am</b>.)</p>
+  <div class="story tap" id="t20"></div>
+  <div class="actions"><button class="primary" onclick="checkTap('b20')">Check</button></div><div class="score" id="b20-score"></div>
+  <div class="sub">21 · Complete the table: before or after?</div>
+  <table class="tbl"><tr><th>When I use the verb <i>to be</i>…</th><th>When I use other verbs…</th></tr>
+  <tr><td>The adverb comes <select id="s21a"><option></option><option>before</option><option>after</option></select> the verb.<br><i class="muted">I am often too tired to eat breakfast.</i></td>
+  <td>The adverb comes <select id="s21b"><option></option><option>before</option><option>after</option></select> the verb.<br><i class="muted">We usually spend time in the living room.</i></td></tr></table>
+  <div class="actions"><button class="primary" onclick="check21()">Check</button></div><div class="score" id="b21-score"></div>
+  <div class="sub">22 · Complete the sentences with <i>never</i> in the correct position</div>
+  <div class="q"><div class="s"><span class="n">1</span>I ___ am ___ late for school.</div><input type="text" id="b22-0" placeholder="Write the full sentence" autocomplete="off"></div>
+  <div class="q"><div class="s"><span class="n">2</span>I ___ forget ___ to do my homework.</div><input type="text" id="b22-1" placeholder="Write the full sentence" autocomplete="off"></div>
+  <div class="actions"><button class="primary" onclick="check22()">Check</button></div><div class="score" id="b22-score"></div>
+  <div class="tip">23 · Speaking with a partner → see the <b>🎤 IELTS Speaking</b> tab.</div>`);
+  rMcq("b18","","",EX18,$("h18"));
+  drawTap("t19"); drawTap("t20");
+}
+const TOK=GIORGIO.split(" ");
+const clean=w=>w.toLowerCase().replace(/[^a-z']/g,"");
+const ADV_IDX=TOK.map((w,i)=>ADVS.includes(clean(w))?i:-1).filter(i=>i>=0);
+const VERB_IDX=ADV_IDX.map(i=>BEFORMS.includes(clean(TOK[i-1]))?i-1:i+1);
+const TAPSEL={t19:new Set(),t20:new Set()};
+function drawTap(id){ $(id).innerHTML=TOK.map((w,i)=>`<span class="w ${TAPSEL[id].has(i)?"sel":""}" onclick="tapW('${id}',${i},this)">${esc(w)}</span>`).join(" "); }
+function tapW(id,i,el){ const S=TAPSEL[id]; if(S.has(i)) S.delete(i); else S.add(i); el.classList.toggle("sel"); }
+function checkTap(rid){
+  const id=rid==="b19"?"t19":"t20", key=rid==="b19"?ADV_IDX:VERB_IDX, S=TAPSEL[id];
+  const spans=$(id).querySelectorAll(".w"); let hit=0, extra=0; const missed=[];
+  spans.forEach((s,i)=>{ s.classList.remove("ok","bad","miss");
+    if(key.includes(i)){ if(S.has(i)){hit++;s.classList.add("ok");} else {s.classList.add("miss"); missed.push(clean(TOK[i]));} }
+    else if(S.has(i)){ extra++; s.classList.add("bad"); } });
+  const score=Math.max(0,hit-extra);
+  $(rid+"-score").textContent=`Found ${hit} / ${key.length}`+(extra?` · wrong taps: ${extra}`:"")+(hit===key.length&&!extra?" 🔥":"");
+  setRes(rid,score,key.length,missed.length||extra?[`missed: ${missed.join(", ")||"—"}; wrong taps: ${extra}`]:[]); after(rid);
+}
+function check21(){
+  const a=$("s21a").value,b=$("s21b").value; let ok=(a==="after")+(b==="before");
+  $("s21a").className=a==="after"?"ok":"bad"; $("s21b").className=b==="before"?"ok":"bad";
+  $("b21-score").textContent=`Score: ${ok} / 2`+(ok===2?" — BE → after, other verbs → before ✅":" (✓ 1 after, 2 before)");
+  setRes("b21",ok,2,ok<2?[`1 "${a||"—"}", 2 "${b||"—"}" (✓ after, before)`]:[]); after("b21");
+}
+function check22(){
+  const A=[["I am never late for school.","I'm never late for school."],["I never forget to do my homework."]]; let ok=0; const wrong=[];
+  A.forEach((ans,i)=>{ const inp=$("b22-"+i); const g=match(inp.value,ans); inp.classList.remove("ok","bad"); inp.classList.add(g?"ok":"bad"); if(g)ok++; else wrong.push(`"${inp.value||"—"}" (✓ ${ans[0]})`); });
+  $("b22-score").innerHTML=`Score: ${ok} / 2`+(ok<2?`<div class="why">✓ I am never late for school. · I never forget to do my homework.</div>`:" 🔥");
+  setRes("b22",ok,2,wrong); after("b22");
+}
+
+/* ---- 5. Reading ---- */
+const TF=["TRUE","FALSE","NOT GIVEN"];
+function rRead(){
+  card(`<h2>5 · IELTS Reading practice</h2>
+  <p class="muted">Read the text. Then do the two IELTS task types below. <span>Не спешите: ищите ответ в тексте.</span></p>
+  <div class="story">${LENA}</div>
+  <div class="sub">Questions 1–7 · TRUE / FALSE / NOT GIVEN</div>
+  <div class="tip" style="font-size:14.5px"><b>TRUE</b> — the text says this. <b>FALSE</b> — the text says the opposite. <b>NOT GIVEN</b> — the text doesn't say anything about it.</div>
+  <div id="hTF"></div>
+  <div class="sub">Questions 8–10 · Answer with NO MORE THAN TWO WORDS</div>
+  ${SHORT.map((s,i)=>`<div class="q"><div class="s"><span class="n">${i+8}</span>${s.q}</div><input type="text" id="sh${i}" style="max-width:260px;margin-top:6px" autocomplete="off"><div class="why hidden" id="shw${i}"></div></div>`).join("")}
+  <div class="actions"><button class="primary" onclick="checkShort()">Check 8–10</button></div><div class="score" id="short-score"></div>`);
+  rMcq("tfng","","",TFNG.map(t=>({q:t.q,o:TF,a:t.a})),$("hTF"));
+}
+function checkShort(){
+  let ok=0; const wrong=[];
+  SHORT.forEach((s,i)=>{ const inp=$("sh"+i), v=inp.value; const words=(v.trim().match(/\S+/g)||[]).length; const g=match(v,s.a)&&words<=2;
+    inp.classList.remove("ok","bad"); inp.classList.add(g?"ok":"bad"); if(g)ok++; else wrong.push(`${i+8}) "${v||"—"}" (✓ ${s.a[0]})`);
+    const w=$("shw"+i); w.innerHTML=g?"✅":(words>2?"❌ Too many words! ":"❌ ")+"Answer: <b>"+s.a[0]+"</b>"; w.classList.remove("hidden"); });
+  $("short-score").textContent=`Score: ${ok} / ${SHORT.length}`;
+  setRes("short",ok,SHORT.length,wrong); after("short");
+}
+
+/* ---- 6. About me ---- */
+const ME_Q=["How often do you have breakfast?","What do you usually do in the evening?","How often do you tidy your room?","What do you never do at the weekend?","Where do you usually do your homework?","What housework do you hardly ever do?"];
+function rMe(){
+  const T=STATE.texts.me||{};
+  card(`<h2>6 · About me ✍️</h2>
+  <p>Answer in full sentences. Use a <b>frequency word</b> in each answer and add a <b>reason</b> (because…) where you can.</p>
+  <p class="muted">Ответьте полными предложениями — ответы увидит преподаватель.</p>
+  ${ME_Q.map((q,i)=>`<div class="q"><div class="s"><span class="n">${i+1}</span>${q}</div><input type="text" id="me${i}" value="${esc(T[i]||"")}" oninput="meInput()" autocomplete="off"><div class="hint" id="meh${i}"></div></div>`).join("")}`);
+  meInput();
+}
+const FREQ=/\b(always|usually|often|sometimes|rarely|seldom|never|hardly ever|every|once|twice|times a|most of the time|from time to time)\b/i;
+function meInput(){
+  const T={}; let good=0;
+  ME_Q.forEach((q,i)=>{ const v=$("me"+i).value; T[i]=v; const h=$("meh"+i); const w=(v.trim().match(/\S+/g)||[]).length;
+    if(!v.trim()){h.textContent="";return;}
+    const f=FREQ.test(v), r=/\bbecause\b|\bso\b|\bbut\b/i.test(v);
+    h.innerHTML=(f?"✅ frequency word":"➕ add a frequency word")+" · "+(w>=6?"✅ full sentence":"➕ make it longer")+(r?" · ⭐ reason":"");
+    if(f&&w>=6) good++; });
+  STATE.texts.me=T; save();
+  if(good>=5) markDone("me");
+}
+
+/* ---- 7. Speaking ---- */
+let timer=null;
+function rSpeak(){
+  const S=STATE.texts.speak||{};
+  card(`<h2>🎤 IELTS Speaking · Part 1</h2>
+  <p>Answer each question <b>aloud</b> in 2–3 sentences (answer + reason + detail). Then write your answer down and compare it with the model. <span class="muted">Сначала вслух, потом письменно.</span></p>
+  ${P1.map((p,i)=>`<div class="q"><div class="s"><span class="n">${i+1}</span>${p.q}</div>
+    <textarea class="short" id="sp${i}" oninput="spInput()" placeholder="My answer…">${esc(S[i]||"")}</textarea>
+    <details><summary>👀 Model answer (Band 6)</summary><div class="why">${p.m}</div></details></div>`).join("")}`);
+  card(`<h2>🎤 Part 2 · Cue card</h2>
+  <div class="cue"><b>Describe your favourite room in your home.</b><br>You should say:<ul><li>which room it is</li><li>what furniture there is in it</li><li>what you usually do there</li></ul>and explain why you like it.</div>
+  <p>You have <b>1 minute</b> to make notes. Then speak for <b>1–2 minutes</b>.</p>
+  <div class="actions"><button onclick="runTimer(60,'Prepare')">⏱ 1 min — prepare</button><button onclick="runTimer(120,'Speak')">🎙 2 min — speak</button></div>
+  <div class="timer" id="timer"></div>
+  <textarea id="cueNotes" oninput="spInput()" placeholder="Notes: room… furniture… I usually… because…">${esc(S.cue||"")}</textarea>
+  <div class="tip">💡 Useful: <i>There is a… / There are… · I usually… · I often… because… · The best thing about it is… · I always feel relaxed there.</i></div>`);
+  card(`<h2>👥 In class (ex. 23)</h2>
+  <p>In pairs, talk about what you <b>usually</b> do on weekdays and describe a typical day at the weekend. Your partner asks <b>two</b> “How often…?” questions.</p>`);
+}
+function spInput(){
+  const S={}; P1.forEach((p,i)=>S[i]=$("sp"+i).value); S.cue=$("cueNotes").value; STATE.texts.speak=S; save();
+  if(P1.filter((p,i)=>(S[i]||"").trim().split(/\s+/).length>=8).length>=4) markDone("speak");
+}
+function runTimer(sec,label){
+  clearInterval(timer); let t=sec; const el=$("timer");
+  const draw=()=>el.textContent=`${label}: ${Math.floor(t/60)}:${String(t%60).padStart(2,"0")}`; draw();
+  timer=setInterval(()=>{ t--; draw(); if(t<=0){ clearInterval(timer); el.textContent=label==="Prepare"?"⏰ Time to speak!":"✅ Time's up — well done!"; } },1000);
+}
+
+/* ---- Send ---- */
+const NAMES={where:"Words: Where…?",collo:"Words: collocations",order:"Word order",right:"Which is right?",b18:"Book 18",b19:"Book 19 (adverbs)",b20:"Book 20 (verbs)",b21:"Book 21",b22:"Book 22",tfng:"Reading T/F/NG",short:"Reading short answers"};
+function rSend(){
+  const rows=Object.keys(NAMES).map(k=>{ const r=STATE.res[k]; return `<tr><td>${NAMES[k]}</td><td style="text-align:right">${r?`<b>${r.score} / ${r.total}</b>`:'<span class="muted">not done</span>'}</td></tr>`; }).join("");
+  card(`<h2>🚀 Send to your teacher</h2>
+  <table class="res">${rows}</table>
+  <div class="actions"><button class="primary" id="sendBtn" onclick="sendResults()">Send results 📩</button>
+  <button class="sm" onclick="if(confirm('Start again from zero?')){STATE={name:STATE.name,res:{},texts:{},done:{}};save();go('words')}">Reset</button></div>
+  <div class="feedback" id="sendFb"></div><textarea id="copyBox" class="hidden" readonly></textarea>`);
+}
+function buildReport(){
+  let t=`🏠 <b>${TITLE}</b>\n👤 <b>${esc(STATE.name)}</b>\n🕒 ${new Date().toLocaleString("ru-RU")}\n`; let tot=0,max=0;
+  Object.keys(NAMES).forEach(k=>{ const r=STATE.res[k]; if(!r){t+=`\n▫️ ${NAMES[k]}: —`;return;}
+    tot+=r.score; max+=r.total; t+=`\n${r.score===r.total?"✅":"🔸"} <b>${NAMES[k]}: ${r.score}/${r.total}</b>`; r.wrong.forEach(w=>t+=`\n   • ${esc(w)}`); });
+  t+=`\n\n<b>Total: ${tot}/${max}</b>`;
+  const me=STATE.texts.me||{}; const meL=ME_Q.map((q,i)=>me[i]&&me[i].trim()?`${i+1}. ${q}\n   ${esc(me[i].trim())}`:null).filter(Boolean);
+  if(meL.length) t+=`\n\n✍️ <b>About me</b>\n`+meL.join("\n");
+  const sp=STATE.texts.speak||{}; const spL=P1.map((p,i)=>sp[i]&&sp[i].trim()?`${i+1}. ${p.q}\n   ${esc(sp[i].trim())}`:null).filter(Boolean);
+  if(spL.length) t+=`\n\n🎤 <b>Speaking Part 1</b>\n`+spL.join("\n");
+  if(sp.cue&&sp.cue.trim()) t+=`\n\n🎤 <b>Part 2 notes (favourite room)</b>\n${esc(sp.cue.trim())}`;
+  return t;
+}
+function chunks(text){ const out=[]; let c=""; text.split("\n").forEach(l=>{ if((c+"\n"+l).length>3800){out.push(c);c=l;} else c=c?c+"\n"+l:l; }); if(c)out.push(c); return out; }
+async function sendResults(){
+  const text=buildReport(); $("sendBtn").disabled=true; $("sendFb").textContent="Sending…";
+  try{ for(const part of chunks(text)){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+    $("sendFb").textContent="✅ Sent! Well done!"; $("sendBtn").disabled=false; }
+  catch(e){ $("sendBtn").disabled=false; $("sendFb").textContent="Couldn't send ("+e.message+"). Copy the text and send it to your teacher:"; const b=$("copyBox"); b.value=plain(text); b.classList.remove("hidden"); b.select(); }
+}
+
+load(); if(STATE.name) $("nameInput").value=STATE.name;
+$("nameInput").addEventListener("keydown",e=>{ if(e.key==="Enter") start(); });
+if(window.MIRAE&&MIRAE.user){ $("nameInput").value=MIRAE.user; start(); }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden"){ clearTimeout(liveTm); saveLive(); } });
+addEventListener("pagehide",()=>saveLive());
+</script>
+</body>
+</html>
