@@ -40,7 +40,7 @@ function dueText(d){
 }
 function hwActive(){return (HW||[]).filter(function(r){return r.status==='active'}).sort(function(a,b){return (a.due||'9999')<(b.due||'9999')?-1:(a.due||'9999')>(b.due||'9999')?1:a.created-b.created})}
 function hwRow(r){
-  var n=0;(r.items||[]).forEach(function(it){n+=it.m?1:(it.b||[]).length});
+  var n=0;(r.items||[]).forEach(function(it){n+=it.m||it.wt?1:(it.b||[]).length});
   var P={};try{P=JSON.parse(localStorage.getItem('kr_progress:'+KR.user()+':hw-'+r.id)||'{}')}catch(e){}
   var d=Math.min(n,Object.keys(P).filter(function(k){var p=P[k];return p&&(p.done||p.total!=null)}).length);
   var du=r.due?dueText(r.due):['','срок не задан'],th=(r.theory||[])[0],other=r.lang&&r.lang!==KR.lang()&&KR.LANGS[r.lang];

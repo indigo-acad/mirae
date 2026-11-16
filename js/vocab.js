@@ -16,6 +16,18 @@ function save(){try{localStorage.setItem(key(),JSON.stringify(D))}catch(e){}}
 function put(c){D.w[c.id]=c;D.d[c.id]=1;delete D.x[c.id];save();push()}
 function revToday(){var ds=SRS.dayStart(Date.now());return D.rv&&D.rv.d===ds?D.rv.n:0}
 function changed(){if(typeof V.onchange==="function")try{V.onchange()}catch(e){}}
+/* Журнал занятий словами по дням (kr_wlog:<ученик>): n — новых слов начато, r — повторений и шагов изучения,
+   ok — верных ответов, t — время последнего ответа. Уходит в облако вместе с прогрессом ученика (js/common.js, ключ wl),
+   преподаватель видит его в карточке ученика. Хранятся последние 60 дней. */
+function dayKey(t){var d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function logAnswer(wasNew,good,now){
+  var k="kr_wlog:"+KR.user(),L={};try{L=JSON.parse(localStorage.getItem(k)||"{}")||{}}catch(e){}
+  var d=dayKey(now),x=L[d]||{n:0,r:0,ok:0,t:0};
+  if(wasNew)x.n++;else x.r++;if(good)x.ok++;x.t=now;L[d]=x;
+  var keys=Object.keys(L).sort();while(keys.length>60)delete L[keys.shift()];
+  try{localStorage.setItem(k,JSON.stringify(L))}catch(e){}
+  if(KR.push)KR.push();
+}
 
 // ---------- синхронизация ----------
 var timer=null,busy=false,again=false;
@@ -77,9 +89,9 @@ var V={
   star:function(id){var c=D.w[id];if(!c)return null;c=Object.assign({},c,{u:Date.now()});if(c.star)delete c.star;else{c.star=1;c=SRS.bump(c,Date.now())}put(c);return c},
   remove:function(id){delete D.w[id];delete D.d[id];D.x[id]=1;save();push()},
   answer:function(id,grade){
-    var c=D.w[id];if(!c)return null;
-    if(c.st===2){var ds=SRS.dayStart(Date.now());D.rv=D.rv&&D.rv.d===ds?{d:ds,n:D.rv.n+1}:{d:ds,n:1}}
-    c=SRS.next(c,grade,D.s,Date.now());put(c);return c;
+    var c=D.w[id];if(!c)return null;var now=Date.now(),wasNew=!c.st;
+    if(c.st===2){var ds=SRS.dayStart(now);D.rv=D.rv&&D.rv.d===ds?{d:ds,n:D.rv.n+1}:{d:ds,n:1}}
+    c=SRS.next(c,grade,D.s,now);put(c);logAnswer(wasNew,grade>=3,now);return c;
   },
   /* Ответ в упражнении вне тренажёра (см. SRS.practice). res: {id карточки: верно ли}; если слово было в двух заданиях
      и в одном из них ошибка, передавайте false. Возвращает {back: вернулись на повторение, done: засчитаны как повторение}. */

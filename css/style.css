@@ -890,3 +890,83 @@ html:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{
 .hwt-pick{align-items:center;cursor:pointer}
 .hwt-old{margin-top:14px}
 @media (max-width:420px){.wcab-2{gap:8px}.wcab-i{padding:12px}.wcab-i b{font-size:32px}}
+/* преподаватель: как ученик учит слова (цвета проверены на различимость, в том числе при цветовой слепоте) */
+.wlog{--wn:#D98A2B;--wr:#4254AD;margin:12px 0 4px;padding:14px 0 6px;border-top:1px solid var(--rule)}
+.wlog-h{margin:0 0 8px}
+.wlog-t{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.wlog-t div{display:flex;flex-direction:column;padding:10px 12px;border-radius:12px;background:var(--fill)}
+.wlog-t b{font-family:var(--font-display);font-size:28px;font-weight:600;line-height:1.1}
+.wlog-t .muted{font-size:13px;line-height:1.3}
+.wlog-l{margin:8px 0 10px;font-size:14px}
+.wlog-late{color:var(--bad-fg);font-weight:600}
+.wch-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13.5px;margin:0 0 6px}
+.wch-legend span{display:inline-flex;align-items:center;gap:6px}
+.wch-legend i{display:inline-block;width:14px;height:4px;border-radius:2px}
+.wch-legend i.wn,.wch i.wn{background:var(--wn)}
+.wch-legend i.wr,.wch i.wr{background:var(--wr)}
+.wch{position:relative;display:grid;grid-template-columns:repeat(14,1fr);height:110px;border-bottom:1px solid var(--rule);border-top:1px solid var(--rule)}
+.wch-c{display:flex;justify-content:center;align-items:flex-end;height:100%;outline:none;border-radius:4px}
+.wch-c:hover,.wch-c:focus-visible{background:var(--fill)}
+.wch-b{display:flex;flex-direction:column-reverse;gap:2px;width:min(14px,64%);height:100%}
+.wch-b i{display:block;min-height:3px}
+.wch-b i:last-child{border-radius:4px 4px 0 0}
+.wch-tip{position:absolute;top:-34px;z-index:2;padding:4px 10px;border-radius:8px;background:var(--navy);color:var(--ivory);font-size:13px;white-space:nowrap;pointer-events:none}
+.wch-x{display:grid;grid-template-columns:repeat(14,1fr);font-size:11.5px;color:var(--fg-2);text-align:center;margin-top:3px}
+.wch-tbl{margin:8px 0 2px;font-size:14px}
+.wch-tbl summary{cursor:pointer;padding:4px 0}
+.wch-tbl table{border-collapse:collapse;margin-top:4px}
+.wch-tbl th,.wch-tbl td{padding:4px 12px 4px 0;text-align:left;font-variant-numeric:tabular-nums}
+.wlog-w{margin:8px 0 0;font-size:14.5px}
+@media (max-width:420px){.wlog-t{gap:6px}.wlog-t div{padding:8px}.wlog-t b{font-size:24px}}
+/* ---------- тест по словам (test.html): с учителем и самостоятельно ---------- */
+.wt{max-width:860px}
+.wt-setup h3{display:flex;align-items:center;gap:8px;margin:0 0 6px}
+.wt-setup h3 svg{color:var(--gold)}
+.wt-lbl{margin:12px 0 4px}
+.wt-kinds{display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:6px}
+.wt-kinds label{display:inline-flex;align-items:center;gap:7px;cursor:pointer}
+.wt-kinds input{width:18px;height:18px;accent-color:var(--gold)}
+.wt-setup .btn.big{display:inline-flex;align-items:center;gap:8px}
+.wt-top{display:flex;justify-content:space-between;align-items:center;min-height:28px;margin:6px 2px 0;font-size:17px}
+.wt-score .g{color:var(--ok-fg)} .wt-score .r{color:var(--bad-fg)}
+.wt-clock{font-weight:600;font-variant-numeric:tabular-nums}
+.wt-clock.low{color:var(--bad-fg)}
+.wt-q{padding:22px}
+.wt-n{margin:6px 0 4px;font-size:14.5px}
+.wt-p{font-size:34px;font-weight:600;line-height:1.3;margin:14px 0 6px;display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.wt-p.wt-tr{font-size:28px;font-weight:500}
+.wt-p.wt-ctx{font-size:24px;font-weight:500;display:block}
+.wt-blank{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--gold-ink);letter-spacing:2px;white-space:pre-wrap}
+.wt-et{margin:2px 0 6px;font-size:15px}
+.wt-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.wt-opts button{display:flex;align-items:flex-start;gap:10px;text-align:left;padding:14px 16px;font-size:19px;line-height:1.35;border-radius:14px;min-height:56px}
+.wt-opts button small{flex:none;font-size:12px;opacity:.55;margin-top:4px}
+.wt-opts button.ok{outline:3px solid var(--ok);background:rgba(63,138,90,.12)}
+.wt-opts button.bad{outline:3px solid var(--bad);background:rgba(185,71,59,.1)}
+.wt-opts button:disabled{opacity:1;cursor:default}
+.wt-in{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.wt-in input{flex:1 1 220px;margin:0;font-size:22px}
+.wt-in input.ok{border-color:var(--ok);background:rgba(63,138,90,.1)}
+.wt-in input.bad{border-color:var(--bad);background:rgba(185,71,59,.08)}
+.wt-fb{min-height:30px;margin-top:14px;font-size:19px;font-weight:600}
+.wt-fb.ok{color:var(--ok)} .wt-fb.bad{color:var(--bad)}
+.wt-fb .say{vertical-align:middle}
+.wt-ex{margin-top:6px;font-size:16px;font-weight:400;color:var(--fg)}
+.wt-acts{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.wt-acts .btn{display:inline-flex;align-items:center;gap:8px}
+.wt-done h3{font-size:34px;margin:0 0 8px}
+.wt-res{width:100%;border-collapse:collapse;font-size:16px}
+.wt-res td{padding:7px 6px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+@media (max-width:560px){.wt-opts{grid-template-columns:1fr}.wt-p{font-size:28px}.wt-p.wt-tr{font-size:24px}.wt-p.wt-ctx{font-size:21px}}
+/* преподаватель: тест на начало урока */
+.tg-src{margin:10px 0 8px}
+.tg-prev{margin:10px 0 8px;font-size:14.5px}
+.tg-row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:8px 0 2px;font-size:14.5px}
+.tg-row label{display:inline-flex;align-items:center;gap:8px}
+.tg-row select{margin:0;width:auto}
+#tgc .done-row button{display:inline-flex;align-items:center;gap:6px}
+.wt-card{margin-top:18px}
+.wt-card h3{display:flex;align-items:center;gap:8px;margin:0 0 6px}
+.wt-card h3 svg{color:var(--gold)}
+.wt-btns{display:inline-flex;gap:8px;flex-wrap:wrap}
+.wt-btns .btn{display:inline-flex;align-items:center;gap:6px}

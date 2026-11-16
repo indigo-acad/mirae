@@ -7,8 +7,10 @@
 -- Нужны файлы прошлых шагов: school-access.sql и teachers.sql.
 
 -- ---------- 1. Таблица ----------
--- items:  [{"l":"l12-jiyo","b":["practice-0","practice-1"]}, {"m":"ko-topik3-vocab"}]
---         l — урок, b — блоки урока (ключ «раздел-номер», как в прогрессе урока); m — материал из каталога
+-- items:  [{"l":"l12-jiyo","b":["practice-0","practice-1"]}, {"m":"ko-topik3-vocab"}, {"wt":{...}}]
+--         l — урок, b — блоки урока (ключ «раздел-номер», как в прогрессе урока); m — материал из каталога;
+--         wt — тест по словам (test.html): {"title":"…","lang":"ko","k":["tr","rev","ctx","wr"],"min":10,
+--              "w":[{"w":"слово","t":"перевод","ex":"пример","et":"перевод примера","f":"форма в примере"}, …]}
 -- theory: [{"l":"l12-jiyo","s":"grammar"}] — разделы теории, которые ученик может открыть из домашки
 -- status: active — задана, done — сдана, checked — проверена преподавателем
 create table if not exists public.homework (
@@ -37,7 +39,7 @@ revoke all on public.homework from anon, authenticated;
 -- проверка состава домашки: что задано и откуда
 create or replace function public._hw_check(p_hw jsonb)
 returns void as $fn$
-declare it jsonb; b jsonb; n int := 0;
+declare it jsonb; b jsonb; n int := 0; k text;
 begin
   if p_hw is null or jsonb_typeof(p_hw) <> 'object' or length(p_hw::text) > 20000 then raise exception 'bad_input'; end if;
   if length(trim(coalesce(p_hw->>'title', ''))) not between 1 and 200 then raise exception 'bad_input'; end if;
@@ -47,6 +49,20 @@ begin
     if jsonb_typeof(it) <> 'object' then raise exception 'bad_input'; end if;
     if it ? 'm' then
       if not exists (select 1 from public.materials where id = it->>'m') then raise exception 'no_material'; end if;
+    elsif it ? 'wt' then
+      -- тест по словам: слова лежат в самом задании, ученик проходит его на странице test.html
+      if jsonb_typeof(it->'wt') <> 'object' or jsonb_typeof(it->'wt'->'w') is distinct from 'array'
+         or jsonb_array_length(it->'wt'->'w') not between 2 and 40 or length(coalesce(it->'wt'->>'title', '')) > 200
+         or coalesce(it->'wt'->>'min', '0') !~ '^[0-9]{1,2}$' then raise exception 'bad_input'; end if;
+      for b in select * from jsonb_array_elements(it->'wt'->'w') loop
+        if jsonb_typeof(b) <> 'object' or length(coalesce(b->>'w', '')) not between 1 and 120 or length(coalesce(b->>'t', '')) not between 1 and 200
+           or length(coalesce(b->>'ex', '') || coalesce(b->>'et', '') || coalesce(b->>'f', '')) > 600 then raise exception 'bad_input'; end if;
+      end loop;
+      if jsonb_typeof(it->'wt'->'k') is distinct from 'array' or jsonb_array_length(it->'wt'->'k') not between 1 and 4 then raise exception 'bad_input'; end if;
+      for k in select jsonb_array_elements_text(it->'wt'->'k') loop
+        if k not in ('tr', 'rev', 'ctx', 'wr') then raise exception 'bad_input'; end if;
+      end loop;
+      n := n + 1;
     elsif coalesce(it->>'l', '') ~ '^[a-z0-9-]{1,60}$' and jsonb_typeof(it->'b') = 'array' and jsonb_array_length(it->'b') between 1 and 40 then
       for b in select * from jsonb_array_elements(it->'b') loop
         if jsonb_typeof(b) <> 'string' or (b #>> '{}') !~ '^[a-z0-9_-]{1,60}$' then raise exception 'bad_input'; end if;
