@@ -263,7 +263,8 @@ var TYPE_RU={fill:'вписать',choice:'выбрать',build:'собрать
 function plural(n,f1,f2,f5){return n%10===1&&n%100!==11?f1:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?f2:f5}
 function lessLabel(l){var x=LESS.filter(function(y){return y[0]===l})[0],L=window.LESSONS[l];return x?x[1]:L?L.course+' · '+L.title:l}
 function hwLessons(){return LESS.filter(function(x){var L=window.LESSONS[x[0]];return L&&(L.lang||'ko')===hwf.lang})}
-function hwMats(){return MATERIALS.filter(function(m){return m.kind!=='lesson'&&m.kind!=='practice'&&KR.langOf(m.id)===hwf.lang})}
+// английские уроки — отдельные страницы (kind «lesson»), их можно задать как материал; корейские уроки идут через урок с заданиями
+function hwMats(){return MATERIALS.filter(function(m){return m.kind!=='practice'&&(m.kind!=='lesson'||m.section==='english')&&KR.langOf(m.id)===hwf.lang})}
 function hwPicked(){
   var items=[],by={},theory=[];
   Object.keys(hwf.sel).forEach(function(k){if(!hwf.sel[k])return;var i=k.indexOf('|'),l=k.slice(0,i);(by[l]=by[l]||[]).push(k.slice(i+1))});
@@ -284,7 +285,7 @@ function hwSummary(){
 }
 // задания выбранного урока: отработка и «Домашнее задание» из урока; теория — для подсказки
 function hwBlocks(){
-  var l=hwf.l,L=window.LESSONS[l];if(!L)return '<p class="muted">На сайте пока нет уроков этого языка: выберите тренажёры и тесты ниже.</p>';
+  var l=hwf.l,L=window.LESSONS[l];if(!L)return '<p class="muted">Уроков с заданиями для этого языка пока нет. Уроки-страницы, тренажёры и тесты выберите в списке «Материалы» ниже.</p>';
   var ex='',th='';
   L.sections.forEach(function(s){var pt=KR.part(s);
     if(pt==='theory'){var k=l+'|'+s.id;th+='<label class="line hwt-pick"><input type="checkbox" data-hwt="'+esc(k)+'"'+(hwf.th[k]?' checked':'')+'><span>'+esc(s.title)+'</span></label>';return}
@@ -303,7 +304,7 @@ function hwForm(){
     '<div class="seg hwt-lang" role="group" aria-label="Язык">'+[['ko','Корейский'],['en','Английский']].map(function(x){return '<button type="button" data-hwlang="'+x[0]+'" class="'+(hwf.lang===x[0]?'on':'')+'" aria-pressed="'+(hwf.lang===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
     (ls.length?'<label class="field" for="hwl">Урок</label><select id="hwl">'+ls.map(function(x){return '<option value="'+esc(x[0])+'"'+(x[0]===hwf.l?' selected':'')+'>'+esc(x[1])+'</option>'}).join('')+'</select>':'')+
     '<div id="hwblk">'+hwBlocks()+'</div>'+
-    (mats.length?'<details class="hwt-mats"'+(Object.keys(hwf.mats).some(function(k){return hwf.mats[k]})?' open':'')+'><summary>Тренажёры и тесты · '+mats.length+'</summary>'+mats.map(function(m){return '<label class="line hwt-pick"><input type="checkbox" data-hwm="'+esc(m.id)+'"'+(hwf.mats[m.id]?' checked':'')+'><span>'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>'}).join('')+'</details>':'')+
+    (mats.length?'<details class="hwt-mats"'+(Object.keys(hwf.mats).some(function(k){return hwf.mats[k]})?' open':'')+'><summary>Материалы · '+mats.length+'</summary>'+mats.map(function(m){return '<label class="line hwt-pick"><input type="checkbox" data-hwm="'+esc(m.id)+'"'+(hwf.mats[m.id]?' checked':'')+'><span>'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>'}).join('')+'</details>':'')+
     '<input id="hwti" class="name" maxlength="200" placeholder="Название (по желанию)">'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="hwdue" type="date" class="name" style="flex:1;min-width:150px;margin:0" aria-label="Срок"><input id="hwnote" class="name" maxlength="1000" placeholder="Комментарий для ученика (по желанию)" style="flex:2;min-width:180px;margin:0"></div>'+
     '<div class="done-row"><span class="muted" id="hwsum"></span><button type="button" class="pri" id="hwgo">Задать домашку</button></div></div></details>';
