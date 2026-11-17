@@ -197,7 +197,7 @@ async function cloudSay(text,lang,cb,acc){
     url=URL.createObjectURL(await r.blob());if(ttsCache.size>300)ttsCache.clear();ttsCache.set(key,url);
   }
   if(!ttsAudio)ttsAudio=new Audio();
-  ttsAudio.pause();ttsAudio.src=url;ttsAudio.playbackRate=Math.max(.75,rate()+.1);
+  ttsAudio.pause();ttsAudio.src=url;ttsAudio.playbackRate=cb.rate?Math.max(.5,cb.rate):Math.max(.75,rate()+.1);   // cb.rate — медленнее для тренировки на слух
   ttsAudio.onplay=()=>cb.start&&cb.start();ttsAudio.onended=ttsAudio.onerror=()=>cb.end&&cb.end();
   await ttsAudio.play();
 }
@@ -206,7 +206,7 @@ function localSay(text,lang,cb,acc){
   try{
     const p=String(lang||"ko").slice(0,2),u=new SpeechSynthesisUtterance(text),v=pickVoice(p,acc);
     if(v){u.voice=v;u.lang=v.lang}else u.lang=(LANGS[p]||{}).tts||lang;
-    u.rate=rate();u.onstart=()=>cb.start&&cb.start();u.onend=u.onerror=()=>cb.end&&cb.end();
+    u.rate=cb.rate||rate();u.onstart=()=>cb.start&&cb.start();u.onend=u.onerror=()=>cb.end&&cb.end();
     speechSynthesis.cancel();speechSynthesis.speak(u);
   }catch(e){cb.end&&cb.end()}
 }
@@ -229,6 +229,9 @@ const IC={
   repeat:'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
   lock:'<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
   volume:'<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>',
+  mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><path d="M12 18v4"/>',
+  headphones:'<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>',
+  skip:'<path d="m5 4 10 8-10 8z"/><path d="M19 5v14"/>',
   arrow:'<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
   back:'<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
   arrowUp:'<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
