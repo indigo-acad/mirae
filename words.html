@@ -378,7 +378,7 @@ function drawList(){
   var F={all:['Все',function(){return true}],new:['Новые',function(c){return !c.st}],learn:['Учу',function(c){return c.st===1||c.st===3}],known:['Знаю',function(c){return c.st===2}],star:['Сложные',function(c){return c.star}]};
   var h='<div class="card glass"><h3>Добавить слово</h3><form id="addf" class="addw" autocomplete="off"><input class="name'+(lang==='ko'?' ko':'')+'" id="aw" lang="'+lang+'" placeholder="Слово: '+G.name+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false"><input class="name" id="at" placeholder="Перевод" aria-label="Перевод" maxlength="160"><button type="submit" class="btn pri">'+KR.icon('plus',16)+'Добавить</button></form><p class="msg" id="amsg" role="status"></p>'+
     '<p class="hint">Слова попадают сюда из уроков, по выделению в тексте урока и от преподавателя. Если добавить слово, которое уже есть, оно вернётся на повторение раньше.</p></div>'+
-    '<div class="card glass"><h3>Добавить список слов</h3><p class="hint">Вставь слова построчно или через запятую. Если после слова указан перевод через тире, он сохранится. Для остальных попробуем найти перевод через DeepL.</p><textarea class="name" id="bulk-input" rows="5" maxlength="8000" placeholder="runny nose\nsore throat\naccommodation — жильё" aria-label="Список слов"></textarea><div class="done-row"><span></span><button type="button" class="btn pri" data-x="bulk-translate">Разобрать и перевести</button></div><p class="msg" id="bulk-msg" role="status"></p><div id="bulk-preview"></div></div>';
+    '<div class="card glass"><h3>Добавить список слов</h3><p class="hint">Корейские и английские слова можно вперемешку: по одному в строке, через запятую или парами «слово — перевод» (также «=», «:», Tab из Quizlet и Excel). Перевод может стоять и слева. Пример: «слово — перевод | пример | перевод примера». Слова без перевода сначала ищем в базе слов школы, потом переводит DeepL.</p><textarea class="name" id="bulk-input" rows="5" maxlength="8000" placeholder="runny nose, sore throat\naccommodation — жильё\n식욕 — аппетит\n선생님" aria-label="Список слов"></textarea><div class="done-row"><span></span><button type="button" class="btn pri" data-x="bulk-translate">Разобрать и перевести</button></div><p class="msg" id="bulk-msg" role="status"></p><div id="bulk-preview"></div></div>';
   h=setsCard()+h;
   if(all.length){
     h+='<div class="card glass" id="wlist"><div class="opts">'+Object.keys(F).map(function(k){var n=all.filter(F[k][1]).length;return '<button type="button" data-f="'+k+'" class="'+(filt===k?'sel':'')+'" aria-pressed="'+(filt===k)+'">'+F[k][0]+' · '+n+'</button>'}).join('')+'</div>'+
@@ -439,59 +439,60 @@ function savePrefs(reset){
   drawPrefs();drawToday();$('#pmsg').textContent='Сохранено';$('#pmsg').className='msg ok';
 }
 
-// ---------- массовое добавление слов с переводом DeepL ----------
-function parseBulk(text){
-  var seen={},out=[];
-  String(text||'').split(/[\n,;]+/).forEach(function(line){
-    line=line.trim();if(!line)return;
-    var m=line.match(/^(.+?)\s+[—–-]\s+(.+)$/),w=(m?m[1]:line).trim(),t=m?m[2].trim():'';
-    if(!w||w.length>80)return;
-    var key=SRS.norm(w);if(seen[key])return;seen[key]=1;out.push({w:w,t:t});
-  });
-  return out.slice(0,80);
-}
-function drawBulkPreview(){
-  var box=$('#bulk-preview');if(!box||!bulkRows.length)return;
-  box.innerHTML='<div class="wl">'+bulkRows.map(function(x,i){
-    return '<div class="wrow bulk-row"><div class="mid"><input class="name'+(lang==='ko'?' ko':'')+'" data-bw="'+i+'" lang="'+lang+'" value="'+esc(x.w)+'" aria-label="Слово '+(i+1)+'"><input class="name" data-bt="'+i+'" value="'+esc(x.t)+'" placeholder="Перевод (можно оставить пустым)" aria-label="Перевод '+(i+1)+'"></div></div>';
-  }).join('')+'</div><div class="done-row"><span class="muted">Проверь слова и переводы перед сохранением.</span><button type="button" class="btn pri" data-x="bulk-save">Добавить в словарь · '+bulkRows.length+'</button></div>';
-}
+// ---------- список слов: разбор (KR.W2.parseMine) и перевод (база школы, потом DeepL) ----------
+/* Язык каждого слова определяется по буквам, поэтому корейские и английские слова можно вставлять вперемешку. */
 var bulkRows=[];
+var LNAME={ko:'кор',en:'англ'};
+function bulkRead(){[].forEach.call(document.querySelectorAll('#bulk-preview [data-bw]'),function(inp){
+  var i=+inp.dataset.bw,x=bulkRows[i],t=document.querySelector('#bulk-preview [data-bt="'+i+'"]');if(!x)return;
+  var w=inp.value.trim(),l=KR.W2.langOf(w)||x.l;
+  if(w!==x.w){x.w=w;x.l=l;x.err=!w?'нет слова':KR.W2.langOf(w)&&!/[А-Яа-яЁё]/.test(w)?'':'не похоже на корейское или английское слово'}
+  if(t&&t.value.trim()!==x.t){x.t=t.value.trim();x.src=''}
+})}
+function drawBulkPreview(){
+  var box=$('#bulk-preview');if(!box)return;
+  if(!bulkRows.length){box.innerHTML='';return}
+  var ok=bulkRows.filter(function(x){return !x.err});
+  box.innerHTML='<div class="wl">'+bulkRows.map(function(x,i){
+    var had=!x.err&&V.find(x.l,x.w),tag=x.err?'<span class="badge warn">'+esc(x.err)+'</span>':
+      '<span class="badge">'+(LNAME[x.l]||'?')+'</span>'+(x.src==='base'?'<span class="badge ok" title="Перевод из базы слов школы">база</span>':x.src==='deepl'?'<span class="badge" title="Автоперевод DeepL: проверь">DeepL</span>':'')+
+      (had?'<span class="badge warn" title="Слово уже есть в словаре: вернётся на повторение раньше">уже есть</span>':'');
+    return '<div class="wrow bulk-row'+(x.err?' off':'')+'"><div class="mid"><input class="name'+(x.l==='ko'?' ko':'')+'" data-bw="'+i+'" lang="'+(x.l||'')+'" value="'+esc(x.w)+'" aria-label="Слово '+(i+1)+'"'+(x.err==='повтор'?' disabled':'')+'>'+
+      '<input class="name" data-bt="'+i+'" value="'+esc(x.t)+'" placeholder="Перевод (можно оставить пустым)" aria-label="Перевод '+(i+1)+'"'+(x.err==='повтор'?' disabled':'')+'>'+
+      (x.ex?'<div class="muted"'+(x.l==='ko'?' lang="ko"':'')+'>'+esc(x.ex)+(x.et?' · '+esc(x.et):'')+'</div>':'')+'</div><div class="bulk-tags">'+tag+'</div></div>';
+  }).join('')+'</div><div class="done-row"><span class="muted">Проверь слова и переводы. Строки с пометкой не сохранятся.</span><button type="button" class="btn pri" data-x="bulk-save"'+(ok.length?'':' disabled')+'>Добавить в словарь · '+ok.length+'</button></div>';
+}
 async function bulkTranslate(){
   var msg=$('#bulk-msg'),btn=document.querySelector('[data-x="bulk-translate"]');
-  bulkRows=parseBulk($('#bulk-input').value);
-  if(!bulkRows.length){msg.textContent='Вставь список слов — по одному в строке или через запятую.';msg.className='msg bad';return}
+  bulkRows=KR.W2.parseMine($('#bulk-input').value);
+  var ok=bulkRows.filter(function(x){return !x.err}),cut=0;
+  if(!ok.length){drawBulkPreview();msg.textContent=bulkRows.length?'Не нашлось ни одного корейского или английского слова.':'Вставь список слов: по одному в строке, через запятую или «слово — перевод».';msg.className='msg bad';return}
+  if(ok.length>80){cut=ok.length-80;ok.slice(80).forEach(function(x){x.err='больше 80 слов за раз'})}
   if(btn)btn.disabled=true;
-  msg.textContent='Подготавливаем список…';msg.className='msg';
-  try{
-    var missing=bulkRows.map(function(x,i){return x.t?null:i}).filter(function(i){return i!==null});
-    if(missing.length){
-      var cfg=window.CONFIG||{},res=await fetch(cfg.SUPABASE_URL+'/functions/v1/translate-words',{
-        method:'POST',headers:{'Content-Type':'application/json',apikey:cfg.SUPABASE_ANON_KEY,Authorization:'Bearer '+cfg.SUPABASE_ANON_KEY},
-        body:JSON.stringify({p_name:KR.user(),p_pin:localStorage.getItem('kr_pin')||'',words:missing.map(function(i){return bulkRows[i].w})})
-      });
-      var data=await res.json();
-      if(!res.ok)throw new Error(data.message||data.error||'Не удалось выполнить перевод');
-      (data.translations||[]).forEach(function(t,j){if(t&&bulkRows[missing[j]])bulkRows[missing[j]].t=t});
-    }
-    drawBulkPreview();
-    var done=bulkRows.filter(function(x){return x.t}).length;
-    msg.textContent='Готово: '+bulkRows.length+' слов, перевод есть у '+done+'. Проверь и при необходимости исправь его ниже.';
-    msg.className='msg ok';
-  }catch(e){
-    drawBulkPreview();
-    msg.textContent='Не удалось получить автоматический перевод: '+(e.message||'ошибка').slice(0,180)+'. Слова можно заполнить вручную и всё равно сохранить.';
-    msg.className='msg bad';
-  }finally{if(btn)btn.disabled=false}
+  var need=ok.filter(function(x){return !x.t&&!x.err}).length;
+  msg.textContent=need?'Ищем переводы…':'Разбираем список…';msg.className='msg';
+  var r=need?await KR.W2.translate(bulkRows):{n:0,err:''};
+  if(btn)btn.disabled=false;
+  drawBulkPreview();
+  ok=bulkRows.filter(function(x){return !x.err});
+  var withT=ok.filter(function(x){return x.t}).length,ko=ok.filter(function(x){return x.l==='ko'}).length,bad=bulkRows.length-ok.length;
+  var parts=['Слов: '+ok.length+(ko&&ko<ok.length?' (корейских '+ko+', английских '+(ok.length-ko)+')':''),'с переводом: '+withT];
+  if(bad)parts.push('не возьмём: '+bad);
+  if(r.err){msg.textContent=parts.join(' · ')+'. Автоперевод не получился: '+r.err+'. Переводы можно вписать вручную.';msg.className='msg bad'}
+  else{msg.textContent=parts.join(' · ')+'. Проверь переводы с пометкой DeepL.'+(cut?' За раз можно добавить 80 слов.':'');msg.className='msg ok'}
 }
 function bulkSave(){
-  var rows=document.querySelectorAll('#bulk-preview [data-bw]');
-  rows.forEach(function(inp){
-    var i=+inp.dataset.bw,t=document.querySelector('#bulk-preview [data-bt="'+i+'"]');
-    var w=inp.value.trim();if(w)V.add(lang,w,t?t.value.trim():'',{src:'manual-bulk'});
+  bulkRead();
+  var n=0,ko=0,other=0,again=0;
+  bulkRows.forEach(function(x){
+    if(x.err||!x.w||!x.l)return;
+    var r=V.add(x.l,x.w,x.t,{src:'manual-bulk',ex:x.ex,et:x.ex?x.et:''});n++;if(!r.added)again++;if(x.l==='ko')ko++;if(x.l!==lang)other++;
   });
-  var n=rows.length;bulkRows=[];$('#bulk-preview').innerHTML='';$('#bulk-input').value='';
-  var msg=$('#bulk-msg');msg.textContent='Добавлено в словарь: '+n+'.';msg.className='msg ok';drawToday();drawList();
+  bulkRows=[];drawBulkPreview();$('#bulk-input').value='';
+  drawToday();drawList();
+  var msg=$('#bulk-msg');
+  msg.textContent='Добавлено в словарь: '+n+(again?' (уже были и вернутся раньше: '+again+')':'')+'.'+(other?' Слова на другом языке ('+other+') — в разделе «'+KR.LANGS[lang==='ko'?'en':'ko'].name+'».':'');
+  msg.className='msg ok';
 }
 
 // ---------- события ----------
@@ -538,9 +539,11 @@ document.addEventListener('submit',function(e){
   if(f.id==='wf')return writeCheck();
   if(f.id==='pf')return savePrefs(false);
   if(f.id==='addf'){
-    var w=$('#aw').value.trim(),t=$('#at').value.trim(),m=$('#amsg');
+    var w=$('#aw').value.trim(),t=$('#at').value.trim(),m=$('#amsg'),wl=KR.W2.langOf(w);
     if(!w||!t){m.textContent='Нужны и слово, и перевод.';m.className='msg bad';return}
-    var r=V.add(lang,w,t,{src:'manual'});drawAll();m=$('#amsg');
+    if(!wl&&KR.W2.langOf(t)){var sw=w;w=t;t=sw;wl=KR.W2.langOf(w)}   // перевод и слово перепутаны местами
+    if(!wl){m.textContent='Слово должно быть корейским или английским.';m.className='msg bad';return}
+    var r=V.add(wl,w,t,{src:'manual'});drawAll();m=$('#amsg');
     m.textContent=r.added?'Добавлено: '+r.card.w:'Это слово уже было в словаре. Оно вернётся на повторение раньше.';m.className='msg ok';$('#aw').focus();return;
   }
   if(f.classList.contains('wedit')){var c=V.get(f.dataset.id);if(c){c=Object.assign({},c,{t:f.t.value.trim(),ex:f.ex.value.trim(),et:f.et.value.trim()});if(!c.ex){delete c.ex;delete c.et;delete c.f}else if(c.f&&c.ex.indexOf(c.f)<0)delete c.f;V.update(c)}editing=null;drawAll()}
