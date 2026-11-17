@@ -138,6 +138,14 @@ window.MATERIALS=[
   "level": "3급"
  },
  {
+  "id": "ko-pidong-start-quest",
+  "section": "korean",
+  "kind": "trainer",
+  "title": "피동 · квест «Вор в Сеуле» (разминка)",
+  "path": "materials/korean/ko-pidong-start-quest/",
+  "level": "3급"
+ },
+ {
   "id": "ko-pidong-game",
   "section": "korean",
   "kind": "quest",

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🕵️ Квест для начала урока · 피동</title>
+<style>
+  :root{--ink:#1d2433;--muted:#667085;--line:#e4e7ec;--bg:#f5f6fa;--card:#fff;--accent:#2f5bea;--ok:#1f9d55;--okbg:#e9f8ef;--bad:#d64545;--badbg:#fdeeee;--gold:#f2b705}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  .ko{font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+  .wrap{max-width:980px;margin:0 auto;padding:14px 14px 60px}
+  .card{background:var(--card);border-radius:18px;padding:22px;margin:12px 0;box-shadow:0 2px 10px #0000000d}
+  h1{font-size:26px;margin:0 0 6px} h2{margin:0 0 8px;font-size:24px}
+  .muted{color:var(--muted);font-size:15px}
+  button{font:inherit;border:0;border-radius:12px;padding:12px 18px;cursor:pointer;background:#eef0f4;color:var(--ink);margin:4px 6px 4px 0}
+  button.primary{background:var(--accent);color:#fff}
+  button.ok{background:var(--ok);color:#fff} button.bad{background:var(--bad);color:#fff}
+  button.sm{font-size:14px;padding:7px 12px}
+  button.big{font-size:20px;padding:16px 26px}
+  .hidden{display:none!important}
+  .top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+  .map{display:flex;gap:6px;flex-wrap:wrap}
+  .map span{padding:5px 11px;border-radius:999px;background:#eef0f4;font-size:14px}
+  .map span.done{background:var(--okbg);color:var(--ok)} .map span.cur{background:var(--ink);color:#fff}
+  .keys{font-size:30px;letter-spacing:6px}
+  .keys b{color:var(--gold)}
+  .bar{height:8px;background:#e7e9ef;border-radius:5px;overflow:hidden;margin:10px 0 4px}
+  .bar div{height:100%;background:var(--accent);transition:width .3s}
+  .lab{font-size:16px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .prompt{font-size:46px;font-weight:700;margin:18px 0 10px;text-align:center;line-height:1.3}
+  .prompt.ru{font-size:36px}
+  .prompt.sent{font-size:34px;font-weight:500}
+  .gap{color:var(--accent);font-weight:700}
+  .sub{text-align:center;color:var(--muted);font-size:19px}
+  .answer{background:#effaf3;border-radius:14px;padding:16px 18px;margin-top:16px;text-align:center}
+  .answer .a{font-size:38px;font-weight:700}
+  .answer .r{font-size:21px;margin-top:4px}
+  .answer .ex{font-size:22px;margin-top:10px}
+  .answer .exr{color:var(--muted);font-style:italic}
+  .ctrl{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+  .opts.two{grid-template-columns:1fr 1fr}
+  .opts button{font-size:28px;padding:18px;margin:0;background:#f1f3f7}
+  .opts button .n{font-size:15px;color:var(--muted);display:block}
+  .opts button.ok{background:var(--okbg);outline:3px solid var(--ok);color:var(--ink)}
+  .opts button.bad{background:var(--badbg);outline:3px solid var(--bad);color:var(--ink)}
+  .story{background:#fffdf5;border:1px solid #efe6c4;border-radius:12px;padding:14px 16px;font-size:17px}
+  .center{text-align:center}
+  .gem{font-size:64px;text-align:center}
+  .hint{font-size:13px;color:var(--muted);text-align:center;margin-top:14px}
+  table.res{width:100%;border-collapse:collapse;font-size:17px}
+  table.res td{padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  .mode{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .mode button{text-align:left;margin:0;padding:16px}
+  .mode button.sel{outline:3px solid var(--accent);background:#eef3ff}
+  @media(max-width:640px){.prompt{font-size:34px}.prompt.sent{font-size:24px}.prompt.ru{font-size:26px}.opts{grid-template-columns:1fr}.opts button{font-size:22px}.answer .a{font-size:28px}.mode{grid-template-columns:1fr}}
+</style>
+</head>
+<body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+
+<!-- старт -->
+<div id="intro" class="card">
+  <h1>🕵️ Квест «Вор в Сеуле»</h1>
+  <div class="story">Ночью из Национального музея украли корону 👑. Вор бежит по Сеулу, а мы идём по его следу. На каждой станции нужно ответить на вопросы по словам урока и 피동. За каждую станцию получаем слог из кода. В конце собираем код и ловим вора!</div>
+  <p class="muted" style="margin-top:14px">👩‍🏫 Квест ведёт учитель: показывает задание, ученик отвечает вслух, учитель открывает ответ и отмечает ✓ или ✗. В конце будет список слов, которые нужно повторить.</p>
+  <div class="mode">
+    <button id="mFast" onclick="setMode('fast')"><b>⚡ Быстрый</b><br><span class="muted">по 5 случайных заданий на станцию · ~8–10 мин</span></button>
+    <button id="mFull" onclick="setMode('full')"><b>📚 Полный</b><br><span class="muted">все слова · ~20 мин</span></button>
+  </div>
+  <p style="margin-top:14px"><button class="primary big" onclick="startQuest()">Начать квест →</button>
+  <button class="sm hidden" id="resumeBtn" onclick="resume()">↩ Продолжить прошлый квест</button></p>
+  <p class="hint">Клавиши: <b>Пробел</b> — показать ответ / дальше · <b>→</b> или <b>1</b> — ✓ знает · <b>←</b> или <b>2</b> — ✗ не знает · в тестах <b>1 2 3</b> — вариант</p>
+</div>
+
+<!-- игра -->
+<div id="game" class="hidden">
+  <div class="card" style="padding:14px 18px">
+    <div class="top">
+      <div class="map" id="map"></div>
+      <div class="keys ko" id="keys"></div>
+    </div>
+    <div class="bar"><div id="bar" style="width:0"></div></div>
+    <div class="top muted"><span id="prog"></span><span id="score"></span></div>
+  </div>
+  <div class="card" id="stage"></div>
+  <p class="center"><button class="sm" onclick="skipStation()">⏭ Пропустить станцию</button> <button class="sm" onclick="if(confirm('Начать заново?')){localStorage.removeItem(KEY);location.reload()}">⟲ Заново</button></p>
+</div>
+
+</div>
+<script>
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID = "347625701";
+const KEY="pd_start_quest_v1";
+const $=id=>document.getElementById(id);
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+/* ============ СЛОВА УРОКА ============ */
+const LW1=[
+ {ko:"비용이 많이 들다", ru:"требует больших расходов", ex:"유학은 비용이 많이 들어요.", exRu:"Учёба за границей требует больших расходов."},
+ {ko:"애매하다", ru:"неоднозначный, неточный", ex:"그의 대답은 좀 애매했어요.", exRu:"Его ответ был довольно неясным."},
+ {ko:"꼼짝", ru:"малейшее движение", ex:"너무 무서워서 꼼짝도 할 수 없었어요.", exRu:"Было так страшно, что я не мог даже шевельнуться."},
+ {ko:"꼼짝 못 하다", ru:"не мочь пошевелиться", ex:"감기 때문에 하루 종일 꼼짝 못 했어요.", exRu:"Из-за простуды я целый день не мог пошевелиться."},
+ {ko:"착각하다", ru:"заблуждаться, перепутать", ex:"날짜를 착각해서 하루 일찍 왔어요.", exRu:"Я перепутал дату и пришёл на день раньше."},
+ {ko:"밀리다", ru:"скапливаться (о делах); быть отодвинутым", ex:"휴가 때문에 일이 많이 밀렸어요.", exRu:"Из-за отпуска накопилось много работы."},
+ {ko:"차가 밀리다", ru:"пробки на дорогах", ex:"출근 시간에는 차가 많이 밀려요.", exRu:"В час пик большие пробки."},
+ {ko:"섞이다", ru:"смешиваться", ex:"물과 기름은 잘 섞이지 않아요.", exRu:"Вода и масло плохо смешиваются."},
+ {ko:"섞다", ru:"перемешивать, смешивать", ex:"밥과 나물을 잘 섞으세요.", exRu:"Хорошо перемешайте рис с овощами."},
+ {ko:"빼앗기다", ru:"быть отобранным, лишиться", ex:"동생에게 장난감을 빼앗겼어요.", exRu:"Младший брат отнял у меня игрушку."},
+ {ko:"알려지다", ru:"становиться известным", ex:"이 식당은 맛집으로 알려져 있어요.", exRu:"Этот ресторан известен как очень вкусный."}
+];
+const LW2=[
+ {ko:"보이다", ru:"виднеться, быть видным", ex:"창문으로 산이 보여요.", exRu:"Из окна видны горы."},
+ {ko:"정해지다", ru:"определяться, устанавливаться", ex:"시험 날짜가 정해졌어요.", exRu:"Дата экзамена определена."},
+ {ko:"얼굴 한번 보다", ru:"как-нибудь увидеться", ex:"시간 있을 때 얼굴 한번 봐요.", exRu:"Когда будет время, давай как-нибудь увидимся."},
+ {ko:"길을 헤매다", ru:"блуждать, плутать", ex:"처음 가는 곳이라서 길을 헤맸어요.", exRu:"Я шёл туда впервые и заплутал."},
+ {ko:"훌륭하다", ru:"замечательный, прекрасный", ex:"정말 훌륭한 공연이었어요.", exRu:"Это был действительно прекрасный концерт."},
+ {ko:"깔끔하다", ru:"чистый, опрятный, аккуратный", ex:"호텔 방이 아주 깔끔했어요.", exRu:"Номер в отеле был очень чистым."},
+ {ko:"끊이다", ru:"прекращаться (끊이지 않다 — не прекращаться)", ex:"이 가게는 손님이 끊이지 않아요.", exRu:"В этом магазине не переводятся покупатели."},
+ {ko:"쫓기다", ru:"быть преследуемым", ex:"꿈에서 누군가에게 쫓겼어요.", exRu:"Во сне за мной кто-то гнался."},
+ {ko:"잠그다", ru:"запирать (на замок)", ex:"문을 잠그고 나갔어요.", exRu:"Я запер дверь и вышел."},
+ {ko:"안기다", ru:"быть в объятиях, на руках", ex:"아기가 엄마 품에 안겼어요.", exRu:"Малыш оказался у мамы на руках."}
+];
+/* новые предложения со словами урока — проверка, а не повтор примеров */
+const LCTX=[
+ {s:"금요일 저녁이라서 차가 많이 ( ).", o:["밀려요","섞여요","잠가요"], a:"밀려요", ru:"В пятницу вечером большие пробки.", w:"차가 밀리다"},
+ {s:"집을 나갈 때 문을 꼭 ( ).", o:["잠그세요","안기세요","보이세요"], a:"잠그세요", ru:"Уходя из дома, обязательно заприте дверь.", w:"잠그다"},
+ {s:"친구 이름을 ( ) 다른 사람을 불렀어요.", o:["착각해서","훌륭해서","정해져서"], a:"착각해서", ru:"Перепутал имя друга и позвал другого человека.", w:"착각하다"},
+ {s:"이 카페는 커피가 맛있기로 ( ) 있어요.", o:["알려져","쫓겨","섞여"], a:"알려져", ru:"Это кафе известно вкусным кофе.", w:"알려지다"},
+ {s:"지도가 없어서 한참 동안 길을 ( ).", o:["헤맸어요","끊였어요","밀렸어요"], a:"헤맸어요", ru:"Без карты я долго плутал.", w:"길을 헤매다"},
+ {s:"질문이 좀 ( ) 대답하기 어려워요.", o:["애매해서","깔끔해서","훌륭해서"], a:"애매해서", ru:"Вопрос немного неясный, на него трудно ответить.", w:"애매하다"},
+ {s:"인기 있는 빵집이라서 손님이 ( ) 않아요.", o:["끊이지","섞이지","보이지"], a:"끊이지", ru:"Пекарня популярная — покупатели не переводятся.", w:"끊이다"},
+ {s:"언니에게 마지막 케이크를 ( ).", o:["빼앗겼어요","알려졌어요","정해졌어요"], a:"빼앗겼어요", ru:"Сестра отняла у меня последний кусок торта.", w:"빼앗기다"},
+ {s:"방은 작지만 정리가 잘 돼서 ( ).", o:["깔끔해요","애매해요","밀려요"], a:"깔끔해요", ru:"Комната маленькая, но всё убрано — аккуратно.", w:"깔끔하다"},
+ {s:"다리를 다쳐서 일주일 동안 꼼짝 ( ).", o:["못 했어요","섞였어요","안겼어요"], a:"못 했어요", ru:"Повредил ногу и неделю не мог пошевелиться.", w:"꼼짝 못 하다"},
+ {s:"결혼식은 비용이 많이 ( ).", o:["들어요","보여요","밀려요"], a:"들어요", ru:"Свадьба требует больших расходов.", w:"비용이 많이 들다"},
+ {s:"오랜만이네요! 다음 주에 얼굴 한번 ( ).", o:["봐요","보여요","섞여요"], a:"봐요", ru:"Давно не виделись! Давай увидимся на следующей неделе.", w:"얼굴 한번 보다"}
+];
+
+/* ============ 피동: [актив, пассив, перевод, пример, перевод примера] ============ */
+const P12=[
+ ["보다","보이다","быть видным, виднеться","창문으로 바다가 보여요.","Из окна видно море."],
+ ["쓰다","쓰이다","быть написанным; использоваться","칠판에 이름이 쓰여 있어요.","На доске написано имя."],
+ ["놓다","놓이다","быть положенным, стоять, лежать","책상 위에 꽃병이 놓여 있어요.","На столе стоит ваза."],
+ ["쌓다","쌓이다","накапливаться, быть сложенным","밤새 눈이 많이 쌓였어요.","За ночь навалило много снега."],
+ ["섞다","섞이다","смешиваться","물과 기름은 잘 안 섞여요.","Вода и масло плохо смешиваются."],
+ ["바꾸다","바뀌다","меняться, быть заменённым","비밀번호가 바뀌었어요.","Пароль изменился."],
+ ["깎다","깎이다","быть сниженным (о цене)","세일이라서 가격이 많이 깎였어요.","Распродажа, цена сильно снижена."],
+ ["먹다","먹히다","быть съеденным","쥐가 고양이에게 먹혔어요.","Мышь была съедена кошкой."],
+ ["닫다","닫히다","закрываться","바람 때문에 문이 닫혔어요.","Из-за ветра дверь закрылась."],
+ ["막다","막히다","быть перекрытым; пробка","출근 시간에는 길이 많이 막혀요.","В час пик на дорогах пробки."],
+ ["읽다","읽히다","читаться, быть прочитанным","이 책은 많은 사람들에게 읽혀요.","Эту книгу читают многие."],
+ ["밟다","밟히다","быть наступленным","지하철에서 발을 밟혔어요.","В метро мне наступили на ногу."],
+ ["꽂다","꽂히다","быть воткнутым, вставленным","열쇠가 문에 꽂혀 있어요.","Ключ вставлен в дверь."],
+ ["박다","박히다","быть вбитым; застрять (о занозе)","손에 가시가 박혔어요.","В руку попала заноза."]
+];
+const P34=[
+ ["열다","열리다","открываться; проводиться","문이 저절로 열렸어요.","Дверь открылась сама."],
+ ["팔다","팔리다","продаваться","이 책이 요즘 잘 팔려요.","Эта книга сейчас хорошо продаётся."],
+ ["듣다","들리다","слышаться","밖에서 이상한 소리가 들려요.","С улицы доносится странный звук."],
+ ["걸다","걸리다","висеть; заболеть; занимать (время)","벽에 그림이 걸려 있어요.","На стене висит картина."],
+ ["풀다","풀리다","развязываться; решаться","신발 끈이 풀렸어요.","Шнурок развязался."],
+ ["밀다","밀리다","быть отодвинутым; накапливаться","휴가 때문에 일이 많이 밀렸어요.","Из-за отпуска накопилось много работы."],
+ ["물다","물리다","быть укушенным","어젯밤에 모기에 물렸어요.","Вчера ночью меня укусил комар."],
+ ["누르다","눌리다","быть нажатым, прижатым","버튼이 잘못 눌렸어요.","Кнопка нажалась случайно."],
+ ["안다","안기다","быть в объятиях","아기가 엄마 품에 안겼어요.","Малыш оказался в маминых объятиях."],
+ ["끊다","끊기다","прерываться, обрываться","통화 중에 전화가 끊겼어요.","Во время разговора связь оборвалась."],
+ ["쫓다","쫓기다","быть преследуемым","꿈에서 누군가에게 쫓겼어요.","Во сне за мной кто-то гнался."],
+ ["감다","감기다","закрываться (о глазах)","졸려서 눈이 자꾸 감겨요.","Хочу спать, глаза сами закрываются."],
+ ["담다","담기다","быть положенным; содержаться","이 노래에는 사랑이 담겨 있어요.","В этой песне заключена любовь."],
+ ["빼앗다","빼앗기다","лишиться, быть отнятым","동생에게 장난감을 빼앗겼어요.","Младший брат отнял у меня игрушку."],
+ ["찢다","찢기다","рваться, быть разорванным","종이가 바람에 찢겼어요.","Бумага порвалась на ветру."]
+];
+const P5=[
+ ["만들다","만들어지다","изготавливаться, создаваться","이 가방은 가죽으로 만들어졌어요.","Эта сумка сделана из кожи."],
+ ["지우다","지워지다","стираться, удаляться","파일이 실수로 지워졌어요.","Файл случайно удалился."],
+ ["켜다","켜지다","включаться, загораться","사람이 들어오면 불이 자동으로 켜져요.","Когда кто-то входит, свет включается сам."],
+ ["끄다","꺼지다","выключаться, гаснуть","갑자기 컴퓨터가 꺼졌어요.","Компьютер внезапно выключился."],
+ ["정하다","정해지다","определяться, быть назначенным","회의 날짜가 정해졌어요.","Дата собрания определена."],
+ ["알리다","알려지다","становиться известным","이 식당은 맛집으로 알려져 있어요.","Этот ресторан известен как очень вкусный."],
+ ["이루다","이루어지다","осуществляться, сбываться","드디어 꿈이 이루어졌어요.","Наконец мечта сбылась."]
+];
+/* актив или пассив — новые предложения */
+const AP=[
+ {s:"바람이 불어서 문이 ( ).", o:["닫혔어요","닫았어요"], a:"닫혔어요", ru:"Подул ветер, и дверь закрылась.", w:"닫히다"},
+ {s:"동생이 창문을 ( ).", o:["열었어요","열렸어요"], a:"열었어요", ru:"Младший брат открыл окно.", w:"열다"},
+ {s:"버스에서 누가 제 발을 ( ).", o:["밟았어요","밟혔어요"], a:"밟았어요", ru:"В автобусе кто-то наступил мне на ногу.", w:"밟다"},
+ {s:"버스에서 발을 ( ).", o:["밟혔어요","밟았어요"], a:"밟혔어요", ru:"В автобусе мне наступили на ногу.", w:"밟히다"},
+ {s:"고양이가 쥐를 ( ).", o:["잡았어요","잡혔어요"], a:"잡았어요", ru:"Кошка поймала мышь.", w:"잡다"},
+ {s:"산에서 모기에 많이 ( ).", o:["물렸어요","물었어요"], a:"물렸어요", ru:"В горах меня сильно покусали комары.", w:"물리다"},
+ {s:"라디오에서 좋아하는 노래가 ( ).", o:["들려요","들어요"], a:"들려요", ru:"По радио звучит моя любимая песня.", w:"들리다"},
+ {s:"나갈 때 제가 컴퓨터를 ( ).", o:["껐어요","꺼졌어요"], a:"껐어요", ru:"Уходя, я выключил компьютер.", w:"끄다"},
+ {s:"마트에서 우유가 벌써 다 ( ).", o:["팔렸어요","팔았어요"], a:"팔렸어요", ru:"В магазине молоко уже всё раскупили.", w:"팔리다"},
+ {s:"휴대폰 비밀번호를 새로 ( ).", o:["바꿨어요","바뀌었어요"], a:"바꿨어요", ru:"Я поменял пароль на телефоне.", w:"바꾸다"},
+ {s:"통화 중에 갑자기 전화가 ( ).", o:["끊겼어요","끊었어요"], a:"끊겼어요", ru:"Во время разговора звонок вдруг оборвался.", w:"끊기다"},
+ {s:"밤새 책상 위에 서류가 ( ).", o:["쌓였어요","쌓았어요"], a:"쌓였어요", ru:"За ночь на столе скопились бумаги.", w:"쌓이다"}
+];
+
+/* ============ СТАНЦИИ ============ */
+const flipKoRu=w=>({t:"flip",lab:"Что значит?",q:w.ko,qKo:true,say:w.ko,a:w.ru,aKo:false,ex:w.ex,exRu:w.exRu,word:w.ko,ru:w.ru});
+const flipRuKo=w=>({t:"flip",lab:"Скажи по-корейски",q:w.ru,qKo:false,a:w.ko,aKo:true,ex:w.ex,exRu:w.exRu,word:w.ko,ru:w.ru});
+const flipPas=p=>({t:"flip",lab:"Скажи пассив",q:p[0]+" → ?",qKo:true,say:p[0],a:p[1],aKo:true,a2:p[2],ex:p[3],exRu:p[4],word:p[0]+" → "+p[1],ru:p[2]});
+const DICT={"열다":"открывать","바꾸다":"менять","밟다":"наступать","잡다":"ловить","끄다":"выключать"};
+[...LW1,...LW2].forEach(w=>DICT[w.ko]=w.ru); [...P12,...P34,...P5].forEach(p=>DICT[p[1]]=p[2]);
+const mc=(x,lab)=>({t:"mc",lab,s:x.s,o:x.o,a:x.a,ru:x.ru,word:x.w,mean:DICT[x.w]||""});
+const STATIONS=[
+ {name:"🚇 Метро", syl:"도", story:"Камеры увидели вора на станции метро 시청역. Переведи слова — и узнаешь, куда он поехал.", items:()=>LW1.map(flipKoRu)},
+ {name:"🏪 Рынок", syl:"둑", story:"Вор выскочил на рынке 남대문시장. Торговцы говорят только по-корейски — назови слово по-корейски.", items:()=>LW2.map(flipRuKo)},
+ {name:"🍜 Ресторан", syl:"이", story:"В ресторане на 명동 вор оставил записку с пропусками. Какое слово пропущено?", items:()=>LCTX.map(x=>mc(x,"Какое слово пропущено?"))},
+ {name:"🏨 Отель", syl:"잡", story:"Вор снял номер в отеле. Чтобы открыть его дверь, назови пассив: суффиксы -이- и -히-.", items:()=>P12.map(flipPas)},
+ {name:"🎤 Концертный зал", syl:"혔", story:"Вор спрятался в толпе на концерте. Пассив с -리- и -기- поможет его найти.", items:()=>P34.map(flipPas)},
+ {name:"🌳 Парк", syl:"어", story:"Вор убегает через парк 한강. Последние глаголы: пассив на -아/어지다.", items:()=>P5.map(flipPas)},
+ {name:"🚓 Полиция", syl:"요", story:"В участке свидетели дают показания. Актив или пассив?", items:()=>AP.map(x=>mc(x,"Актив или пассив?"))}
+];
+const CODE="도둑이 잡혔어요";
+
+/* ============ СОСТОЯНИЕ ============ */
+let MODE="fast", S=null;
+function setMode(m){ MODE=m; $("mFast").classList.toggle("sel",m==="fast"); $("mFull").classList.toggle("sel",m==="full"); }
+setMode("fast");
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} }
+try{ const o=JSON.parse(localStorage.getItem(KEY)); if(o&&!o.finished) $("resumeBtn").classList.remove("hidden"); }catch(e){}
+function startQuest(){
+  const st=STATIONS.map(x=>{ let it=x.items(); it=shuffle(it); if(MODE==="fast") it=it.slice(0,5); return it; });
+  S={mode:MODE,started:Date.now(),st:0,i:0,items:st,res:STATIONS.map(()=>[]),phase:"intro",wrong:[],repeat:null};
+  save(); show(); }
+function resume(){ try{ S=JSON.parse(localStorage.getItem(KEY)); }catch(e){} if(S) show(); }
+function show(){ $("intro").classList.add("hidden"); $("game").classList.remove("hidden"); render(); }
+
+/* голос */
+let voices=[];
+function loadVoices(){ voices=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang)).sort((a,b)=>(/Natural|Online|Neural|Yuna|Google/i.test(b.name)?1:0)-(/Natural|Online|Neural|Yuna|Google/i.test(a.name)?1:0)); }
+if("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+function say(t){ if(!("speechSynthesis" in window)||!t) return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); if(voices[0]){u.voice=voices[0];u.lang=voices[0].lang;} else u.lang="ko-KR"; u.rate=.85; speechSynthesis.speak(u); }
+const sayBtn=t=>' <button class="sm" onclick="say('+esc(JSON.stringify(t))+')">🔊</button>';
+
+/* ============ ОТРИСОВКА ============ */
+let revealed=false, picked=null;
+function header(){
+  $("map").innerHTML=STATIONS.map((s,k)=>'<span class="'+(k<S.st?"done":k===S.st&&S.phase!=="final"?"cur":"")+'">'+(k<S.st?"✓ ":"")+s.name+'</span>').join("")+'<span class="'+(S.phase==="final"?"cur":"")+'">🔓 Код</span>';
+  $("keys").innerHTML=STATIONS.map((s,k)=>k<S.st?"<b>"+s.syl+"</b>":"_").join(" ");
+  const total=S.items.reduce((a,x)=>a+x.length,0), done=S.items.slice(0,S.st).reduce((a,x)=>a+x.length,0)+(S.phase==="q"?S.i:0);
+  $("bar").style.width=(S.phase==="final"?100:100*Math.min(done,total)/total)+"%";
+  const all=S.res.flat(), ok=all.filter(r=>r.ok).length;
+  $("score").textContent=all.length?"✓ "+ok+" · ✗ "+(all.length-ok):"";
+  $("prog").textContent=S.phase==="q"?STATIONS[S.st].name+" · задание "+(S.i+1)+" из "+S.items[S.st].length:"";
+}
+function render(){ revealed=false; picked=null; if("speechSynthesis" in window) speechSynthesis.cancel();
+  if(S.phase==="repeat") return renderRepeat();
+  header();
+  if(S.phase==="final") return renderFinal();
+  if(S.phase==="intro"){ const st=STATIONS[S.st];
+    $("stage").innerHTML='<div class="lab">Станция '+(S.st+1)+' из '+STATIONS.length+'</div><h2>'+st.name+'</h2><div class="story">'+esc(st.story)+'</div><div class="ctrl"><button class="primary big" onclick="go()">Поехали → <span style="opacity:.6;font-size:14px">(пробел)</span></button></div>'; return; }
+  if(S.phase==="end"){ const r=S.res[S.st], ok=r.filter(x=>x.ok).length;
+    $("stage").innerHTML='<div class="gem">🔓</div><h2 class="center">Станция пройдена!</h2><p class="center" style="font-size:20px">Слог кода: <b class="ko" style="font-size:40px;color:var(--gold)">'+STATIONS[S.st].syl+'</b></p><p class="center muted" style="font-size:18px">Результат: '+ok+' из '+r.length+'</p>'+
+      (r.some(x=>!x.ok)?'<p class="center ko" style="color:var(--bad)">Повторить: '+r.filter(x=>!x.ok).map(x=>esc(x.word)).join(", ")+'</p>':'<p class="center" style="color:var(--ok)">Без ошибок! 🎉</p>')+
+      '<div class="ctrl"><button class="primary big" onclick="nextStation()">'+(S.st+1<STATIONS.length?"Следующая станция →":"К кодовому замку 🔒")+'</button></div>'; return; }
+  renderItem(S.items[S.st][S.i]);
+}
+function renderItem(it){
+  let h='<div class="lab">'+esc(it.lab)+'</div>';
+  if(it.t==="flip"){
+    h+='<div class="prompt '+(it.qKo?"ko":"ru")+'">'+esc(it.q)+(it.say?sayBtn(it.say):"")+'</div>';
+    h+='<div id="ans" class="hidden"><div class="answer"><div class="a '+(it.aKo?"ko":"")+'">'+esc(it.a)+(it.aKo?sayBtn(it.a):"")+'</div>'+(it.a2?'<div class="r">'+esc(it.a2)+'</div>':"")+
+       '<div class="ex ko">'+esc(it.ex)+sayBtn(it.ex)+'</div><div class="exr">'+esc(it.exRu)+'</div></div>'+
+       '<div class="ctrl"><button class="bad big" onclick="mark(false)">✗ Не знает</button><button class="ok big" onclick="mark(true)">✓ Знает</button></div></div>';
+    h+='<div class="ctrl" id="revBtn"><button class="primary big" onclick="reveal()">👁 Показать ответ</button></div>';
+  } else {
+    h+='<div class="prompt sent ko">'+esc(it.s).replace("( )",'<span class="gap">(&nbsp;&nbsp;?&nbsp;&nbsp;)</span>')+'</div>';
+    h+='<div class="opts '+(it.o.length===2?"two":"")+'" id="opts">'+(it.oSh||(it.oSh=shuffle(it.o))).map((o,k)=>'<button class="ko" onclick="pick('+k+')"><span class="n">'+(k+1)+'</span>'+esc(o)+'</button>').join("")+'</div>';
+    h+='<div id="ans" class="hidden"><div class="answer"><div class="ex ko" style="margin-top:0">'+esc(it.s.replace("( )",it.a))+sayBtn(it.s.replace("( )",it.a))+'</div><div class="exr">'+esc(it.ru)+'</div></div><div class="ctrl"><button class="primary big" onclick="mark(picked)">Дальше →</button></div></div>';
+  }
+  h+='<p class="hint">Пробел — '+(it.t==="flip"?"показать ответ":"дальше")+' · → / 1 — ✓ · ← / 2 — ✗</p>';
+  $("stage").innerHTML=h;
+}
+function curItem(){ return S.phase==="repeat"?S.repeat.list[S.repeat.i]:S.items[S.st][S.i]; }
+function reveal(){ if(revealed) return; revealed=true; $("ans").classList.remove("hidden"); const r=$("revBtn"); if(r) r.remove(); const it=curItem(); say(it.aKo?it.a:it.ex); }
+function pick(k){ if(revealed) return; const it=curItem(); const o=it.oSh[k]; picked=o===it.a; revealed=true;
+  [...$("opts").children].forEach((b,j)=>{ b.disabled=true; if(it.oSh[j]===it.a) b.classList.add("ok"); else if(j===k) b.classList.add("bad"); });
+  $("ans").classList.remove("hidden"); say(it.s.replace("( )",it.a)); }
+function mark(ok){ if(!revealed) return; const it=curItem();
+  if(S.phase==="repeat"){ S.repeat.res.push({word:it.word,ru:it.mean||it.ru,ok}); S.repeat.i++; save(); return render(); }
+  S.res[S.st].push({word:it.word,ru:it.mean||it.ru,ok,item:it}); S.i++;
+  if(S.i>=S.items[S.st].length) S.phase="end"; save(); render(); }
+function go(){ S.phase="q"; S.i=0; save(); render(); }
+function nextStation(){ S.st++; S.i=0; S.phase=S.st>=STATIONS.length?"final":"intro"; save(); render(); window.scrollTo(0,0); }
+function skipStation(){ if(S.phase==="final"||S.phase==="repeat") return; S.phase="end"; save(); render(); }
+
+/* ============ ФИНАЛ ============ */
+function wrongList(){ return S.res.flat().filter(r=>!r.ok); }
+function renderFinal(){
+  const sec=Math.round(((S.finished||Date.now())-S.started)/1000);
+  let h='<h2 class="center">🔒 Кодовый замок</h2><div class="story center">Все слоги собраны! Составь из них фразу: что случилось с вором? (Подсказка: пассив!)</div><div class="prompt ko">'+(S.codeShown?'<span style="color:var(--ok)">'+CODE+'</span>'+sayBtn(CODE):shuffle(STATIONS.map(s=>s.syl)).join(" · "))+'</div>';
+  if(!S.codeShown){ h+='<div class="ctrl"><button class="primary big" onclick="showCode()">🔓 Открыть замок</button></div>'; $("stage").innerHTML=h; return; }
+  const all=S.res.flat(), ok=all.filter(r=>r.ok).length, w=wrongList();
+  h+='<p class="center" style="font-size:20px">🎉 Вор пойман! — <i>Вор был пойман полицией</i></p>';
+  h+='<p class="center" style="font-size:19px">Результат: <b>'+ok+' из '+all.length+'</b> ('+(all.length?Math.round(100*ok/all.length):0)+'%) · время '+Math.floor(sec/60)+' мин '+(sec%60)+' с</p>';
+  h+='<table class="res">'+STATIONS.map((s,k)=>{ const r=S.res[k]; return '<tr><td>'+s.name+'</td><td style="text-align:right">'+(r.length?r.filter(x=>x.ok).length+" / "+r.length:"пропущено")+'</td></tr>'; }).join("")+'</table>';
+  if(w.length){ h+='<h3 style="margin-top:18px">📌 Повторить на уроке ('+w.length+')</h3><table class="res">'+w.map(x=>'<tr><td class="ko" style="font-weight:600">'+esc(x.word)+'</td><td>'+esc(x.ru)+'</td></tr>').join("")+'</table>';
+    h+='<div class="ctrl"><button class="primary big" onclick="startRepeat()">🔁 Повторить ошибки</button></div>'; }
+  else h+='<p class="center" style="color:var(--ok);font-size:20px">Ни одной ошибки! 완벽해요! 🏆</p>';
+  h+='<div class="ctrl"><button onclick="sendTg()" id="tgBtn">📨 Отправить итог себе в Telegram</button><button onclick="localStorage.removeItem(KEY);location.reload()">⟲ Новый квест</button></div><div class="center muted" id="tgFb"></div>';
+  $("stage").innerHTML=h;
+}
+function showCode(){ S.codeShown=true; S.finished=Date.now(); save(); renderFinal(); say(CODE); }
+
+/* повтор ошибок */
+function startRepeat(){ const w=wrongList(); S.repeat={list:shuffle(w.map(x=>{ const it=x.item; return it.t==="mc"?{...it,oSh:null}:it; })),i:0,res:[]}; S.phase="repeat"; save(); render(); }
+function renderRepeat(){ const R=S.repeat;
+  $("map").innerHTML='<span class="cur">🔁 Повтор ошибок</span>'; $("keys").textContent=CODE; $("bar").style.width=(100*R.i/R.list.length)+"%"; $("score").textContent=""; $("prog").textContent=R.i<R.list.length?"задание "+(R.i+1)+" из "+R.list.length:"";
+  if(R.i<R.list.length) return renderItem(R.list[R.i]);
+  const still=R.res.filter(x=>!x.ok);
+  $("stage").innerHTML='<h2 class="center">🔁 Повтор закончен</h2><p class="center" style="font-size:20px">Исправлено: <b>'+(R.res.length-still.length)+' из '+R.res.length+'</b></p>'+
+    (still.length?'<h3>Ещё не усвоено:</h3><table class="res">'+still.map(x=>'<tr><td class="ko" style="font-weight:600">'+esc(x.word)+'</td><td>'+esc(x.ru)+'</td></tr>').join("")+'</table>':'<p class="center" style="color:var(--ok);font-size:20px">Всё исправлено! 🎉</p>')+
+    '<div class="ctrl"><button onclick="S.phase=\'final\';save();render()">← К итогам</button><button onclick="sendTg()" id="tgBtn">📨 Отправить итог себе</button></div><div class="center muted" id="tgFb"></div>';
+}
+
+/* отчёт в Telegram */
+async function sendTg(){
+  const all=S.res.flat(), ok=all.filter(r=>r.ok).length, w=wrongList();
+  let t="🕵️ <b>Квест-разминка · 피동</b> ("+(S.mode==="fast"?"быстрый":"полный")+")\n🕒 "+new Date().toLocaleString("ru-RU")+"\n✅ "+ok+" из "+all.length+"\n"+
+    STATIONS.map((s,k)=>s.name+": "+(S.res[k].length?S.res[k].filter(x=>x.ok).length+"/"+S.res[k].length:"—")).join("\n");
+  if(w.length) t+="\n\n📌 <b>Ошибки:</b>\n"+w.map(x=>"• "+esc(x.word)+" — "+esc(x.ru)).join("\n");
+  if(S.repeat&&S.repeat.res.length){ const st=S.repeat.res.filter(x=>!x.ok); t+="\n\n🔁 После повтора не усвоено: "+(st.length?st.map(x=>esc(x.word)).join(", "):"ничего 🎉"); }
+  const b=$("tgBtn"); if(b) b.disabled=true; $("tgFb").textContent="Отправляю…";
+  try{ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:t,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); $("tgFb").textContent="✅ Отправлено"; }
+  catch(e){ if(b) b.disabled=false; $("tgFb").textContent="Не получилось: "+e.message; }
+}
+
+/* клавиши для учителя */
+document.addEventListener("keydown",e=>{ if(!S||$("game").classList.contains("hidden")) return; if(e.target.tagName==="INPUT") return;
+  const k=e.key;
+  if(S.phase==="intro"&&(k===" "||k==="Enter")){ e.preventDefault(); return go(); }
+  if(S.phase==="end"&&(k===" "||k==="Enter")){ e.preventDefault(); return nextStation(); }
+  if(S.phase!=="q"&&!(S.phase==="repeat"&&S.repeat.i<S.repeat.list.length)) return;
+  const it=curItem(); if(!it) return;
+  if(it.t==="flip"){
+    if(!revealed&&(k===" "||k==="Enter")){ e.preventDefault(); return reveal(); }
+    if(revealed&&(k==="ArrowRight"||k==="1")){ e.preventDefault(); return mark(true); }
+    if(revealed&&(k==="ArrowLeft"||k==="2")){ e.preventDefault(); return mark(false); }
+  } else {
+    if(!revealed&&/^[1-3]$/.test(k)&&+k<=it.o.length){ e.preventDefault(); return pick(+k-1); }
+    if(revealed&&(k===" "||k==="Enter"||k==="ArrowRight")){ e.preventDefault(); return mark(picked); }
+  }
+});
+</script>
+</body>
+</html>
