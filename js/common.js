@@ -201,13 +201,21 @@ async function cloudSay(text,lang,cb,acc){
   ttsAudio.onplay=()=>cb.start&&cb.start();ttsAudio.onended=ttsAudio.onerror=()=>cb.end&&cb.end();
   await ttsAudio.play();
 }
-function localSay(text,lang,cb,acc){
+// alt — повтор с другим голосом: облачные голоса устройства («Online», «Natural») иногда молча падают,
+// если звук просят сразу после предыдущего (подкаст, озвучка подряд)
+function localSay(text,lang,cb,acc,alt){
   if(!hasTTS()){cb.end&&cb.end();return}
   try{
-    const p=String(lang||"ko").slice(0,2),u=new SpeechSynthesisUtterance(text),v=pickVoice(p,acc);
+    const p=String(lang||"ko").slice(0,2),u=new SpeechSynthesisUtterance(text);
+    const v=alt?(voices(p,acc).find(x=>x!==alt&&x.localService)||voices(p,acc).find(x=>x!==alt)||null):pickVoice(p,acc);
     if(v){u.voice=v;u.lang=v.lang}else u.lang=(LANGS[p]||{}).tts||lang;
-    u.rate=cb.rate||rate();u.onstart=()=>cb.start&&cb.start();u.onend=u.onerror=()=>cb.end&&cb.end();
-    speechSynthesis.cancel();speechSynthesis.speak(u);
+    let started=false;
+    u.rate=cb.rate||rate();u.onstart=()=>{started=true;cb.start&&cb.start()};u.onend=()=>cb.end&&cb.end();
+    u.onerror=e=>{const er=e&&e.error||"";
+      if(!started&&!alt&&er!=="interrupted"&&er!=="canceled"){setTimeout(()=>localSay(text,lang,cb,acc,v||true),250);return}
+      cb.end&&cb.end()};
+    if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel();
+    speechSynthesis.speak(u);
   }catch(e){cb.end&&cb.end()}
 }
 // lang: "ko", "en" или "en-gb" / "en-us" — английское слово с нужным произношением

@@ -592,7 +592,15 @@ function podStart(ids,title){
   if(S)stop();stopPod();
   var me={ids:ids,i:0,title:title,pc:0};POD=me;
   var el=$('#pod');el.hidden=false;drawPod();drawListenBar();el.scrollIntoView({block:'start',behavior:KR.calm()?'auto':'smooth'});
+  // iPhone: первая озвучка должна прозвучать прямо по нажатию, иначе Safari не даёт говорить дальше
+  try{if(window.speechSynthesis&&!speechSynthesis.speaking){var u0=new SpeechSynthesisUtterance(' ');u0.volume=0;speechSynthesis.speak(u0)}}catch(e){}
   podLock(true);podRun(me);
+}
+/* нет голоса для языка слова на этом устройстве: объясняем, где его поставить */
+function noVoice(l){
+  if(!KR.canSay()||KR.cloudVoice()||KR.voices(l).length||!speechSynthesis.getVoices().length)return '';
+  var name=l==='ko'?'корейского':'английского',L=l==='ko'?'Корейский':'Английский';
+  return '<p class="msg bad pod-novoice">На этом устройстве нет голоса для '+name+', поэтому слово не звучит. Android: Настройки → Синтез речи (Google) → Установить голосовые данные → '+L+'. iPhone: Настройки → Универсальный доступ → Устный контент → Голоса → '+L+'. Потом перезагрузи страницу.</p>';
 }
 function stopPod(){if(!POD)return;var me=POD;POD=null;KR.hush();podKick(me);podLock(false);var el=$('#pod');if(el){el.hidden=true;el.innerHTML=''}markRow(null);drawListenBar()}
 var stopListen=stopPod;
@@ -619,7 +627,7 @@ function drawPod(){
     '<div class="pod-ctl">'+(me.tap&&!me.paused?'<button type="button" class="btn pri" data-x="pod-next">Дальше'+KR.icon('arrow',16)+'</button>':'')+
       '<button type="button" data-x="pod-pause">'+KR.icon(me.paused?'play':'pause',16)+(me.paused?'Продолжить':'Пауза')+'</button>'+
       '<button type="button" data-x="pod-skip">'+KR.icon('skip',15)+'Следующее слово</button></div>'+
-    '<p class="muted pod-meta">'+esc(podMeta(cfg))+' · <button type="button" class="linkish" data-x="listen-cfg">Настроить</button></p>';
+    (c?noVoice(c.l):'')+'<p class="muted pod-meta">'+esc(podMeta(cfg))+' · <button type="button" class="linkish" data-x="listen-cfg">Настроить</button></p>';
 }
 /* подкаст на сегодня: слова в работе, повторения и новые слова дня; если их нет — все изученные, начиная с тех, что скоро повторять */
 function podToday(){
