@@ -11,7 +11,7 @@
 (function(root){
 "use strict";
 var MIN=60000,DAY=86400000,AHEAD=20*MIN;
-var GAMES=["cards","tr","ctx","wr","build","pairs"];
+var GAMES=["cards","tr","ctx","wr","build","pairs","hear","dict","say"];   // hear, dict, say — на слух и вслух (js/ear.js)
 var DEF={
   steps:[1,10],   // шаги изучения нового слова, минуты
   relearn:[10],   // шаг для забытого слова, минуты
@@ -25,7 +25,7 @@ var DEF={
   maxIvl:365,     // потолок интервала, дни
   newDay:10,      // новых слов в день
   revDay:100,     // повторений в день
-  games:{cards:1,tr:1,ctx:1,wr:1,build:1,pairs:1},
+  games:{cards:1,tr:1,ctx:1,wr:1,build:1,pairs:1,hear:1,dict:1,say:1},
   lw:"ask"        // слова нового урока: ask — спросить ученика, auto — добавить сразу, off — не добавлять
 };
 function num(v,d,lo,hi){v=parseFloat(v);return isFinite(v)?Math.max(lo,Math.min(hi,v)):d}
@@ -37,7 +37,7 @@ function mins(a,d){
 /* Настройки с подставленными значениями по умолчанию и разумными границами. */
 function cfg(s){
   s=s||{};var g={},on=0;
-  GAMES.forEach(function(k){g[k]=(s.games?s.games[k]:DEF.games[k])?1:0;on+=g[k]});
+  GAMES.forEach(function(k){g[k]=(s.games&&k in s.games?s.games[k]:DEF.games[k])?1:0;on+=g[k]});   // новая игра у старых настроек включена
   if(!on)g.cards=1;                                     // хотя бы одна игра всегда включена
   return {steps:mins(s.steps,DEF.steps),relearn:mins(s.relearn,DEF.relearn),
     grad:Math.round(num(s.grad,DEF.grad,1,30)),easy:Math.round(num(s.easy,DEF.easy,1,60)),

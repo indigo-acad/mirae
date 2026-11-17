@@ -980,3 +980,42 @@ html:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{
 .bulk-tags .badge{white-space:normal;text-align:right;border-radius:10px}
 .bulk-row.off{opacity:.6}
 @media (max-width:560px){.bulk-row .mid{grid-template-columns:1fr}}
+
+/* ---------- слова на слух и вслух (words.html, js/ear.js) ---------- */
+.tb-more{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 8px}
+.tb-more button{display:inline-flex;align-items:center;gap:8px}
+.ear-ctl{display:flex;justify-content:center;align-items:center;gap:12px;margin:6px 0 4px}
+.ear-play{display:grid;place-items:center;width:72px;height:72px;padding:0;border-radius:50%;background:var(--gold);color:#0B1535;border-color:var(--gold)}
+.ear-play:hover{background:var(--gold-hi)}
+.ear-play.on,button.mic.on{animation:earPulse 1.1s ease-in-out infinite;background:var(--bad);border-color:var(--bad);color:#fff}
+@keyframes earPulse{0%,100%{box-shadow:0 0 0 0 rgba(185,71,59,.45)}50%{box-shadow:0 0 0 12px rgba(185,71,59,0)}}
+.say-alt{justify-content:center;margin-top:8px}
+.ear-pair,.ear-miss{justify-content:center}
+.ear-pair button,.ear-miss button{display:inline-flex;align-items:center;gap:6px}
+.dcells{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 16px;margin:16px 0 6px}
+.dw{display:inline-flex;gap:4px;white-space:nowrap}
+.dcells i{display:grid;place-items:center;min-width:26px;height:42px;padding:0 2px;border-bottom:2px solid var(--gold);font-style:normal;font-size:22px;font-weight:600;line-height:1;color:var(--ivory)}
+.dcells.ko i{min-width:40px;height:50px;font-size:26px}
+.dcells i.fix{border-color:transparent;min-width:10px;color:var(--silver)}
+.dcells i.ok{color:var(--ok-fg);border-color:var(--ok-fg)}
+.dcells i.bad{color:var(--bad-fg);border-color:var(--bad-fg);height:auto;min-height:42px;grid-auto-rows:auto}
+.dcells i s{font-size:13px;font-weight:400;opacity:.8}
+.dcells i b{font-weight:600}
+.micfb{margin-top:8px;font-size:15px;color:var(--silver)}
+.micfb.ok{color:var(--ok-fg)}.micfb.bad{color:var(--bad-fg)}
+.q-opts.cnt{grid-template-columns:repeat(4,1fr)}
+.cnt-words{display:flex;flex-wrap:wrap;gap:6px}
+.cnt-words span{padding:2px 8px;border:1px solid var(--rule);border-radius:8px}
+.pod-card{position:relative}
+.pod-card .flash-w{min-height:1.3em}
+.pod-card .flash-t{min-height:1.2em}
+.pod-hint{margin:14px 0 0;font-size:16px;color:var(--silver)}
+.pod-hint.on{color:var(--gold);font-weight:600}
+.pod-timer{height:4px;margin:12px auto 0;max-width:280px;border-radius:4px;background:var(--rule);overflow:hidden}
+.pod-timer i{display:block;height:100%;background:var(--gold);transform-origin:left;animation:podT linear forwards}
+@keyframes podT{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.pod-ctl{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:14px}
+.pod-ctl button{display:inline-flex;align-items:center;gap:6px}
+.pod-meta{text-align:center;font-size:14px;margin:12px 0 0}
+@media(max-width:560px){.dcells i{min-width:22px;font-size:20px}.dcells.ko i{min-width:34px;font-size:23px}.ear-play{width:64px;height:64px}}
+@media(prefers-reduced-motion:reduce){.ear-play.on,button.mic.on{animation:none}.pod-timer i{animation:none}}

@@ -16,6 +16,7 @@
 <main>
   <div id="today" class="today2"></div>
   <section id="play" class="card glass play" aria-live="polite" hidden></section>
+  <section id="pod" class="card glass play pod" aria-live="polite" hidden></section>
   <div class="seg wtabs" id="tabs" role="tablist" aria-label="Словарь и настройки">
     <button type="button" role="tab" data-tab="list" aria-selected="true">Мои слова</button>
     <button type="button" role="tab" data-tab="prefs" aria-selected="false">Настройки</button>
@@ -23,7 +24,7 @@
   <section id="list"></section>
   <section id="prefs" hidden></section>
 </main>
-<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/words2.js"></script><script src="js/assistant.js"></script>
+<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/words2.js"></script><script src="js/ear.js"></script><script src="js/assistant.js"></script>
 <script>
 /* Тренажёр слов. Расписание как в Anki (js/srs.js), игры взяты из тренажёра группы 2724:
    карточки, выбор перевода на слух, слово в предложении, письмо, сборка слова, поиск пары.
@@ -35,7 +36,10 @@ var URLP=new URLSearchParams(location.search),FORCE=URLP.get('game');   // ?game
 var INFO={},WSETS=[],sfilt=URLP.get('set')||'',tfilt='',lvfilt='',pfilt='',infoAt=0;
 var GAME={cards:['Карточки','вспомни перевод и оцени себя сам'],tr:['Выбери перевод','слово звучит, нужно выбрать перевод'],
   ctx:['Слово в предложении','какое слово пропущено'],wr:['Напиши слово','по переводу, с клавиатуры'],
-  build:['Собери слово','из слогов или букв'],pairs:['Найди пару','соедини слова и переводы']};
+  build:['Собери слово','из слогов или букв'],pairs:['Найди пару','соедини слова и переводы'],
+  hear:['Что прозвучало','слово звучит, выбери, как оно пишется: 달, 탈 или 딸'],dict:['Диктант','слово или фраза звучит, впиши по клеточкам'],
+  say:['Скажи слово','по переводу, вслух в микрофон'],cnt:['Сколько слов','послушай фразу и посчитай слова']};
+var EAR=KR.ear;
 var RATE=[[1,'Снова'],[2,'Трудно'],[3,'Хорошо'],[4,'Легко']];
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
 function wcls(c){return c.l==='ko'?' class="ko"':''}
@@ -43,6 +47,15 @@ function word(c){return '<span'+wcls(c)+' lang="'+c.l+'">'+esc(c.w)+'</span>'}
 function sayBtn(text,l){return KR.canSay()?'<button type="button" class="say" data-say="'+esc(text)+'" data-l="'+l+'" aria-label="Послушать">'+KR.icon('volume',16)+'</button>':''}
 function same(a,b){var n=function(s){return SRS.norm(s).replace(/[\s.,!?·~'’-]/g,'')};return n(a)!==''&&n(a)===n(b)}
 function units(c){return c.w.replace(/\s+/g,'').split('')}
+function micBtn(text,l){return EAR.canHear()?'<button type="button" class="say mic" data-mic="'+esc(text)+'" data-l="'+l+'" aria-label="Проверить произношение">'+KR.icon('mic',16)+'</button>':''}
+/* пример к слову: свой или из базы слов школы */
+function exOf(c){if(c.ex)return {s:c.ex,t:c.et||''};var e=((info(c)||{}).examples||[])[0];return e&&e.s?{s:e.s,t:e.t||''}:null}
+/* похожие на слух слова для «Что прозвучало»: считаем один раз на занятие */
+function alikesOf(c){
+  if(!S)return [];S.al=S.al||{};
+  if(!S.al[c.id])S.al[c.id]=EAR.alikes(c.w,c.l,V.all(c.l).map(function(x){return x.w}),3);
+  return S.al[c.id];
+}
 /* Место слова в примере: по заданной форме (f) или по основе слова. */
 function cloze(c){
   if(!c.ex)return null;var f=c.f&&c.ex.indexOf(c.f)>=0?c.f:null;
@@ -72,6 +85,9 @@ function drawToday(){
   if(busy==='rev')h+='';
   else if(inWork+rev)h+='<div class="done-row"><span class="muted">Упражнения по словам, которые уже в работе</span><button type="button" class="cta" id="go">Начать отработку'+KR.icon('arrow',18)+'</button></div>';
   else h+='<div class="done-row"><span class="muted">'+(st.total?(p.waiting?'Сейчас отрабатывать нечего. Ближайшее слово вернётся через '+SRS.span(p.nextAt-now)+'.':st.total>p.allNew?'На сегодня отработка закончена. Повторения появятся завтра.':'Отработка начнётся, когда разберёшь новые слова.'):'В словаре пока нет слов: '+G.ru+' раздел.')+'</span></div>';
+  if(st.total&&KR.canSay())h+='<div class="tb-more"><button type="button" data-x="to-ear">'+KR.icon('headphones',17)+'Тренировка на слух</button>'+
+    '<button type="button" data-x="pod-today">'+KR.icon('play',16)+'Подкаст на сегодня</button></div>'+
+    '<p class="muted tb-sub">На слух: диктант по клеточкам, «что прозвучало»'+(EAR.canHear()?', скажи слово в микрофон':'')+'. Подкаст читает слова с паузой, чтобы успеть ответить.</p>';
   h+='<p class="muted cloudline">'+KR.icon(cloud[0],15)+' '+cloud[1]+'</p></section>';
   $('#today').innerHTML=h;
 }
@@ -85,25 +101,38 @@ function feasible(c,d){
   if(g.ctx&&others.length>=3&&cloze(c))out.push('ctx');
   if(g.wr&&c.t)out.push('wr');
   if(g.build&&n>=2&&n<=16)out.push('build');
+  if(g.hear&&KR.canSay()&&alikesOf(c).length>=3)out.push('hear');
+  if(g.dict&&KR.canSay()&&n<=24)out.push('dict');
+  if(g.say&&EAR.canHear()&&trOf(c))out.push('say');
   return out;
 }
 function choose(c,d){
   var f=feasible(c,d);
   if(FORCE&&(f.indexOf(FORCE)>=0))return FORCE;
   if(!c.st)return f.indexOf('cards')>=0?'cards':'intro';                 // новое слово сначала показываем
-  var pref=(c.st===1||c.st===3)?['tr','ctx','build','cards','wr']:(c.ivl||0)<7?['ctx','tr','build','wr','cards']:['wr','build','ctx','tr','cards'];
-  var av=pref.filter(function(g){return f.indexOf(g)>=0});
-  return av.length?av[av.length>1&&Math.random()>.65?1:0]:'cards';
+  // сначала узнавание (в том числе на слух), потом вспоминание: написать, сказать вслух, записать на слух
+  var pref=(c.st===1||c.st===3)?['tr','hear','ctx','build','dict','cards','wr']:(c.ivl||0)<7?['ctx','dict','tr','say','hear','build','wr','cards']:['wr','say','dict','build','ctx','tr','cards'];
+  var av=pref.filter(function(g){return f.indexOf(g)>=0&&g!==S.lastGame});
+  if(!av.length)av=pref.filter(function(g){return f.indexOf(g)>=0});
+  return av.length?av[Math.floor(Math.random()*Math.min(3,av.length))]:'cards';
 }
 /* mode: new — знакомство с новыми словами на сегодня; rev — отработка (без новых слов) */
 function start(mode){
-  S={mode:mode==='new'?'new':'rev',done:0,known:0,sincePairs:99,right:0,wrong:0};
+  stopPod();
+  S={mode:mode==='new'||mode==='ear'?mode:'rev',done:0,known:0,sincePairs:99,right:0,wrong:0,missed:[]};
   if(S.mode==='new'){S.queue=V.plan(lang).fresh.map(function(c){return c.id});S.qi=0}
+  if(S.mode==='ear'){S.queue=earQueue();S.qi=0}
   $('#play').hidden=false;drawToday();nextCard();$('#play').scrollIntoView({block:'start',behavior:KR.calm()?'auto':'smooth'});
 }
-function stop(){KR.hush();S=null;$('#play').hidden=true;$('#play').innerHTML='';drawAll()}
+function stop(){KR.hush();EAR.stop();S=null;$('#play').hidden=true;$('#play').innerHTML='';drawAll()}
 function nextCard(){
-  if(!S)return;KR.hush();clearTimeout(S.timer);
+  if(!S)return;KR.hush();EAR.stop();clearTimeout(S.timer);S.tok=(S.tok||0)+1;S.hint=false;S.tries=0;
+  if(S.mode==='ear'){
+    if(S.qi>=S.queue.length)return finishEar();
+    var it=S.queue[S.qi],ce=V.get(it.id);if(!ce){S.queue.splice(S.qi,1);return nextCard()}
+    S.card=ce;S.game=it.g;S.lock=false;S.retype=false;S.miss=0;
+    return ({hear:gHear,dict:gDict,say:gSay,cnt:gCount})[it.g](ce,it.ph);
+  }
   if(S.mode==='new'){
     while(S.qi<S.queue.length){var c0=V.get(S.queue[S.qi]);if(c0&&!c0.st)break;S.qi++}   // слово могли удалить или разобрать на другом устройстве
     if(S.qi>=S.queue.length)return finishNew();
@@ -114,11 +143,13 @@ function nextCard(){
   if((g.pairs&&S.sincePairs>=8&&pool.length>=4&&!FORCE)||(FORCE==='pairs'&&pool.concat(p.soon).length>=4)){S.sincePairs=0;return pairs((FORCE==='pairs'?pool.concat(p.soon):pool).slice(0,5))}
   var c=SRS.pick(p);
   if(!c)return finish(p);
-  S.sincePairs++;S.card=c;S.game=choose(c,deck());S.hint=false;S.retype=false;S.miss=0;S.lock=false;
-  ({cards:gCards,intro:gCards,tr:gChoice,ctx:gChoice,wr:gWrite,build:gBuild})[S.game](c);
+  S.sincePairs++;S.card=c;S.game=choose(c,deck());S.lastGame=S.game;S.hint=false;S.retype=false;S.miss=0;S.lock=false;
+  // диктант фразой: слово уже знакомо и у него есть пример
+  var ph=false;if(S.game==='dict'){var e=exOf(c);ph=!!(e&&c.st===2&&(c.ivl||0)>=3&&e.s.length<=70&&EAR.count(e.s)>=2&&Math.random()<.5)}
+  ({cards:gCards,intro:gCards,tr:gChoice,ctx:gChoice,wr:gWrite,build:gBuild,hear:gHear,dict:gDict,say:gSay})[S.game](c,ph);
 }
 function frame(title,body){
-  var p=V.plan(lang),left=S.mode==='new'?S.queue.length-S.qi:p.learn.length+p.rev.length+p.soon.length;
+  var p=V.plan(lang),left=S.mode==='new'||S.mode==='ear'?S.queue.length-S.qi:p.learn.length+p.rev.length+p.soon.length;
   $('#play').innerHTML='<div class="play-top"><span class="tag">'+title+'</span><span class="muted">осталось: '+left+'</span><button type="button" class="round" data-x="stop" aria-label="Закончить занятие">'+KR.icon('x',16)+'</button></div>'+body;
 }
 function finish(p){
@@ -136,7 +167,7 @@ function gNew(c){
   var src=KR.W2.source(c.src||I.src,(setById(String(c.src||'').replace('set:',''))||{}).title);
   frame('Новое слово · '+(S.qi+1)+' из '+S.queue.length,'<div class="flash newcard">'+
     (I.image?'<img class="flash-img" src="'+esc(I.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
-    '<div class="flash-w">'+word(c)+' '+sayBtn(c.w,c.l)+'</div>'+
+    '<div class="flash-w">'+word(c)+' '+sayBtn(c.w,c.l)+micBtn(c.w,c.l)+'</div>'+
     (ipa?'<div class="flash-ipa" lang="en">'+esc(ipa)+'</div>':'')+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+
     '<div class="flash-t">'+esc(trOf(c)||'перевод не указан')+'</div>'+
     (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+(c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>':'')+
@@ -159,6 +190,7 @@ function finishNew(){
 }
 /* Записать оценку, показать, когда слово вернётся, и перейти дальше. */
 function grade(g,auto){
+  if(S.mode==='ear')return earGrade(g>1,auto);
   var c=V.answer(S.card.id,g);S.done++;if(g>1)S.right++;else S.wrong++;
   var fb=$('#fb');if(fb)fb.insertAdjacentHTML('beforeend','<div class="muted back-in">Вернётся через '+(c.st===2?SRS.span(c.ivl*SRS.DAY):SRS.span(Math.max(0,c.due-Date.now())))+'</div>');
   drawToday();
@@ -172,7 +204,7 @@ function more(c){   // пример после ответа
 function gCards(c){
   var intro=S.game==='intro',now=Date.now(),set=V.settings();
   var I=info(c)||{},ipa=c.l==='en'?(KR.accent()==='us'?I.ipa_us||I.ipa_uk:I.ipa_uk||I.ipa_us):'';
-  frame(c.st?GAME.cards[0]:'Новое слово','<div class="flash" id="flash"><div class="flash-w">'+word(c)+' '+sayBtn(c.w,c.l)+'</div>'+
+  frame(c.st?GAME.cards[0]:'Новое слово','<div class="flash" id="flash"><div class="flash-w">'+word(c)+' '+sayBtn(c.w,c.l)+micBtn(c.w,c.l)+'</div>'+
     (ipa?'<div class="flash-ipa" lang="en">'+esc(ipa)+'</div>':'')+
     (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+'</div>':'')+
     '<div class="flash-back" id="back" hidden>'+(I.image?'<img class="flash-img" src="'+esc(I.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
@@ -253,6 +285,156 @@ function pairTap(b){
   else{S.pm[id]=1;S.pm[b.dataset.pt]=1;b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake','bad');setTimeout(function(){b.classList.remove('bad')},500)}
 }
 
+// ---------- на слух и вслух (js/ear.js) ----------
+/* Тренировка на слух: 12 слов из тех, что уже в работе (сначала те, что пора повторить, и сложные).
+   Ответы сдвигают интервалы, как упражнения уроков (KR.vocab.practice): ошибка — слово вернётся на повторение сегодня. */
+function earQueue(){
+  var all=V.all(lang),ds=SRS.dayStart(Date.now()),prev='',out=[];
+  var pool=all.filter(function(c){return c.st});if(pool.length<4)pool=all.slice();
+  var due=function(c){return c.st===1||c.st===3||(c.st===2&&c.due<ds+SRS.DAY)?1:0};
+  pool=shuffle(pool).sort(function(a,b){return (due(b)-due(a))||((b.star?1:0)-(a.star?1:0))});
+  pool.slice(0,12).forEach(function(c){
+    var e=exOf(c),phOk=!!(e&&e.s.length<=80&&EAR.count(e.s)>=2),gs=[];
+    if(alikesOf(c).length>=3)gs.push('hear');
+    gs.push('dict');
+    if(EAR.canHear()&&trOf(c))gs.push('say');
+    if(phOk&&EAR.count(e.s)>=3)gs.push('cnt');
+    var ch=gs.filter(function(g){return g!==prev});if(!ch.length)ch=gs;
+    var g=ch[Math.floor(Math.random()*ch.length)];prev=g;
+    out.push({id:c.id,g:g,ph:g==='cnt'||(g==='dict'&&phOk&&Math.random()<.5)});
+  });
+  return out;
+}
+function nextRow(){return '<div class="done-row"><span></span><button type="button" class="btn pri" id="nextb" data-x="next" hidden>Дальше'+KR.icon('arrow',16)+'</button></div>'}
+function earCtl(){return '<div class="ear-ctl"><button type="button" class="ear-play" data-x="ear-say" aria-label="Послушать ещё раз">'+KR.icon('volume',30)+'</button><button type="button" data-x="ear-slow">Медленно</button></div>'}
+/* slow — сначала медленно, потом в обычном темпе */
+function earPlay(slow){
+  if(!S||!S.ear)return;var e=S.ear,t=S.tok;
+  if(!slow)return KR.say(e.text,e.l);
+  sayP(e.text,e.l,{rate:.6}).then(function(){return pause(700)}).then(function(){if(S&&S.tok===t)KR.say(e.text,e.l)});
+}
+// что прозвучало: слово и три похожих на слух
+function gHear(c){
+  var opts=shuffle([c.w].concat(alikesOf(c).slice(0,3)));S.hopts=opts;S.ear={text:c.w,l:c.l};
+  frame(GAME.hear[0],earCtl()+'<p class="muted q-sub">Какое слово прозвучало?</p>'+
+    '<div class="opts q-opts">'+opts.map(function(o,i){return '<button type="button" data-h="'+i+'"'+wcls(c)+' lang="'+c.l+'">'+esc(o)+'</button>'}).join('')+'</div>'+
+    '<div id="fb" class="q-fb"></div>'+nextRow());
+  earPlay(false);
+}
+function hearPick(i){
+  if(!S||S.lock)return;S.lock=true;var c=S.card,o=S.hopts[i],ok=o===c.w,t=S.tok;
+  [].forEach.call(document.querySelectorAll('.q-opts button'),function(b,k){b.disabled=true;if(S.hopts[k]===c.w)b.classList.add('ok');else if(k===i)b.classList.add('bad')});
+  var sb=function(x){return '<button type="button" data-say="'+esc(x)+'" data-l="'+c.l+'">'+KR.icon('volume',15)+' <span'+wcls(c)+' lang="'+c.l+'">'+esc(x)+'</span></button>'};
+  $('#fb').innerHTML='<div class="'+(ok?'ok':'bad')+'">'+(ok?'Верно':'Прозвучало')+': '+word(c)+' — '+esc(trOf(c))+'</div>'+
+    (ok?'':'<p class="muted">Послушай разницу: твой вариант и правильный.</p><div class="opts ear-pair">'+sb(o)+sb(c.w)+'</div>');
+  if(!ok)sayP(o,c.l).then(function(){return pause(500)}).then(function(){if(S&&S.tok===t)KR.say(c.w,c.l)});
+  grade(ok?3:1,ok);
+}
+// диктант по клеточкам: слог (корейский) или буква (английский) в клеточке
+function gDict(c,ph){
+  var e=ph?exOf(c):null,text=e?e.s:c.w,ko=c.l==='ko',n=EAR.typed(text).length;
+  S.ear={text:text,l:c.l,ph:!!e,tr:e?e.t:trOf(c)};
+  frame(GAME.dict[0]+(e?' · фраза':''),earCtl()+
+    '<p class="muted q-sub">'+(e?'Впиши фразу':'Впиши слово')+': '+(ko?'в клеточке один слог':'в клеточке одна буква')+(e?', пробелы и знаки уже стоят':'')+' · '+(ko?'слогов':'букв')+': '+n+'</p>'+
+    '<div class="dcells'+(ko?' ko':'')+'" id="dcells" lang="'+c.l+'" aria-hidden="true">'+EAR.cells(text,c.l).map(function(w){return '<span class="dw">'+w.map(function(x){return x.fix?'<i class="fix">'+esc(x.ch)+'</i>':'<i data-k="'+x.k+'"></i>'}).join('')+'</span>'}).join('')+'</div>'+
+    '<form id="df" class="wr" autocomplete="off"><input class="name'+(ko?' ko':'')+'" id="din" lang="'+c.l+'" aria-label="'+(e?'Фраза':'Слово')+', которое прозвучало" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="submit" class="btn pri">Проверить</button><button type="button" data-x="dhint">Подсказка</button></form>'+
+    '<p class="muted q-sub" id="dleft"></p><div id="fb" class="q-fb"></div>'+nextRow()+(ko?'<p class="hint">Нужна корейская раскладка.</p>':''));
+  $('#din').focus({preventScroll:true});
+  earPlay(!!e||c.st!==2);   // фраза и ещё не выученное слово: сначала медленно
+}
+function dictFill(){
+  var inp=$('#din');if(!inp||!S||!S.ear||S.lock)return;var t=EAR.typed(inp.value),total=EAR.typed(S.ear.text).length;
+  [].forEach.call(document.querySelectorAll('#dcells i[data-k]'),function(i){i.textContent=t[+i.dataset.k]||''});
+  var l=$('#dleft');if(l)l.textContent=t.length>total?'Лишних '+(S.ear.l==='ko'?'слогов':'букв')+': '+(t.length-total):'';
+}
+function dictCheck(){
+  if(!S||S.lock)return;var inp=$('#din'),c=S.card,e=S.ear;if(!inp||!inp.value.trim())return;
+  var r=EAR.check(e.text,e.l,inp.value);S.lock=true;inp.disabled=true;
+  [].forEach.call(document.querySelectorAll('#dcells i[data-k]'),function(i){var x=r.cells[+i.dataset.k];if(!x)return;i.className=x.ok?'ok':'bad';
+    if(!x.ok)i.innerHTML=(x.got?'<s>'+esc(x.got)+'</s>':'')+'<b>'+esc(x.ch)+'</b>'});
+  var g=r.ok?(S.hint?2:3):(e.ph&&r.bad+r.extra<=1&&r.total>=10?2:1);
+  $('#fb').innerHTML='<div class="'+(g>1?'ok':'bad')+'">'+(r.ok?'Верно':g>1?'Почти: одна ошибка':'Ошибок: '+(r.bad+r.extra)+'. Правильные буквы — в клеточках')+'</div>'+
+    '<div class="exbox"><div'+wcls(c)+' lang="'+c.l+'">'+esc(e.text)+' '+sayBtn(e.text,c.l)+'</div>'+(e.tr?'<div class="muted">'+esc(e.tr)+'</div>':'')+(e.ph?'<div class="muted">Слово: '+word(c)+' — '+esc(trOf(c))+'</div>':'')+'</div>';
+  KR.say(e.text,e.l);
+  grade(g,r.ok&&!e.ph);   // после фразы не торопим: пусть дослушает
+}
+// скажи слово: перевод на экране, ученик говорит слово в микрофон
+function gSay(c){
+  S.ear={text:c.w,l:c.l};S.tries=0;S.peek=false;
+  frame(GAME.say[0],'<div class="q-word q-ru">'+esc(trOf(c))+'</div><p class="muted q-sub">Скажи '+(c.l==='ko'?'по-корейски':'по-английски')+(c.l==='ko'&&units(c).length>1?' · слогов: '+units(c).length:'')+'</p>'+
+    '<div class="ear-ctl"><button type="button" class="ear-play mic-big" data-x="mic" aria-label="Нажми и скажи слово">'+KR.icon('mic',30)+'</button></div>'+
+    '<p class="muted q-sub" id="micst" aria-live="polite">Нажми на микрофон и скажи слово</p>'+
+    '<div class="opts say-alt"><button type="button" data-x="say-peek">'+KR.icon('volume',15)+' Послушать, как правильно</button><button type="button" data-x="say-type">Ответить текстом</button></div>'+
+    '<div id="fb" class="q-fb"></div>'+nextRow());
+}
+async function micGo(){
+  if(!S||S.lock||S.listening)return;var c=S.card,t=S.tok,b=$('[data-x="mic"]'),st=$('#micst');
+  KR.hush();S.listening=true;if(b)b.classList.add('on');if(st)st.textContent='Слушаю…';
+  try{
+    var alts=await EAR.recognize(c.l,{accent:KR.accent()});
+    if(!S||S.tok!==t)return;
+    var r=EAR.heard(alts,c.w,c.l),got='Услышали: «'+esc(r.best||alts[0])+'».';S.tries++;
+    if(r.ok){S.lock=true;if(st)st.textContent='';
+      $('#fb').innerHTML='<div class="ok">Верно! '+got+'</div><div class="muted">'+word(c)+' — '+esc(trOf(c))+'</div>'+more(c);
+      KR.say(c.w,c.l);return grade(S.peek?2:3,true)}
+    if(S.tries>=2){S.lock=true;if(st)st.textContent='';
+      $('#fb').innerHTML='<div class="'+(r.close?'ok':'bad')+'">'+got+(r.close?' Почти!':'')+' Правильно: '+word(c)+' '+sayBtn(c.w,c.l)+'</div>'+more(c);
+      KR.say(c.w,c.l);return grade(r.close?2:1,false)}
+    $('#fb').innerHTML='<div class="bad">'+got+' '+(r.close?'Почти. Послушай и повтори.':'Попробуй ещё раз.')+'</div>';
+    if(st)st.textContent='Ещё одна попытка';
+    if(r.close){S.peek=true;KR.say(c.w,c.l)}
+  }catch(e){if(S&&S.tok===t&&st)st.textContent=EAR.errText(e)||'Нажми на микрофон и скажи слово'}
+  finally{if(S&&S.tok===t){S.listening=false;if(b)b.classList.remove('on')}}
+}
+/* микрофон рядом с новым словом: проверить своё произношение, без оценки */
+async function micCheck(b){
+  if(b.classList.contains('on'))return;
+  var box=b.closest('.flash')||b.parentNode,fb=box.querySelector('.micfb'),text=b.dataset.mic,l=b.dataset.l;
+  if(!fb){(b.closest('.flash-w')||b).insertAdjacentHTML('afterend','<div class="micfb" aria-live="polite"></div>');fb=box.querySelector('.micfb')}
+  KR.hush();b.classList.add('on');fb.className='micfb';fb.textContent='Слушаю… скажи слово';
+  try{
+    var alts=await EAR.recognize(l,{accent:KR.accent()}),r=EAR.heard(alts,text,l);
+    fb.className='micfb '+(r.ok?'ok':r.close?'':'bad');
+    fb.textContent=r.ok?'Отлично, понятно: «'+r.best+'»':r.close?'Почти: услышали «'+r.best+'». Послушай и повтори.':'Услышали «'+(r.best||alts[0])+'». Послушай ещё раз и повтори.';
+    if(!r.ok)setTimeout(function(){KR.say(text,l)},300);
+  }catch(e){fb.className='micfb bad';fb.textContent=EAR.errText(e)}
+  b.classList.remove('on');
+}
+// сколько слов во фразе (только в тренировке на слух, без оценки слова)
+function gCount(c){
+  var e=exOf(c),n=EAR.count(e.s),opts=shuffle([n-1,n,n+1,n+2]);
+  S.ear={text:e.s,l:c.l,tr:e.t};S.cn=n;S.copts=opts;
+  frame(GAME.cnt[0],earCtl()+'<p class="muted q-sub">Сколько слов во фразе? Сначала она звучит медленно, потом в обычном темпе.</p>'+
+    '<div class="opts q-opts cnt">'+opts.map(function(x,i){return '<button type="button" data-cn="'+i+'">'+x+'</button>'}).join('')+'</div><div id="fb" class="q-fb"></div>'+nextRow());
+  earPlay(true);
+}
+function cntPick(i){
+  if(!S||S.lock)return;S.lock=true;var c=S.card,e=S.ear,ok=S.copts[i]===S.cn;
+  [].forEach.call(document.querySelectorAll('.q-opts button'),function(b,k){b.disabled=true;if(S.copts[k]===S.cn)b.classList.add('ok');else if(k===i)b.classList.add('bad')});
+  $('#fb').innerHTML='<div class="'+(ok?'ok':'bad')+'">'+(ok?'Верно':'Слов во фразе')+': '+S.cn+'</div><div class="exbox"><div class="cnt-words'+(c.l==='ko'?' ko':'')+'" lang="'+c.l+'">'+
+    e.text.split(/\s+/).map(function(w){return '<span>'+esc(w)+'</span>'}).join('')+'</div>'+(e.tr?'<div class="muted">'+esc(e.tr)+'</div>':'')+'</div>';
+  KR.say(e.text,e.l);
+  earGrade(ok,false,true);
+}
+/* ответ в тренировке на слух. free — без влияния на интервалы */
+function earGrade(ok,auto,free){
+  var c=S.card;S.done++;if(ok)S.right++;else{S.wrong++;if(S.missed.indexOf(c.id)<0)S.missed.push(c.id)}
+  if(!free){var o={};o[c.id]=!!ok;var r=V.practice(o),fb=$('#fb');
+    if(fb&&r.back.length)fb.insertAdjacentHTML('beforeend','<div class="muted back-in">Слово вернётся на повторение сегодня</div>');
+    else if(fb&&r.done.length)fb.insertAdjacentHTML('beforeend','<div class="muted back-in">Засчитано как повторение на сегодня</div>')}
+  S.qi++;drawToday();
+  if(auto)S.timer=setTimeout(nextCard,KR.calm()?900:1500);
+  else{var b=$('#nextb');if(b){b.hidden=false;b.focus()}else nextCard()}
+}
+function finishEar(){
+  var n=S.right+S.wrong,miss=S.missed.map(function(id){return V.get(id)}).filter(Boolean);S.mode='done';
+  $('#play').innerHTML='<div class="fin"><span class="spark">'+KR.icon('headphones',34)+'</span><h3>Тренировка на слух закончена</h3><p class="muted">Верно: '+S.right+' из '+n+'.'+(miss.length?' Эти слова стоит послушать ещё раз:':'')+'</p>'+
+    (miss.length?'<div class="opts ear-miss">'+miss.map(function(c){return '<button type="button" data-say="'+esc(c.w)+'" data-l="'+c.l+'">'+KR.icon('volume',15)+' <span'+wcls(c)+' lang="'+c.l+'">'+esc(c.w)+'</span>&nbsp;· '+esc(trOf(c))+'</button>'}).join('')+'</div>':'')+
+    '<div class="fin-acts"><button type="button" class="btn pri" data-x="to-ear">Ещё раунд</button>'+(miss.length?'<button type="button" data-x="pod-miss">Подкаст из ошибок</button>':'')+'<button type="button" data-x="stop">Готово</button></div></div>';
+  S.missIds=miss.map(function(c){return c.id});
+  drawToday();
+}
+
 // ---------- словарь 2.0: карточки из базы школы, словари от преподавателя (supabase/vocab2.sql) ----------
 // Без этого файла на сервере всё работает как раньше: карточка слова показывает то, что есть у самого ученика.
 var infoKey=function(){return 'kr_winfo:'+KR.user()};
@@ -331,41 +513,121 @@ function saveNote(){
   if(c&&(c.note||'')!==v){c=Object.assign({},c);if(v)c.note=v;else delete c.note;V.update(c)}
 }
 
-// ---------- озвучка списка с паузами: слово, пауза, перевод ----------
-// Настройки — на этом устройстве (вкладка «Настройки» → «Озвучка списка»).
-var LISTROWS=[],LST=null;
-function listenCfg(){var d={pause:2,tr:1,rep:1};try{var x=JSON.parse(localStorage.getItem('kr_listen')||'null');if(x&&typeof x==='object')d=Object.assign(d,x)}catch(e){}
-  d.pause=Math.min(6,Math.max(1,+d.pause||2));d.rep=d.rep>1?2:1;d.tr=d.tr?1:0;return d}
-function setListenCfg(c){try{localStorage.setItem('kr_listen',JSON.stringify(c))}catch(e){}}
+// ---------- подкаст из слов: слово, пауза на ответ, перевод, пример, повтори за диктором ----------
+/* Пауза — время вспомнить и сказать ответ вслух, пока диктор его не назвал. pause 0 — ждём, пока ученик нажмёт «Дальше».
+   Настройки — на этом устройстве (вкладка «Настройки» → «Подкаст»). */
+var LISTROWS=[],POD=null,LOCK=null;
+var PAUSES=[2,3,5,8,12,0];
+function podCfg(){
+  var d={pause:5,dir:'w2t',ex:1,echo:1,rep:1,slow:0},x=null;
+  try{x=JSON.parse(localStorage.getItem('kr_listen')||'null')}catch(e){}
+  if(x&&typeof x==='object'){
+    if(!('dir' in x)){x={pause:Math.max(5,+x.pause||0),dir:x.tr===0?'w':'w2t',rep:x.rep}}   // прежняя «Озвучка списка»: пауза была до 6 секунд
+    d=Object.assign(d,x);
+  }
+  d.pause=+d.pause;if(PAUSES.indexOf(d.pause)<0)d.pause=PAUSES.slice(0,5).reduce(function(a,b){return Math.abs(b-d.pause)<Math.abs(a-d.pause)?b:a});
+  d.dir=['w2t','t2w','w'].indexOf(d.dir)>=0?d.dir:'w2t';d.rep=d.rep>1?2:1;['ex','echo','slow'].forEach(function(k){d[k]=d[k]?1:0});
+  return d;
+}
+function setPodCfg(c){try{localStorage.setItem('kr_listen',JSON.stringify(c))}catch(e){}}
+function podMeta(c){return [c.pause?'пауза '+c.pause+' с':'жду нажатия',{w2t:'слово → перевод',t2w:'перевод → слово',w:'только слово'}[c.dir],c.ex?'с примерами':'',c.echo?'повтори за диктором':''].filter(Boolean).join(' · ')}
 function listenBar(){
-  var c=listenCfg(),n=LISTROWS.length,meta='пауза '+c.pause+' с'+(c.tr?' · с переводом':'')+(c.rep>1?' · слово дважды':'');
-  if(LST)return '<button type="button" class="btn pri" data-x="listen" aria-pressed="true">'+KR.icon('pause',16)+'Остановить</button><span class="muted" aria-live="polite">'+(LST.i+1)+' из '+LST.ids.length+'</span>';
-  return '<button type="button" data-x="listen">'+KR.icon('play',16)+'Слушать список · '+n+'</button><span class="muted">'+meta+'</span><button type="button" class="linkish" data-x="listen-cfg">Настроить</button>';
+  var n=LISTROWS.length;
+  if(POD)return '<button type="button" class="btn pri" data-x="pod-stop" aria-pressed="true">'+KR.icon('pause',16)+'Остановить подкаст</button>';
+  return '<button type="button" data-x="listen">'+KR.icon('play',16)+'Подкаст из списка · '+n+'</button><span class="muted">'+podMeta(podCfg())+'</span><button type="button" class="linkish" data-x="listen-cfg">Настроить</button>';
 }
 function drawListenBar(){var e=$('#listen');if(e)e.innerHTML=listenBar()}
 function markRow(id){
   [].forEach.call(document.querySelectorAll('.wrow.playing'),function(r){r.classList.remove('playing')});
   if(!id)return;var r=document.querySelector('.wrow[data-id="'+(window.CSS&&CSS.escape?CSS.escape(id):id)+'"]');
-  if(r){r.classList.add('playing');r.scrollIntoView({block:'nearest',behavior:KR.calm()?'auto':'smooth'})}
+  if(r&&$('#pod').hidden)r.scrollIntoView({block:'nearest',behavior:KR.calm()?'auto':'smooth'});
+  if(r)r.classList.add('playing');
 }
 /* одна фраза до конца: ждём окончания звука, но не дольше разумного (у некоторых браузеров событие конца теряется) */
-function sayP(text,l){return new Promise(function(res){var done=false,fin=function(){if(!done){done=true;res()}};
-  KR.say(text,l,{end:fin});setTimeout(fin,Math.max(4000,String(text).length*450/KR.rate()))})}
+function sayP(text,l,o){var r=(o&&o.rate)||KR.rate();return new Promise(function(res){var done=false,fin=function(){if(!done){done=true;res()}};
+  KR.say(text,l,Object.assign({end:fin},o||{}));setTimeout(fin,Math.max(4000,String(text).length*450/r))})}
 function pause(ms){return new Promise(function(r){setTimeout(r,ms)})}
-async function listen(ids){
-  if(!ids.length)return;var me={ids:ids,i:0};LST=me;drawListenBar();
-  var cfg=listenCfg();
-  for(;me.i<ids.length;me.i++){
-    if(LST!==me)return;
-    var c=V.get(ids[me.i]);if(!c)continue;
-    markRow(c.id);drawListenBar();
-    for(var k=0;k<cfg.rep;k++){await sayP(c.w,c.l);if(LST!==me)return;if(k+1<cfg.rep)await pause(800)}
-    var t=trOf(c);if(cfg.tr&&t){await pause(600);if(LST!==me)return;await sayP(t,'ru');if(LST!==me)return}
-    await pause(cfg.pause*1000);
-  }
-  if(LST===me){LST=null;markRow(null);drawListenBar()}
+// шаги подкаста прерываются кнопками: пауза, следующее слово, стоп
+function podLive(me){return POD===me&&!me.skip}
+function podWait(me,ms){return new Promise(function(res){
+  if(!podLive(me))return res();var t=null,fin=function(){clearTimeout(t);if(me.wake===fin)me.wake=null;res()};me.wake=fin;if(ms!=null)t=setTimeout(fin,ms)})}
+function podSay(me,text,l,o){
+  if(!podLive(me)||!text)return Promise.resolve();
+  return new Promise(function(res){var r=(o&&o.rate)||KR.rate(),t,fin=function(){clearTimeout(t);if(me.wake===fin)me.wake=null;res()};me.wake=fin;
+    KR.say(text,l,Object.assign({},o||{},{end:fin}));t=setTimeout(fin,Math.max(4000,String(text).length*450/r))});
 }
-function stopListen(){if(!LST)return;LST=null;KR.hush();markRow(null);drawListenBar()}
+function podKick(me){if(me&&me.wake)me.wake()}
+async function podGate(me){while(POD===me&&me.paused&&!me.skip)await new Promise(function(r){me.wake=r})}
+async function podRun(me){
+  var cfg=podCfg();
+  for(;me.i<me.ids.length;me.i++){
+    if(POD!==me)return;me.skip=false;
+    var c=V.get(me.ids[me.i]);if(!c)continue;
+    var t=trOf(c),e=cfg.ex?exOf(c):null,first=cfg.dir==='t2w'&&t,steps=[],add=function(f){steps.push(f)};
+    var stage=function(s){me.stage=s;drawPod()};
+    var sayWord=async function(){if(cfg.slow){await podSay(me,c.w,c.l,{rate:.6});await podWait(me,500)}
+      for(var r=0;r<cfg.rep;r++){await podSay(me,c.w,c.l);if(r+1<cfg.rep)await podWait(me,800)}};
+    var think=async function(){stage('think');if(cfg.pause)await podWait(me,cfg.pause*1000);else{me.tap=true;drawPod();await podWait(me,null);me.tap=false}};
+    me.c=c;me.t=t;me.e=e;me.first=first?'t':'w';
+    if(first){add(function(){stage('ask');return podSay(me,t,'ru')});add(think);add(function(){stage('open');return sayWord()})}
+    else{add(function(){stage('ask');return sayWord()});add(think);
+      if(cfg.dir==='w2t'&&t)add(function(){stage('open');return podSay(me,t,'ru')});else add(function(){stage('open');return podWait(me,300)})}
+    if(e){add(function(){return podWait(me,500)});add(function(){stage('ex');return podSay(me,e.s,c.l)});
+      if(e.t&&cfg.dir!=='w'){add(function(){return podWait(me,400)});add(function(){return podSay(me,e.t,'ru')})}}
+    if(cfg.echo){add(function(){return podWait(me,500)});add(function(){stage('echo');return podSay(me,c.w,c.l)});
+      add(function(){return podWait(me,Math.max(2500,c.w.length*(c.l==='ko'?500:160)+1500))})}
+    add(function(){return podWait(me,600)});
+    markRow(c.id);
+    for(var k=0;k<steps.length;){
+      await podGate(me);if(POD!==me)return;if(me.skip)break;
+      var pc=me.pc;await steps[k]();
+      if(POD!==me)return;if(me.pc!==pc&&!me.skip)continue;   // нажали паузу посреди шага: после паузы повторим этот шаг
+      k++;
+    }
+  }
+  if(POD===me){me.end=true;me.stage='';drawPod();markRow(null);podLock(false)}
+}
+function podStart(ids,title){
+  ids=(ids||[]).filter(function(id){return V.get(id)});if(!ids.length)return;
+  if(S)stop();stopPod();
+  var me={ids:ids,i:0,title:title,pc:0};POD=me;
+  var el=$('#pod');el.hidden=false;drawPod();drawListenBar();el.scrollIntoView({block:'start',behavior:KR.calm()?'auto':'smooth'});
+  podLock(true);podRun(me);
+}
+function stopPod(){if(!POD)return;var me=POD;POD=null;KR.hush();podKick(me);podLock(false);var el=$('#pod');if(el){el.hidden=true;el.innerHTML=''}markRow(null);drawListenBar()}
+var stopListen=stopPod;
+function podPause(){var me=POD;if(!me||me.end)return;if(me.paused){me.paused=false;podKick(me)}else{me.paused=true;me.pc++;KR.hush();podKick(me)}drawPod()}
+function podNext(){var me=POD;if(!me||me.end)return;if(me.tap&&!me.paused){podKick(me);return}me.paused=false;me.skip=true;KR.hush();podKick(me)}
+/* экран не гаснет, пока идёт подкаст: при выключенном экране браузер обычно останавливает озвучку */
+async function podLock(on){
+  try{if(on&&navigator.wakeLock&&!LOCK)LOCK=await navigator.wakeLock.request('screen');else if(!on&&LOCK){var l=LOCK;LOCK=null;await l.release()}}catch(e){LOCK=null}
+}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&POD&&!POD.end){LOCK=null;podLock(true)}});
+function drawPod(){
+  var el=$('#pod'),me=POD;if(!el||!me)return;var cfg=podCfg();
+  if(me.end){el.innerHTML='<div class="fin"><span class="spark">'+KR.icon('headphones',34)+'</span><h3>Подкаст закончен</h3><p class="muted">Слов: '+me.ids.length+'.</p>'+
+    '<div class="fin-acts"><button type="button" class="btn pri" data-x="pod-again">Ещё раз</button><button type="button" data-x="pod-stop">Закрыть</button></div></div>';return}
+  var c=me.c,st=me.stage||'ask',open=st==='open'||st==='ex'||st==='echo',w2=me.first==='w';
+  var wv=c?(w2||open?'<span'+wcls(c)+' lang="'+c.l+'">'+esc(c.w)+'</span>':'?'):'',tv=c?(me.t?(!w2||open?esc(me.t):'…'):''):'';
+  var hint={ask:w2?'Слушай':'Слушай перевод',think:w2?(cfg.dir==='w2t'&&me.t?'Вспомни перевод и скажи вслух':'Вспомни, что значит слово'):'Вспомни слово и скажи вслух',
+    open:'Проверь себя',ex:'Слово в предложении',echo:'Повтори за диктором'}[st]||'';
+  el.innerHTML='<div class="play-top"><span class="tag">Подкаст · '+esc(me.title)+'</span><span class="muted">'+Math.min(me.i+1,me.ids.length)+' из '+me.ids.length+'</span><button type="button" class="round" data-x="pod-stop" aria-label="Остановить подкаст">'+KR.icon('x',16)+'</button></div>'+
+    '<div class="flash pod-card">'+(c?'<div class="flash-w">'+wv+'</div><div class="flash-t">'+tv+'</div>'+
+      (me.e&&(st==='ex'||st==='echo')?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(me.e.s)+'</span>'+(me.e.t&&cfg.dir!=='w'?'<div class="muted">'+esc(me.e.t)+'</div>':'')+'</div>':''):'')+
+      '<p class="pod-hint'+(st==='think'||st==='echo'?' on':'')+'">'+(me.paused?'Пауза':hint)+'</p>'+
+      (st==='think'&&cfg.pause&&!me.paused?'<div class="pod-timer"><i style="animation-duration:'+cfg.pause+'s"></i></div>':'')+'</div>'+
+    '<div class="pod-ctl">'+(me.tap&&!me.paused?'<button type="button" class="btn pri" data-x="pod-next">Дальше'+KR.icon('arrow',16)+'</button>':'')+
+      '<button type="button" data-x="pod-pause">'+KR.icon(me.paused?'play':'pause',16)+(me.paused?'Продолжить':'Пауза')+'</button>'+
+      '<button type="button" data-x="pod-skip">'+KR.icon('skip',15)+'Следующее слово</button></div>'+
+    '<p class="muted pod-meta">'+esc(podMeta(cfg))+' · <button type="button" class="linkish" data-x="listen-cfg">Настроить</button></p>';
+}
+/* подкаст на сегодня: слова в работе, повторения и новые слова дня; если их нет — все изученные, начиная с тех, что скоро повторять */
+function podToday(){
+  var p=V.plan(lang),seen={},ids=[];
+  p.learn.concat(p.soon,p.rev,p.fresh).forEach(function(c){if(!seen[c.id]){seen[c.id]=1;ids.push(c.id)}});
+  if(!ids.length)ids=V.all(lang).filter(function(c){return c.st}).sort(function(a,b){return a.due-b.due}).slice(0,30).map(function(c){return c.id});
+  return ids;
+}
 
 // ---------- список слов ----------
 function badge(c){
@@ -396,7 +658,7 @@ function drawList(){
     h+='</div>';
   }
   $('#list').innerHTML=h;
-  if(LST)markRow(LST.ids[LST.i]);
+  if(POD&&POD.c&&!POD.end)markRow(POD.c.id);
 }
 
 // ---------- настройки: интервалы, игры, голос ----------
@@ -423,12 +685,16 @@ function drawPrefs(){
     (lang==='en'?'<span class="field">Произношение</span><div class="opts" role="group" aria-label="Произношение английского">'+[['gb','Британское'],['us','Американское']].map(function(a){return '<button type="button" data-accent="'+a[0]+'" class="'+(KR.accent()===a[0]?'sel':'')+'" aria-pressed="'+(KR.accent()===a[0])+'">'+a[1]+'</button>'}).join('')+'</div>':'')+
     '<div class="done-row"><span class="muted">'+(KR.ttsCloud()?'Говорит облачный нейроголос, голос устройства выше — запасной.':'Самые живые голоса: в браузере Microsoft Edge («Natural»), на iPhone в Safari.')+'</span><button type="button" data-x="voice">'+KR.icon('volume',16)+' Проверить</button></div>'
     :'<p class="muted">В этом браузере нет озвучки.</p>')+'</div>';
-  if(KR.canSay()){var lc=listenCfg();
-    h+='<div class="card glass prefs" id="lcfg"><h3>Озвучка списка</h3><p class="hint">Кнопка «Слушать список» над словами читает их по очереди: слово, перевод, пауза. Удобно в дороге и перед сном.</p>'+
-      '<label class="field" for="l-pause">Пауза между словами: <span id="l-pausev">'+lc.pause+' с</span></label><input type="range" id="l-pause" min="1" max="6" step="1" value="'+lc.pause+'">'+
-      '<div class="opts" role="group" aria-label="Что читать"><button type="button" data-ltr="1" aria-pressed="'+(lc.tr===1)+'" class="'+(lc.tr?'sel':'')+'">С переводом</button><button type="button" data-ltr="0" aria-pressed="'+(lc.tr===0)+'" class="'+(lc.tr?'':'sel')+'">Только слово</button></div>'+
-      '<div class="opts" role="group" aria-label="Сколько раз читать слово"><button type="button" data-lrep="1" aria-pressed="'+(lc.rep===1)+'" class="'+(lc.rep===1?'sel':'')+'">Слово один раз</button><button type="button" data-lrep="2" aria-pressed="'+(lc.rep===2)+'" class="'+(lc.rep===2?'sel':'')+'">Дважды</button></div>'+
-      '<p class="hint">Скорость речи — ползунок «Скорость» выше.</p></div>';
+  if(KR.canSay()){var lc=podCfg(),grp=function(label,key,items){return '<span class="field">'+label+'</span><div class="opts" role="group" aria-label="'+label+'">'+
+      items.map(function(x){var on=String(lc[key])===String(x[0]);return '<button type="button" data-pc="'+key+'" data-v="'+x[0]+'" aria-pressed="'+on+'" class="'+(on?'sel':'')+'">'+x[1]+'</button>'}).join('')+'</div>'};
+    h+='<div class="card glass prefs" id="lcfg"><h3>Подкаст</h3><p class="hint">Подкаст читает слова по очереди и оставляет паузу, чтобы ты успел вспомнить ответ и сказать его вслух до того, как диктор его назовёт. Запускается кнопкой «Подкаст на сегодня» вверху или «Подкаст из списка» над словами. Экран лучше не выключать: при выключенном экране браузер может остановить озвучку.</p>'+
+      grp('Пауза на ответ','pause',PAUSES.map(function(x){return [x,x?x+' с':'Жду нажатия']}))+
+      grp('Порядок','dir',[['w2t','Слово → перевод'],['t2w','Перевод → слово'],['w','Только слово']])+
+      grp('Пример в предложении','ex',[[1,'Читать'],[0,'Не читать']])+
+      grp('Повторить за диктором','echo',[[1,'Да: слово ещё раз и пауза'],[0,'Нет']])+
+      grp('Слово','rep',[[1,'Один раз'],[2,'Дважды']])+
+      grp('Темп','slow',[[0,'Обычный'],[1,'Сначала медленно, потом обычно']])+
+      '<p class="hint">«Перевод → слово» — самый трудный и полезный вариант: слышишь перевод и вспоминаешь слово сам. Скорость речи — ползунок «Скорость» выше.</p></div>';
   }
   $('#prefs').innerHTML=h;
 }
@@ -520,7 +786,24 @@ document.addEventListener('click',function(e){
   if(d.open)return openCard(d.open);
   if(d.sf){sfilt=String(sfilt)===d.sf?'':d.sf;shown=60;drawList();var wl=$('#wlist');if(sfilt&&wl)wl.scrollIntoView({block:'start'});return}
   if(d.sfirst)return setFirst(d.sfirst);
-  if(d.x==='listen')return LST?stopListen():listen(LISTROWS.slice());
+  if(d.x==='listen')return POD?stopPod():podStart(LISTROWS.slice(),'список');
+  if(d.x==='pod-today')return podStart(podToday(),'на сегодня');
+  if(d.x==='pod-miss'){var mi=S&&S.missIds||[];return podStart(mi,'ошибки')}
+  if(d.x==='pod-again'){var pa=POD;if(pa)podStart(pa.ids,pa.title);return}
+  if(d.x==='pod-stop')return stopPod();
+  if(d.x==='pod-pause')return podPause();
+  if(d.x==='pod-next'||d.x==='pod-skip')return podNext();
+  if(d.pc){var pcf=podCfg();pcf[d.pc]=d.pc==='dir'?d.v:+d.v;setPodCfg(pcf);drawPrefs();drawListenBar();if(POD)drawPod();return}
+  if(d.x==='to-ear'){stopPod();return start('ear')}
+  if(d.x==='ear-say')return earPlay(false);
+  if(d.x==='ear-slow'){if(S&&S.ear)KR.say(S.ear.text,S.ear.l,{rate:.6});return}
+  if(d.h!==undefined)return hearPick(+d.h);
+  if(d.cn!==undefined)return cntPick(+d.cn);
+  if(d.x==='dhint'){var di=$('#din');if(di&&S&&!S.lock){S.hint=true;di.value=EAR.hint(S.ear.text,S.ear.l,di.value);dictFill();di.focus()}return}
+  if(d.x==='mic')return micGo();
+  if(d.mic!==undefined)return micCheck(b);
+  if(d.x==='say-peek'){if(S&&S.card){S.peek=true;KR.say(S.card.w,S.card.l)}return}
+  if(d.x==='say-type'){if(S&&S.card&&!S.lock){EAR.stop();S.game='wr';gWrite(S.card)}return}
   if(d.x==='listen-cfg'){setTab('prefs');var lc=$('#lcfg');if(lc)lc.scrollIntoView({block:'start'});return}
   if(d.edit){var dl2=$('#wdlg');if(dl2&&dl2.open)dl2.close();editing=d.edit;drawList();var ed=document.querySelector('.wedit');if(ed)ed.scrollIntoView({block:'center'});return}
   if(d.x==='cancel'){editing=null;return drawList()}
@@ -529,7 +812,6 @@ document.addEventListener('click',function(e){
   if(d.x==='reset')return savePrefs(true);
   if(d.x==='voice')return KR.say(lang==='ko'?'안녕하세요! 같이 공부해요.':'Hello! Let’s learn together.',lang);
   if(d.accent){KR.setAccent(d.accent);drawPrefs();return KR.say('Hello! Let’s learn together.','en')}
-  if(d.ltr!==undefined||d.lrep!==undefined){var lc=listenCfg();if(d.ltr!==undefined)lc.tr=+d.ltr;else lc.rep=+d.lrep;setListenCfg(lc);drawPrefs();drawListenBar();return}
   if(d.x==='bulk-translate')return bulkTranslate();
   if(d.x==='bulk-save')return bulkSave();
 });
@@ -537,6 +819,7 @@ document.addEventListener('submit',function(e){
   var f=e.target;if(f.getAttribute('method')==='dialog')return;   // карточка слова закрывается сама
   e.preventDefault();
   if(f.id==='wf')return writeCheck();
+  if(f.id==='df')return dictCheck();
   if(f.id==='pf')return savePrefs(false);
   if(f.id==='addf'){
     var w=$('#aw').value.trim(),t=$('#at').value.trim(),m=$('#amsg'),wl=KR.W2.langOf(w);
@@ -551,7 +834,7 @@ document.addEventListener('submit',function(e){
 document.addEventListener('input',function(e){
   if(e.target.id==='q'){q=e.target.value;shown=60;var pos=e.target.selectionStart;drawList();var n=$('#q');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}}}
   if(e.target.id==='p-rate'){KR.setRate(e.target.value);$('#p-ratev').textContent=(+e.target.value).toFixed(2)}
-  if(e.target.id==='l-pause'){var lc=listenCfg();lc.pause=+e.target.value;setListenCfg(lc);$('#l-pausev').textContent=lc.pause+' с';drawListenBar()}
+  if(e.target.id==='din')dictFill();
 });
 document.addEventListener('change',function(e){
   var id=e.target.id;if(id==='p-voice')KR.setVoice(lang,e.target.value);
@@ -563,7 +846,7 @@ document.addEventListener('change',function(e){
 document.addEventListener('keydown',function(e){
   if(!S||e.target.tagName==='INPUT'||e.ctrlKey||e.metaKey||e.altKey)return;
   if(e.key===' '&&$('#back')&&$('#back').hidden){e.preventDefault();return flip()}
-  if(/^[1-4]$/.test(e.key)){var b=document.querySelector('#rate:not([hidden]) button[data-g="'+e.key+'"]')||document.querySelector('.q-opts button[data-o="'+(e.key-1)+'"]:not(:disabled)');if(b){e.preventDefault();b.click()}}
+  if(/^[1-4]$/.test(e.key)){var b=document.querySelector('#rate:not([hidden]) button[data-g="'+e.key+'"]')||document.querySelector('.q-opts button:is([data-o="'+(e.key-1)+'"],[data-h="'+(e.key-1)+'"],[data-cn="'+(e.key-1)+'"]):not(:disabled)');if(b){e.preventDefault();b.click()}}
 });
 // пришли данные из облака: сводку обновляем всегда, а список — только если ученик сейчас ничего не вводит
 function typing(){var a=document.activeElement;return !!a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)}
