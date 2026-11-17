@@ -162,9 +162,9 @@ function vocabCard(){
     (c.lap?' · забывалось: '+c.lap:'')+(c.pe?' · ошибок в упражнениях: '+c.pe:'')+(c.b?' · добавляли повторно: '+c.b:'')+(c.star?' · сложное для ученика':'')+'</span></div>'+(del?'<button data-vdel="'+esc(c.id)+'" aria-label="Убрать слово">'+KR.icon('trash',15)+'</button>':'')+'</div>'};
   var h='<div class="card"><h3>Словарь ученика</h3><p class="muted">Корейский: '+cnt('ko')+' · английский: '+cnt('en')+' · к повторению сегодня: '+due+'</p>'+wordActivity();
   if(hard.length)h+='<p style="margin:12px 0 4px"><b>Даются трудно</b></p>'+hard.map(function(c){return row(c,false)}).join('');
-  h+='<p style="margin:14px 0 4px"><b>Добавить слова</b></p><div class="opts">'+[['ko','Корейский'],['en','Английский']].map(function(x){return '<button data-vl="'+x[0]+'" class="'+(vlang===x[0]?'sel':'')+'" aria-pressed="'+(vlang===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
-    '<textarea id="vtext" aria-label="Список слов для ученика" placeholder="Вставь слова построчно или через запятую&#10;runny nose&#10;sore throat&#10;accommodation — жильё" style="min-height:120px" maxlength="8000"></textarea>'+
-    '<div class="done-row"><span class="muted">Перевод через тире сохранится как есть, для остальных слов подставим перевод автоматически. Дальше его можно поправить.</span><button class="pri" id="vparse">Разобрать и перевести</button></div>'+
+  h+='<p style="margin:14px 0 4px"><b>Добавить слова</b></p>'+
+    '<textarea id="vtext" aria-label="Список слов для ученика" placeholder="Корейские и английские вперемешку&#10;runny nose, sore throat&#10;accommodation — жильё&#10;식욕 — аппетит" style="min-height:120px" maxlength="8000"></textarea>'+
+    '<div class="done-row"><span class="muted">Язык слова определится сам. Пары «слово — перевод» (также «=», «:», Tab из Quizlet) сохранятся как есть; остальные переводы возьмём из базы слов школы, потом из DeepL.</span><button class="pri" id="vparse">Разобрать и перевести</button></div>'+
     '<p id="vmsg" class="msg" role="status" aria-live="polite"></p><div id="vprev">'+vPrev()+'</div>';
   if(voc.length)h+='<details style="margin-top:10px"><summary style="cursor:pointer;padding:4px 0"><b>Все слова</b> <span class="muted">· '+voc.length+'</span></summary>'+voc.slice().sort(function(a,b){return (b.a||0)-(a.a||0)}).map(function(c){return row(c,true)}).join('')+'</details>';
   return h+'</div>';
@@ -213,44 +213,31 @@ function wchTip(c){var box=c.closest('.wch'),tip=box&&box.querySelector('.wch-ti
 document.addEventListener('pointerover',function(e){var c=e.target.closest&&e.target.closest('.wch-c');if(c)wchTip(c)});
 document.addEventListener('focusin',function(e){var c=e.target.closest&&e.target.closest('.wch-c');if(c)wchTip(c)});
 document.addEventListener('pointerout',function(e){var c=e.target.closest&&e.target.closest('.wch');if(c&&!c.contains(e.relatedTarget)){var t=c.querySelector('.wch-tip');if(t)t.hidden=true}});
-// список слов как у ученика (words.html): построчно, через запятую или «;», перевод через тире; недостающие переводы — DeepL
+// список слов как у ученика (words.html): разбор KR.W2.parseMine (язык по каждой строке), перевод KR.W2.translate
 var vbulk=[];
-function parseBulk(text){
-  var seen={},out=[];
-  String(text||'').split(/[\n,;]+/).forEach(function(line){
-    line=line.trim();if(!line)return;
-    var m=line.match(/^(.+?)\s*[—–]\s*(.+)$/)||line.match(/^(.+?)\s+-\s+(.+)$/)||line.match(/^(.+?)\s*(?:=|:|→|->)\s+(.+)$/),w=(m?m[1]:line).trim(),t=m?m[2].trim():'';
-    if(!w||w.length>80)return;
-    var k=w.toLowerCase();if(seen[k])return;seen[k]=1;out.push({w:w,t:t});
-  });
-  return out.slice(0,80);
-}
 function vPrev(){
   if(!vbulk.length)return '';
+  var ok=vbulk.filter(function(x){return !x.err});
   return '<div class="wl">'+vbulk.map(function(x,i){
-    return '<div class="line" style="gap:8px;margin:6px 0"><input class="name'+(vlang==='ko'?' ko':'')+'" data-vbw="'+i+'" lang="'+esc(vlang)+'" value="'+esc(x.w)+'" aria-label="Слово '+(i+1)+'" style="flex:1;min-width:120px;margin:0"><input class="name" data-vbt="'+i+'" value="'+esc(x.t)+'" placeholder="Перевод (можно оставить пустым)" aria-label="Перевод '+(i+1)+'" style="flex:1;min-width:120px;margin:0"></div>'}).join('')+'</div>'+
-    '<div class="done-row"><span class="muted">Проверь слова и переводы перед сохранением. Если слово у ученика уже есть, оно вернётся на повторение раньше.</span><button class="pri" id="vsave">Добавить в словарь · '+vbulk.length+'</button></div>';
+    var tag=x.err?'<span class="badge warn">'+esc(x.err)+'</span>':'<span class="badge">'+(x.l==='ko'?'кор':'англ')+'</span>'+(x.src==='base'?' <span class="badge ok">база</span>':x.src==='deepl'?' <span class="badge">DeepL</span>':'');
+    return '<div class="line" style="gap:8px;margin:6px 0;align-items:center'+(x.err?';opacity:.6':'')+'"><input class="name'+(x.l==='ko'?' ko':'')+'" data-vbw="'+i+'" lang="'+esc(x.l||'')+'" value="'+esc(x.w)+'" aria-label="Слово '+(i+1)+'" style="flex:1;min-width:120px;margin:0"'+(x.err==='повтор'?' disabled':'')+'><input class="name" data-vbt="'+i+'" value="'+esc(x.t)+'" placeholder="Перевод (можно оставить пустым)" aria-label="Перевод '+(i+1)+'" style="flex:1;min-width:120px;margin:0"'+(x.err==='повтор'?' disabled':'')+'><span>'+tag+'</span></div>'}).join('')+'</div>'+
+    '<div class="done-row"><span class="muted">Проверь слова и переводы (DeepL — автоперевод). Строки с пометкой не сохранятся. Если слово у ученика уже есть, оно вернётся на повторение раньше.</span><button class="pri" id="vsave"'+(ok.length?'':' disabled')+'>Добавить в словарь · '+ok.length+'</button></div>';
 }
-function vRead(){document.querySelectorAll('#vprev [data-vbw]').forEach(function(inp){var i=+inp.dataset.vbw,t=document.querySelector('#vprev [data-vbt="'+i+'"]');if(vbulk[i]){vbulk[i].w=inp.value.trim();vbulk[i].t=t?t.value.trim():''}})}
+function vRead(){document.querySelectorAll('#vprev [data-vbw]').forEach(function(inp){var i=+inp.dataset.vbw,x=vbulk[i],t=document.querySelector('#vprev [data-vbt="'+i+'"]');if(!x)return;
+  var w=inp.value.trim();if(w!==x.w){x.w=w;x.l=KR.W2.langOf(w);x.err=!w?'нет слова':x.l&&!/[А-Яа-яЁё]/.test(w)?'':'не похоже на корейское или английское слово'}
+  if(t&&t.value.trim()!==x.t){x.t=t.value.trim();x.src=''}})}
 async function vTranslate(btn){
-  vbulk=parseBulk($('#vtext').value);
-  if(!vbulk.length){$('#vprev').innerHTML='';vmsg('Вставь список слов: по одному в строке или через запятую.');return}
-  btn.disabled=true;vmsg('Подготавливаем список…',true);
-  var missing=vbulk.map(function(x,i){return x.t?null:i}).filter(function(i){return i!==null}),err='';
-  if(missing.length){
-    try{
-      var cfg=window.CONFIG||{},res=await fetch(cfg.SUPABASE_URL+'/functions/v1/translate-words',{method:'POST',
-        headers:{'Content-Type':'application/json',apikey:cfg.SUPABASE_ANON_KEY,Authorization:'Bearer '+cfg.SUPABASE_ANON_KEY},
-        body:JSON.stringify({p_name:KR.user(),p_pin:localStorage.getItem('kr_pin')||'',words:missing.map(function(i){return vbulk[i].w})})});
-      var data=await res.json();
-      if(!res.ok)throw new Error(data.message||data.error||'Не удалось выполнить перевод');
-      (data.translations||[]).forEach(function(t,j){if(t&&vbulk[missing[j]])vbulk[missing[j]].t=t});
-    }catch(e){err=(e&&e.message||'ошибка').slice(0,180)}
-  }
+  vbulk=KR.W2.parseMine($('#vtext').value);
+  var ok=vbulk.filter(function(x){return !x.err});
+  if(!ok.length){$('#vprev').innerHTML=vPrev();vmsg(vbulk.length?'Не нашлось ни одного корейского или английского слова.':'Вставь список слов: по одному в строке, через запятую или «слово — перевод».');return}
+  if(ok.length>80)ok.slice(80).forEach(function(x){x.err='больше 80 слов за раз'});
+  btn.disabled=true;vmsg('Ищем переводы…',true);
+  var r=await KR.W2.translate(vbulk);
   $('#vprev').innerHTML=vPrev();btn.disabled=false;
-  var done=vbulk.filter(function(x){return x.t}).length;
-  if(err)vmsg('Автоперевод не получился: '+err+'. Переводы можно вписать вручную или сохранить слова без них.');
-  else vmsg('Готово: '+vbulk.length+' слов, перевод есть у '+done+'. Проверь и при необходимости исправь.',true);
+  ok=vbulk.filter(function(x){return !x.err});
+  var done=ok.filter(function(x){return x.t}).length,bad=vbulk.length-ok.length;
+  if(r.err)vmsg('Автоперевод не получился: '+r.err+'. Переводы можно вписать вручную или сохранить слова без них.');
+  else vmsg('Готово: '+ok.length+' слов, перевод есть у '+done+(bad?' · не возьмём: '+bad:'')+'. Проверь и при необходимости исправь.',true);
 }
 function parseWords(text,lang){
   var now=Date.now();
@@ -540,10 +527,9 @@ document.addEventListener('click',async function(e){
     try{await KR.api('teacher_delete_student',{p_student:cur});var gone=cur;cur=null;students=await KR.api('teacher_students')||students;draw();msg('Ученик удалён: '+gone,true)}
     catch(x){msg('Не получилось удалить')}
   }
-  else if(b.dataset.vl){vlang=b.dataset.vl;vbulk=[];var keep=$('#vtext')?$('#vtext').value:'';await drawStudent();if($('#vtext'))$('#vtext').value=keep}
   else if(b.id==='vparse'){await vTranslate(b)}
   else if(b.id==='vsave'){
-    vRead();var now=Date.now(),ws=vbulk.filter(function(x){return x.w}).map(function(x,i){return SRS.make(vlang,x.w,x.t,{src:'teacher'},now+i)});
+    vRead();var now=Date.now(),ws=vbulk.filter(function(x){return x.w&&x.l&&!x.err}).map(function(x,i){return SRS.make(x.l,x.w,x.t,{src:'teacher',ex:x.ex,et:x.ex?x.et:''},now+i)});
     if(!ws.length){vmsg('Нет слов для сохранения.');return}
     b.disabled=true;
     try{var r=await KR.api('teacher_vocab_add',{p_student:cur,p_words:ws});vbulk=[];var tx=$('#vtext');if(tx)tx.value='';await drawStudent();vmsg('Добавлено слов: '+(r&&r.added||0)+((r&&r.bumped)?' · уже были и вернутся раньше: '+r.bumped:''),true)}
