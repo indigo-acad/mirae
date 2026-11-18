@@ -183,7 +183,9 @@ function accent(){return LS("kr_accent")==="us"?"us":"gb"}
 // ttsOff — до какого времени не просить облачный голос (ошибка функции). Хранится до конца сеанса браузера,
 // чтобы каждая страница не повторяла заведомо неудачный запрос: 503 — ключи голосов ещё не добавлены в Supabase.
 const ttsCache=new Map();let ttsAudio=null,ttsOff=0;
-try{ttsOff=+sessionStorage.getItem("kr_tts_off")||0}catch(e){}
+// 503 — голоса в облаке не настроены: помним 6 часов на устройстве (localStorage), иначе каждая новая вкладка
+// сначала ждёт облако, и голос устройства включается уже не по нажатию — iPhone и часть Android такой звук не пропускают.
+try{ttsOff=Math.max(+sessionStorage.getItem("kr_tts_off")||0,+localStorage.getItem("kr_tts_off")||0)}catch(e){}
 // облачный голос: задан адрес, есть связь с базой и ученик вошёл (функция проверяет логин и PIN)
 const cloudVoice=()=>!!(CFG.TTS_URL&&cloud.on&&U()&&localStorage.getItem("kr_pin")&&Date.now()>ttsOff);
 async function cloudSay(text,lang,cb,acc){
@@ -193,7 +195,7 @@ async function cloudSay(text,lang,cb,acc){
     try{r=await fetch(CFG.TTS_URL,{method:"POST",headers:{"Content-Type":"application/json",apikey:CFG.SUPABASE_ANON_KEY,Authorization:"Bearer "+CFG.SUPABASE_ANON_KEY},
       body:JSON.stringify({text:text,lang:lang,accent:ac||undefined,p_name:U(),p_pin:localStorage.getItem("kr_pin")||""})})}
     catch(e){ttsOff=Date.now()+600000;throw e}   // нет связи с функцией: 10 минут говорит голос устройства
-    if(!r.ok){ttsOff=Date.now()+(r.status===503?1800000:600000);try{sessionStorage.setItem("kr_tts_off",String(ttsOff))}catch(e){}throw new Error("tts "+r.status)}
+    if(!r.ok){ttsOff=Date.now()+(r.status===503?6*3600000:600000);try{sessionStorage.setItem("kr_tts_off",String(ttsOff));if(r.status===503)localStorage.setItem("kr_tts_off",String(ttsOff))}catch(e){}throw new Error("tts "+r.status)}
     url=URL.createObjectURL(await r.blob());if(ttsCache.size>300)ttsCache.clear();ttsCache.set(key,url);
   }
   if(!ttsAudio)ttsAudio=new Audio();
@@ -238,6 +240,18 @@ function say(text,lang,cb){
   localSay(text,lang,cb,acc);
 }
 function hush(){try{if(ttsAudio)ttsAudio.pause();if(hasTTS())speechSynthesis.cancel()}catch(e){}}
+/* Разблокировка звука при первом касании: iPhone (и часть Android) пропускают звук и речь, только если они впервые
+   запущены прямо по нажатию. После этого озвучка работает и тогда, когда она начинается чуть позже — после ответа
+   облака или словаря, в подкасте, после проверки ответа. */
+let unlocked=false;
+function unlockAudio(){
+  if(unlocked)return;unlocked=true;
+  try{if(hasTTS()&&!speechSynthesis.speaking){const u=new SpeechSynthesisUtterance(" ");u.volume=0;speechSynthesis.speak(u)}}catch(e){}
+  try{if(!ttsAudio)ttsAudio=new Audio();
+    ttsAudio.src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+    const p=ttsAudio.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}
+}
+["pointerdown","touchend","keydown"].forEach(ev=>document.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
 
 // ---------- иконки: контурные, одного семейства (вместо эмодзи) ----------
 const IC={
