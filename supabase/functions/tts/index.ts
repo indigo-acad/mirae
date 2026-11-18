@@ -134,7 +134,14 @@ Deno.serve(async (req) => {
     if (!name || !pin) return json({ error: "unauthorized" }, 401);
 
     const provider = env("TTS_PROVIDER").toLowerCase();
-    if (!DEFAULT_VOICES[provider] || !configured(provider)) return json({ error: "not_configured" }, 503);
+    if (!DEFAULT_VOICES[provider] || !configured(provider)) {
+      // Подсказка, чего не хватает: только имена секретов, значения никогда не показываются.
+      const need: Record<string, string[]> = { azure: ["AZURE_SPEECH_KEY", "AZURE_SPEECH_REGION"], google: ["GOOGLE_TTS_API_KEY"], openai: ["OPENAI_API_KEY"] };
+      const missing = DEFAULT_VOICES[provider] ? need[provider].filter((k) => !env(k)) : ["TTS_PROVIDER (azure, google или openai)"];
+      const seen = Object.keys(Deno.env.toObject()).filter((k) => /AZURE|SPEECH|TTS|GOOGLE|OPENAI/i.test(k));
+      console.error("tts not_configured; missing:", JSON.stringify(missing), "; secrets seen:", JSON.stringify(seen), "; provider recognised:", !!DEFAULT_VOICES[provider]);
+      return json({ error: "not_configured", missing, secrets_seen: seen }, 503);
+    }
 
     // вход: is_teacher отвечает для любого действующего аккаунта школы, ошибка — неверный логин или PIN
     const supa = env("SUPABASE_URL"), anon = env("SUPABASE_ANON_KEY");
