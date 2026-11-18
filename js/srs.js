@@ -1,7 +1,8 @@
 /* MIRAÉ · интервальное повторение слов (по образцу Anki): расписание карточек.
    Здесь только расчёты, без страницы и сети, поэтому их можно проверять отдельно (см. README).
 
-   Карточка: id, l (язык), w (слово), t (перевод), ex / et (пример и его перевод), f (форма слова в примере),
+   Карточка: id, l (язык), w (слово), t (переводы через «;»), d / syn / col (определения на любых языках, синонимы,
+   устойчивые выражения — см. js/meaning.js), ex / et (пример и его перевод), f (форма слова в примере),
    src (откуда слово), star (отмечено учеником), st (0 новое, 1 учу, 2 повторяю, 3 переучиваю),
    due (когда показать, мс), ivl (интервал, дни), ef (лёгкость), step (шаг изучения), reps, lap (забывания),
    b (сколько раз слово добавляли повторно), fr / lr (первый и последний показ), a / u (добавлено / изменено),
@@ -11,7 +12,8 @@
 (function(root){
 "use strict";
 var MIN=60000,DAY=86400000,AHEAD=20*MIN;
-var GAMES=["cards","tr","ctx","wr","build","pairs","hear","dict","say"];   // hear, dict, say — на слух и вслух (js/ear.js)
+var GAMES=["cards","tr","mean","ctx","wr","build","pairs","hear","dict","say"];   // hear, dict, say — на слух и вслух (js/ear.js)
+var CTXM=["ru","ctx","mix"];   // как отрабатывать: с русским, в контексте (только изучаемый язык), вперемешку
 var DEF={
   steps:[1,10],   // шаги изучения нового слова, минуты
   relearn:[10],   // шаг для забытого слова, минуты
@@ -25,7 +27,8 @@ var DEF={
   maxIvl:365,     // потолок интервала, дни
   newDay:10,      // новых слов в день
   revDay:100,     // повторений в день
-  games:{cards:1,tr:1,ctx:1,wr:1,build:1,pairs:1,hear:1,dict:1,say:1},
+  games:{cards:1,tr:1,mean:1,ctx:1,wr:1,build:1,pairs:1,hear:1,dict:1,say:1},
+  ctxm:{},        // режим отработки по языкам: {ko: "ru", en: "ctx"}; нет языка — "ru"
   lw:"ask"        // слова нового урока: ask — спросить ученика, auto — добавить сразу, off — не добавлять
 };
 function num(v,d,lo,hi){v=parseFloat(v);return isFinite(v)?Math.max(lo,Math.min(hi,v)):d}
@@ -44,7 +47,9 @@ function cfg(s){
     ease:num(s.ease,DEF.ease,1.3,4),hard:num(s.hard,DEF.hard,1,2),bonus:num(s.bonus,DEF.bonus,1,2),
     lapse:num(s.lapse,DEF.lapse,0,1),mod:num(s.mod,DEF.mod,.5,2),maxIvl:Math.round(num(s.maxIvl,DEF.maxIvl,7,3650)),
     newDay:Math.round(num(s.newDay,DEF.newDay,0,200)),revDay:Math.round(num(s.revDay,DEF.revDay,1,2000)),games:g,
-    lw:s.lw==="auto"||s.lw==="off"?s.lw:DEF.lw};
+    lw:s.lw==="auto"||s.lw==="off"?s.lw:DEF.lw,ctxm:ctxm(s.ctxm)};
+}
+function ctxm(m){var o={};if(m&&typeof m==="object")Object.keys(m).forEach(function(l){if(/^[a-z]{2,3}$/.test(l)&&CTXM.indexOf(m[l])>=0)o[l]=m[l]});return o
 }
 function dayStart(t){var d=new Date(t);d.setHours(0,0,0,0);return d.getTime()}
 function norm(w){return String(w==null?"":w).normalize("NFC").trim().replace(/\s+/g," ").toLowerCase()}
@@ -52,6 +57,7 @@ function makeId(lang,word){return lang+":"+norm(word)}
 function make(lang,word,tr,x,now){
   x=x||{};var c={id:makeId(lang,word),l:lang,w:String(word).normalize("NFC").trim().replace(/\s+/g," "),t:String(tr||"").trim(),st:0,due:now,a:now,u:now};
   ["ex","et","f","src","pair"].forEach(function(k){if(x[k])c[k]=String(x[k]).trim()});
+  ["d","syn","col"].forEach(function(k){if(Array.isArray(x[k])&&x[k].length)c[k]=x[k].slice(0,12)});   // определения, синонимы, выражения (js/meaning.js)
   if(x.star)c.star=1;
   return c;
 }

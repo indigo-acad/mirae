@@ -24,7 +24,7 @@
   <section id="list"></section>
   <section id="prefs" hidden></section>
 </main>
-<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/words2.js"></script><script src="js/ear.js"></script><script src="js/assistant.js"></script>
+<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/words2.js"></script><script src="js/meaning.js"></script><script src="js/ear.js"></script><script src="js/assistant.js"></script>
 <script>
 /* Тренажёр слов. Расписание как в Anki (js/srs.js), игры взяты из тренажёра группы 2724:
    карточки, выбор перевода на слух, слово в предложении, письмо, сборка слова, поиск пары.
@@ -35,6 +35,7 @@ var URLP=new URLSearchParams(location.search),FORCE=URLP.get('game');   // ?game
 // словарь 2.0 (supabase/vocab2.sql): карточки слов из базы школы и словари от преподавателя; ?set=12 — открыть слова словаря
 var INFO={},WSETS=[],sfilt=URLP.get('set')||'',tfilt='',lvfilt='',pfilt='',infoAt=0;
 var GAME={cards:['Карточки','вспомни перевод и оцени себя сам'],tr:['Выбери перевод','слово звучит, нужно выбрать перевод'],
+  mean:['Что значит','напиши значение: подходит любой перевод, определение или синоним'],
   ctx:['Слово в предложении','какое слово пропущено'],wr:['Напиши слово','по переводу, с клавиатуры'],
   build:['Собери слово','из слогов или букв'],pairs:['Найди пару','соедини слова и переводы'],
   hear:['Что прозвучало','слово звучит, выбери, как оно пишется: 달, 탈 или 딸'],dict:['Диктант','слово или фраза звучит, впиши по клеточкам'],
@@ -63,6 +64,83 @@ function cloze(c){
   if(!f)return null;var i=c.ex.indexOf(f);return {a:c.ex.slice(0,i),b:c.ex.slice(i+f.length),f:f};
 }
 
+// ---------- значения слова и режим отработки (js/meaning.js) ----------
+/* У слова может быть несколько переводов и определений на любых языках, синонимы и устойчивые выражения.
+   Режим отработки (Настройки, отдельно для каждого языка): ru — с русским переводом; ctx — в контексте, только на изучаемом
+   языке: определение, устойчивое выражение или пример с пропуском, синонимы (рекомендуем с 2급 / A2); mix — вперемешку.
+   Режим выбирается для каждого слова в занятии (S.cx), подсказка-контекст — тоже одна на слово (S.pr). */
+var M=KR.mean,GAP='(\u00a0\u00a0\u00a0\u00a0)';
+var CXN={ru:'с русским',ctx:'в контексте',mix:'вперемешку'},PK={def:'Определение',col:'Устойчивое выражение',ex:'Пример',syn:'Синонимы'};
+function cm(){return (V.settings().ctxm||{})[lang]||'ru'}
+function rel(a,b){return M.related(a,b,info(a),info(b))}
+function others(c){return deck().filter(function(x){return x.id!==c.id}).map(function(x){return {c:x,I:info(x)}})}
+/* пропуск слова в тексте: выражение из нескольких слов — целиком, иначе слово по основе */
+function gapIn(text,c){
+  var w=c.w.split('/')[0].trim(),i=text.toLowerCase().indexOf(w.toLowerCase());
+  if(i>=0&&w.indexOf(' ')>=0)return text.slice(0,i)+GAP+text.slice(i+w.length);
+  var st=V.stem(c.l,w.split(' ')[0]),hit=false;if(!st)return null;
+  var r=text.replace(/[\p{L}\p{N}]+/gu,function(t){if(hit||SRS.norm(t).indexOf(st)!==0)return t;hit=true;return GAP});
+  return hit?r:null;
+}
+/* подсказки на изучаемом языке: определения (без самого слова), выражения и примеры с пропуском, синонимы */
+function ctxPrompts(c){
+  var I=info(c)||{},out=[],nw=SRS.norm(c.w);
+  M.tdefs(c,I).forEach(function(d){if(SRS.norm(d.s).indexOf(nw)<0)out.push({k:'def',s:d.s})});
+  M.cols(c).forEach(function(x){var g=gapIn(x.s,c);if(g)out.push({k:'col',s:g})});
+  var ex=[];if(c.ex)ex.push(c.ex);(I.examples||[]).forEach(function(e){if(e.s&&ex.indexOf(e.s)<0)ex.push(e.s)});
+  ex.slice(0,3).forEach(function(t){var g=gapIn(t,c);if(g)out.push({k:'ex',s:g})});
+  var sy=M.syns(c,I);if(sy.length)out.push({k:'syn',s:sy.slice(0,3).join(', '),list:sy.slice(0,3)});
+  return out;
+}
+/* в контексте ли это слово сейчас; без подсказок на изучаемом языке — с переводом */
+function pickCx(c){var m=cm();if(m==='ru')return null;var ps=ctxPrompts(c);if(!ps.length||(m==='mix'&&Math.random()<.5))return null;return ps[Math.floor(Math.random()*ps.length)]}
+/* задание: перевод или подсказка на изучаемом языке */
+function promptHtml(c){
+  var p=S&&S.cx?S.pr:null;
+  if(!p)return '<div class="q-word q-ru">'+esc(trOf(c))+'</div>';
+  return '<div class="q-word q-cx"><small class="muted">'+PK[p.k]+'</small><div'+wcls(c)+' lang="'+c.l+'">'+esc(p.s)+(p.k==='def'||p.k==='syn'?' '+sayBtn(p.s,c.l):'')+'</div></div>';
+}
+/* значение слова в ответе: в контексте — на изучаемом языке */
+function gl(c){
+  if(S&&S.cx){var I=info(c)||{},d=M.tdefs(c,I)[0],sy=M.syns(c,I);if(d)return {s:d.s,l:c.l};if(sy.length)return {s:'≈ '+sy.slice(0,3).join(', '),l:c.l}}
+  return {s:trOf(c),l:'ru'};
+}
+function glH(c){var g=gl(c);return g.l==='ru'?esc(g.s):'<span'+wcls(c)+' lang="'+g.l+'">'+esc(g.s)+'</span>'}
+/* все значения слова — показать после ответа */
+function meaningsHtml(c,cx){
+  var I=info(c)||{},h='';
+  if(cx){var sy=M.syns(c,I),td=M.tdefs(c,I);
+    if(sy.length)h+='<div><span class="muted">Синонимы:</span> <span'+wcls(c)+' lang="'+c.l+'">'+sy.map(esc).join(', ')+'</span></div>';
+    td.forEach(function(d){h+='<div'+wcls(c)+' lang="'+c.l+'">'+esc(d.s)+'</div>'});
+    return h?'<div class="exbox">'+h+'</div>':'';
+  }
+  var t=M.trs(c,I),od=M.defs(c,I);
+  if(t.length)h+='<div>'+t.map(esc).join('; ')+'</div>';
+  od.forEach(function(d){h+='<div><small class="muted">'+esc(M.NAMES[d.l]||d.l)+'</small> <span lang="'+d.l+'"'+(d.l==='ko'?' class="ko"':'')+'>'+esc(d.s)+'</span></div>'});
+  return h?'<div class="exbox">'+h+'</div>':'';
+}
+/* какие ответы засчитываем в «Что значит» */
+function meanTargets(c){
+  var I=info(c)||{};
+  if(S&&S.cx)return M.syns(c,I).concat(M.tdefs(c,I).map(function(d){return d.s}),others(c).filter(function(o){return rel(c,o.c)}).map(function(o){return o.c.w}));
+  return M.trs(c,I).concat(M.defs(c,I).map(function(d){return d.s}));
+}
+/* слово со словом из формы: «перевод» может быть на любом языке — русское идёт в переводы, остальное в определения */
+function addW(l,w,t,x){
+  var tt=M.splitTr(t,l),r=V.add(l,w,tt.t,Object.assign({},x||{},{d:tt.d}));
+  if(!r.added&&tt.d.length){var c=V.get(r.card.id),have=(c.d||[]).map(function(d){return d.l+':'+d.s.toLowerCase()}),nd=tt.d.filter(function(d){return have.indexOf(d.l+':'+d.s.toLowerCase())<0});
+    if(nd.length)V.update(Object.assign({},c,{d:(c.d||[]).concat(nd).slice(0,12)}))}
+  return r;
+}
+/* ученик настаивает, что его ответ верен: добавляем его к значениям слова */
+function addMeaning(c,v,cx){
+  c=V.get(c.id);if(!c||!v)return;c=Object.assign({},c);
+  if(cx||M.langOf(v)===c.l)c.syn=(c.syn||[]).concat(v).slice(0,12);
+  else if(M.langOf(v)==='ru'||!M.langOf(v))c.t=c.t?c.t+'; '+v:v;
+  else c.d=(c.d||[]).concat({l:M.langOf(v),s:v}).slice(0,12);
+  V.update(c);
+}
+
 // ---------- сводка: сверху новые слова, ниже отработка ----------
 /* Новые слова ученик сначала разбирает в своём блоке (перевод, пример, звук), и только потом они идут в отработку.
    В отработке — упражнения по словам, которые уже в работе: учу сейчас и повторения на сегодня. */
@@ -82,6 +160,7 @@ function drawToday(){
   else h+='<p class="muted tb-sub">Новых слов нет. Они появятся из уроков, от преподавателя или когда добавишь их ниже.</p>';
   h+='</section><section class="card glass today trev" aria-labelledby="trev-h"><div class="tb-h"><h3 id="trev-h">'+KR.icon('repeat',20)+'Отработка</h3></div>'+
     '<div class="stat">'+box(inWork,'учу сейчас')+box(rev,'повторить')+box(st.total,'всего слов')+'</div>';
+  h+='<p class="muted tb-sub">Режим: '+CXN[cm()]+' · <button type="button" class="linkish" data-x="cx-cfg">сменить</button></p>';
   if(busy==='rev')h+='';
   else if(inWork+rev)h+='<div class="done-row"><span class="muted">Упражнения по словам, которые уже в работе</span><button type="button" class="cta" id="go">Начать отработку'+KR.icon('arrow',18)+'</button></div>';
   else h+='<div class="done-row"><span class="muted">'+(st.total?(p.waiting?'Сейчас отрабатывать нечего. Ближайшее слово вернётся через '+SRS.span(p.nextAt-now)+'.':st.total>p.allNew?'На сегодня отработка закончена. Повторения появятся завтра.':'Отработка начнётся, когда разберёшь новые слова.'):'В словаре пока нет слов: '+G.ru+' раздел.')+'</span></div>';
@@ -95,15 +174,17 @@ function drawToday(){
 // ---------- занятие ----------
 function deck(){return V.all(lang)}
 function feasible(c,d){
-  var g=V.settings().games,others=d.filter(function(x){return x.id!==c.id&&x.t&&x.t!==c.t}),out=[],n=units(c).length;
+  var g=V.settings().games,others=d.filter(function(x){return x.id!==c.id&&trOf(x)&&trOf(x)!==trOf(c)}),out=[],n=units(c).length;
   if(g.cards)out.push('cards');
-  if(g.tr&&c.t&&others.length>=3)out.push('tr');
+  var unrel=d.filter(function(x){return x.id!==c.id&&!rel(c,x)});
+  if(g.tr&&(S&&S.cx?unrel.length>=3:trOf(c)&&others.filter(function(x){return !rel(c,x)}).length>=3))out.push('tr');
+  if(g.mean&&meanTargets(c).length)out.push('mean');
   if(g.ctx&&others.length>=3&&cloze(c))out.push('ctx');
-  if(g.wr&&c.t)out.push('wr');
+  if(g.wr&&(trOf(c)||S&&S.cx))out.push('wr');
   if(g.build&&n>=2&&n<=16)out.push('build');
   if(g.hear&&KR.canSay()&&alikesOf(c).length>=3)out.push('hear');
   if(g.dict&&KR.canSay()&&n<=24)out.push('dict');
-  if(g.say&&EAR.canHear()&&trOf(c))out.push('say');
+  if(g.say&&EAR.canHear()&&(trOf(c)||S&&S.cx))out.push('say');
   return out;
 }
 function choose(c,d){
@@ -111,7 +192,7 @@ function choose(c,d){
   if(FORCE&&(f.indexOf(FORCE)>=0))return FORCE;
   if(!c.st)return f.indexOf('cards')>=0?'cards':'intro';                 // новое слово сначала показываем
   // сначала узнавание (в том числе на слух), потом вспоминание: написать, сказать вслух, записать на слух
-  var pref=(c.st===1||c.st===3)?['tr','hear','ctx','build','dict','cards','wr']:(c.ivl||0)<7?['ctx','dict','tr','say','hear','build','wr','cards']:['wr','say','dict','build','ctx','tr','cards'];
+  var pref=(c.st===1||c.st===3)?['tr','hear','mean','ctx','build','dict','cards','wr']:(c.ivl||0)<7?['ctx','mean','dict','tr','say','hear','build','wr','cards']:['wr','say','mean','dict','build','ctx','tr','cards'];
   var av=pref.filter(function(g){return f.indexOf(g)>=0&&g!==S.lastGame});
   if(!av.length)av=pref.filter(function(g){return f.indexOf(g)>=0});
   return av.length?av[Math.floor(Math.random()*Math.min(3,av.length))]:'cards';
@@ -130,7 +211,7 @@ function nextCard(){
   if(S.mode==='ear'){
     if(S.qi>=S.queue.length)return finishEar();
     var it=S.queue[S.qi],ce=V.get(it.id);if(!ce){S.queue.splice(S.qi,1);return nextCard()}
-    S.card=ce;S.game=it.g;S.lock=false;S.retype=false;S.miss=0;
+    S.card=ce;S.game=it.g;S.lock=false;S.retype=false;S.miss=0;S.pr=pickCx(ce);S.cx=!!S.pr;
     return ({hear:gHear,dict:gDict,say:gSay,cnt:gCount})[it.g](ce,it.ph);
   }
   if(S.mode==='new'){
@@ -140,13 +221,14 @@ function nextCard(){
   }
   var p=V.plan(lang),g=V.settings().games;p.fresh=[];   // в отработке новых слов нет: они в своём блоке
   var pool=p.learn.concat(p.rev);
-  if((g.pairs&&S.sincePairs>=8&&pool.length>=4&&!FORCE)||(FORCE==='pairs'&&pool.concat(p.soon).length>=4)){S.sincePairs=0;return pairs((FORCE==='pairs'?pool.concat(p.soon):pool).slice(0,5))}
+  var pp=noRel(FORCE==='pairs'?pool.concat(p.soon):pool).slice(0,5);
+  if((g.pairs&&S.sincePairs>=8&&pp.length>=4&&!FORCE)||(FORCE==='pairs'&&pp.length>=4)){S.sincePairs=0;return pairs(pp)}
   var c=SRS.pick(p);
   if(!c)return finish(p);
-  S.sincePairs++;S.card=c;S.game=choose(c,deck());S.lastGame=S.game;S.hint=false;S.retype=false;S.miss=0;S.lock=false;
+  S.sincePairs++;S.card=c;S.pr=pickCx(c);S.cx=!!S.pr;S.game=choose(c,deck());S.lastGame=S.game;S.hint=false;S.retype=false;S.miss=0;S.lock=false;
   // диктант фразой: слово уже знакомо и у него есть пример
   var ph=false;if(S.game==='dict'){var e=exOf(c);ph=!!(e&&c.st===2&&(c.ivl||0)>=3&&e.s.length<=70&&EAR.count(e.s)>=2&&Math.random()<.5)}
-  ({cards:gCards,intro:gCards,tr:gChoice,ctx:gChoice,wr:gWrite,build:gBuild,hear:gHear,dict:gDict,say:gSay})[S.game](c,ph);
+  ({cards:gCards,intro:gCards,tr:gChoice,mean:gMean,ctx:gChoice,wr:gWrite,build:gBuild,hear:gHear,dict:gDict,say:gSay})[S.game](c,ph);
 }
 function frame(title,body){
   var p=V.plan(lang),left=S.mode==='new'||S.mode==='ear'?S.queue.length-S.qi:p.learn.length+p.rev.length+p.soon.length;
@@ -169,13 +251,22 @@ function gNew(c){
     (I.image?'<img class="flash-img" src="'+esc(I.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
     '<div class="flash-w">'+word(c)+' '+sayBtn(c.w,c.l)+micBtn(c.w,c.l)+'</div>'+
     (ipa?'<div class="flash-ipa" lang="en">'+esc(ipa)+'</div>':'')+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+
-    '<div class="flash-t">'+esc(trOf(c)||'перевод не указан')+'</div>'+
+    '<div class="flash-t">'+esc(trOf(c)||'перевод не указан')+'</div>'+newMore(c)+
     (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+(c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>':'')+
     '<div class="muted new-src">'+esc(src)+'</div></div>'+
     '<div class="new-acts"><button type="button" data-x="knew">Уже знаю</button><button type="button" class="btn pri" data-x="learn">Запомнить'+KR.icon('arrow',16)+'</button></div>'+
     '<p class="muted new-hint">«Запомнить»: слово придёт в отработку через '+SRS.label(c,3,set,now)+'. «Уже знаю»: вернётся на проверку через '+SRS.label(c,4,set,now)+'.</p>');
   var b=$('[data-x="learn"]');if(b)b.focus({preventScroll:true});
   if(KR.canSay())KR.say(c.w,c.l);
+}
+/* у нового слова: остальные значения, синонимы, выражения */
+function newMore(c){
+  var I=info(c)||{},t=M.trs(c,I).slice(1),d=M.defs(c,I),sy=M.syns(c,I),co=M.cols(c),h='';
+  if(t.length)h+='<div class="muted">также: '+t.map(esc).join('; ')+'</div>';
+  d.forEach(function(x){h+='<div><small class="muted">'+esc(M.NAMES[x.l]||x.l)+'</small> <span lang="'+x.l+'"'+(x.l==='ko'?' class="ko"':'')+'>'+esc(x.s)+'</span></div>'});
+  if(sy.length)h+='<div><span class="muted">≈</span> <span'+wcls(c)+' lang="'+c.l+'">'+sy.map(esc).join(', ')+'</span></div>';
+  co.slice(0,3).forEach(function(x){h+='<div><span'+wcls(c)+' lang="'+c.l+'">'+esc(x.s)+'</span>'+(x.t?' <span class="muted">· '+esc(x.t)+'</span>':'')+'</div>'});
+  return h?'<div class="new-more">'+h+'</div>':'';
 }
 function learnNew(g){
   if(!S||S.mode!=='new'||!S.card||S.lock)return;S.lock=true;
@@ -198,7 +289,7 @@ function grade(g,auto){
   else{var b=$('#nextb');if(b){b.hidden=false;b.focus()}else nextCard()}
 }
 function more(c){   // пример после ответа
-  return c.ex?'<div class="exbox"><div'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+' '+sayBtn(c.ex,c.l)+'</div>'+(c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>':'';
+  return c.ex?'<div class="exbox"><div'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+' '+sayBtn(c.ex,c.l)+'</div>'+(c.et&&!(S&&S.cx)?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>':'';
 }
 // карточки: вспомнил — открыл — оценил сам
 function gCards(c){
@@ -208,56 +299,61 @@ function gCards(c){
     (ipa?'<div class="flash-ipa" lang="en">'+esc(ipa)+'</div>':'')+
     (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+'</div>':'')+
     '<div class="flash-back" id="back" hidden>'+(I.image?'<img class="flash-img" src="'+esc(I.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
-    '<div class="flash-t">'+esc(trOf(c)||'перевод не указан')+'</div>'+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+(c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div></div>'+
+    '<div class="flash-t">'+(S.cx?glH(c):esc(trOf(c)||'перевод не указан'))+'</div>'+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+(c.et&&!S.cx?'<div class="muted">'+esc(c.et)+'</div>':'')+meaningsHtml(c,S.cx)+'</div></div>'+
     '<div id="fb" class="q-fb"></div>'+
-    '<div class="done-row" id="showrow"><span class="muted">'+(c.st?'Вспомни перевод, потом открой':'Прочитай, послушай и открой перевод')+'</span><button type="button" class="btn pri" data-x="flip">Показать перевод</button></div>'+
+    '<div class="done-row" id="showrow"><span class="muted">'+(S.cx?'Вспомни, что значит слово, и объясни его своими словами':c.st?'Вспомни перевод, потом открой':'Прочитай, послушай и открой перевод')+'</span><button type="button" class="btn pri" data-x="flip">'+(S.cx?'Показать значение':'Показать перевод')+'</button></div>'+
     '<div class="rate" id="rate" hidden>'+(intro?'<button type="button" class="btn pri" data-g="3">Дальше'+KR.icon('arrow',16)+'</button>':RATE.map(function(r){return '<button type="button" data-g="'+r[0]+'"><b>'+r[1]+'</b><small>'+SRS.label(c,r[0],set,now)+'</small></button>'}).join(''))+'</div>');
   if(c.l&&KR.canSay())KR.say(c.w,c.l);
 }
 function flip(){var b=$('#back');if(!b||!b.hidden)return;b.hidden=false;$('#showrow').hidden=true;$('#rate').hidden=false;var f=$('#rate button[data-g="3"]');if(f)f.focus()}
 // выбор из четырёх: перевод слова или слово в предложении
 function gChoice(c){
-  var ctx=S.game==='ctx',d=deck().filter(function(x){return x.id!==c.id&&x.t&&x.t!==c.t}),pair=c.pair?d.filter(function(x){return x.w===c.pair}):[];
+  var ctx=S.game==='ctx',byw=ctx||S.cx,d=deck().filter(function(x){return x.id!==c.id&&!rel(c,x)&&(byw||trOf(x)&&trOf(x)!==trOf(c))}),pair=c.pair?d.filter(function(x){return x.w===c.pair}):[];
   var others=pair.concat(shuffle(d.filter(function(x){return pair.indexOf(x)<0}))).slice(0,3),opts=shuffle([c].concat(others)),cz=ctx?cloze(c):null;
   S.opts=opts;
-  frame(GAME[S.game][0],(ctx?'<div class="q-word"><span'+wcls(c)+' lang="'+c.l+'">'+esc(cz.a)+'<b class="gap">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</b>'+esc(cz.b)+'</span></div>'+(c.et?'<p class="muted q-sub">'+esc(c.et)+'</p>':'')
-      :'<div class="q-word">'+word(c)+' '+sayBtn(c.w,c.l)+'</div>')+
-    '<div class="opts q-opts">'+opts.map(function(o,i){return '<button type="button" data-o="'+i+'"'+(ctx?wcls(o)+' lang="'+o.l+'"':'')+'>'+esc(ctx?o.w:o.t)+'</button>'}).join('')+'</div>'+
+  frame(ctx?GAME.ctx[0]:S.cx?'Выбери слово':GAME.tr[0],(ctx?'<div class="q-word"><span'+wcls(c)+' lang="'+c.l+'">'+esc(cz.a)+'<b class="gap">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</b>'+esc(cz.b)+'</span></div>'+(c.et&&!S.cx?'<p class="muted q-sub">'+esc(c.et)+'</p>':'')
+      :S.cx?promptHtml(c):'<div class="q-word">'+word(c)+' '+sayBtn(c.w,c.l)+'</div>')+
+    '<div class="opts q-opts">'+opts.map(function(o,i){return '<button type="button" data-o="'+i+'"'+(byw?wcls(o)+' lang="'+o.l+'"':'')+'>'+esc(byw?o.w:trOf(o))+'</button>'}).join('')+'</div>'+
     '<div id="fb" class="q-fb"></div><div class="done-row"><span></span><button type="button" class="btn pri" id="nextb" data-x="next" hidden>Дальше'+KR.icon('arrow',16)+'</button></div>');
-  if(!ctx)KR.say(c.w,c.l);
+  if(!byw)KR.say(c.w,c.l);
 }
 function choosePick(i){
   if(S.lock)return;S.lock=true;var c=S.card,o=S.opts[i],ok=o.id===c.id;
   [].forEach.call(document.querySelectorAll('.q-opts button'),function(b,k){b.disabled=true;if(S.opts[k].id===c.id)b.classList.add('ok');else if(k===i)b.classList.add('bad')});
-  $('#fb').innerHTML='<div class="'+(ok?'ok':'bad')+'">'+(ok?'Верно':'Правильно так')+': '+word(c)+' — '+esc(c.t)+'</div>'+more(c);
-  if(S.game==='ctx'&&c.ex)KR.say(c.ex,c.l);else if(!ok)KR.say(c.w,c.l);
+  $('#fb').innerHTML='<div class="'+(ok?'ok':'bad')+'">'+(ok?'Верно':'Правильно так')+': '+word(c)+' — '+glH(c)+'</div>'+more(c);
+  if(S.game==='ctx'&&c.ex)KR.say(c.ex,c.l);else if(!ok||S.cx)KR.say(c.w,c.l);
   grade(ok?3:1,ok);
 }
 // письмо: перевод → слово; после ошибки слово нужно один раз перепечатать
 function gWrite(c){
   var n=units(c).length;
-  frame(GAME.wr[0],'<div class="q-word q-ru">'+esc(c.t)+'</div><p class="muted q-sub">'+(c.l==='ko'?'По-корейски, в словарной форме · слогов: '+n+'. Нужна корейская раскладка.':'По-английски · букв: '+n)+'</p>'+
+  frame(GAME.wr[0],promptHtml(c)+'<p class="muted q-sub">'+(c.l==='ko'?'По-корейски, в словарной форме · слогов: '+n+'. Нужна корейская раскладка.':'По-английски · букв: '+n)+'. Синоним тоже засчитаем.</p>'+
     '<form id="wf" class="wr" autocomplete="off"><input class="name'+(c.l==='ko'?' ko':'')+'" id="win" lang="'+c.l+'" aria-label="Слово" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="submit" class="btn pri">Проверить</button><button type="button" data-x="hint">Подсказка</button></form>'+
     '<div id="fb" class="q-fb"></div><div class="done-row"><span></span><button type="button" class="btn pri" id="nextb" data-x="next" hidden>Дальше'+KR.icon('arrow',16)+'</button></div>');
   $('#win').focus({preventScroll:true});
 }
 function writeCheck(){
   if(S.lock)return;var c=S.card,inp=$('#win'),v=inp.value;if(!v.trim())return;
-  var ok=same(v,c.w);
+  var ok=same(v,c.w),r=ok?{ok:true,kind:'word'}:M.wordOk(v,c,info(c),others(c));
+  if(r.ok&&r.kind!=='word'&&S.pr&&S.pr.k==='syn'&&S.pr.list.some(function(x){return M.nw(x)===M.nw(v)})){   // синоним из подсказки не считается
+    $('#fb').innerHTML='<div class="bad">«'+esc(v)+'» уже есть в подсказке. Нужно другое слово с тем же значением.</div>';inp.select();return}
   if(S.retype){
     if(ok){S.lock=true;inp.className='name ans-ok'+(c.l==='ko'?' ko':'');inp.disabled=true;$('#fb').innerHTML='<div class="ok">Теперь верно. Слово ещё вернётся.</div>'+more(c);grade(1,false)}
     else{inp.className='name ans-bad'+(c.l==='ko'?' ko':'');$('#fb').innerHTML='<div class="bad">Ещё не так. Напиши точно: '+word(c)+'</div>'}
     return;
   }
   KR.say(c.w,c.l);
-  if(ok){S.lock=true;inp.className='name ans-ok'+(c.l==='ko'?' ko':'');inp.disabled=true;$('#fb').innerHTML='<div class="ok">Верно: '+word(c)+' — '+esc(c.t)+'</div>'+more(c);grade(S.hint?2:3,true)}
-  else{S.retype=true;inp.className='name ans-bad'+(c.l==='ko'?' ko':'');$('#fb').innerHTML='<div class="bad">Правильно: <b>'+word(c)+'</b>. Перепечатай и нажми «Проверить».</div>';inp.value='';inp.focus()}
+  if(r.ok&&r.kind!=='word'){S.lock=true;inp.className='name ans-ok'+(c.l==='ko'?' ko':'');inp.disabled=true;
+    $('#fb').innerHTML='<div class="ok">Тоже верно: «'+esc(r.match)+'» — синоним. Слово, которое мы ждали: '+word(c)+' — '+glH(c)+'</div>'+more(c);grade(S.hint?2:3,false);return}
+  if(ok){S.lock=true;inp.className='name ans-ok'+(c.l==='ko'?' ko':'');inp.disabled=true;$('#fb').innerHTML='<div class="ok">Верно: '+word(c)+' — '+glH(c)+'</div>'+more(c);grade(S.hint?2:3,true)}
+  else{S.retype=true;S.wv=v.trim();inp.className='name ans-bad'+(c.l==='ko'?' ko':'');$('#fb').innerHTML='<div class="bad">Правильно: <b>'+word(c)+'</b>. Перепечатай и нажми «Проверить».</div>'+
+    (M.langOf(v)===c.l&&!same(v,c.w)?'<div class="opts"><button type="button" data-x="wown">«'+esc(v.trim())+'» — тоже верно, это синоним</button></div>':'');inp.value='';inp.focus()}
 }
 // сборка слова из слогов (корейский) или букв (английский)
 function gBuild(c){
   var u=units(c),extra=shuffle(deck().filter(function(x){return x.id!==c.id}).map(function(x){return units(x)}).reduce(function(a,b){return a.concat(b)},[]).filter(function(ch){return u.indexOf(ch)<0})).slice(0,Math.min(3,Math.max(1,Math.round(u.length/3))));
   S.u=u;S.pos=0;S.tiles=shuffle(u.concat(extra));
-  frame(GAME.build[0],'<div class="q-word q-ru">'+esc(c.t)+' '+sayBtn(c.w,c.l)+'</div><div class="slots'+(c.l==='ko'?' ko':'')+'" id="slots" aria-label="Собранное слово">'+u.map(function(){return '<i></i>'}).join('')+'</div>'+
+  frame(GAME.build[0],(S.cx?promptHtml(c):'<div class="q-word q-ru">'+esc(trOf(c))+' '+sayBtn(c.w,c.l)+'</div>')+'<div class="slots'+(c.l==='ko'?' ko':'')+'" id="slots" aria-label="Собранное слово">'+u.map(function(){return '<i></i>'}).join('')+'</div>'+
     '<div class="tiles'+(c.l==='ko'?' ko':'')+'" id="tiles">'+S.tiles.map(function(ch,i){return '<button type="button" data-t="'+i+'" lang="'+c.l+'">'+esc(ch)+'</button>'}).join('')+'</div>'+
     '<div id="fb" class="q-fb"></div><div class="done-row"><span></span><button type="button" class="btn pri" id="nextb" data-x="next" hidden>Дальше'+KR.icon('arrow',16)+'</button></div>');
 }
@@ -267,15 +363,40 @@ function buildTap(b){
   b.disabled=true;b.classList.add('used');$('#slots').children[S.pos].textContent=need;S.pos++;
   if(S.pos<S.u.length)return;
   S.lock=true;KR.say(c.w,c.l);
-  $('#fb').innerHTML='<div class="ok">'+(S.miss?'Собрано, ошибок: '+S.miss:'Верно')+': '+word(c)+' — '+esc(c.t)+'</div>'+more(c);
+  $('#fb').innerHTML='<div class="ok">'+(S.miss?'Собрано, ошибок: '+S.miss:'Верно')+': '+word(c)+' — '+glH(c)+'</div>'+more(c);
   grade(S.miss>=3?1:S.miss?2:3,S.miss<3);
 }
+// что значит: слово → значение. С русским — любой перевод или определение на любом языке; в контексте — синоним
+// или определение на изучаемом языке. Опечатка в одну-две буквы — «почти». Ответ, которого нет в словаре, ученик может засчитать сам.
+function gMean(c){
+  var cx=S.cx;
+  frame(GAME.mean[0],'<div class="q-word">'+word(c)+' '+sayBtn(c.w,c.l)+'</div><p class="muted q-sub">'+(cx?'Скажи иначе '+(M.FULL[c.l]||'')+': синоним, слово с тем же значением или определение':'Что значит слово? Напиши перевод: подойдёт любое из значений')+'</p>'+
+    '<form id="mf" class="wr" autocomplete="off"><input class="name'+(cx&&c.l==='ko'?' ko':'')+'" id="min" lang="'+(cx?c.l:'ru')+'" aria-label="Значение слова" autocapitalize="off" spellcheck="false"><button type="submit" class="btn pri">Проверить</button><button type="button" data-x="mdk">Не помню</button></form>'+
+    '<div id="fb" class="q-fb"></div>'+nextRow());
+  $('#min').focus({preventScroll:true});KR.say(c.w,c.l);
+}
+function meanCheck(skip){
+  if(!S||S.lock||S.game!=='mean')return;var c=S.card,inp=$('#min'),v=skip?'':inp.value.trim();if(!skip&&!v)return;
+  var r=skip?{ok:false}:M.meaningOk(v,meanTargets(c));
+  S.lock=true;inp.disabled=true;
+  if(r.ok){inp.className='name ans-ok';
+    $('#fb').innerHTML='<div class="ok">'+(r.typo?'Почти: «'+esc(r.match)+'»':'Верно')+'</div>'+meaningsHtml(c,S.cx)+more(c);return grade(r.typo?2:3,true)}
+  inp.className='name ans-bad';S.mv=v;
+  $('#fb').innerHTML='<div class="bad">'+(skip?'Значения слова':'Такого значения у слова в словаре нет. Значения')+':</div>'+meaningsHtml(c,S.cx)+more(c)+
+    (skip?'':'<div class="opts"><button type="button" data-x="mown">Мой ответ тоже верный</button><button type="button" class="btn pri" data-x="mbad">Ошиблась, дальше</button></div>');
+  if(skip)grade(1,false);
+}
 // найди пару: несколько слов сразу
+/* в «Найди пару» не ставим рядом слова с общим значением: иначе у перевода два верных слова */
+function noRel(cards){var out=[];cards.forEach(function(c){if(!out.some(function(x){return rel(c,x)}))out.push(c)});return out}
+/* правая колонка: в контексте — короткие определения или синонимы на изучаемом языке, если они есть у всех слов */
+function pairLabel(c,cx){if(!cx)return trOf(c);var I=info(c)||{},d=M.tdefs(c,I).filter(function(x){return x.s.length<=40})[0],sy=M.syns(c,I);return d?d.s:sy.length?'≈ '+sy.slice(0,2).join(', '):''}
 function pairs(cards){
-  S.game='pairs';S.pc=cards;S.pm={};S.sel=null;S.left=cards.length;
+  var m=cm(),cx=m!=='ru'&&(m==='ctx'||Math.random()<.5)&&cards.every(function(c){return pairLabel(c,true)});
+  S.game='pairs';S.pc=cards;S.pm={};S.sel=null;S.left=cards.length;S.pcx=cx;S.cx=null;
   var L=shuffle(cards),R=shuffle(cards);
-  frame(GAME.pairs[0],'<p class="muted q-sub">Нажми слово, потом его перевод.</p><div class="pairs"><div>'+L.map(function(c){return '<button type="button" data-pw="'+esc(c.id)+'"'+wcls(c)+' lang="'+c.l+'">'+esc(c.w)+'</button>'}).join('')+'</div><div>'+
-    R.map(function(c){return '<button type="button" data-pt="'+esc(c.id)+'">'+esc(c.t)+'</button>'}).join('')+'</div></div><div id="fb" class="q-fb"></div>');
+  frame(GAME.pairs[0],'<p class="muted q-sub">Нажми слово, потом '+(cx?'его значение':'его перевод')+'.</p><div class="pairs"><div>'+L.map(function(c){return '<button type="button" data-pw="'+esc(c.id)+'"'+wcls(c)+' lang="'+c.l+'">'+esc(c.w)+'</button>'}).join('')+'</div><div>'+
+    R.map(function(c){return '<button type="button" data-pt="'+esc(c.id)+'"'+(cx?wcls(c)+' lang="'+c.l+'"':'')+'>'+esc(pairLabel(c,cx))+'</button>'}).join('')+'</div></div><div id="fb" class="q-fb"></div>');
 }
 function pairTap(b){
   if(b.dataset.pw!==undefined){[].forEach.call(document.querySelectorAll('.pairs [data-pw]'),function(x){x.classList.remove('sel')});b.classList.add('sel');S.sel=b;var c=V.get(b.dataset.pw);if(c)KR.say(c.w,c.l);return}
@@ -325,7 +446,7 @@ function hearPick(i){
   if(!S||S.lock)return;S.lock=true;var c=S.card,o=S.hopts[i],ok=o===c.w,t=S.tok;
   [].forEach.call(document.querySelectorAll('.q-opts button'),function(b,k){b.disabled=true;if(S.hopts[k]===c.w)b.classList.add('ok');else if(k===i)b.classList.add('bad')});
   var sb=function(x){return '<button type="button" data-say="'+esc(x)+'" data-l="'+c.l+'">'+KR.icon('volume',15)+' <span'+wcls(c)+' lang="'+c.l+'">'+esc(x)+'</span></button>'};
-  $('#fb').innerHTML='<div class="'+(ok?'ok':'bad')+'">'+(ok?'Верно':'Прозвучало')+': '+word(c)+' — '+esc(trOf(c))+'</div>'+
+  $('#fb').innerHTML='<div class="'+(ok?'ok':'bad')+'">'+(ok?'Верно':'Прозвучало')+': '+word(c)+' — '+glH(c)+'</div>'+
     (ok?'':'<p class="muted">Послушай разницу: твой вариант и правильный.</p><div class="opts ear-pair">'+sb(o)+sb(c.w)+'</div>');
   if(!ok)sayP(o,c.l).then(function(){return pause(500)}).then(function(){if(S&&S.tok===t)KR.say(c.w,c.l)});
   grade(ok?3:1,ok);
@@ -333,7 +454,7 @@ function hearPick(i){
 // диктант по клеточкам: слог (корейский) или буква (английский) в клеточке
 function gDict(c,ph){
   var e=ph?exOf(c):null,text=e?e.s:c.w,ko=c.l==='ko',n=EAR.typed(text).length;
-  S.ear={text:text,l:c.l,ph:!!e,tr:e?e.t:trOf(c)};
+  S.ear={text:text,l:c.l,ph:!!e,tr:S.cx?(e?'':gl(c).s):e?e.t:trOf(c)};
   frame(GAME.dict[0]+(e?' · фраза':''),earCtl()+
     '<p class="muted q-sub">'+(e?'Впиши фразу':'Впиши слово')+': '+(ko?'в клеточке один слог':'в клеточке одна буква')+(e?', пробелы и знаки уже стоят':'')+' · '+(ko?'слогов':'букв')+': '+n+'</p>'+
     '<div class="dcells'+(ko?' ko':'')+'" id="dcells" lang="'+c.l+'" aria-hidden="true">'+EAR.cells(text,c.l).map(function(w){return '<span class="dw">'+w.map(function(x){return x.fix?'<i class="fix">'+esc(x.ch)+'</i>':'<i data-k="'+x.k+'"></i>'}).join('')+'</span>'}).join('')+'</div>'+
@@ -354,14 +475,14 @@ function dictCheck(){
     if(!x.ok)i.innerHTML=(x.got?'<s>'+esc(x.got)+'</s>':'')+'<b>'+esc(x.ch)+'</b>'});
   var g=r.ok?(S.hint?2:3):(e.ph&&r.bad+r.extra<=1&&r.total>=10?2:1);
   $('#fb').innerHTML='<div class="'+(g>1?'ok':'bad')+'">'+(r.ok?'Верно':g>1?'Почти: одна ошибка':'Ошибок: '+(r.bad+r.extra)+'. Правильные буквы — в клеточках')+'</div>'+
-    '<div class="exbox"><div'+wcls(c)+' lang="'+c.l+'">'+esc(e.text)+' '+sayBtn(e.text,c.l)+'</div>'+(e.tr?'<div class="muted">'+esc(e.tr)+'</div>':'')+(e.ph?'<div class="muted">Слово: '+word(c)+' — '+esc(trOf(c))+'</div>':'')+'</div>';
+    '<div class="exbox"><div'+wcls(c)+' lang="'+c.l+'">'+esc(e.text)+' '+sayBtn(e.text,c.l)+'</div>'+(e.tr?'<div class="muted">'+esc(e.tr)+'</div>':'')+(e.ph?'<div class="muted">Слово: '+word(c)+' — '+glH(c)+'</div>':'')+'</div>';
   KR.say(e.text,e.l);
   grade(g,r.ok&&!e.ph);   // после фразы не торопим: пусть дослушает
 }
 // скажи слово: перевод на экране, ученик говорит слово в микрофон
 function gSay(c){
   S.ear={text:c.w,l:c.l};S.tries=0;S.peek=false;
-  frame(GAME.say[0],'<div class="q-word q-ru">'+esc(trOf(c))+'</div><p class="muted q-sub">Скажи '+(c.l==='ko'?'по-корейски':'по-английски')+(c.l==='ko'&&units(c).length>1?' · слогов: '+units(c).length:'')+'</p>'+
+  frame(GAME.say[0],promptHtml(c)+'<p class="muted q-sub">Скажи '+(c.l==='ko'?'по-корейски':'по-английски')+(c.l==='ko'&&units(c).length>1?' · слогов: '+units(c).length:'')+'</p>'+
     '<div class="ear-ctl"><button type="button" class="ear-play mic-big" data-x="mic" aria-label="Нажми и скажи слово">'+KR.icon('mic',30)+'</button></div>'+
     '<p class="muted q-sub" id="micst" aria-live="polite">Нажми на микрофон и скажи слово</p>'+
     '<div class="opts say-alt"><button type="button" data-x="say-peek">'+KR.icon('volume',15)+' Послушать, как правильно</button><button type="button" data-x="say-type">Ответить текстом</button></div>'+
@@ -374,11 +495,16 @@ async function micGo(){
     var alts=await EAR.recognize(c.l,{accent:KR.accent()});
     if(!S||S.tok!==t)return;
     var r=EAR.heard(alts,c.w,c.l),got='Услышали: «'+esc(r.best||alts[0])+'».';S.tries++;
+    if(!r.ok){   // синоним или слово с тем же значением тоже засчитываем (кроме синонимов из подсказки)
+      var shown=S.pr&&S.pr.k==='syn'?S.pr.list.map(M.nw):[];
+      M.syns(c,info(c)).concat(others(c).filter(function(o){return rel(c,o.c)}).map(function(o){return o.c.w})).some(function(s){
+        if(shown.indexOf(M.nw(s))>=0)return false;var r2=EAR.heard(alts,s,c.l);if(r2.ok){r=r2;r.syn=s;return true}});
+    }
     if(r.ok){S.lock=true;if(st)st.textContent='';
-      $('#fb').innerHTML='<div class="ok">Верно! '+got+'</div><div class="muted">'+word(c)+' — '+esc(trOf(c))+'</div>'+more(c);
+      $('#fb').innerHTML='<div class="ok">'+(r.syn?'Тоже верно: «'+esc(r.syn)+'» — синоним. ':'Верно! ')+got+'</div><div class="muted">'+word(c)+' — '+glH(c)+'</div>'+more(c);
       KR.say(c.w,c.l);return grade(S.peek?2:3,true)}
     if(S.tries>=2){S.lock=true;if(st)st.textContent='';
-      $('#fb').innerHTML='<div class="'+(r.close?'ok':'bad')+'">'+got+(r.close?' Почти!':'')+' Правильно: '+word(c)+' '+sayBtn(c.w,c.l)+'</div>'+more(c);
+      $('#fb').innerHTML='<div class="'+(r.close?'ok':'bad')+'">'+got+(r.close?' Почти!':'')+' Правильно: '+word(c)+' '+sayBtn(c.w,c.l)+' — '+glH(c)+'</div>'+more(c);
       KR.say(c.w,c.l);return grade(r.close?2:1,false)}
     $('#fb').innerHTML='<div class="bad">'+got+' '+(r.close?'Почти. Послушай и повтори.':'Попробуй ещё раз.')+'</div>';
     if(st)st.textContent='Ещё одна попытка';
@@ -450,7 +576,7 @@ async function loadInfo(){
   var d=$('#wdlg');if(d&&d.open)openCard(d.dataset.id);
 }
 function info(c){return INFO[c.id]||null}
-function trOf(c){var i=info(c);return c.t||(i&&i.tr_ru&&i.tr_ru[0])||''}
+function trOf(c){var i=info(c);return c.t||(i&&i.tr_ru&&i.tr_ru[0])||((c.d||[])[0]||{}).s||''}
 function setsHere(){return WSETS.filter(function(s){return s.lang===lang})}
 function setById(id){return WSETS.filter(function(s){return String(s.id)===String(id)})[0]||null}
 function fmtDue(d){var t=new Date(d+'T00:00');return isNaN(t)?d:t.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}
@@ -563,17 +689,17 @@ async function podRun(me){
   for(;me.i<me.ids.length;me.i++){
     if(POD!==me)return;me.skip=false;
     var c=V.get(me.ids[me.i]);if(!c)continue;
-    var t=trOf(c),e=cfg.ex?exOf(c):null,first=cfg.dir==='t2w'&&t,steps=[],add=function(f){steps.push(f)};
+    var gx=podGloss(c),t=gx.s,tl=gx.l,e=cfg.ex?exOf(c):null,first=cfg.dir==='t2w'&&t,steps=[],add=function(f){steps.push(f)};
     var stage=function(s){me.stage=s;drawPod()};
     var sayWord=async function(){if(cfg.slow){await podSay(me,c.w,c.l,{rate:.6});await podWait(me,500)}
       for(var r=0;r<cfg.rep;r++){await podSay(me,c.w,c.l);if(r+1<cfg.rep)await podWait(me,800)}};
     var think=async function(){stage('think');if(cfg.pause)await podWait(me,cfg.pause*1000);else{me.tap=true;drawPod();await podWait(me,null);me.tap=false}};
-    me.c=c;me.t=t;me.e=e;me.first=first?'t':'w';
-    if(first){add(function(){stage('ask');return podSay(me,t,'ru')});add(think);add(function(){stage('open');return sayWord()})}
+    me.c=c;me.t=t;me.tl=tl;me.e=e;me.first=first?'t':'w';
+    if(first){add(function(){stage('ask');return podSay(me,t,tl)});add(think);add(function(){stage('open');return sayWord()})}
     else{add(function(){stage('ask');return sayWord()});add(think);
-      if(cfg.dir==='w2t'&&t)add(function(){stage('open');return podSay(me,t,'ru')});else add(function(){stage('open');return podWait(me,300)})}
+      if(cfg.dir==='w2t'&&t)add(function(){stage('open');return podSay(me,t,tl)});else add(function(){stage('open');return podWait(me,300)})}
     if(e){add(function(){return podWait(me,500)});add(function(){stage('ex');return podSay(me,e.s,c.l)});
-      if(e.t&&cfg.dir!=='w'){add(function(){return podWait(me,400)});add(function(){return podSay(me,e.t,'ru')})}}
+      if(e.t&&cfg.dir!=='w'&&tl==='ru'){add(function(){return podWait(me,400)});add(function(){return podSay(me,e.t,'ru')})}}
     if(cfg.echo){add(function(){return podWait(me,500)});add(function(){stage('echo');return podSay(me,c.w,c.l)});
       add(function(){return podWait(me,Math.max(2500,c.w.length*(c.l==='ko'?500:160)+1500))})}
     add(function(){return podWait(me,600)});
@@ -586,6 +712,12 @@ async function podRun(me){
     }
   }
   if(POD===me){me.end=true;me.stage='';drawPod();markRow(null);podLock(false)}
+}
+/* значение слова в подкасте: в контексте — определение или синонимы на изучаемом языке */
+function podGloss(c){
+  var m=cm(),I=info(c)||{};
+  if(m==='ctx'||(m==='mix'&&Math.random()<.5)){var d=M.tdefs(c,I)[0],sy=M.syns(c,I);if(d)return {s:d.s,l:c.l};if(sy.length)return {s:sy.slice(0,3).join(', '),l:c.l}}
+  return {s:trOf(c),l:'ru'};
 }
 function podStart(ids,title){
   ids=(ids||[]).filter(function(id){return V.get(id)});if(!ids.length)return;
@@ -621,7 +753,7 @@ function drawPod(){
     open:'Проверь себя',ex:'Слово в предложении',echo:'Повтори за диктором'}[st]||'';
   el.innerHTML='<div class="play-top"><span class="tag">Подкаст · '+esc(me.title)+'</span><span class="muted">'+Math.min(me.i+1,me.ids.length)+' из '+me.ids.length+'</span><button type="button" class="round" data-x="pod-stop" aria-label="Остановить подкаст">'+KR.icon('x',16)+'</button></div>'+
     '<div class="flash pod-card">'+(c?'<div class="flash-w">'+wv+'</div><div class="flash-t">'+tv+'</div>'+
-      (me.e&&(st==='ex'||st==='echo')?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(me.e.s)+'</span>'+(me.e.t&&cfg.dir!=='w'?'<div class="muted">'+esc(me.e.t)+'</div>':'')+'</div>':''):'')+
+      (me.e&&(st==='ex'||st==='echo')?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(me.e.s)+'</span>'+(me.e.t&&cfg.dir!=='w'&&me.tl==='ru'?'<div class="muted">'+esc(me.e.t)+'</div>':'')+'</div>':''):'')+
       '<p class="pod-hint'+(st==='think'||st==='echo'?' on':'')+'">'+(me.paused?'Пауза':hint)+'</p>'+
       (st==='think'&&cfg.pause&&!me.paused?'<div class="pod-timer"><i style="animation-duration:'+cfg.pause+'s"></i></div>':'')+'</div>'+
     '<div class="pod-ctl">'+(me.tap&&!me.paused?'<button type="button" class="btn pri" data-x="pod-next">Дальше'+KR.icon('arrow',16)+'</button>':'')+
@@ -646,18 +778,24 @@ function badge(c){
 function drawList(){
   var all=V.all(lang).sort(function(a,b){return (b.a||0)-(a.a||0)}),G=KR.LANGS[lang];
   var F={all:['Все',function(){return true}],new:['Новые',function(c){return !c.st}],learn:['Учу',function(c){return c.st===1||c.st===3}],known:['Знаю',function(c){return c.st===2}],star:['Сложные',function(c){return c.star}]};
-  var h='<div class="card glass"><h3>Добавить слово</h3><form id="addf" class="addw" autocomplete="off"><input class="name'+(lang==='ko'?' ko':'')+'" id="aw" lang="'+lang+'" placeholder="Слово: '+G.name+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false"><input class="name" id="at" placeholder="Перевод" aria-label="Перевод" maxlength="160"><button type="submit" class="btn pri">'+KR.icon('plus',16)+'Добавить</button></form><p class="msg" id="amsg" role="status"></p>'+
-    '<p class="hint">Слова попадают сюда из уроков, по выделению в тексте урока и от преподавателя. Если добавить слово, которое уже есть, оно вернётся на повторение раньше.</p></div>'+
-    '<div class="card glass"><h3>Добавить список слов</h3><p class="hint">Корейские и английские слова можно вперемешку: по одному в строке, через запятую или парами «слово — перевод» (также «=», «:», Tab из Quizlet и Excel). Перевод может стоять и слева. Пример: «слово — перевод | пример | перевод примера». Слова без перевода сначала ищем в базе слов школы, потом переводит DeepL.</p><textarea class="name" id="bulk-input" rows="5" maxlength="8000" placeholder="runny nose, sore throat\naccommodation — жильё\n식욕 — аппетит\n선생님" aria-label="Список слов"></textarea><div class="done-row"><span></span><button type="button" class="btn pri" data-x="bulk-translate">Разобрать и перевести</button></div><p class="msg" id="bulk-msg" role="status"></p><div id="bulk-preview"></div></div>';
+  var h='<div class="card glass"><h3>Добавить слово</h3><form id="addf" class="addw" autocomplete="off"><input class="name'+(lang==='ko'?' ko':'')+'" id="aw" lang="'+lang+'" placeholder="Слово: '+G.name+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false"><input class="name" id="at" placeholder="Перевод или определение" aria-label="Перевод или определение" maxlength="300"><button type="submit" class="btn pri">'+KR.icon('plus',16)+'Добавить</button></form><p class="msg" id="amsg" role="status"></p>'+
+    '<p class="hint">Несколько значений — через «;». Подойдёт и определение на любом языке: «a place to live», «사는 곳». Синонимы и устойчивые выражения добавляются в карточке слова (карандаш). Слова попадают сюда из уроков, по выделению в тексте урока и от преподавателя. Если добавить слово, которое уже есть, оно вернётся на повторение раньше.</p></div>'+
+    '<div class="card glass"><h3>Добавить список слов</h3><p class="hint">Корейские и английские слова можно вперемешку: по одному в строке, через запятую или парами «слово — перевод» (также «=», «:», Tab из Quizlet и Excel). Перевод может стоять и слева. Несколько значений — через «;», можно определение на любом языке. Пример: «слово — перевод | пример | перевод примера». Слова без перевода сначала ищем в базе слов школы, потом переводит DeepL.</p><textarea class="name" id="bulk-input" rows="5" maxlength="8000" placeholder="runny nose, sore throat\naccommodation — жильё\n식욕 — аппетит\n선생님" aria-label="Список слов"></textarea><div class="done-row"><span></span><button type="button" class="btn pri" data-x="bulk-translate">Разобрать и перевести</button></div><p class="msg" id="bulk-msg" role="status"></p><div id="bulk-preview"></div></div>';
   h=setsCard()+h;
   if(all.length){
     h+='<div class="card glass" id="wlist"><div class="opts">'+Object.keys(F).map(function(k){var n=all.filter(F[k][1]).length;return '<button type="button" data-f="'+k+'" class="'+(filt===k?'sel':'')+'" aria-pressed="'+(filt===k)+'">'+F[k][0]+' · '+n+'</button>'}).join('')+'</div>'+
       '<input class="name" id="q" type="search" placeholder="Найти слово или перевод" aria-label="Поиск по словарю" value="'+esc(q)+'">'+selects(all);
-    var qq=SRS.norm(q),rows=all.filter(F[filt][1]).filter(passV2).filter(function(c){return !qq||SRS.norm(c.w).indexOf(qq)>=0||SRS.norm(trOf(c)+' '+((info(c)||{}).tr_ru||[]).join(' ')).indexOf(qq)>=0});
+    var qq=SRS.norm(q),rows=all.filter(F[filt][1]).filter(passV2).filter(function(c){return !qq||SRS.norm(c.w).indexOf(qq)>=0||SRS.norm(trOf(c)+' '+((info(c)||{}).tr_ru||[]).join(' ')+' '+(c.d||[]).map(function(x){return x.s}).join(' ')+' '+(c.syn||[]).join(' ')).indexOf(qq)>=0});
     LISTROWS=rows.slice(0,200).map(function(c){return c.id});
     if(rows.length&&KR.canSay())h+='<div class="listen" id="listen">'+listenBar()+'</div>';
     h+=rows.length?'<div class="wl">'+rows.slice(0,shown).map(function(c){
-      if(editing===c.id)return '<form class="wrow wedit" data-id="'+esc(c.id)+'"><div class="mid"><b>'+word(c)+'</b><input class="name" name="t" value="'+esc(c.t)+'" placeholder="Перевод" aria-label="Перевод" maxlength="160"><input class="name'+(c.l==='ko'?' ko':'')+'" name="ex" lang="'+c.l+'" value="'+esc(c.ex||'')+'" placeholder="Пример (по желанию)" aria-label="Пример" maxlength="240"><input class="name" name="et" value="'+esc(c.et||'')+'" placeholder="Перевод примера" aria-label="Перевод примера" maxlength="240"></div><div class="wact"><button type="submit" class="btn pri">Сохранить</button><button type="button" data-x="cancel">Отмена</button><button type="button" data-del="'+esc(c.id)+'">'+KR.icon('trash',15)+' Удалить</button></div></form>';
+      if(editing===c.id)return '<form class="wrow wedit" data-id="'+esc(c.id)+'"><div class="mid"><b>'+word(c)+'</b>'+
+        '<span class="field">Переводы по-русски</span><input class="name" name="t" value="'+esc(c.t)+'" placeholder="Несколько переводов — через «;»" aria-label="Переводы по-русски" maxlength="300">'+
+        '<span class="field">Определения и переводы на других языках</span><textarea class="name" name="d" rows="3" aria-label="Определения, по одному в строке" placeholder="'+(c.l==='ko'?'사람이 머무는 곳\nen: a place to stay':'a place where you live\nko: 사는 곳\nja: 住まい')+'">'+esc(M.fmtDefs(c.d))+'</textarea>'+
+        '<p class="hint">По одному в строке. Язык узнаётся по буквам; немецкий, французский и другие на латинице — напиши в начале «de:», «fr:».</p>'+
+        '<span class="field">Синонимы</span><input class="name'+(c.l==='ko'?' ko':'')+'" name="syn" lang="'+c.l+'" value="'+esc((c.syn||[]).join(', '))+'" placeholder="Через запятую" aria-label="Синонимы" maxlength="300">'+
+        '<span class="field">Устойчивые выражения</span><textarea class="name'+(c.l==='ko'?' ko':'')+'" name="col" lang="'+c.l+'" rows="2" aria-label="Устойчивые выражения, по одному в строке" placeholder="'+(c.l==='ko'?'결정을 내리다 | принять решение':'make a decision | принять решение')+'">'+esc(M.fmtCols(c.col))+'</textarea>'+
+        '<span class="field">Пример</span><input class="name'+(c.l==='ko'?' ko':'')+'" name="ex" lang="'+c.l+'" value="'+esc(c.ex||'')+'" placeholder="Пример (по желанию)" aria-label="Пример" maxlength="240"><input class="name" name="et" value="'+esc(c.et||'')+'" placeholder="Перевод примера" aria-label="Перевод примера" maxlength="240"></div><div class="wact"><button type="submit" class="btn pri">Сохранить</button><button type="button" data-x="cancel">Отмена</button><button type="button" data-del="'+esc(c.id)+'">'+KR.icon('trash',15)+' Удалить</button></div></form>';
       var I=info(c)||{},meta=[I.pos?KR.W2.POS[I.pos]:'',I.level].filter(Boolean).join(' · ');
       return '<div class="wrow" data-id="'+esc(c.id)+'">'+sayBtn(c.w,c.l)+'<button type="button" class="mid wopen" data-open="'+esc(c.id)+'" aria-haspopup="dialog"><b>'+word(c)+'</b><span class="muted">'+esc(trOf(c)||'без перевода')+(meta?' · '+esc(meta):'')+'</span></button>'+badge(c)+
         '<button type="button" class="icb'+(c.star?' on':'')+'" data-star="'+esc(c.id)+'" aria-pressed="'+(!!c.star)+'" aria-label="Сложное слово">'+KR.icon('star',17)+'</button><button type="button" class="icb" data-edit="'+esc(c.id)+'" aria-label="Изменить слово">'+KR.icon('pencil',16)+'</button></div>'}).join('')+'</div>'+
@@ -683,6 +821,12 @@ function drawPrefs(){
     '<h3>Игры</h3><p class="hint">Отметь игры для отработки. Новые слова сначала разбираются в своём блоке, вверху страницы.</p><div class="games">'+
     SRS.GAMES.map(function(g){return '<label><input type="checkbox" name="g" value="'+g+'"'+(s.games[g]?' checked':'')+'><span><b>'+GAME[g][0]+'</b><small>'+GAME[g][1]+'</small></span></label>'}).join('')+'</div>'+
     '<div class="done-row"><button type="button" data-x="reset">Вернуть как было</button><button type="submit" class="btn pri">Сохранить</button></div><p class="msg" id="pmsg" role="status"></p></form>';
+  var cmv=cm(),lvl=lang==='ko'?'2급':'A2',ln=lang==='ko'?'корейском':'английском';
+  h+='<div class="card glass prefs" id="cxcfg"><h3>Как отрабатывать слова · '+KR.LANGS[lang].name+'</h3><div class="opts" role="group" aria-label="Режим отработки слов">'+
+    [['ctx','В контексте'],['ru','С русским'],['mix','Вперемешку']].map(function(x){return '<button type="button" data-cxm="'+x[0]+'" aria-pressed="'+(cmv===x[0])+'" class="'+(cmv===x[0]?'sel':'')+'">'+x[1]+(x[0]==='ctx'?' · с '+lvl:'')+'</button>'}).join('')+'</div>'+
+    '<p class="hint">'+{ctx:'Задания только на '+ln+': определение, устойчивое выражение или пример с пропуском, синонимы. Русский перевод не показывается. Если у слова пока нет ни определения, ни примера, задание будет с переводом.',
+      ru:'Задания с русским переводом: по переводу вспомнить слово, по слову — перевод.',mix:'Часть заданий в контексте, только на '+ln+', часть — с русским переводом.'}[cmv]+'</p>'+
+    '<p class="hint">Рекомендуем «В контексте» с уровня '+lvl+' и выше: слово запоминается вместе с тем, как его употребляют, и не приходится переводить в голове. В любом режиме синоним или другое значение слова ошибкой не считается.'+lvTip()+'</p></div>';
   var lw=s.lw;
   h+='<div class="card glass prefs" id="lwcfg"><h3>Слова из уроков</h3><p class="hint">Что делать со словами урока, когда открываешь его в первый раз.</p><div class="opts" role="group" aria-label="Слова из новых уроков">'+
     [['ask','Спрашивать'],['auto','Добавлять сами'],['off','Не добавлять']].map(function(x){return '<button type="button" data-lw="'+x[0]+'" aria-pressed="'+(lw===x[0])+'" class="'+(lw===x[0]?'sel':'')+'">'+x[1]+'</button>'}).join('')+'</div>'+
@@ -706,10 +850,16 @@ function drawPrefs(){
   }
   $('#prefs').innerHTML=h;
 }
+/* подсказка по уровню слов из базы школы: большинство слов 2급 / A2 и выше, а режим — с русским */
+function lvTip(){
+  if(cm()!=='ru')return '';var lv=V.all(lang).map(function(c){return (info(c)||{}).level}).filter(Boolean),L=KR.W2.LEVELS[lang]||[];
+  var hi=lv.filter(function(x){return L.indexOf(x)>=1}).length;
+  return lv.length>=10&&hi>lv.length/2?' Большая часть твоих слов — уровня '+(lang==='ko'?'2급':'A2')+' и выше: попробуй «В контексте».':'';
+}
 function savePrefs(reset){
   if(reset){V.setSettings(null);drawPrefs();drawToday();$('#pmsg').textContent='Настройки сброшены';$('#pmsg').className='msg ok';return}
   var g={};[].forEach.call(document.querySelectorAll('#pf input[name=g]'),function(i){g[i.value]=i.checked?1:0});
-  V.setSettings({steps:$('#p-steps').value,grad:$('#p-grad').value,easy:$('#p-easy').value,mod:parseFloat($('#p-mod').value)/100,newDay:$('#p-new').value,revDay:$('#p-rev').value,games:g,lw:V.settings().lw});
+  V.setSettings({steps:$('#p-steps').value,grad:$('#p-grad').value,easy:$('#p-easy').value,mod:parseFloat($('#p-mod').value)/100,newDay:$('#p-new').value,revDay:$('#p-rev').value,games:g,lw:V.settings().lw,ctxm:V.settings().ctxm});
   drawPrefs();drawToday();$('#pmsg').textContent='Сохранено';$('#pmsg').className='msg ok';
 }
 
@@ -760,7 +910,7 @@ function bulkSave(){
   var n=0,ko=0,other=0,again=0;
   bulkRows.forEach(function(x){
     if(x.err||!x.w||!x.l)return;
-    var r=V.add(x.l,x.w,x.t,{src:'manual-bulk',ex:x.ex,et:x.ex?x.et:''});n++;if(!r.added)again++;if(x.l==='ko')ko++;if(x.l!==lang)other++;
+    var r=addW(x.l,x.w,x.t,{src:'manual-bulk',ex:x.ex,et:x.ex?x.et:''});n++;if(!r.added)again++;if(x.l==='ko')ko++;if(x.l!==lang)other++;
   });
   bulkRows=[];drawBulkPreview();$('#bulk-input').value='';
   drawToday();drawList();
@@ -779,6 +929,13 @@ document.addEventListener('click',function(e){
   if(b.id==='gonew'||d.x==='to-new'){stopListen();return start('new')}
   if(d.x==='learn')return learnNew(3);
   if(d.x==='knew')return learnNew(4);
+  if(d.cxm){var cs=V.settings();cs.ctxm=Object.assign({},cs.ctxm);cs.ctxm[lang]=d.cxm;V.setSettings(cs);drawPrefs();drawToday();var cc=$('#cxcfg [data-cxm="'+d.cxm+'"]');if(cc)cc.focus();return}
+  if(d.x==='cx-cfg'){setTab('prefs');var cx=$('#cxcfg');if(cx)cx.scrollIntoView({block:'start'});return}
+  if(d.x==='mdk')return meanCheck(true);
+  if(d.x==='mown'){if(S&&S.card&&S.game==='mean'&&S.mv){addMeaning(S.card,S.mv,S.cx);$('#fb').insertAdjacentHTML('afterbegin','<div class="ok">Засчитано: «'+esc(S.mv)+'» добавлено к значениям слова</div>');S.mv='';[].forEach.call(document.querySelectorAll('[data-x="mown"],[data-x="mbad"]'),function(x){x.disabled=true});grade(3,true)}return}
+  if(d.x==='mbad'){if(S&&S.game==='mean'&&S.mv!==undefined){S.mv=undefined;[].forEach.call(document.querySelectorAll('[data-x="mown"],[data-x="mbad"]'),function(x){x.disabled=true});grade(1,false)}return}
+  if(d.x==='wown'){if(S&&S.card&&S.retype&&S.wv&&!S.lock){var wc=S.card;addMeaning(wc,S.wv,true);S.lock=true;var wi=$('#win');if(wi)wi.disabled=true;
+    $('#fb').innerHTML='<div class="ok">Засчитано: «'+esc(S.wv)+'» добавлено в синонимы. Слово, которое мы ждали: '+word(wc)+' — '+glH(wc)+'</div>'+more(wc);grade(3,false)}return}
   if(d.lw){var ls=V.settings();ls.lw=d.lw;V.setSettings(ls);return drawPrefs()}
   if(d.tab)return setTab(d.tab);
   if(d.x==='stop')return stop();
@@ -828,16 +985,20 @@ document.addEventListener('submit',function(e){
   e.preventDefault();
   if(f.id==='wf')return writeCheck();
   if(f.id==='df')return dictCheck();
+  if(f.id==='mf')return meanCheck(false);
   if(f.id==='pf')return savePrefs(false);
   if(f.id==='addf'){
     var w=$('#aw').value.trim(),t=$('#at').value.trim(),m=$('#amsg'),wl=KR.W2.langOf(w);
     if(!w||!t){m.textContent='Нужны и слово, и перевод.';m.className='msg bad';return}
     if(!wl&&KR.W2.langOf(t)){var sw=w;w=t;t=sw;wl=KR.W2.langOf(w)}   // перевод и слово перепутаны местами
     if(!wl){m.textContent='Слово должно быть корейским или английским.';m.className='msg bad';return}
-    var r=V.add(wl,w,t,{src:'manual'});drawAll();m=$('#amsg');
+    var r=addW(wl,w,t,{src:'manual'});drawAll();m=$('#amsg');
     m.textContent=r.added?'Добавлено: '+r.card.w:'Это слово уже было в словаре. Оно вернётся на повторение раньше.';m.className='msg ok';$('#aw').focus();return;
   }
-  if(f.classList.contains('wedit')){var c=V.get(f.dataset.id);if(c){c=Object.assign({},c,{t:f.t.value.trim(),ex:f.ex.value.trim(),et:f.et.value.trim()});if(!c.ex){delete c.ex;delete c.et;delete c.f}else if(c.f&&c.ex.indexOf(c.f)<0)delete c.f;V.update(c)}editing=null;drawAll()}
+  if(f.classList.contains('wedit')){var c=V.get(f.dataset.id);if(c){
+    var tt=M.splitTr(f.t.value,c.l),dd=M.parseDefs(f.d.value),seen={};dd=dd.concat(tt.d).filter(function(x){var k=x.l+':'+x.s.toLowerCase();if(seen[k])return false;seen[k]=1;return true}).slice(0,12);
+    var arr=function(o,k,v){if(v.length)o[k]=v;else delete o[k]};
+    c=Object.assign({},c,{t:tt.t,ex:f.ex.value.trim(),et:f.et.value.trim()});arr(c,'d',dd);arr(c,'syn',M.parseSyn(f.syn.value));arr(c,'col',M.parseCols(f.col.value));if(!c.ex){delete c.ex;delete c.et;delete c.f}else if(c.f&&c.ex.indexOf(c.f)<0)delete c.f;V.update(c)}editing=null;drawAll()}
 });
 document.addEventListener('input',function(e){
   if(e.target.id==='q'){q=e.target.value;shown=60;var pos=e.target.selectionStart;drawList();var n=$('#q');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}}}

@@ -33,7 +33,8 @@ function source(src,setTitle){
 function card(i,c){
   i=i||{};c=c||{};
   var l=i.lang||c.l||'en',w=i.word||c.w||'',ko=l==='ko',lk=ko?' class="ko" lang="ko"':' lang="'+esc(l)+'"';
-  var tr=uniq([c.t||''].concat(i.tr_ru||[])),ex=(i.examples||[]).slice();
+  var M=KR.mean,tr=uniq(String(c.t||'').split(/;|\n/).concat(i.tr_ru||[])),ex=(i.examples||[]).slice();
+  var dfs=M?M.defs(c,i).filter(function(d){return !(d.l==='ko'&&(i.tr_ko||[]).indexOf(d.s)>=0)&&d.s!==i.explanation}):[],syn=uniq((c.syn||[]).concat(i.synonyms||[])),col=(c.col||[]);
   if(c.ex&&!ex.some(function(x){return x.s===c.ex}))ex.unshift({s:c.ex,t:c.et||''});
   var meta=[i.pos?chip(POS[i.pos]||i.pos):'',i.level?chip(i.level,'lv'):''].join('');
   var h='<div class="wcard"><div class="wc-head"><div class="wc-title"><div class="wc-w"><b'+lk+'>'+esc(w)+'</b>'+(l==='en'&&(i.ipa_uk||i.ipa_us)?'':sayBtn(w,l))+'</div>'+
@@ -45,10 +46,15 @@ function card(i,c){
   }
   h+='<div class="wc-sec"><h4>Перевод</h4><p>'+(tr.length?tr.map(esc).join('; '):'<span class="muted">перевод не указан</span>')+'</p>'+
     ((i.tr_ko||[]).length?'<p class="muted"><span class="ko" lang="ko">'+i.tr_ko.map(esc).join('; ')+'</span></p>':'')+'</div>';
+  if(dfs.length)h+='<div class="wc-sec"><h4>'+(dfs.every(function(d){return d.l===l})?(dfs.length>1?'Определения':'Определение'):'Определения и переводы')+'</h4>'+dfs.map(function(d){
+    var dl=d.l==='ko'?' class="ko" lang="ko"':' lang="'+esc(d.l)+'"';
+    return '<p><small class="muted">'+esc((M.NAMES[d.l]||d.l))+'</small> <span'+dl+'>'+esc(d.s)+'</span>'+(d.l===l?sayBtn(d.s,l,'Послушать определение'):'')+'</p>'}).join('')+'</div>';
+  if(col.length)h+='<div class="wc-sec"><h4>Устойчивые выражения</h4>'+col.map(function(x){
+    return '<div class="wc-ex"><p'+lk+'>'+esc(x.s)+sayBtn(x.s,l,'Послушать выражение')+'</p>'+(x.t?'<p class="muted">'+esc(x.t)+'</p>':'')+'</div>'}).join('')+'</div>';
   if(i.explanation)h+='<div class="wc-sec"><h4>Объяснение</h4><p>'+esc(i.explanation)+'</p></div>';
   if(ex.length)h+='<div class="wc-sec"><h4>'+(ex.length>1?'Примеры':'Пример')+'</h4>'+ex.slice(0,5).map(function(x){
     return '<div class="wc-ex"><p'+lk+'>'+esc(x.s)+sayBtn(x.s,l,'Послушать пример')+'</p>'+(x.t?'<p class="muted">'+esc(x.t)+'</p>':'')+'</div>'}).join('')+'</div>';
-  if((i.synonyms||[]).length)h+='<div class="wc-sec"><h4>Синонимы</h4><p class="chips">'+i.synonyms.map(function(s){return chip(s,ko?'ko':'')}).join('')+'</p></div>';
+  if(syn.length)h+='<div class="wc-sec"><h4>Синонимы</h4><p class="chips">'+syn.map(function(s){return chip(s,ko?'ko':'')}).join('')+'</p></div>';
   if((i.topics||[]).length)h+='<div class="wc-sec"><h4>Темы</h4><p class="chips">'+i.topics.map(function(s){return chip(s)}).join('')+'</p></div>';
   return h+'</div>';
 }
