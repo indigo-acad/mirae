@@ -282,6 +282,14 @@ window.MATERIALS=[
   "level": "3급"
  },
  {
+  "id": "ko-g2724-2-quiz",
+  "section": "korean",
+  "kind": "trainer",
+  "title": "Группа 2724 · урок 2 · проверка на начало урока",
+  "path": "materials/korean/ko-g2724-2-quiz/",
+  "level": "3급"
+ },
+ {
   "id": "ko-g2724-2-class",
   "section": "korean",
   "kind": "class",
