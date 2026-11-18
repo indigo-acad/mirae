@@ -401,7 +401,7 @@ $("rate").oninput=()=>$("rateVal").textContent=$("rate").value;
 
 /* полный список слов */
 function renderWords(){ let h="";
-  SETS.forEach(st=>{ h+='<h3 class="ko" style="margin:12px 0 4px">'+esc(st.name)+'</h3><table class="res">';
+  SETS.forEach(st=>{ if(!mpHas(st))return; h+='<h3 class="ko" style="margin:12px 0 4px">'+esc(st.name)+'</h3><table class="res">';
     if(!st.words.length){ h=h.slice(0,h.lastIndexOf('<h3')); return; }
     st.words.forEach(w=>{ h+='<tr><td style="width:34px"><button class="sm" style="margin:0;padding:4px 8px" onclick="say('+esc(JSON.stringify(w.ko))+')">🔊</button></td><td class="ko" style="font-weight:600;white-space:nowrap">'+(w.act?esc(w.act)+' → ':'')+esc(w.ko)+'</td><td>'+esc(w.ru)+'</td></tr>'; });
     h+='</table>'; });
@@ -430,6 +430,13 @@ const GRAM_TYPES=[
 ];
 const STEPS=[];
 SETS.forEach(s=>(s.gram?GRAM_TYPES:s.pas?PAS_TYPES:STEP_TYPES).forEach(x=>STEPS.push({key:s.id+":"+x.t,set:s,t:x.t,name:x.name})));
+/* ---------- MIRAÉ: задания для домашки (см. js/bridge.js) ----------
+   MIRAE_PARTS — задания с ключами: из них преподаватель выбирает отдельные задания в «Задать домашку».
+   Если тренажёр открыт из домашки (?only=…), до первой отрисовки остаются только выбранные задания. */
+window.MIRAE_PARTS=SETS.map(s=>({g:"Слова · "+s.name,t:STEPS.filter(x=>x.set===s).map(x=>({k:"v:"+x.key,n:x.name}))}))
+  .concat(STEPS.some(x=>!x.set)?[{g:"Итоговые задания",t:STEPS.filter(x=>!x.set).map(x=>({k:"v:"+x.key,n:x.name}))}]:[]);
+if(window.MIRAE_PICK){ MIRAE_PICK.keep(STEPS,x=>"v:"+x.key); if(typeof renderWords==="function") renderWords(); }   // список слов — только наборы домашки
+function mpHas(st){ try{ return STEPS.some(x=>x.set===st) }catch(e){ return true } }   // набор есть в этом прохождении (в домашке — только наборы с выбранными шагами)
 
 function curIdx(){ const i=STEPS.findIndex(s=>!STATE.vocab[s.key]); return i<0?STEPS.length:i; }
 function renderPath(){
@@ -540,7 +547,7 @@ const SHORT={tr:"перевод",ctx:"в предложении",wr:"напис�
 function buildReport(){
   const mins=Math.max(1,Math.round((Date.now()-STATE.started)/60000));
   let t="📝 <b>Урок · слова, 피동, грамматика</b>\n👤 "+esc(STATE.name)+"\n🕒 "+new Date().toLocaleString("ru-RU")+" · ≈"+mins+" мин\n📚 Шагов пройдено: "+STEPS.filter(s=>STATE.vocab[s.key]).length+" из "+STEPS.length+"\n";
-  SETS.forEach(st=>{
+  SETS.forEach(st=>{ if(!mpHas(st))return;
     const got=STEPS.filter(x=>x.set===st&&x.t!=="cards"&&x.t!=="rule"&&STATE.vocab[x.key]);
     if(!got.length){ t+="\n<b>"+esc(st.name)+"</b>: не начато"; return; }
     const sc=got.reduce((a,x)=>a+STATE.vocab[x.key].score,0), tt=got.reduce((a,x)=>a+STATE.vocab[x.key].total,0);

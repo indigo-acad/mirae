@@ -11,33 +11,94 @@
    Где хранится: общая запись ученика в Supabase (save_progress, site = "school"), ключи state.mat и state.rep,
    на устройстве — localStorage "kr_mat:<логин>". Правила слияния те же, что в js/common.js (mergeMat, mergeRep). */
 /* Домашка с отдельными заданиями. Преподаватель может задать не весь тренажёр, а только выбранные задания
-   («Задать домашку» → материал → «выбрать отдельные»). Тогда ссылка из домашки открывает тренажёр так:
-   …/index.html?hw=<номер домашки>&only=<ключ,ключ,…>. Здесь только разбирается адрес; какие задания оставить,
-   решает сам тренажёр по своему списку window.MIRAE_PARTS (ключи те же, их собирает tools/parts.js в data/parts.js).
-   window.MIRAE_PICK (нет параметра only — нет и объекта):
-     has(k)          — выбрано ли задание с ключом k;
-     keep(arr, key)  — оставить в массиве (на месте) только выбранные элементы, key(x, i) — ключ по исходному номеру;
-                       возвращает исходные номера оставшихся;
-     take(arr, ix)   — оставить в массиве элементы с этими номерами (для параллельных массивов, например подсказок);
-     tabs({вкладка: число заданий}) — спрятать вкладки без заданий и открыть первую оставшуюся;
-     suffix          — добавка к ключу сохранения: прогресс домашки хранится отдельно от обычного прохождения. */
+   («Задать домашку» → тренажёр → «выбрать отдельные»). Работает с любым материалом, в том числе с новыми:
+
+   1) Список заданий. Панель преподавателя открывает материал в скрытой рамке с ?mirae-parts=<метка>; здесь материал
+      ничего не отправляет и не сохраняет, а после загрузки отдаёт родителю список заданий (postMessage):
+      - если материал сам объявил window.MIRAE_PARTS = [{g: "группа", t: [{k: "ключ", n: "название"}]}] — его;
+      - иначе список собирается сам: шаги пути слов (глобальный массив STEPS с key/name/set, как в тренажёрах слов)
+        и вкладки (nav button[data-tab] с разделом #tab-<имя>).
+   2) Домашка. Ссылка из домашки открывает материал с ?hw=<номер>&only=<ключ,ключ,…>:
+      - window.MIRAE_PICK: has(k), keep(arr, key) — оставить в массиве (на месте) только выбранное, key(x, i) — ключ
+        по исходному номеру, возвращает исходные номера; take(arr, ix) — то же по номерам (для параллельных массивов);
+        tabs({вкладка: число заданий}) — спрятать пустые вкладки. Материал со своим MIRAE_PARTS фильтрует сам, до первой
+        отрисовки; если он этого не сделал, после загрузки сами отфильтруются STEPS и вкладки;
+      - прогресс домашки хранится отдельно от обычного прохождения: ключи localStorage материала (кроме kr_… сайта)
+        и облачная запись материала (load_progress / save_progress с его p_site) получают добавку ":hw<номер>";
+      - сверху плашка «Домашка от преподавателя» со ссылкой на весь тренажёр. */
 (function () {
   "use strict";
   var q; try { q = new URLSearchParams(location.search) } catch (e) { return }
+  var path = location.pathname, at = path.indexOf("/materials/");
+  var MID = at < 0 ? "" : (path.slice(at + 11).split("/")[1] || "").trim();
+
+  // ---------- общий разбор заданий ----------
+  function glob(name) { try { return (0, eval)("typeof " + name + " !== 'undefined' ? " + name + " : undefined") } catch (e) { return undefined } }
+  var clean = function (s) { return String(s == null ? "" : s).replace(/^[^0-9A-Za-zА-Яа-яЁёㄱ-ㆎ가-힣]+/, "").trim() };
+  function tabBtns() { return [].slice.call(document.querySelectorAll("nav [data-tab], [role=tablist] [data-tab]")).filter(function (b) { return document.getElementById("tab-" + b.dataset.tab) }) }
+  function stepsOf() { var S = glob("STEPS"); return Array.isArray(S) && S.length && S.every(function (x) { return x && x.key && x.name }) ? S : null }
+  function autoParts() {
+    var out = [], S = stepsOf(), groups = {}, order = [];
+    if (S) S.forEach(function (x) {
+      var g = x.set && x.set.name ? "Слова · " + x.set.name : "Итоговые задания";
+      if (!groups[g]) { groups[g] = []; order.push(g) }
+      groups[g].push({ k: "v:" + x.key, n: clean(x.name) });
+    });
+    order.forEach(function (g) { out.push({ g: g, t: groups[g] }) });
+    var pathTab = null, p = document.getElementById("path");
+    if (S && p) { var sec = p.closest("[id^='tab-']"); if (sec) pathTab = sec.id.slice(4) }
+    var tabs = tabBtns().filter(function (b) { return b.dataset.tab !== pathTab && !/finish|send|result|итог/i.test(b.dataset.tab) })
+      .map(function (b) { return { k: "t:" + b.dataset.tab, n: clean(b.textContent) || b.dataset.tab } });
+    if (tabs.length) out.push({ g: "Разделы", t: tabs });
+    return out;
+  }
+  function partsNow() {
+    var P = window.MIRAE_PARTS;
+    if (Array.isArray(P)) return P.filter(function (g) { return g && Array.isArray(g.t) && g.t.length })
+      .map(function (g) { return { g: String(g.g || ""), t: g.t.map(function (x) { return { k: String(x.k), n: clean(x.n) || String(x.k) } }) } });
+    return autoParts();
+  }
+
+  // ---------- 1) список заданий для панели преподавателя ----------
+  var ask = q.get("mirae-parts");
+  if (ask !== null) {
+    window.MIRAE_DISCOVER = true;
+    var noop = function () {};
+    window.alert = noop; window.confirm = function () { return false }; window.prompt = function () { return null };
+    try { Storage.prototype.setItem = noop; Storage.prototype.removeItem = noop } catch (e) {}   // у преподавателя ничего не меняется
+    try { if (window.speechSynthesis) window.speechSynthesis.speak = noop } catch (e) {}
+    var rf = window.fetch && window.fetch.bind(window);
+    window.fetch = function (input, init) {
+      var url = typeof input === "string" ? input : (input && input.url) || "";
+      var same = false; try { same = new URL(url, location.href).origin === location.origin } catch (e) {}
+      return same && rf && !(init && init.method && init.method !== "GET") ? rf(input, init) : new Promise(function () {});
+    };
+    var sent = false;
+    var send = function () {
+      if (sent) return; sent = true;
+      var parts = []; try { parts = partsNow() } catch (e) {}
+      try { parent.postMessage({ mirae: "parts", ask: ask, id: MID, parts: parts }, location.origin) } catch (e) {}
+    };
+    window.addEventListener("load", function () { setTimeout(send, 400) });
+    setTimeout(send, 8000);
+    return;
+  }
+
+  // ---------- 2) домашка с выбранными заданиями ----------
   var only = q.get("only"); if (!only) return;
   var set = {}, n = 0;
   only.split(",").forEach(function (k) { k = k.trim(); if (k && set[k] !== 1) { set[k] = 1; n++ } });
   if (!n) return;
-  var hw = (q.get("hw") || "").replace(/[^0-9a-z_-]/gi, "").slice(0, 20);
+  var hw = (q.get("hw") || "").replace(/[^0-9a-z_-]/gi, "").slice(0, 20), SUF = ":hw" + (hw || "x");
   var P = window.MIRAE_PICK = {
-    hw: hw, n: n, suffix: ":hw" + (hw || "x"),
+    hw: hw, n: n, suffix: SUF, used: false,
     has: function (k) { return set[k] === 1 },
-    take: function (arr, ix) { var c = ix.map(function (i) { return arr[i] }); arr.length = 0; Array.prototype.push.apply(arr, c); return arr },
+    take: function (arr, ix) { P.used = true; var c = ix.map(function (i) { return arr[i] }); arr.length = 0; Array.prototype.push.apply(arr, c); return arr },
     keep: function (arr, key) { var ix = []; for (var i = 0; i < arr.length; i++) if (set[key(arr[i], i)] === 1) ix.push(i); P.take(arr, ix); return ix },
     tabs: function (map) {
-      var btn = function (t) { return document.querySelector('nav button[data-tab="' + t + '"]') }, first = null, act = null;
+      P.used = true; var first = null, act = null;
       Object.keys(map).forEach(function (t) {
-        var b = btn(t), sec = document.getElementById("tab-" + t);
+        var b = document.querySelector('[data-tab="' + t + '"]'), sec = document.getElementById("tab-" + t);
         if (!map[t]) { if (b) b.style.display = "none"; if (sec) sec.classList.add("hidden"); return }
         if (b && !first) first = b;
         if (b && b.classList.contains("active")) act = b;
@@ -45,6 +106,40 @@
       if (first && !act) first.click();
     }
   };
+  // прогресс домашки отдельно: свои ключи материала в localStorage и его облачная запись
+  var mine = function (k) { k = String(k); return k.indexOf("kr_") !== 0 && k.slice(-SUF.length) !== SUF };
+  try {
+    var SP = Storage.prototype, gI = SP.getItem, sI = SP.setItem, rI = SP.removeItem;
+    SP.getItem = function (k) { return gI.call(this, this === window.localStorage && mine(k) ? k + SUF : k) };
+    SP.setItem = function (k, v) { return sI.call(this, this === window.localStorage && mine(k) ? k + SUF : k, v) };
+    SP.removeItem = function (k) { return rI.call(this, this === window.localStorage && mine(k) ? k + SUF : k) };
+  } catch (e) {}
+  if (window.fetch) {
+    var f0 = window.fetch.bind(window);
+    window.fetch = function (input, init) {
+      try {
+        var url = typeof input === "string" ? input : (input && input.url) || "";
+        if (/\/rest\/v1\/rpc\/(load_progress|save_progress)\b/.test(url) && init && typeof init.body === "string") {
+          var b = JSON.parse(init.body);
+          if (b && typeof b.p_site === "string" && b.p_site !== "school" && b.p_site.slice(-SUF.length) !== SUF) {
+            b.p_site += SUF; init = Object.assign({}, init, { body: JSON.stringify(b) });
+          }
+        }
+      } catch (e) {}
+      return f0(input, init);
+    };
+  }
+  // материал без своего фильтра: после загрузки оставить выбранные шаги пути и вкладки
+  function auto() {
+    if (P.used) return;
+    var S = stepsOf();
+    if (S) { P.keep(S, function (x) { return "v:" + x.key }); var r = glob("renderPath"); if (typeof r === "function") try { r() } catch (e) {} }
+    var pathTab = null, p = document.getElementById("path");
+    if (S && p) { var sec = p.closest("[id^='tab-']"); if (sec) pathTab = sec.id.slice(4) }
+    var map = {};
+    tabBtns().forEach(function (b) { var t = b.dataset.tab; map[t] = t === pathTab ? S.length : /finish|send|result|итог/i.test(t) || set["t:" + t] === 1 ? 1 : 0 });
+    if (Object.keys(map).length) P.tabs(map);
+  }
   function banner() {
     if (document.getElementById("mirae-pick")) return;
     var box = document.getElementById("app") || document.body, d = document.createElement("div");
@@ -55,7 +150,8 @@
     var h = box.querySelector("header");
     if (h && h.parentNode === box) box.insertBefore(d, h.nextSibling); else box.insertBefore(d, box.firstChild);
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", banner); else banner();
+  function ready() { banner(); auto() }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ready); else ready();
 })();
 
 (function () {
@@ -64,7 +160,7 @@
   if (at < 0 || !window.fetch) return;
   var ROOT = path.slice(0, at + 1);                                  // корень сайта
   var MID = (path.slice(at + 11).split("/")[1] || "").trim();        // materials/<раздел>/<id>/ → id
-  if (!MID) return;
+  if (!MID || window.MIRAE_DISCOVER) return;   // список заданий для панели преподавателя: ничего не считаем и не сохраняем
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v) } catch (e) {} return null }
   var USER = ls("kr_user"), PIN = ls("kr_pin");
   if (!USER || !PIN) return;
@@ -201,6 +297,12 @@
   window.fetch = function (input, init) {
     var url = typeof input === "string" ? input : (input && input.url) || "";
     if (!/api\.telegram\.org\/bot[^/]*\/sendMessage/.test(url)) return realFetch(input, init);
+    // отчёт из домашки с выбранными заданиями: пометка сверху (если материал не поставил её сам)
+    if (window.MIRAE_PICK && init && init.body) try {
+      var b0 = init.body, t0 = textOf(b0);
+      if (t0 && !/домашка/i.test(t0.slice(0, 300)) && ((typeof URLSearchParams !== "undefined" && b0 instanceof URLSearchParams) || (typeof FormData !== "undefined" && b0 instanceof FormData)))
+        b0.set("text", "📌 Домашка: выбранные задания\n" + t0);
+    } catch (e) {}
     var text = textOf(init && init.body);
     if (text) addReport(text);
     var saved = text ? push() : Promise.resolve(false);

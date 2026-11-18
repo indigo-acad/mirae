@@ -250,9 +250,9 @@ function block(b){
     return h+"</div>";
   }else if(b.type==="mat"){   // тренажёр или тест из каталога внутри домашки
     const m=b.m,p=Array.isArray(b.p)&&b.p.length?b.p:null;
-    // преподаватель выбрал отдельные задания: тренажёр откроется только с ними (?only=…, см. js/bridge.js и data/parts.js)
+    // преподаватель выбрал отдельные задания: тренажёр откроется только с ними (?only=…, см. js/bridge.js)
     const href=p&&m.path!=="#"?m.path+(m.path.indexOf("?")<0?"?":"&")+"hw="+encodeURIComponent(L.hw.id)+"&only="+encodeURIComponent(p.join(",")):m.path;
-    const names=[];if(p)((window.PARTS||{})[m.id]||[]).forEach(g=>{const t=g.t.filter(x=>p.indexOf(x.k)>=0).map(x=>x.n);if(t.length)names.push(`<b>${esc(g.g)}</b>: ${esc(t.join(", "))}`)});
+    const names=p&&Array.isArray(b.pn)?b.pn.filter(x=>x&&x.t).map(x=>(x.g?`<b>${esc(x.g)}</b>: `:"")+esc(x.t)):[];   // названия заданий сохранил преподаватель
     h+=`<p class="muted">${esc((window.KINDS||{})[m.kind]||"Материал")}${m.level?" · "+esc(m.level):""}. ${p?`Не весь тренажёр, а только задания, которые выбрал преподаватель (${p.length}). `:""}Открой, пройди и нажми в нём «Отправить учителю»: задание отметится само. Можно отметить и вручную.</p>`+
       (names.length?`<details class="hw-mp"><summary>Какие задания</summary><ul>${names.map(n=>`<li>${n}</li>`).join("")}</ul></details>`:"")+
       `<div class="done-row"><a class="btn" href="${esc(href)}" target="_blank" rel="noopener">${ic("arrow",16)} Открыть</a><button data-done="${b._key}">${doneLabel(P[b._key]&&P[b._key].done)}</button></div>`;
@@ -359,7 +359,7 @@ function hwLesson(rec){
     if(it.wt){const t=it.wt;lang=lang||t.lang||"";
       sections.push({id:"wt-"+idx,title:++n+". Тест по словам",icon:"🔤",blocks:[{type:"wtest",title:t.title||"Тест по словам",wt:t,idx}]});return}
     if(it.m){const m=MAT.find(x=>x.id===it.m)||{id:it.m,title:it.m,kind:"",path:"#"};
-      sections.push({id:"m--"+String(it.m).replace(/[^a-z0-9_-]/gi,"_"),title:++n+". "+((window.KINDS||{})[m.kind]||"Материал"),icon:"📌",blocks:[{type:"mat",title:m.title,m,p:Array.isArray(it.p)?it.p.filter(k=>typeof k==="string"&&k).slice(0,200):null}]});return}
+      sections.push({id:"m--"+String(it.m).replace(/[^a-z0-9_-]/gi,"_"),title:++n+". "+((window.KINDS||{})[m.kind]||"Материал"),icon:"📌",blocks:[{type:"mat",title:m.title,m,p:Array.isArray(it.p)?it.p.filter(k=>typeof k==="string"&&k).slice(0,200):null,pn:it.pn}]});return}
     const src=LS[it.l];if(!src)return;lang=lang||src.lang||"ko";
     src.sections.forEach(s=>s.blocks.forEach((b,i)=>{const k=s.id+"-"+i;if((it.b||[]).indexOf(k)<0)return;
       sections.push({id:it.l+"--"+k,title:++n+". "+(b.title||s.title),icon:s.icon,from:src.course+" · "+src.title,blocks:[hwPick(Object.assign({},b,{src:it.l,srcKey:k}),it.i&&it.i[k])]})}));

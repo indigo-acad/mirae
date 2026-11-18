@@ -14,7 +14,7 @@
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Преподаватель</small><h1>Ученики и задания</h1><p>Назначай материалы: ученик увидит только их</p></div></header>
 <main><nav class="seg tnav" aria-label="Разделы преподавателя"><a href="teacher.html" class="on" aria-current="page">Ученики</a><a href="dict.html">Словари</a></nav><div id="m"></div></main>
-<script src="data/materials.js"></script><script src="data/parts.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/words2.js"></script><script src="js/srs.js"></script><script src="js/assistant.js"></script>
+<script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/words2.js"></script><script src="js/srs.js"></script><script src="js/assistant.js"></script>
 <script>
 var $=function(s){return document.querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
@@ -310,27 +310,54 @@ function hwSubText(b,x,i){
   if(a!=null&&a!=='')h+='<span class="muted"> · ответ: </span><span class="ko">'+esc(a)+'</span>';
   return h||'Задание '+(i+1);
 }
-/* Отдельные задания тренажёра (data/parts.js, собирает tools/parts.js): группы {g, t:[{k, n}]}.
-   Тренажёр целиком: hwf.mats[id]. Часть заданий: их ключи в hwf.mp[id]; в домашку уходят полем p: [ключи],
-   ученик откроет тренажёр с ?only=<ключи> и увидит только их (js/bridge.js). */
-function matParts(id){var P=window.PARTS&&window.PARTS[id];return P&&P.length?P:null}
+/* Отдельные задания тренажёра. Список заданий тренажёр отдаёт сам: при «выбрать отдельные» он открывается в скрытой
+   рамке с ?mirae-parts=…, js/bridge.js в нём собирает задания (window.MIRAE_PARTS тренажёра или шаги пути и вкладки)
+   и присылает сюда. Так работают и новые тренажёры, ничего настраивать не нужно. Группы {g, t:[{k, n}]}.
+   Тренажёр целиком: hwf.mats[id]. Часть заданий: их ключи в hwf.mp[id]; в домашку уходят полем p: [ключи]
+   (и pn — названия для ученика, pt — сколько заданий всего); ученик откроет тренажёр с ?only=<ключи>. */
+var MPARTS={};   // id тренажёра → список групп; 'wait' — загружается; [] — отдельных заданий нет
+function matPickable(m){return m&&m.kind==='trainer'&&m.path&&m.path!=='#'}
+function matParts(id){var P=MPARTS[id];return Array.isArray(P)&&P.length?P:null}
 function matKeys(id){var a=[];(matParts(id)||[]).forEach(function(g){g.t.forEach(function(x){a.push(x.k)})});return a}
 function matPart(id){var a=hwf.mp[id],n=matKeys(id).length;return hwf.mats[id]&&Array.isArray(a)&&a.length&&a.length<n?a:null}
 function matOn(id){var pa=matPart(id);return hwf.mats[id]?(pa||matKeys(id)).slice():[]}
 function matSet(id,on){var all=matKeys(id);on=all.filter(function(k){return on.indexOf(k)>=0});hwf.mats[id]=on.length>0;if(on.length&&on.length<all.length)hwf.mp[id]=on;else delete hwf.mp[id]}
+// названия выбранных заданий по группам — для ученика в домашке
+function matNames(id,keys){var out=[];(matParts(id)||[]).forEach(function(g){var t=g.t.filter(function(x){return keys.indexOf(x.k)>=0}).map(function(x){return x.n});if(t.length)out.push({g:String(g.g).slice(0,120),t:t.join(', ').slice(0,400)})});return out}
+function matBody(id){
+  var P=MPARTS[id];
+  if(P===undefined||P==='wait')return '<p class="muted hwt-sub">Загружаю задания тренажёра…</p>';
+  if(P==='err')return '<p class="muted hwt-sub">Не получилось открыть тренажёр. Закройте и откройте список ещё раз.</p>';
+  if(!P.length)return '<p class="muted hwt-sub">В этом тренажёре нельзя выбрать отдельные задания: его можно задать только целиком.</p>';
+  return P.map(function(g,gi){
+    return '<label class="line hwt-pick hwt-grp"><input type="checkbox" data-hwg="'+esc(id)+'" data-gi="'+gi+'"><b>'+esc(g.g)+'</b></label>'+
+      g.t.map(function(x){return '<label class="line hwt-pick hwt-sub hwt-sub2"><input type="checkbox" data-hwp="'+esc(id)+'" data-pk="'+esc(x.k)+'"><span>'+esc(x.n)+'</span></label>'}).join('')}).join('');
+}
 function hwMatRow(m){
-  var P=matParts(m.id),h='<div class="hwt-blk"><label class="line hwt-pick"><input type="checkbox" data-hwm="'+esc(m.id)+'"'+(hwf.mats[m.id]?' checked':'')+'><span>'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>';
-  if(P)h+='<details class="hwt-subs"'+(matPart(m.id)?' open':'')+'><summary class="muted"><span class="hwt-cnt"></span></summary>'+P.map(function(g,gi){
-    return '<label class="line hwt-pick hwt-grp"><input type="checkbox" data-hwg="'+esc(m.id)+'" data-gi="'+gi+'"><b>'+esc(g.g)+'</b></label>'+
-      g.t.map(function(x){return '<label class="line hwt-pick hwt-sub hwt-sub2"><input type="checkbox" data-hwp="'+esc(m.id)+'" data-pk="'+esc(x.k)+'"><span>'+esc(x.n)+'</span></label>'}).join('')}).join('')+'</details>';
+  var h='<div class="hwt-blk"><label class="line hwt-pick"><input type="checkbox" data-hwm="'+esc(m.id)+'"'+(hwf.mats[m.id]?' checked':'')+'><span>'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>';
+  if(matPickable(m))h+='<details class="hwt-subs" data-hwload="'+esc(m.id)+'"'+(matPart(m.id)?' open':'')+'><summary class="muted"><span class="hwt-cnt">выбрать отдельные задания</span></summary><div class="hwt-mb">'+matBody(m.id)+'</div></details>';
   return h+'</div>';
 }
+function matRedraw(id){document.querySelectorAll('details[data-hwload]').forEach(function(d){if(d.dataset.hwload===id){var b=d.querySelector('.hwt-mb');if(b)b.innerHTML=matBody(id)}});hwSummary()}
+function matLoad(id){
+  var m=MAP[id];if(!matPickable(m)||(MPARTS[id]!==undefined&&MPARTS[id]!=='err'))return;
+  MPARTS[id]='wait';matRedraw(id);
+  var ask=Math.random().toString(36).slice(2),fr=document.createElement('iframe'),done=false;
+  var fin=function(P){if(done)return;done=true;window.removeEventListener('message',on);if(fr.parentNode)fr.parentNode.removeChild(fr);MPARTS[id]=P;matRedraw(id)};
+  var on=function(e){var d=e.data;if(e.origin!==location.origin||!d||d.mirae!=='parts'||d.ask!==ask)return;
+    fin((Array.isArray(d.parts)?d.parts:[]).filter(function(g){return g&&Array.isArray(g.t)&&g.t.length}).map(function(g){return {g:String(g.g||''),t:g.t.map(function(x){return {k:String(x.k),n:String(x.n||x.k)}})}}))};
+  window.addEventListener('message',on);
+  fr.setAttribute('aria-hidden','true');fr.tabIndex=-1;fr.style.cssText='position:absolute;left:-9999px;top:0;width:800px;height:600px;border:0;visibility:hidden';
+  fr.src=m.path+(m.path.indexOf('?')<0?'?':'&')+'mirae-parts='+ask;document.body.appendChild(fr);
+  setTimeout(function(){fin('err')},20000);
+}
+document.addEventListener('toggle',function(e){var d=e.target;if(d&&d.dataset&&d.dataset.hwload&&d.open)matLoad(d.dataset.hwload)},true);
 function hwPicked(){
   var items=[],by={},part={},theory=[];
   Object.keys(hwf.sel).forEach(function(k){if(!hwf.sel[k])return;var i=k.indexOf('|'),l=k.slice(0,i),bk=k.slice(i+1),pa=hwPart(k);
     (by[l]=by[l]||[]).push(bk);if(pa){part[l]=part[l]||{};part[l][bk]=pa.slice()}});
   Object.keys(by).forEach(function(l){var it={l:l,b:by[l]};if(part[l])it.i=part[l];items.push(it)});
-  Object.keys(hwf.mats).forEach(function(m){if(!hwf.mats[m])return;var it={m:m},pa=matPart(m);if(pa)it.p=pa.slice();items.push(it)});
+  Object.keys(hwf.mats).forEach(function(m){if(!hwf.mats[m])return;var it={m:m},pa=matPart(m);if(pa){it.p=pa.slice();it.pn=matNames(m,pa);it.pt=matKeys(m).length}items.push(it)});
   Object.keys(hwf.th).forEach(function(k){if(!hwf.th[k])return;var i=k.indexOf('|');theory.push({l:k.slice(0,i),s:k.slice(i+1)})});
   return {items:items,theory:theory};
 }
@@ -348,7 +375,8 @@ function hwMarks(){
     var bx=c.closest('.hwt-blk'),e=bx&&bx.querySelector('.hwt-cnt');
     if(e)e.textContent=pa?'выбрано '+pa.length+' из '+n:hwf.sel[k]?'все '+n+' · выбрать отдельные':n+' '+plural(n,'задание','задания','заданий')+' · выбрать отдельные';
     if(bx)bx.querySelectorAll('[data-hwi]').forEach(function(x){x.checked=!!hwf.sel[k]&&(!pa||pa.indexOf(+x.dataset.ix)>=0)})});
-  document.querySelectorAll('[data-hwm]').forEach(function(c){var id=c.dataset.hwm,bx=c.closest('.hwt-blk');if(!bx||!matParts(id))return;
+  document.querySelectorAll('[data-hwm]').forEach(function(c){var id=c.dataset.hwm,bx=c.closest('.hwt-blk');if(!bx)return;
+    if(!matParts(id)){c.indeterminate=false;var e0=bx.querySelector('.hwt-cnt');if(e0)e0.textContent=MPARTS[id]==='wait'?'загружаю задания…':'выбрать отдельные задания';return}
     var n=matKeys(id).length,pa=matPart(id),on=matOn(id),e=bx.querySelector('.hwt-cnt');
     c.checked=!!hwf.mats[id];c.indeterminate=!!pa;
     if(e)e.textContent=pa?'выбрано '+pa.length+' из '+n:hwf.mats[id]?'все '+n+' · выбрать отдельные':n+' '+plural(n,'задание','задания','заданий')+' · выбрать отдельные';
@@ -392,7 +420,7 @@ function hwForm(){
     '<div class="done-row"><span class="muted" id="hwsum"></span><button type="button" class="pri" id="hwgo">Задать домашку</button></div></div></details>';
 }
 function hwItemsText(r){
-  return (r.items||[]).map(function(it){if(it.m)return esc((MAP[it.m]||{title:it.m}).title)+(Array.isArray(it.p)&&it.p.length?' ('+it.p.length+' из '+(matKeys(it.m).length||'?')+' заданий)':'');
+  return (r.items||[]).map(function(it){if(it.m)return esc((MAP[it.m]||{title:it.m}).title)+(Array.isArray(it.p)&&it.p.length?' ('+it.p.length+' из '+(it.pt||matKeys(it.m).length||'?')+' заданий)':'');
     if(it.wt)return 'Тест по словам: '+(it.wt.w||[]).length+' '+plural((it.wt.w||[]).length,'слово','слова','слов');
     var t=it.b.map(function(k){var x=hwBlockOf(it.l,k),a=x&&x.b&&hwSubs(x.b),p=it.i&&it.i[k];
       return (x&&x.b?(x.b.title||x.s.title):k)+(Array.isArray(p)&&p.length&&a?' ('+p.length+' из '+a.length+')':'')});

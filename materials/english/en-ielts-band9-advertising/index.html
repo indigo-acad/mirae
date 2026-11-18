@@ -324,7 +324,7 @@ const UPGRADE = [
 /* ============ ЛОГИКА ============ */
 let STATE={name:"",started:null,vocab:{}};
 const $=id=>document.getElementById(id);
-const KEY="ielts_ads_state_v1"+(window.MIRAE_PICK?MIRAE_PICK.suffix:"");
+const KEY="ielts_ads_state_v1";
 const MP_HW=window.MIRAE_PICK?" · домашка (выбранные задания)":"";   // MIRAÉ: пометка в отчёте, если тренажёр открыт из домашки
 
 function save(){ try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){} }
@@ -744,10 +744,9 @@ $("nav").addEventListener("click",e=>{ const t=e.target.dataset.tab; if(!t)retur
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));
   ["vocab","units","essay"].forEach(x=>$("tab-"+x).classList.toggle("hidden",x!==t)); window.scrollTo(0,0); });
 
-/* ---------- MIRAÉ: задания для домашки ----------
-   MIRAE_PARTS — задания тренажёра с ключами: из них преподаватель выбирает отдельные задания в «Задать домашку»
-   (node tools/parts.js переносит список в data/parts.js — запустить после правки заданий).
-   Если тренажёр открыт из домашки (?only=…, см. js/bridge.js), остаются только выбранные задания. */
+/* ---------- MIRAÉ: задания для домашки (см. js/bridge.js) ----------
+   MIRAE_PARTS — задания тренажёра с ключами: из них преподаватель выбирает отдельные задания в «Задать домашку».
+   Если тренажёр открыт из домашки (?only=…), до первой отрисовки остаются только выбранные задания. */
 const MP_NAME=s=>String(s).replace(/^[^A-Za-zА-Яа-яЁё0-9]+/,"");
 const MP_VOCAB=()=>SETS.map(s=>({g:"Лексика · "+s.name,t:STEPS.filter(x=>x.set===s).map(x=>({k:"v:"+x.key,n:MP_NAME(x.name)}))}))
   .concat(STEPS.some(x=>!x.set)?[{g:"Лексика · итоговые задания",t:STEPS.filter(x=>!x.set).map(x=>({k:"v:"+x.key,n:MP_NAME(x.name)}))}]:[]);

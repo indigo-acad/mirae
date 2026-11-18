@@ -276,6 +276,11 @@ function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.flo
 function norm(s){ return (s||"").normalize("NFC").toLowerCase().replace(/[\s.,!?·~()]/g,""); }
 function isRight(v,w){ const x=norm(v); return x!=="" && [w.ko,...w.alt].some(a=>norm(a)===x); }
 const related=(a,b)=>(a.ko.length>1&&b.ko.includes(a.ko))||(b.ko.length>1&&a.ko.includes(b.ko));
+/* ---------- MIRAÉ: задания для домашки (см. js/bridge.js) ----------
+   MIRAE_PARTS — задания с ключами: из них преподаватель выбирает отдельные задания в «Задать домашку».
+   Если тренажёр открыт из домашки (?only=…), до первой отрисовки остаются только выбранные задания. */
+window.MIRAE_PARTS=[...new Set(LESSONS.map(l=>l.book))].map(b=>({g:"Уроки "+b,t:LESSONS.filter(l=>l.book===b).map(l=>({k:"les:"+l.id,n:l.name}))}));
+if(window.MIRAE_PICK) MIRAE_PICK.keep(LESSONS,l=>"les:"+l.id);
 LESSONS.forEach(l=>l.words.forEach(w=>{ w.key=l.id+"|"+w.ko; w.les=l; }));
 const ALLW=LESSONS.flatMap(l=>l.words);
 
