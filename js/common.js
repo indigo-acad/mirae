@@ -240,16 +240,14 @@ function say(text,lang,cb){
   localSay(text,lang,cb,acc);
 }
 function hush(){try{if(ttsAudio)ttsAudio.pause();if(hasTTS())speechSynthesis.cancel()}catch(e){}}
-/* Разблокировка звука при первом касании: iPhone (и часть Android) пропускают звук и речь, только если они впервые
-   запущены прямо по нажатию. После этого озвучка работает и тогда, когда она начинается чуть позже — после ответа
-   облака или словаря, в подкасте, после проверки ответа. */
-let unlocked=false;
+/* Разблокировка речи при первом касании — только iPhone и iPad: Safari пропускает речь, только если она впервые
+   запущена прямо по нажатию; после этого озвучка работает и тогда, когда начинается чуть позже (подкаст, после проверки).
+   На Android и компьютере не нужна: там беззвучная «пустая» фраза у части голосов слышна как шипение. */
+const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+let unlocked=!IOS;
 function unlockAudio(){
   if(unlocked)return;unlocked=true;
   try{if(hasTTS()&&!speechSynthesis.speaking){const u=new SpeechSynthesisUtterance(" ");u.volume=0;speechSynthesis.speak(u)}}catch(e){}
-  try{if(!ttsAudio)ttsAudio=new Audio();
-    ttsAudio.src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
-    const p=ttsAudio.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}
 }
 ["pointerdown","touchend","keydown"].forEach(ev=>document.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
 
