@@ -44,6 +44,7 @@ function card(i,c){
     h+='<div class="wc-ipa">'+[['gb','брит.',i.ipa_uk],['us','амер.',i.ipa_us]].filter(function(x){return x[2]}).map(function(x){
       return '<span class="ipa"><small>'+x[1]+'</small> <span lang="en">'+esc(x[2])+'</span>'+sayBtn(w,'en-'+x[0],'Послушать: '+(x[0]==='us'?'американское':'британское')+' произношение')+'</span>'}).join('')+'</div>';
   }
+  if(!(l==='en'&&(i.ipa_uk||i.ipa_us))&&c.ipa)h+='<div class="wc-ipa"><span class="ipa"><span lang="'+esc(l==='ko'?'ko':'en')+'">'+esc(c.ipa)+'</span></span></div>';
   h+='<div class="wc-sec"><h4>Перевод</h4><p>'+(tr.length?tr.map(esc).join('; '):'<span class="muted">перевод не указан</span>')+'</p>'+
     ((i.tr_ko||[]).length?'<p class="muted"><span class="ko" lang="ko">'+i.tr_ko.map(esc).join('; ')+'</span></p>':'')+'</div>';
   if(dfs.length)h+='<div class="wc-sec"><h4>'+(dfs.every(function(d){return d.l===l})?(dfs.length>1?'Определения':'Определение'):'Определения и переводы')+'</h4>'+dfs.map(function(d){

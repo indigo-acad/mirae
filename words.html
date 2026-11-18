@@ -245,12 +245,12 @@ function finish(p){
 /* Новое слово показано целиком: перевод, пример, звук, картинка. «Запомнить» — слово уходит в отработку
    (вернётся через первый шаг изучения), «Уже знаю» — сразу в повторения с интервалом «Легко». */
 function gNew(c){
-  var I=info(c)||{},ipa=c.l==='en'?(KR.accent()==='us'?I.ipa_us||I.ipa_uk:I.ipa_uk||I.ipa_us):'',set=V.settings(),now=Date.now();
+  var I=info(c)||{},ipa=(c.l==='en'?(KR.accent()==='us'?I.ipa_us||I.ipa_uk:I.ipa_uk||I.ipa_us):'')||c.ipa||'',set=V.settings(),now=Date.now();
   var src=KR.W2.source(c.src||I.src,(setById(String(c.src||'').replace('set:',''))||{}).title);
   frame('Новое слово · '+(S.qi+1)+' из '+S.queue.length,'<div class="flash newcard">'+
     (I.image?'<img class="flash-img" src="'+esc(I.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
     '<div class="flash-w">'+word(c)+' '+sayBtn(c.w,c.l)+micBtn(c.w,c.l)+'</div>'+
-    (ipa?'<div class="flash-ipa" lang="en">'+esc(ipa)+'</div>':'')+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+
+    (ipa?'<div class="flash-ipa" lang="'+(c.l==='ko'?'ko':'en')+'">'+esc(ipa)+'</div>':'')+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+
     '<div class="flash-t">'+esc(trOf(c)||'перевод не указан')+'</div>'+newMore(c)+
     (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+(c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>':'')+
     '<div class="muted new-src">'+esc(src)+'</div></div>'+
@@ -258,12 +258,70 @@ function gNew(c){
     '<p class="muted new-hint">«Запомнить»: слово придёт в отработку через '+SRS.label(c,3,set,now)+'. «Уже знаю»: вернётся на проверку через '+SRS.label(c,4,set,now)+'.</p>');
   var b=$('[data-x="learn"]');if(b)b.focus({preventScroll:true});
   if(KR.canSay())KR.say(c.w,c.l);
+  if(!c.dq){var tk=S.tok;dictPull(c.id,function(n,r){if(r&&r.found&&S&&S.mode==='new'&&S.tok===tk&&!S.lock){S.card=n;if($('.newcard'))gNewRedraw(n)}}).catch(function(){})}
+}
+/* перерисовать знакомство со словом после ответа словаря, не озвучивая слово ещё раз */
+function gNewRedraw(c){var say=KR.say;KR.say=function(){};try{gNew(c)}finally{KR.say=say}}
+// ---------- словарь (supabase/functions/dict-lookup) ----------
+/* Корейский — 한국어기초사전 (определение по-корейски, переводы на английский и русский, примеры, синонимы, уровень),
+   английский — Free Dictionary API / Викисловарь (определения, примеры, синонимы, транскрипция).
+   Ответ хранится на устройстве неделю; в карточку попадает только то, чего в ней ещё нет. */
+var S_DF={};   // источник и произношение, подтянутые в форму правки до сохранения
+var DICT_URL=((window.CONFIG||{}).SUPABASE_URL||'')+'/functions/v1/dict-lookup',DQ={};
+async function dictGet(w,l){
+  var k='kr_dict:'+l+':'+SRS.norm(w);
+  try{var x=JSON.parse(localStorage.getItem(k)||'null');if(x&&Date.now()-x.at<7*SRS.DAY)return x.r}catch(e){}
+  if(DQ[k])return DQ[k];
+  var cfg=window.CONFIG||{};
+  DQ[k]=(async function(){
+    var res=await fetch(DICT_URL,{method:'POST',headers:{'Content-Type':'application/json',apikey:cfg.SUPABASE_ANON_KEY,Authorization:'Bearer '+cfg.SUPABASE_ANON_KEY},
+      body:JSON.stringify({p_name:KR.user(),p_pin:localStorage.getItem('kr_pin')||'',word:w.split('/')[0].trim(),lang:l})});
+    var r=await res.json().catch(function(){return {}});
+    if(!res.ok)throw new Error(r.message||('ошибка '+res.status));
+    try{localStorage.setItem(k,JSON.stringify({at:Date.now(),r:r}))}catch(e){}
+    return r;
+  })();
+  try{return await DQ[k]}finally{delete DQ[k]}
+}
+/* статья словаря → карточка: добавляем недостающее, своё ученика и преподавателя не трогаем */
+function enrich(c,r){
+  c=Object.assign({},c);c.dq=1;if(!r||!r.found)return c;
+  var key=function(d){return d.l+':'+String(d.s).toLowerCase()};
+  if(!c.t&&(r.tr_ru||[]).length)c.t=r.tr_ru.slice(0,3).join('; ');
+  var have=(c.d||[]).map(key),nd=(r.defs||[]).filter(function(d){return d.s&&have.indexOf(key(d))<0});
+  // по два определения на язык: изучаемый, английский, русский
+  var per={};nd=nd.filter(function(d){per[d.l]=(per[d.l]||0)+1;return per[d.l]<=2});
+  if(nd.length)c.d=(c.d||[]).concat(nd).slice(0,8);
+  var sy=(c.syn||[]).concat((r.syn||[]).filter(function(x){return (c.syn||[]).map(SRS.norm).indexOf(SRS.norm(x))<0&&SRS.norm(x)!==SRS.norm(c.w)}));
+  if(sy.length)c.syn=sy.slice(0,8);
+  var co=(c.col||[]).concat((r.cols||[]).filter(function(x){return !(c.col||[]).some(function(y){return y.s===x.s})}));
+  if(co.length)c.col=co.slice(0,6);
+  var ex=(r.examples||[])[0];if(!c.ex&&ex&&ex.s){c.ex=ex.s;if(ex.t)c.et=ex.t}
+  if(!c.ipa&&r.ipa)c.ipa=r.ipa;
+  if(r.srcName)c.dsrc=r.srcName;
+  return c;
+}
+/* подтянуть статью к слову; done(c) — когда карточка обновилась */
+async function dictPull(id,done){
+  var c=V.get(id);if(!c||!KR.cloud.on||!KR.user())return null;
+  var r=await dictGet(c.w,c.l);c=V.get(id);if(!c)return null;
+  var n=enrich(c,r);c=V.update(n);if(done)done(c,r);return r;
+}
+/* все слова раздела без статьи: по одному, не больше 40 за раз */
+var DALL=false;
+async function dictAll(b){
+  if(DALL)return;DALL=true;if(b)b.disabled=true;
+  var ids=V.all(lang).filter(function(c){return !c.dq}).slice(0,40).map(function(c){return c.id}),n=0,ok=0;
+  var msg=function(t){var m=$('#dallmsg');if(m)m.textContent=t};
+  for(var i=0;i<ids.length;i++){msg('Словарь: '+(i+1)+' из '+ids.length+'…');
+    try{var r=await dictPull(ids[i]);n++;if(r&&r.found)ok++}catch(e){msg('Словарь не ответил: '+e.message);break}}
+  DALL=false;if(!typing()&&!editing)drawList();msg('Готово: найдено в словаре '+ok+' из '+n+'.');
 }
 /* у нового слова: остальные значения, синонимы, выражения */
 function newMore(c){
   var I=info(c)||{},t=M.trs(c,I).slice(1),d=M.defs(c,I),sy=M.syns(c,I),co=M.cols(c),h='';
   if(t.length)h+='<div class="muted">также: '+t.map(esc).join('; ')+'</div>';
-  d.forEach(function(x){h+='<div><small class="muted">'+esc(M.NAMES[x.l]||x.l)+'</small> <span lang="'+x.l+'"'+(x.l==='ko'?' class="ko"':'')+'>'+esc(x.s)+'</span></div>'});
+  d.forEach(function(x){if(x.s===trOf(c))return;h+='<div><small class="muted">'+esc(M.NAMES[x.l]||x.l)+'</small> <span lang="'+x.l+'"'+(x.l==='ko'?' class="ko"':'')+'>'+esc(x.s)+'</span></div>'});
   if(sy.length)h+='<div><span class="muted">≈</span> <span'+wcls(c)+' lang="'+c.l+'">'+sy.map(esc).join(', ')+'</span></div>';
   co.slice(0,3).forEach(function(x){h+='<div><span'+wcls(c)+' lang="'+c.l+'">'+esc(x.s)+'</span>'+(x.t?' <span class="muted">· '+esc(x.t)+'</span>':'')+'</div>'});
   return h?'<div class="new-more">'+h+'</div>':'';
@@ -294,9 +352,9 @@ function more(c){   // пример после ответа
 // карточки: вспомнил — открыл — оценил сам
 function gCards(c){
   var intro=S.game==='intro',now=Date.now(),set=V.settings();
-  var I=info(c)||{},ipa=c.l==='en'?(KR.accent()==='us'?I.ipa_us||I.ipa_uk:I.ipa_uk||I.ipa_us):'';
+  var I=info(c)||{},ipa=(c.l==='en'?(KR.accent()==='us'?I.ipa_us||I.ipa_uk:I.ipa_uk||I.ipa_us):'')||c.ipa||'';
   frame(c.st?GAME.cards[0]:'Новое слово','<div class="flash" id="flash"><div class="flash-w">'+word(c)+' '+sayBtn(c.w,c.l)+micBtn(c.w,c.l)+'</div>'+
-    (ipa?'<div class="flash-ipa" lang="en">'+esc(ipa)+'</div>':'')+
+    (ipa?'<div class="flash-ipa" lang="'+(c.l==='ko'?'ko':'en')+'">'+esc(ipa)+'</div>':'')+
     (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+'</div>':'')+
     '<div class="flash-back" id="back" hidden>'+(I.image?'<img class="flash-img" src="'+esc(I.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
     '<div class="flash-t">'+(S.cx?glH(c):esc(trOf(c)||'перевод не указан'))+'</div>'+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+(c.et&&!S.cx?'<div class="muted">'+esc(c.et)+'</div>':'')+meaningsHtml(c,S.cx)+'</div></div>'+
@@ -630,7 +688,8 @@ function openCard(id){
     '<button type="submit" class="icb" aria-label="Закрыть">'+KR.icon('x',18)+'</button></div>'+KR.W2.card(i,c)+
     '<div class="wdlg-me"><button type="button" class="pick'+(c.star?' on':'')+'" data-star="'+esc(c.id)+'" aria-pressed="'+!!c.star+'">'+KR.icon('star',16)+(c.star?'Сложное слово':'Отметить как сложное')+'</button>'+
     '<label class="field" for="wnote">Моя заметка</label><textarea id="wnote" class="name" rows="2" maxlength="500" placeholder="Как запомнить, где встретилось слово">'+esc(c.note||'')+'</textarea>'+
-    '<div class="done-row"><button type="button" data-edit="'+esc(c.id)+'">'+KR.icon('pencil',15)+' Изменить перевод</button><button type="submit" class="btn pri">Готово</button></div></div></form>';
+    '<div class="done-row"><button type="button" data-edit="'+esc(c.id)+'">'+KR.icon('pencil',15)+' Изменить</button>'+(KR.cloud.on?'<button type="button" data-dict="'+esc(c.id)+'">'+KR.icon('book',15)+' Из словаря</button>':'')+'<button type="submit" class="btn pri">Готово</button></div>'+
+    '<p class="muted" id="dmsg" role="status">'+(c.dsrc?'Словарь: '+esc(c.dsrc):'')+'</p></div></form>';
   if(!d.open)d.showModal();
   if(!i&&KR.cloud.on&&Date.now()-infoAt>20000)loadInfo();
 }
@@ -788,6 +847,8 @@ function drawList(){
     var qq=SRS.norm(q),rows=all.filter(F[filt][1]).filter(passV2).filter(function(c){return !qq||SRS.norm(c.w).indexOf(qq)>=0||SRS.norm(trOf(c)+' '+((info(c)||{}).tr_ru||[]).join(' ')+' '+(c.d||[]).map(function(x){return x.s}).join(' ')+' '+(c.syn||[]).join(' ')).indexOf(qq)>=0});
     LISTROWS=rows.slice(0,200).map(function(c){return c.id});
     if(rows.length&&KR.canSay())h+='<div class="listen" id="listen">'+listenBar()+'</div>';
+    var nodq=all.filter(function(c){return !c.dq}).length;
+    if(KR.cloud.on&&nodq)h+='<div class="done-row"><span class="muted" id="dallmsg" role="status">Слов без статьи из словаря: '+nodq+'</span><button type="button" data-x="dict-all">'+KR.icon('book',15)+' Заполнить из словаря</button></div>';
     h+=rows.length?'<div class="wl">'+rows.slice(0,shown).map(function(c){
       if(editing===c.id)return '<form class="wrow wedit" data-id="'+esc(c.id)+'"><div class="mid"><b>'+word(c)+'</b>'+
         '<span class="field">Переводы по-русски</span><input class="name" name="t" value="'+esc(c.t)+'" placeholder="Несколько переводов — через «;»" aria-label="Переводы по-русски" maxlength="300">'+
@@ -795,6 +856,7 @@ function drawList(){
         '<p class="hint">По одному в строке. Язык узнаётся по буквам; немецкий, французский и другие на латинице — напиши в начале «de:», «fr:».</p>'+
         '<span class="field">Синонимы</span><input class="name'+(c.l==='ko'?' ko':'')+'" name="syn" lang="'+c.l+'" value="'+esc((c.syn||[]).join(', '))+'" placeholder="Через запятую" aria-label="Синонимы" maxlength="300">'+
         '<span class="field">Устойчивые выражения</span><textarea class="name'+(c.l==='ko'?' ko':'')+'" name="col" lang="'+c.l+'" rows="2" aria-label="Устойчивые выражения, по одному в строке" placeholder="'+(c.l==='ko'?'결정을 내리다 | принять решение':'make a decision | принять решение')+'">'+esc(M.fmtCols(c.col))+'</textarea>'+
+        (KR.cloud.on?'<div class="done-row"><span class="muted" id="emsg" role="status"></span><button type="button" data-dfill="'+esc(c.id)+'">'+KR.icon('book',15)+' Заполнить из словаря</button></div>':'')+
         '<span class="field">Пример</span><input class="name'+(c.l==='ko'?' ko':'')+'" name="ex" lang="'+c.l+'" value="'+esc(c.ex||'')+'" placeholder="Пример (по желанию)" aria-label="Пример" maxlength="240"><input class="name" name="et" value="'+esc(c.et||'')+'" placeholder="Перевод примера" aria-label="Перевод примера" maxlength="240"></div><div class="wact"><button type="submit" class="btn pri">Сохранить</button><button type="button" data-x="cancel">Отмена</button><button type="button" data-del="'+esc(c.id)+'">'+KR.icon('trash',15)+' Удалить</button></div></form>';
       var I=info(c)||{},meta=[I.pos?KR.W2.POS[I.pos]:'',I.level].filter(Boolean).join(' · ');
       return '<div class="wrow" data-id="'+esc(c.id)+'">'+sayBtn(c.w,c.l)+'<button type="button" class="mid wopen" data-open="'+esc(c.id)+'" aria-haspopup="dialog"><b>'+word(c)+'</b><span class="muted">'+esc(trOf(c)||'без перевода')+(meta?' · '+esc(meta):'')+'</span></button>'+badge(c)+
@@ -929,6 +991,19 @@ document.addEventListener('click',function(e){
   if(b.id==='gonew'||d.x==='to-new'){stopListen();return start('new')}
   if(d.x==='learn')return learnNew(3);
   if(d.x==='knew')return learnNew(4);
+  if(d.dict){var dm=$('#dmsg'),id0=d.dict;if(dm)dm.textContent='Ищем в словаре…';b.disabled=true;
+    dictPull(id0,function(n,r){var dl=$('#wdlg');if(dl&&dl.open&&dl.dataset.id===id0)openCard(id0);var m2=$('#dmsg');if(m2)m2.textContent=r.found?'Добавлено из словаря: '+(r.srcName||''):(r.message||'Слова нет в словаре.');drawList()})
+      .catch(function(e){var m2=$('#dmsg');if(m2)m2.textContent='Словарь не ответил: '+e.message;b.disabled=false});return}
+  if(d.dfill){var f0=b.closest('form'),em=$('#emsg');if(em)em.textContent='Ищем в словаре…';b.disabled=true;
+    var c0=V.get(d.dfill);dictGet(c0.w,c0.l).then(function(r){
+      b.disabled=false;if(!r.found){if(em)em.textContent=r.message||'Слова нет в словаре.';return}
+      // в форму: дописываем то, чего в полях ещё нет; сохранит ученик
+      var cur={id:c0.id,l:c0.l,w:c0.w,t:M.splitTr(f0.t.value,c0.l).t,d:M.parseDefs(f0.d.value),syn:M.parseSyn(f0.syn.value),col:M.parseCols(f0.col.value),ex:f0.ex.value.trim(),et:f0.et.value.trim()};
+      var n=enrich(cur,r);f0.t.value=n.t||'';f0.d.value=M.fmtDefs(n.d);f0.syn.value=(n.syn||[]).join(', ');f0.col.value=M.fmtCols(n.col);f0.ex.value=n.ex||'';f0.et.value=n.et||'';
+      S_DF[c0.id]={dsrc:n.dsrc,ipa:n.ipa};
+      if(em)em.textContent='Заполнено: '+(r.srcName||'словарь')+'. Проверь и сохрани.';
+    }).catch(function(e){b.disabled=false;if(em)em.textContent='Словарь не ответил: '+e.message});return}
+  if(d.x==='dict-all')return dictAll(b);
   if(d.cxm){var cs=V.settings();cs.ctxm=Object.assign({},cs.ctxm);cs.ctxm[lang]=d.cxm;V.setSettings(cs);drawPrefs();drawToday();var cc=$('#cxcfg [data-cxm="'+d.cxm+'"]');if(cc)cc.focus();return}
   if(d.x==='cx-cfg'){setTab('prefs');var cx=$('#cxcfg');if(cx)cx.scrollIntoView({block:'start'});return}
   if(d.x==='mdk')return meanCheck(true);
@@ -998,7 +1073,8 @@ document.addEventListener('submit',function(e){
   if(f.classList.contains('wedit')){var c=V.get(f.dataset.id);if(c){
     var tt=M.splitTr(f.t.value,c.l),dd=M.parseDefs(f.d.value),seen={};dd=dd.concat(tt.d).filter(function(x){var k=x.l+':'+x.s.toLowerCase();if(seen[k])return false;seen[k]=1;return true}).slice(0,12);
     var arr=function(o,k,v){if(v.length)o[k]=v;else delete o[k]};
-    c=Object.assign({},c,{t:tt.t,ex:f.ex.value.trim(),et:f.et.value.trim()});arr(c,'d',dd);arr(c,'syn',M.parseSyn(f.syn.value));arr(c,'col',M.parseCols(f.col.value));if(!c.ex){delete c.ex;delete c.et;delete c.f}else if(c.f&&c.ex.indexOf(c.f)<0)delete c.f;V.update(c)}editing=null;drawAll()}
+    c=Object.assign({},c,{t:tt.t,ex:f.ex.value.trim(),et:f.et.value.trim()});arr(c,'d',dd);arr(c,'syn',M.parseSyn(f.syn.value));arr(c,'col',M.parseCols(f.col.value));
+    if(S_DF[c.id]){if(S_DF[c.id].dsrc)c.dsrc=S_DF[c.id].dsrc;if(S_DF[c.id].ipa&&!c.ipa)c.ipa=S_DF[c.id].ipa;c.dq=1;delete S_DF[c.id]}if(!c.ex){delete c.ex;delete c.et;delete c.f}else if(c.f&&c.ex.indexOf(c.f)<0)delete c.f;V.update(c)}editing=null;drawAll()}
 });
 document.addEventListener('input',function(e){
   if(e.target.id==='q'){q=e.target.value;shown=60;var pos=e.target.selectionStart;drawList();var n=$('#q');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}}}
