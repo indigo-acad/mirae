@@ -266,6 +266,30 @@ window.MATERIALS=[
   "level": "3급"
  },
  {
+  "id": "ko-g2724-2-lesson",
+  "section": "korean",
+  "kind": "trainer",
+  "title": "Группа 2724 · урок 2 · слова и ошибки теста",
+  "path": "materials/korean/ko-g2724-2-lesson/",
+  "level": "3급"
+ },
+ {
+  "id": "ko-g2724-2-games",
+  "section": "korean",
+  "kind": "game",
+  "title": "Группа 2724 · урок 2 · игры со словами",
+  "path": "materials/korean/ko-g2724-2-games/",
+  "level": "3급"
+ },
+ {
+  "id": "ko-g2724-2-class",
+  "section": "korean",
+  "kind": "class",
+  "title": "Группа 2724 · урок 2 (для урока)",
+  "path": "materials/korean/ko-g2724-2-class/",
+  "level": "3급"
+ },
+ {
   "id": "ko-g2724-class",
   "section": "korean",
   "kind": "class",
