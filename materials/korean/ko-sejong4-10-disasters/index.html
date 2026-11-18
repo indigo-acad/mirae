@@ -145,6 +145,17 @@ footer{text-align:center;font-size:13px;color:#8a8ba0;padding:24px 0 36px}
     </div>
   </details>
 </div>
+
+<!-- send -->
+<div class="bar"><h2>📨 Отправить учителю</h2></div>
+<div class="wrap">
+  <div class="box">
+    <p class="lead" style="margin-top:0">Сделай задания, напиши своё имя и нажми кнопку. Ответы сохраняются на этом устройстве, можно закрыть страницу и вернуться позже.</p>
+    <div class="q" style="border:none"><span class="t"><b>Как тебя зовут?</b><br><input type="text" id="nameInput" placeholder="Имя" autocomplete="off" style="width:100%;max-width:320px;text-align:left;margin-top:6px"></span></div>
+    <div class="btns"><button class="btn" id="sendBtn" onclick="sendResults()">Отправить результаты</button><span class="score" id="sendFb"></span></div>
+    <textarea id="copyBox" style="display:none;margin-top:10px;height:180px;font:13px monospace"></textarea>
+  </div>
+</div>
 <footer>세종한국어 회화 4 · 10과 · 자연재해</footer>
 
 <script>
@@ -290,6 +301,49 @@ const T = [
  '자연재해와 환경파괴는 어떤 관계가 있다고 생각해요?'
 ];
 document.getElementById('talk').innerHTML = T.map((t,i)=>`<div class="card"><div class="num" style="margin-bottom:8px">${i+1}</div><h3>${t}</h3></div>`).join('');
+
+/* ===== сохранение ответов ===== */
+const SKEY='ko_sejong4_10_v1';
+function fields(){return [...document.querySelectorAll('select, input[type=text], textarea:not(#copyBox)')]}
+function saveAll(){try{localStorage.setItem(SKEY,JSON.stringify({f:fields().map(e=>e.value),ox:[...document.querySelectorAll('#ox .q')].map(q=>{const s=q.querySelector('.sel');return s?s.textContent:''})}))}catch(e){}}
+(function(){try{const d=JSON.parse(localStorage.getItem(SKEY));if(!d)return;fields().forEach((e,i)=>{if(d.f[i]!=null&&e.id!=='nameInput'||d.f[i]&&!e.value)e.value=d.f[i]});document.querySelectorAll('#ox .q').forEach((q,i)=>{const v=d.ox&&d.ox[i];if(v)[...q.querySelectorAll('button')].forEach(b=>{if(b.textContent===v)b.classList.add('sel')})})}catch(e){}
+ try{const u=localStorage.getItem('kr_user'),n=document.getElementById('nameInput');if(u&&!n.value)n.value=u}catch(e){}})();
+document.addEventListener('input',saveAll);document.addEventListener('change',saveAll);document.addEventListener('click',e=>{if(e.target.closest('.ox'))saveAll()});
+
+/* ===== отправка в Telegram ===== */
+const TG_TOKEN="9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID="347625701";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function part(title,items){ // items: [label, given, right]
+  const done=items.filter(x=>x[1]!=='');
+  if(!done.length) return `\n<b>${title}</b>: не делал(а)`;
+  const ok=items.filter(x=>x[1]===x[2]).length, empty=items.length-done.length;
+  let t=`\n<b>${title}</b>: ${ok}/${items.length}`+(empty?` (без ответа: ${empty})`:'');
+  done.forEach(x=>{if(x[1]!==x[2]) t+=`\n   ✗ ${esc(x[0])} → ${esc(x[1])} (верно: ${esc(x[2])})`});
+  return t;
+}
+function buildReport(name){
+  let t=`📝 <b>자연재해 · 세종 회화 4 · 10과</b>\n👤 ${esc(name)}\n🕒 ${new Date().toLocaleString('ru-RU')}\n`;
+  const sel=id=>[...document.querySelectorAll('#'+id+' select')];
+  t+=part('1. Слова',sel('match').map((s,i)=>[M[i][0],s.value,s.dataset.a]));
+  t+=part('2. O/X',[...document.querySelectorAll('#ox .q')].map((q,i)=>{const s=q.querySelector('.sel');return [`${i+1}) ${OX[i][0]}`,s?s.textContent:'',OX[i][1]]}));
+  t+=part('3. Числа',[...document.querySelectorAll('#nums input')].map((e,i)=>[N[i][0]+'…'+N[i][2],e.value.replace(/[\s,]/g,''),e.dataset.a]));
+  t+=part('4. Понимание',sel('mc').map((s,i)=>[`${i+1}) ${MC[i][0]}`,s.value,s.dataset.a]));
+  t+=part('5. Пропуски (дома)',sel('gap').map((s,i)=>[`${i+1}) ${G[i][0]}`,s.value,s.dataset.a]));
+  const wr=[...document.querySelectorAll('#write textarea')];
+  t+='\n<b>6. Предложения (дома)</b>:'+(wr.some(x=>x.value.trim())?'':' не делал(а)');
+  wr.forEach((x,i)=>{if(x.value.trim()) t+=`\n${i+1}) ${esc(WR[i].replace('...','…'))}\n   ✍️ ${esc(x.value.trim())}`});
+  return t;
+}
+function chunks(text){const out=[];let cur='';text.split('\n').forEach(l=>{if((cur+'\n'+l).length>3800){out.push(cur);cur=l}else cur=cur?cur+'\n'+l:l});if(cur)out.push(cur);return out}
+async function sendResults(){
+  const n=document.getElementById('nameInput'),fb=document.getElementById('sendFb'),btn=document.getElementById('sendBtn');
+  const name=n.value.trim(); if(!name){n.focus();fb.textContent='Напиши имя ✍️';return}
+  const text=buildReport(name); btn.disabled=true; fb.textContent='Отправляю…';
+  try{for(const p of chunks(text)){const r=await fetch('https://api.telegram.org/bot'+TG_TOKEN+'/sendMessage',{method:'POST',body:new URLSearchParams({chat_id:TG_CHAT_ID,text:p,parse_mode:'HTML'})});const j=await r.json();if(!j.ok)throw new Error(j.description)}
+    fb.textContent='✅ Отправлено! 잘했어요!';btn.disabled=false}
+  catch(e){btn.disabled=false;fb.textContent='Не получилось отправить. Скопируй текст и пришли учителю:';const b=document.getElementById('copyBox');b.value=text.replace(/<\/?b>/g,'');b.style.display='block';b.select()}
+}
 </script>
 </body>
 </html>
