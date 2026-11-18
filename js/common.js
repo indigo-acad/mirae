@@ -235,8 +235,8 @@ function say(text,lang,cb){
   if(ttsAudio)ttsAudio.pause();
   // запись произношения из словаря (js/dict.js): живой голос диктора для отдельного слова; не загрузилась — синтез
   const rec=typeof window.KR.rec==="function"?window.KR.rec(text,lang,acc||accent()):"";
-  if(rec){recSay(rec,cb).catch(()=>{if(cloudVoice()&&(lang==="ko"||lang==="en"))cloudSay(text,lang,cb,acc).catch(()=>localSay(text,lang,cb,acc));else localSay(text,lang,cb,acc)});return}
-  if(cloudVoice()&&(lang==="ko"||lang==="en")){cloudSay(text,lang,cb,acc).catch(()=>localSay(text,lang,cb,acc));return}
+  if(rec){recSay(rec,cb).catch(()=>{if(cloudVoice()&&(lang==="ko"||lang==="en"||lang==="ru"))cloudSay(text,lang,cb,acc).catch(()=>localSay(text,lang,cb,acc));else localSay(text,lang,cb,acc)});return}
+  if(cloudVoice()&&(lang==="ko"||lang==="en"||lang==="ru")){cloudSay(text,lang,cb,acc).catch(()=>localSay(text,lang,cb,acc));return}
   localSay(text,lang,cb,acc);
 }
 function hush(){try{if(ttsAudio)ttsAudio.pause();if(hasTTS())speechSynthesis.cancel()}catch(e){}}

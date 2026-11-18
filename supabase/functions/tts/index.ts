@@ -1,5 +1,5 @@
-// MIRAÉ: облачная озвучка корейского и английского нейронными голосами.
-// Сайт шлёт POST { text, lang: "ko" | "en", accent: "gb" | "us", p_name, p_pin } и получает mp3.
+// MIRAÉ: облачная озвучка корейского, английского и русского нейронными голосами.
+// Сайт шлёт POST { text, lang: "ko" | "en" | "ru", accent: "gb" | "us", p_name, p_pin } и получает mp3.
 // Озвучивает только вошедший ученик или преподаватель: логин и PIN проверяются в базе школы.
 // Готовая фраза кладётся в хранилище Supabase (корзина "tts"), повторная озвучка бесплатна.
 //
@@ -7,7 +7,7 @@
 //   azure  — AZURE_SPEECH_KEY, AZURE_SPEECH_REGION (например westeurope)
 //   google — GOOGLE_TTS_API_KEY
 //   openai — OPENAI_API_KEY; OPENAI_BASE_URL — для OpenAI-совместимого шлюза (например OmniRoute), TTS_MODEL
-// Голоса по желанию: TTS_VOICE_KO, TTS_VOICE_EN_GB, TTS_VOICE_EN_US.
+// Голоса по желанию: TTS_VOICE_KO, TTS_VOICE_EN_GB, TTS_VOICE_EN_US, TTS_VOICE_RU.
 // Развёртывание без проверки JWT (ключ сайта publishable, не JWT): вход проверяет сама функция.
 
 const cors = {
@@ -23,20 +23,21 @@ const MAX_TEXT = 600;
 
 type Voice = { locale: string; name: string };
 const DEFAULT_VOICES: Record<string, Record<string, string>> = {
-  azure: { "ko-KR": "ko-KR-SunHiNeural", "en-GB": "en-GB-SoniaNeural", "en-US": "en-US-JennyNeural" },
-  google: { "ko-KR": "ko-KR-Neural2-A", "en-GB": "en-GB-Neural2-A", "en-US": "en-US-Neural2-F" },
-  openai: { "ko-KR": "coral", "en-GB": "coral", "en-US": "coral" },
+  azure: { "ko-KR": "ko-KR-SunHiNeural", "en-GB": "en-GB-SoniaNeural", "en-US": "en-US-JennyNeural", "ru-RU": "ru-RU-SvetlanaNeural" },
+  google: { "ko-KR": "ko-KR-Neural2-A", "en-GB": "en-GB-Neural2-A", "en-US": "en-US-Neural2-F", "ru-RU": "ru-RU-Wavenet-A" },
+  openai: { "ko-KR": "coral", "en-GB": "coral", "en-US": "coral", "ru-RU": "coral" },
 };
 // Для моделей, которые понимают указания (gpt-4o-mini-tts и похожие): акцент и спокойный темп для урока.
 const STYLE: Record<string, string> = {
   "ko-KR": "Speak natural standard Seoul Korean, clearly and calmly, at a teaching pace.",
   "en-GB": "Speak with a natural British English (Received Pronunciation) accent, clearly and calmly, at a teaching pace.",
   "en-US": "Speak with a natural General American accent, clearly and calmly, at a teaching pace.",
+  "ru-RU": "Speak natural standard Russian, clearly and calmly, at a teaching pace.",
 };
 
 function pickVoice(provider: string, lang: string, accent: string): Voice {
-  const locale = lang === "ko" ? "ko-KR" : accent === "us" ? "en-US" : "en-GB";
-  const own = env(locale === "ko-KR" ? "TTS_VOICE_KO" : locale === "en-US" ? "TTS_VOICE_EN_US" : "TTS_VOICE_EN_GB");
+  const locale = lang === "ko" ? "ko-KR" : lang === "ru" ? "ru-RU" : accent === "us" ? "en-US" : "en-GB";
+  const own = env(locale === "ko-KR" ? "TTS_VOICE_KO" : locale === "ru-RU" ? "TTS_VOICE_RU" : locale === "en-US" ? "TTS_VOICE_EN_US" : "TTS_VOICE_EN_GB");
   return { locale, name: own || DEFAULT_VOICES[provider][locale] };
 }
 const xml = (s: string) => s.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" }[c]!));
@@ -130,7 +131,7 @@ Deno.serve(async (req) => {
     const lang = String(body.lang || "").slice(0, 2).toLowerCase();
     const accent = body.accent === "us" ? "us" : "gb";
     const name = String(body.p_name || "").trim().toLowerCase(), pin = String(body.p_pin || "");
-    if (!text || text.length > MAX_TEXT || (lang !== "ko" && lang !== "en")) return json({ error: "bad_input" }, 400);
+    if (!text || text.length > MAX_TEXT || (lang !== "ko" && lang !== "en" && lang !== "ru")) return json({ error: "bad_input" }, 400);
     if (!name || !pin) return json({ error: "unauthorized" }, 401);
 
     const provider = env("TTS_PROVIDER").toLowerCase();
