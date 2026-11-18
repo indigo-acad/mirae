@@ -38,9 +38,9 @@
   input.ok{border-color:var(--ok)!important;background:var(--okbg)!important}
   input.bad{border-color:var(--bad)!important;background:var(--badbg)!important}
   .fix{color:var(--ok);font-weight:700;font-size:14px;margin-left:6px}
-  nav{display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5;scrollbar-width:none}
+  nav{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5;scrollbar-width:none}
   nav::-webkit-scrollbar{display:none}
-  nav button{margin:0;font-size:14.5px;white-space:nowrap;background:#fff}
+  nav button{margin:0;font-size:14.5px;white-space:nowrap;background:#fff;flex:none}
   nav button.active{background:var(--ink);color:#fff}
   nav .done:after{content:" ✓";color:var(--ok)}
   nav button.active.done:after{color:#8ff0b5}
@@ -298,7 +298,9 @@ function start(){
   renderNav(); go(cur);
 }
 function renderNav(){
-  $("nav").innerHTML=TABS.map(t=>`<button id="nb-${t.id}" class="${t.id===cur?"active":""} ${STATE.done[t.id]?"done":""}" onclick="go('${t.id}')">${t.t}</button>`).join("");
+  const nv=$("nav"), sl=nv.scrollLeft;
+  nv.innerHTML=TABS.map(t=>`<button id="nb-${t.id}" class="${t.id===cur?"active":""} ${STATE.done[t.id]?"done":""}" onclick="go('${t.id}')">${t.t}</button>`).join("");
+  nv.scrollLeft=sl; const ab=nv.querySelector("button.active"); if(ab){ const l=ab.offsetLeft, r=l+ab.offsetWidth; if(l<nv.scrollLeft) nv.scrollLeft=l-8; else if(r>nv.scrollLeft+nv.clientWidth) nv.scrollLeft=r-nv.clientWidth+8; }
   const scored=TABS.filter(t=>!["learn","send"].includes(t.id));
   $("pbar").style.width=Math.round(100*scored.filter(t=>STATE.done[t.id]).length/scored.length)+"%";
 }
@@ -517,17 +519,18 @@ function checkJoin(){
 }
 
 /* ---- Coursebook ---- */
+function bkOn(k){ return !window.MIRAE_PICK || MIRAE_PICK.has("e:"+k); }
 function rBook(){
   card(`<h2>📘 Coursebook check</h2>
   <p class="muted">Exercises from your book — do them here and check yourself.</p>
-  <div class="sub">Exercise 2A · Choose the correct word or phrase</div><div id="hostA"></div>
-  <div class="sub">Exercise 2B · Past Simple, Past Continuous or Past Perfect</div>${gapBlock("book2b",BOOK_2B)}
-  <div class="sub">p. 135 · Ex 1 · Past Simple or Past Continuous</div>${gapBlock("book135a",BOOK_135_1)}
-  <div class="sub">p. 135 · Ex 3 · Choose A, B or C</div><div id="hostB"></div>`);
-  rMcq("book2a","","",BOOK_2A,$("hostA"));
-  rMcq("book135c","","",BOOK_135_3,$("hostB"));
+  ${bkOn("book2a")?`<div class="sub">Exercise 2A · Choose the correct word or phrase</div><div id="hostA"></div>`:""}
+  ${bkOn("book2b")?`<div class="sub">Exercise 2B · Past Simple, Past Continuous or Past Perfect</div>${gapBlock("book2b",BOOK_2B)}`:""}
+  ${bkOn("book135a")?`<div class="sub">p. 135 · Ex 1 · Past Simple or Past Continuous</div>${gapBlock("book135a",BOOK_135_1)}`:""}
+  ${bkOn("book135c")?`<div class="sub">p. 135 · Ex 3 · Choose A, B or C</div><div id="hostB"></div>`:""}`);
+  if(bkOn("book2a")) rMcq("book2a","","",BOOK_2A,$("hostA"));
+  if(bkOn("book135c")) rMcq("book135c","","",BOOK_135_3,$("hostB"));
 }
-function checkBookDone(){ if(["book2a","book2b","book135a","book135c"].every(k=>STATE.res[k])) markDone("book"); }
+function checkBookDone(){ if(["book2a","book2b","book135a","book135c"].filter(bkOn).every(k=>STATE.res[k])) markDone("book"); }
 
 /* ---- Write ---- */
 function rWrite(){
@@ -600,6 +603,18 @@ async function sendResults(){
 load(); if(STATE.name) $("nameInput").value=STATE.name;
 if(window.MIRAE&&MIRAE.user){ $("nameInput").value=MIRAE.user; start(); }
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden"){ clearTimeout(liveTm); saveLive(); } });
+
+/* ---------- MIRAÉ: задания для домашки (см. js/bridge.js) ----------
+   MIRAE_PARTS — задания тренажёра с ключами для «Задать домашку»; при ?only=… остаются только выбранные. */
+window.MIRAE_PARTS=[
+  {g:"Narrative Tenses",t:TABS.filter(x=>!["book","send"].includes(x.id)).map(x=>({k:"t:"+x.id,n:x.t.replace(/^\S+ · /,"")}))},
+  {g:"Coursebook",t:[{k:"e:book2a",n:"Exercise 2A · Choose the correct word or phrase"},{k:"e:book2b",n:"Exercise 2B · Past Simple, Past Continuous or Past Perfect"},{k:"e:book135a",n:"p. 135 · Ex 1 · Past Simple or Past Continuous"},{k:"e:book135c",n:"p. 135 · Ex 3 · Choose A, B or C"}]}];
+if(window.MIRAE_PICK){ const P=MIRAE_PICK, bk=["book2a","book2b","book135a","book135c"];
+  P.take(TABS,TABS.map((x,i)=>i).filter(i=>{ const x=TABS[i]; return x.id==="send"||(x.id==="book"?bk.some(k=>P.has("e:"+k)):P.has("t:"+x.id)); }));
+  Object.keys(NAMES).forEach(k=>{ if(!(bk.includes(k)?P.has("e:"+k):P.has("t:"+k))) delete NAMES[k]; });
+  cur=TABS[0].id; }
+
+$("nav").addEventListener("wheel",e=>{ if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){ $("nav").scrollLeft+=e.deltaY; e.preventDefault(); } },{passive:false});
 addEventListener("pagehide",()=>saveLive());
 $("nameInput").addEventListener("keydown",e=>{ if(e.key==="Enter") start(); });
 </script>
