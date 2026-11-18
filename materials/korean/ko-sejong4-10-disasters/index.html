@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자연재해 — 세종한국어 회화 4 · 10과</title>
+<style>
+:root{--y:#FFC20E;--n:#2E2F4F;--b:#F2B52B;--ex:#B7860B;--bg:#fff;--g:#eef0f4;--ok:#2f9e5b;--bad:#d64545}
+*{box-sizing:border-box}
+body{word-break:keep-all}
+body{margin:0;font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;color:var(--n);
+background-color:#fff;background-image:linear-gradient(var(--g) 1px,transparent 1px),linear-gradient(90deg,var(--g) 1px,transparent 1px);background-size:22px 22px}
+.bar{position:relative;background:var(--y);height:84px;display:flex;align-items:center;padding:0 6%;margin:28px 0 22px;overflow:hidden}
+.bar h2{margin:0;font-size:clamp(22px,4vw,34px);font-weight:800;z-index:1}
+.bar small{font-size:14px;font-weight:600;margin-left:14px;opacity:.75;z-index:1}
+.bar::after{content:"";position:absolute;right:0;top:0;bottom:0;width:32%;
+background:repeating-linear-gradient(-45deg,var(--n) 0 26px,var(--y) 26px 52px);clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+.tag{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:20px;margin-left:10px;z-index:1;white-space:nowrap}
+.tag.cl{background:var(--n);color:var(--y)}
+.tag.hm{background:#fff;color:var(--n);border:2px solid var(--n)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 18px 10px}
+.hero{background:var(--n);color:#fff;padding:52px 6% 30px;position:relative;overflow:hidden}
+.hero h1{margin:0 0 6px;font-size:clamp(26px,5vw,44px);color:var(--y)}
+.hero p{margin:0;font-size:16px;opacity:.9}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;background:repeating-linear-gradient(-45deg,var(--y) 0 18px,var(--n) 18px 36px)}
+.lead{font-size:15px;margin:0 0 16px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.card{background:#fff;border:2px solid var(--b);border-radius:10px;padding:18px 14px 16px;text-align:center}
+.ic{width:96px;height:96px;border-radius:50%;background:var(--y);margin:0 auto 12px;display:flex;align-items:center;justify-content:center}
+.ic svg{width:48px;height:48px}
+.card h3{margin:0 0 4px;font-size:22px;font-weight:800}
+.ru{font-size:15px;margin:0 0 10px;color:#3c3d5c}
+.ex{font-size:15px;color:var(--ex);margin:0;line-height:1.45}
+.box{background:#fff;border:2px solid var(--b);border-radius:10px;padding:18px 18px 14px;margin-bottom:14px}
+.q{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 0;border-bottom:1px dashed #e3d7b0;font-size:16px;line-height:1.6}
+.q:last-child{border-bottom:none}
+.num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--n);color:var(--y);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px}
+.q .t{flex:1 1 300px}
+select,input[type=text]{font:inherit;font-size:15px;border:2px solid var(--n);border-radius:8px;padding:5px 8px;background:#fffdf3;color:var(--n)}
+input[type=text]{width:90px;text-align:center}
+.ox{display:flex;gap:6px}
+.ox button{width:42px;height:38px;border-radius:8px;border:2px solid var(--n);background:#fff;font-weight:800;font-size:18px;color:var(--n);cursor:pointer}
+.ox button.sel{background:var(--n);color:var(--y)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn{font:inherit;font-weight:800;font-size:15px;background:var(--y);color:var(--n);border:2px solid var(--n);border-radius:8px;padding:8px 18px;cursor:pointer}
+.btn.alt{background:#fff}
+.ok{border-color:var(--ok)!important;background:#eaf7ef!important}
+.bad{border-color:var(--bad)!important;background:#fdeeee!important}
+.mark{font-weight:800;min-width:20px}
+.mark.okm{color:var(--ok)}.mark.badm{color:var(--bad)}
+.score{font-weight:800;margin-left:6px;align-self:center}
+.bank{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.bank span{background:var(--y);border-radius:20px;padding:4px 12px;font-weight:700;font-size:15px}
+.hint{font-size:13px;color:#6b6c86;display:block}
+textarea{width:100%;font:inherit;font-size:15px;border:2px solid var(--n);border-radius:8px;padding:8px;background:#fffdf3;min-height:54px}
+.talk{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.talk .card{text-align:left}
+.talk .card h3{font-size:17px;line-height:1.5;font-weight:700}
+details{background:#fff;border:2px solid var(--b);border-radius:10px;padding:14px 18px}
+summary{font-weight:800;cursor:pointer;font-size:16px}
+.script p{line-height:1.8;font-size:15.5px;margin:10px 0}
+.script b{background:#fff1bf;padding:0 3px;border-radius:3px}
+.sp{font-weight:800;color:var(--ex)}
+footer{text-align:center;font-size:13px;color:#8a8ba0;padding:24px 0 36px}
+@media(max-width:600px){.bar::after{width:22%}.bar small{display:none}}
+</style>
+</head>
+<body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a>
+
+<div class="hero">
+  <h1>자연재해 · Стихийные бедствия</h1>
+  <p>세종한국어 회화 4 · 10과 · 1분 브리핑 — задания к видео и лексика уровня 3급</p>
+</div>
+
+<!-- 새 단어 -->
+<div class="bar"><h2>새 단어</h2><small>23 слова из видео</small></div>
+<div class="wrap"><div class="grid" id="words"></div></div>
+
+<!-- 1 -->
+<div class="bar"><h2>1. 단어 연결</h2><span class="tag cl">в классе · до просмотра</span></div>
+<div class="wrap">
+  <p class="lead">Выберите правильное значение для каждого слова.</p>
+  <div class="box" id="match"></div>
+  <div class="btns"><button class="btn" onclick="checkMatch()">Проверить</button><button class="btn alt" onclick="resetBox('match')">Сбросить</button><span class="score" id="matchScore"></span></div>
+</div>
+
+<!-- 2 -->
+<div class="bar"><h2>2. 맞으면 O, 틀리면 X</h2><span class="tag cl">в классе · во время просмотра</span></div>
+<div class="wrap">
+  <p class="lead">Посмотрите видео и отметьте: верно (O) или неверно (X).</p>
+  <div class="box" id="ox"></div>
+  <div class="btns"><button class="btn" onclick="checkOX()">Проверить</button><button class="btn alt" onclick="resetOX()">Сбросить</button><span class="score" id="oxScore"></span></div>
+</div>
+
+<!-- 3 -->
+<div class="bar"><h2>3. 숫자를 쓰세요</h2><span class="tag cl">в классе · во время просмотра</span></div>
+<div class="wrap">
+  <p class="lead">Впишите числа, которые прозвучали в видео (только цифры).</p>
+  <div class="box" id="nums"></div>
+  <div class="btns"><button class="btn" onclick="checkNums()">Проверить</button><button class="btn alt" onclick="resetBox('nums')">Сбросить</button><span class="score" id="numsScore"></span></div>
+</div>
+
+<!-- 4 -->
+<div class="bar"><h2>4. 내용 확인</h2><span class="tag cl">в классе · после просмотра</span></div>
+<div class="wrap">
+  <p class="lead">Ответьте на вопросы по видео.</p>
+  <div class="box" id="mc"></div>
+  <div class="btns"><button class="btn" onclick="checkMC()">Проверить</button><button class="btn alt" onclick="resetBox('mc')">Сбросить</button><span class="score" id="mcScore"></span></div>
+</div>
+
+<!-- 5 -->
+<div class="bar"><h2>5. 알맞은 말 고르기</h2><span class="tag hm">дома</span></div>
+<div class="wrap">
+  <p class="lead">Вставьте подходящее слово. Форма слова уже дана в выпадающем списке.</p>
+  <div class="box" id="gap"></div>
+  <div class="btns"><button class="btn" onclick="checkGap()">Проверить</button><button class="btn alt" onclick="resetBox('gap')">Сбросить</button><span class="score" id="gapScore"></span></div>
+</div>
+
+<!-- 6 -->
+<div class="bar"><h2>6. 문장 만들기</h2><span class="tag hm">дома</span></div>
+<div class="wrap">
+  <p class="lead">Закончите предложения, используя новые слова. Проверяет преподаватель.</p>
+  <div class="box" id="write"></div>
+</div>
+
+<!-- 7 -->
+<div class="bar"><h2>7. 이야기해 봅시다</h2><span class="tag cl">в классе · говорение</span></div>
+<div class="wrap">
+  <p class="lead">Обсудите в парах. Постарайтесь использовать минимум 3 новых слова в каждом ответе.</p>
+  <div class="talk" id="talk"></div>
+</div>
+
+<!-- script -->
+<div class="bar"><h2>대본</h2><small>исправленный текст видео</small></div>
+<div class="wrap">
+  <details>
+    <summary>Показать текст (после просмотра)</summary>
+    <div class="script">
+      <p><span class="sp">기자:</span> 세계 정보를 1분 만에 전해 드리는 1분 브리핑입니다. 2017년 <b>자연재해</b>로 인한 전 세계 경제 피해가 3,060억 달러, 약 330조 원으로 <b>추정된다</b>고 스위스의 재보험사가 밝혔습니다. 이러한 재해 피해는 2016년에 비해 약 63%나 증가한 <b>수치</b>인데요. 그중 가장 큰 <b>피해를 입은</b> 국가는 초강력 허리케인 하비, 어마, 마리아가 연이어 <b>상륙했던</b> 미국입니다.</p>
+      <p>그 밖에 아프가니스탄에서는 지속적인 <b>폭설</b>로 <b>사상자</b>가 크게 발생했고, 중국에서는 42도의 <b>폭염</b>으로 달리던 버스가 폭발하기도 했습니다. 이처럼 폭염, 폭설, 허리케인 등의 자연재해는 매년 그 규모가 커져 가고 있는데요. 학자들은 자연재해의 원인으로 <b>지구온난화</b>를 <b>꼽았습니다</b>. 세계보건기구에서는 지구온난화의 <b>주범</b>인 <b>온실가스</b>의 증가 추세가 지금처럼 이어진다면 폭염 현상은 2020년에 2배, 2040년에는 4배 이상 발생할 것이라고 <b>내다보기도</b> 했습니다.</p>
+      <p>이처럼 기상으로 인한 자연재해뿐만 아니라 지진, 쓰나미, 화산 활동과 같은 자연재해도 전 세계를 <b>위협하고</b> 있습니다. 특히 가장 위험한 곳은 바로 <b>불의 고리</b>에 위치한 나라들이죠. 이런 자연재해는 막기 힘들기 때문에 <b>예방</b>이 최선의 방법입니다. 지진을 막기 위한 <b>내진설계</b>와 정확한 예측 시설, 그리고 국민 모두가 지진 <b>대피 요령</b>을 잘 알고 있어야 합니다. 무엇보다 지구온난화를 막는 것이 최선의 예방인데요. 환경이 더 이상 파괴되지 않도록 전 세계가 <b>힘을 합쳐야</b> 할 것입니다. 이상 1분 브리핑이었습니다.</p>
+      <p><span class="sp">진행자 1:</span> 1분 브리핑 잘 봤습니다. 자연재해는 사람의 힘으로 막을 수 있는 일이 아니다 보니까 미리미리 <b>대비를</b> 해 둬야 피해를 줄일 수 있겠죠.</p>
+      <p><span class="sp">진행자 2:</span> 네, 맞습니다. 각종 재난에 대한 대피 요령을 미리 <b>숙지하는</b> 자세가 꼭 필요하겠습니다. 또 <b>환경파괴</b>를 더 이상은 해서는 안 될 것 같아요. 우리 모두가 <b>위기의식</b>을 가지고 함께 노력해야겠습니다.</p>
+      <p><span class="sp">진행자 1:</span> 맞는 말입니다. 네, 오늘 세종학당 친구들과 함께 배울 표현도 자연재해와 관련 있어요. 화면 보실까요?</p>
+    </div>
+  </details>
+</div>
+<footer>세종한국어 회화 4 · 10과 · 자연재해</footer>
+
+<script>
+const S = (p)=>`<svg viewBox="0 0 24 24" fill="#2E2F4F" stroke="#2E2F4F" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const I = {
+ tornado: S('<g fill="none" stroke-width="2.4"><path d="M3 4h18M5 8.5h14M7.5 13h10M10 17.5h6M12 21.5h2"/></g>'),
+ house: S('<path d="M2.5 11.5 12 3l9.5 8.5H19v9.5H5v-9.5z" stroke-width="1"/><path d="M12.5 7l-2.5 4 3.5 2.5-2.5 5" fill="none" stroke="#FFC20E" stroke-width="1.8"/>'),
+ calc: S('<rect x="5" y="2" width="14" height="20" rx="2.5" stroke="none"/><rect x="7.5" y="4.5" width="9" height="4.5" rx="1" fill="#FFC20E" stroke="none"/><g fill="#FFC20E" stroke="none"><circle cx="9" cy="13" r="1.2"/><circle cx="12" cy="13" r="1.2"/><circle cx="15" cy="13" r="1.2"/><circle cx="9" cy="17" r="1.2"/><circle cx="12" cy="17" r="1.2"/><circle cx="15" cy="17" r="1.2"/></g>'),
+ pct: S('<text x="12" y="18" font-size="17" font-weight="900" text-anchor="middle" stroke="none" font-family="Arial">%</text>'),
+ cloud: S('<path d="M7 15a4.5 4.5 0 0 1 .3-9 6 6 0 0 1 11.2 2.5A3.3 3.3 0 0 1 18 15z" stroke="none"/><g fill="none" stroke-width="2"><path d="M4 18.5h11M8 21.5h11"/></g>'),
+ snow: S('<g fill="none" stroke-width="2.2"><path d="M12 2v20M3.3 7l17.4 10M3.3 17l17.4-10"/><path d="M9.5 3.5 12 6l2.5-2.5M9.5 20.5 12 18l2.5 2.5"/></g>'),
+ sun: S('<circle cx="12" cy="12" r="4.5" stroke="none"/><g fill="none" stroke-width="2.2"><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></g>'),
+ cross: S('<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z" stroke="none"/>'),
+ globe: S('<circle cx="12" cy="12" r="9.5" fill="none" stroke-width="2"/><g fill="none" stroke-width="1.6"><ellipse cx="12" cy="12" rx="4" ry="9.5"/><path d="M2.5 12h19M4 7h16M4 17h16"/></g>'),
+ factory: S('<path d="M2 21V11l5.5 3.5V11l5.5 3.5V5h4v16z" stroke="none"/><circle cx="17.5" cy="3" r="1.6" stroke="none"/><circle cx="20.5" cy="2.2" r="1.3" stroke="none"/>'),
+ target: S('<circle cx="12" cy="12" r="9.5" fill="none" stroke-width="2.2"/><circle cx="12" cy="12" r="5.5" fill="none" stroke-width="2.2"/><circle cx="12" cy="12" r="2" stroke="none"/>'),
+ first: S('<path d="M12 2l2.6 6 6.4.6-4.9 4.3 1.5 6.3L12 16l-5.6 3.2 1.5-6.3L3 8.6 9.4 8z" stroke="none"/>'),
+ binoc: S('<circle cx="6.5" cy="15" r="4.5" stroke="none"/><circle cx="17.5" cy="15" r="4.5" stroke="none"/><path d="M5 10.5 7 4h3v8M19 10.5 17 4h-3v8" stroke="none"/><rect x="10" y="9" width="4" height="4" stroke="none"/><circle cx="6.5" cy="15" r="2" fill="#FFC20E" stroke="none"/><circle cx="17.5" cy="15" r="2" fill="#FFC20E" stroke="none"/>'),
+ warn: S('<path d="M12 2.5 22.5 21h-21z" stroke="none"/><path d="M12 9v5.5" stroke="#FFC20E" stroke-width="2.4"/><circle cx="12" cy="17.8" r="1.3" fill="#FFC20E" stroke="none"/>'),
+ volcano: S('<path d="M1.5 22l7-10h2l1.5 2 1.5-2h2l7 10z" stroke="none"/><g fill="none" stroke-width="2"><path d="M12 9V6M8 8 6.5 5.5M16 8l1.5-2.5"/></g><circle cx="12" cy="3" r="1.4" stroke="none"/>'),
+ shield: S('<path d="M12 2l8.5 3v6.2c0 5.2-3.6 9.3-8.5 10.8-4.9-1.5-8.5-5.6-8.5-10.8V5z" stroke="none"/><path d="M8 12l3 3 5-6" fill="none" stroke="#FFC20E" stroke-width="2.4"/>'),
+ building: S('<rect x="6" y="2" width="12" height="16" stroke="none"/><g fill="#FFC20E" stroke="none"><rect x="8" y="4.5" width="2.5" height="2.5"/><rect x="13.5" y="4.5" width="2.5" height="2.5"/><rect x="8" y="9" width="2.5" height="2.5"/><rect x="13.5" y="9" width="2.5" height="2.5"/><rect x="10.7" y="13.5" width="2.6" height="4.5"/></g><path d="M2 21.5l2.5-2 2.5 2 2.5-2 2.5 2 2.5-2 2.5 2 2.5-2 2.5 2" fill="none" stroke-width="1.8"/>'),
+ exit: S('<path d="M3 3h10v18H3z" fill="none" stroke-width="2.2"/><circle cx="8" cy="7" r="1.6" stroke="none"/><path d="M8 9.5l-1.5 4 2.5 2-1 3.5M7 11l3 1.5" fill="none" stroke-width="1.6"/><path d="M14 12h8M19 9l3 3-3 3" fill="none" stroke-width="2.2"/>'),
+ book: S('<path d="M12 6C9.5 4 6 3.5 2.5 4v15c3.5-.5 7 0 9.5 2 2.5-2 6-2.5 9.5-2V4c-3.5-.5-7 0-9.5 2z" stroke="none"/><path d="M12 6v15" stroke="#FFC20E" stroke-width="1.6"/>'),
+ kit: S('<rect x="2" y="7" width="20" height="14" rx="2.5" stroke="none"/><path d="M8.5 7V4.5h7V7" fill="none" stroke-width="2"/><path d="M10.5 10.5h3v2.5H16v3h-2.5v2.5h-3V16H8v-3h2.5z" fill="#FFC20E" stroke="none"/>'),
+ siren: S('<path d="M6 18v-6a6 6 0 0 1 12 0v6z" stroke="none"/><rect x="3.5" y="18" width="17" height="3.5" rx="1" stroke="none"/><g fill="none" stroke-width="2"><path d="M12 1.5v2.5M3.5 5l1.8 1.8M20.5 5l-1.8 1.8"/></g><path d="M10 11.5a2 2 0 0 1 2-2" fill="none" stroke="#FFC20E" stroke-width="1.8"/>'),
+ hands: S('<circle cx="7" cy="6" r="3" stroke="none"/><circle cx="17" cy="6" r="3" stroke="none"/><path d="M1.5 21v-5a4.5 4.5 0 0 1 9 0v5zM13.5 21v-5a4.5 4.5 0 0 1 9 0v5z" stroke="none"/><path d="M8 15.5h8" stroke-width="2.4"/>'),
+ tree: S('<path d="M12 1.5 19.5 14h-15z" stroke="none"/><rect x="10.5" y="14" width="3" height="5" stroke="none"/><path d="M3 21.5h18" stroke-width="2"/><path d="M9 6.5l6 6M15 6.5l-6 6" stroke="#FFC20E" stroke-width="2.2"/>')
+};
+
+const W = [
+ ['자연재해','стихийное бедствие','tornado','올해는 자연재해가 유난히 많았어요.'],
+ ['피해를 입다','понести ущерб, пострадать','house','태풍으로 많은 마을이 피해를 입었어요.'],
+ ['추정되다','оцениваться, предполагаться','calc','피해액은 약 100억 원으로 추정됩니다.'],
+ ['수치','показатель, цифра','pct','작년에 비해 두 배나 높은 수치예요.'],
+ ['상륙하다','выйти на сушу (о тайфуне)','cloud','태풍이 내일 새벽 제주도에 상륙할 예정이에요.'],
+ ['폭설','сильный снегопад','snow','폭설 때문에 비행기가 모두 결항됐어요.'],
+ ['폭염','аномальная жара','sun','폭염이 계속되니까 낮에는 외출을 피하세요.'],
+ ['사상자','погибшие и раненые','cross','이번 지진으로 사상자가 많이 발생했어요.'],
+ ['지구온난화','глобальное потепление','globe','지구온난화 때문에 여름이 점점 길어지고 있어요.'],
+ ['온실가스','парниковые газы','factory','공장은 온실가스를 많이 배출해요.'],
+ ['주범','главный виновник, причина','target','플라스틱 쓰레기가 바다 오염의 주범이에요.'],
+ ['꼽다','называть, выделять (среди)','first','외국인들은 한국의 매력으로 음식을 꼽았어요.'],
+ ['내다보다','прогнозировать, предвидеть','binoc','전문가들은 피해가 더 커질 것으로 내다봤어요.'],
+ ['위협하다','угрожать','warn','미세먼지가 우리 건강을 위협하고 있어요.'],
+ ['불의 고리','Тихоокеанское «огненное кольцо»','volcano','일본은 불의 고리에 있어서 지진이 자주 나요.'],
+ ['예방','предотвращение, профилактика','shield','사고는 예방이 가장 중요해요.'],
+ ['내진설계','сейсмостойкая конструкция','building','이 건물은 내진설계가 되어 있어서 안전해요.'],
+ ['대피 요령','правила эвакуации','exit','지진이 나면 대피 요령에 따라 밖으로 나가세요.'],
+ ['숙지하다','твёрдо усвоить, хорошо знать','book','비상구 위치를 미리 숙지해 두세요.'],
+ ['대비하다','подготовиться (к чему-л.)','kit','겨울에 대비해서 따뜻한 옷을 샀어요.'],
+ ['위기의식','осознание опасности','siren','환경 문제에 대해 위기의식을 가져야 해요.'],
+ ['힘을 합치다','объединить усилия','hands','모두가 힘을 합치면 해결할 수 있어요.'],
+ ['환경파괴','разрушение окружающей среды','tree','무분별한 개발이 환경파괴를 일으켜요.']
+];
+document.getElementById('words').innerHTML = W.map(w=>`<div class="card"><div class="ic">${I[w[2]]}</div><h3>${w[0]}</h3><p class="ru">${w[1]}</p><p class="ex">${w[3]}</p></div>`).join('');
+
+const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
+const opts=(list,ph)=>`<option value="">${ph||'— выберите —'}</option>`+list.map(o=>`<option>${o}</option>`).join('');
+
+/* 1. match */
+const M = [['폭염','аномальная жара'],['사상자','погибшие и раненые'],['주범','главный виновник'],['예방','предотвращение'],['상륙하다','выйти на сушу'],['숙지하다','твёрдо усвоить'],['내다보다','прогнозировать'],['위협하다','угрожать'],['추정되다','оцениваться, предполагаться'],['대비하다','подготовиться']];
+const mOpts = shuffle(M.map(m=>m[1]));
+document.getElementById('match').innerHTML = M.map((m,i)=>`<div class="q"><span class="num">${i+1}</span><span class="t"><b style="font-size:18px">${m[0]}</b></span><select data-a="${m[1]}">${opts(mOpts)}</select><span class="mark"></span></div>`).join('');
+function checkSel(id){let ok=0,els=document.querySelectorAll('#'+id+' select');els.forEach(s=>{const r=s.value===s.dataset.a;s.classList.remove('ok','bad');s.classList.add(r?'ok':'bad');const mk=s.parentElement.querySelector('.mark');if(mk){mk.textContent=r?'✓':'✗';mk.className='mark '+(r?'okm':'badm')}if(r)ok++});document.getElementById(id+'Score').textContent=`${ok} / ${els.length}`}
+function checkMatch(){checkSel('match')}
+function resetBox(id){document.querySelectorAll('#'+id+' select, #'+id+' input').forEach(s=>{s.value='';s.classList.remove('ok','bad')});document.querySelectorAll('#'+id+' .mark').forEach(m=>m.textContent='');document.getElementById(id+'Score').textContent=''}
+
+/* 2. OX */
+const OX = [
+ ['2017년 자연재해로 인한 피해는 2016년보다 줄었다.','X','→ 약 63% 증가했다.'],
+ ['자연재해 피해 규모는 스위스의 보험사가 발표했다.','O',''],
+ ['2017년에 가장 큰 피해를 입은 나라는 미국이다.','O',''],
+ ['아프가니스탄에서는 폭염 때문에 사상자가 많이 발생했다.','X','→ 폭설 때문이다.'],
+ ['중국에서는 42도의 폭염 속에서 달리던 버스가 폭발했다.','O',''],
+ ['학자들은 자연재해의 원인으로 지구온난화를 꼽았다.','O',''],
+ ['지진이나 쓰나미는 쉽게 막을 수 있어서 예방이 필요 없다.','X','→ 막기 힘들어서 예방이 최선이다.'],
+ ['진행자들은 대피 요령을 미리 숙지해야 한다고 말했다.','O','']
+];
+document.getElementById('ox').innerHTML = OX.map((q,i)=>`<div class="q" data-a="${q[1]}"><span class="num">${i+1}</span><span class="t">${q[0]}<span class="hint fb"></span></span><span class="ox"><button onclick="pick(this)">O</button><button onclick="pick(this)">X</button></span><span class="mark"></span></div>`).join('');
+function pick(b){b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')}
+function checkOX(){let ok=0;document.querySelectorAll('#ox .q').forEach((q,i)=>{const s=q.querySelector('.sel');const r=s&&s.textContent===q.dataset.a;const mk=q.querySelector('.mark');mk.textContent=r?'✓':'✗';mk.className='mark '+(r?'okm':'badm');q.querySelector('.fb').textContent=(!r&&OX[i][2])?OX[i][2]:'';if(r)ok++});document.getElementById('oxScore').textContent=`${ok} / ${OX.length}`}
+function resetOX(){document.querySelectorAll('#ox .sel').forEach(b=>b.classList.remove('sel'));document.querySelectorAll('#ox .mark,#ox .fb').forEach(m=>m.textContent='');document.getElementById('oxScore').textContent=''}
+
+/* 3. numbers */
+const N = [
+ ['2017년 자연재해로 인한 경제 피해: ','3060','억 달러'],
+ ['한국 돈으로 약 ','330','조 원'],
+ ['2016년에 비해 약 ','63','% 증가'],
+ ['중국의 폭염 온도: ','42','도'],
+ ['폭염 현상은 2020년에 ','2','배 증가 예상'],
+ ['2040년에는 ','4','배 이상 증가 예상']
+];
+document.getElementById('nums').innerHTML = N.map((n,i)=>`<div class="q"><span class="num">${i+1}</span><span class="t">${n[0]}<input type="text" inputmode="numeric" data-a="${n[1]}"> ${n[2]}</span><span class="mark"></span></div>`).join('');
+function checkNums(){let ok=0;document.querySelectorAll('#nums input').forEach(inp=>{const r=inp.value.replace(/[\s,]/g,'')===inp.dataset.a;inp.classList.remove('ok','bad');inp.classList.add(r?'ok':'bad');const mk=inp.closest('.q').querySelector('.mark');mk.textContent=r?'✓':'✗ '+inp.dataset.a;mk.className='mark '+(r?'okm':'badm');if(r)ok++});document.getElementById('numsScore').textContent=`${ok} / ${N.length}`}
+
+/* 4. multiple choice */
+const MC = [
+ ['미국에 상륙한 허리케인이 아닌 것은?',['하비','어마','마리아','카트리나'],'카트리나'],
+ ['세계보건기구에서 지구온난화의 주범으로 말한 것은?',['미세먼지','온실가스','플라스틱','폭설'],'온실가스'],
+ ['특히 위험한 곳으로 소개된 지역은?',['사막 지역','불의 고리','북극','적도'],'불의 고리'],
+ ['지진 피해를 줄이기 위한 방법으로 언급되지 않은 것은?',['내진설계','정확한 예측 시설','대피 요령','보험 가입'],'보험 가입'],
+ ['기자가 말한 "최선의 예방"은?',['지구온난화를 막는 것','건물을 새로 짓는 것','이사를 가는 것','뉴스를 자주 보는 것'],'지구온난화를 막는 것'],
+ ['진행자들이 우리 모두에게 필요하다고 한 것은?',['위기의식','여행 계획','보험','휴가'],'위기의식']
+];
+document.getElementById('mc').innerHTML = MC.map((q,i)=>`<div class="q"><span class="num">${i+1}</span><span class="t">${q[0]}</span><select data-a="${q[2]}">${opts(q[1])}</select><span class="mark"></span></div>`).join('');
+function checkMC(){checkSel('mc')}
+
+/* 5. gap fill */
+const G = [
+ ['태풍이 내일 남부 지방에 ___ 예정이에요.','상륙할'],
+ ['겨울철 ___ 때문에 도로가 막혔어요.','폭설'],
+ ['지진이 잦은 나라에서는 건물을 지을 때 ___를 꼭 해야 해요.','내진설계'],
+ ['비상시를 위해 대피 요령을 미리 ___ 두세요.','숙지해'],
+ ['온실가스는 지구온난화의 ___이에요.','주범'],
+ ['이번 홍수로 많은 농가가 피해를 ___.','입었어요'],
+ ['전문가들은 내년에 폭염이 더 심해질 것으로 ___.','내다봤어요'],
+ ['환경을 지키려면 전 세계가 힘을 ___ 해요.','합쳐야'],
+ ['이번 사고로 10여 명의 ___가 발생했어요.','사상자'],
+ ['장마철에 ___ 미리 배수구를 청소했어요.','대비해서']
+];
+const gBank = shuffle(G.map(g=>g[1]));
+document.getElementById('gap').innerHTML = `<div class="bank">${gBank.map(b=>`<span>${b}</span>`).join('')}</div>`+G.map((g,i)=>{const [a,b]=g[0].split('___');return `<div class="q"><span class="num">${i+1}</span><span class="t">${a}<select data-a="${g[1]}">${opts(gBank,'…')}</select>${b}</span><span class="mark"></span></div>`}).join('');
+function checkGap(){checkSel('gap')}
+
+/* 6. writing */
+const WR = [
+ '자연재해에 대비하려면 ...',
+ '지구온난화의 주범은 ... 고 생각해요.',
+ '우리 나라에서 가장 많은 피해를 입히는 자연재해는 ...',
+ '지진이 나면 대피 요령에 따라 ...',
+ '환경파괴를 막기 위해 우리가 힘을 합쳐서 ...'
+];
+document.getElementById('write').innerHTML = WR.map((w,i)=>`<div class="q"><span class="num">${i+1}</span><span class="t"><b>${w}</b><textarea placeholder="Напишите здесь…"></textarea></span></div>`).join('');
+
+/* 7. talk */
+const T = [
+ '여러분 나라에서는 어떤 자연재해가 자주 발생해요? 피해를 입은 적이 있어요?',
+ '지진이 나면 어떻게 해야 해요? 알고 있는 대피 요령을 말해 보세요.',
+ '자연재해에 대비해서 집에 무엇을 준비해 두면 좋을까요?',
+ '지구온난화를 막기 위해 개인이 할 수 있는 일은 뭐예요?',
+ '폭염이나 폭설 때문에 생활이 불편했던 경험이 있어요?',
+ '자연재해와 환경파괴는 어떤 관계가 있다고 생각해요?'
+];
+document.getElementById('talk').innerHTML = T.map((t,i)=>`<div class="card"><div class="num" style="margin-bottom:8px">${i+1}</div><h3>${t}</h3></div>`).join('');
+</script>
+</body>
+</html>

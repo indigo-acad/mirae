@@ -210,6 +210,14 @@ window.MATERIALS=[
   "level": "3급"
  },
  {
+  "id": "ko-sejong4-10-disasters",
+  "section": "korean",
+  "kind": "class",
+  "title": "자연재해 · видео «1분 브리핑» (세종 회화 4 · 10과)",
+  "path": "materials/korean/ko-sejong4-10-disasters/",
+  "level": "3급"
+ },
+ {
   "id": "ko-school-vocab",
   "section": "korean",
   "kind": "trainer",
