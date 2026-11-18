@@ -908,7 +908,7 @@ function drawBulkPreview(){
   var ok=bulkRows.filter(function(x){return !x.err});
   box.innerHTML='<div class="wl">'+bulkRows.map(function(x,i){
     var had=!x.err&&V.find(x.l,x.w),tag=x.err?'<span class="badge warn">'+esc(x.err)+'</span>':
-      '<span class="badge">'+(LNAME[x.l]||'?')+'</span>'+(x.src==='base'?'<span class="badge ok" title="Перевод из базы слов школы">база</span>':x.src==='dict'?'<span class="badge ok" title="Из словаря'+(x.entry&&x.entry.srcName?': '+esc(x.entry.srcName):'')+'">словарь</span>':x.src==='deepl'?'<span class="badge" title="Автоперевод DeepL: проверь">DeepL</span>':'')+
+      '<span class="badge">'+(LNAME[x.l]||'?')+'</span>'+(x.src==='base'?'<span class="badge ok" title="Перевод из базы слов школы">база</span>':x.src==='dict+deepl'?'<span class="badge" title="Перевод DeepL: проверь. Определения и примеры — из словаря">словарь + DeepL</span>':x.src==='dict'?'<span class="badge ok" title="Из словаря'+(x.entry&&x.entry.srcName?': '+esc(x.entry.srcName):'')+'">словарь</span>':x.src==='deepl'?'<span class="badge" title="Автоперевод DeepL: проверь">DeepL</span>':'')+
       (had?'<span class="badge warn" title="Слово уже есть в словаре: вернётся на повторение раньше">уже есть</span>':'');
     return '<div class="wrow bulk-row'+(x.err?' off':'')+'"><div class="mid"><input class="name'+(x.l==='ko'?' ko':'')+'" data-bw="'+i+'" lang="'+(x.l||'')+'" value="'+esc(x.w)+'" aria-label="Слово '+(i+1)+'"'+(x.err==='повтор'?' disabled':'')+'>'+
       '<input class="name" data-bt="'+i+'" value="'+esc(x.t)+'" placeholder="Перевод (можно оставить пустым)" aria-label="Перевод '+(i+1)+'"'+(x.err==='повтор'?' disabled':'')+'>'+

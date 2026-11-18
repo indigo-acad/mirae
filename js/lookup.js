@@ -70,7 +70,7 @@ function render(){
   if(!pop||!cur)return;var c=cur,ko=c.lang==="ko"?' class="ko"':"";
   var have=KR.vocab&&KR.vocab.find(c.lang,c.word||c.text);
   var tr=c.state==="wait"?'<span class="muted">Ищу перевод…</span>':c.state==="none"?'<span class="muted">Перевод не нашёлся. Слово можно добавить в словарь и вписать перевод там.</span>':
-    KR.esc(c.t)+(c.form?' <small>словарная форма: <b'+ko+' lang="'+c.lang+'">'+KR.esc(c.word)+"</b></small>":"")+(c.src==="dict"?" <small>словарь"+(c.entry&&c.entry.srcName?": "+KR.esc(String(c.entry.srcName).split(",")[0]):"")+"</small>":c.src==="base"?" <small>база слов школы</small>":c.mt?" <small>машинный перевод"+(c.src==="deepl"?" DeepL":"")+"</small>":"");
+    KR.esc(c.t)+(c.form?' <small>словарная форма: <b'+ko+' lang="'+c.lang+'">'+KR.esc(c.word)+"</b></small>":"")+(c.src==="dict"?" <small>словарь"+(c.entry&&c.entry.srcName?": "+KR.esc(String(c.entry.srcName).split(",")[0]):"")+"</small>":c.src==="dict+deepl"?" <small>перевод DeepL, статья из словаря</small>":c.src==="base"?" <small>база слов школы</small>":c.mt?" <small>машинный перевод"+(c.src==="deepl"?" DeepL":"")+"</small>":"");
   pop.innerHTML='<div class="lk-w"><b'+ko+' lang="'+c.lang+'">'+KR.esc(c.text)+"</b>"+(KR.canSay()?'<button type="button" class="say" data-lk="say" aria-label="Послушать">'+KR.icon("volume",16)+"</button>":"")+
     '<button type="button" class="icb" data-lk="x" aria-label="Закрыть">'+KR.icon("x",16)+"</button></div>"+
     '<div class="lk-t">'+tr+"</div>"+

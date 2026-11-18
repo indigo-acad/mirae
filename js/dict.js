@@ -55,6 +55,6 @@ function enrich(c,r){
   return c;
 }
 /* подпись источника перевода */
-var SRC={base:'база школы',dict:'словарь',deepl:'DeepL'};
+var SRC={base:'база школы',dict:'словарь','dict+deepl':'словарь + DeepL',deepl:'DeepL'};
 KR.dict={get:get,put:put,cached:cached,translate:translate,enrich:enrich,SRC:SRC};
 })();

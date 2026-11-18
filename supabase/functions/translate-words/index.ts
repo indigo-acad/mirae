@@ -3,10 +3,12 @@
 // 2) Остальное переводит DeepL — с явным языком источника (корейский или английский) и подсказкой,
 //    что это отдельное слово из словаря: без этого DeepL часто ошибается с языком и смыслом коротких слов.
 // Между базой и DeepL — словарь (функция dict-lookup: 한국어기초사전, Free Dictionary API, Викисловарь):
-//    русский перевод из словаря, а если его нет — определение из словаря. DeepL — только для слов, которых нет ни там, ни там.
+//    русский перевод из словаря. DeepL — для слов, которых нет ни в базе, ни в словаре, и для слов, у которых в словаре
+//    нет русского перевода (у английских слов Free Dictionary даёт только английские определения): тогда перевод от DeepL,
+//    а статья словаря всё равно возвращается (источник "dict+deepl"). Не ответил DeepL — переводом остаётся определение.
 // Вход:  { p_name, p_pin, words: string[] (1–80), langs?: ("ko" | "en" | "")[] }  — langs можно не передавать,
 //        тогда язык определяется по буквам (хангыль — корейский, латиница — английский).
-// Выход: { translations: string[], sources: ("base" | "dict" | "deepl" | "")[], entries: (статья словаря | null)[] }
+// Выход: { translations: string[], sources: ("base" | "dict" | "dict+deepl" | "deepl" | "")[], entries: (статья словаря | null)[] }
 //        — по одному на слово, в том же порядке; entries — полная статья для слов, найденных в словаре.
 // Секреты: DEEPL_AUTH_KEY. SUPABASE_URL, SUPABASE_ANON_KEY и SUPABASE_SERVICE_ROLE_KEY функция получает сама.
 
@@ -161,10 +163,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    const rest = clean.map((_, i) => i).filter((i) => !translations[i]);
+    // DeepL: нет перевода или из словаря пришло только определение (без русских букв)
+    const rest = clean.map((_, i) => i).filter((i) => !translations[i] || (sources[i] === "dict" && !CYR.test(translations[i])));
     if (rest.length) {
       if (!deeplKey) {
-        if (rest.length === clean.length) return json({ error: "missing_deepl_secret", message: "Автоперевод не настроен.", translations, sources, entries }, 503);
+        if (!translations.some(Boolean)) return json({ error: "missing_deepl_secret", message: "Автоперевод не настроен.", translations, sources, entries }, 503);
       } else {
         const groups = new Map<string, number[]>();
         for (const i of rest) groups.set(langs[i], [...(groups.get(langs[i]) || []), i]);
@@ -172,7 +175,7 @@ Deno.serve(async (req) => {
           for (const [lang, idx] of groups) {
             const tr = await deepl(deeplKey, idx.map((i) => clean[i]), lang);
             idx.forEach((i, j) => {
-              if (tr[j]) { translations[i] = tr[j]; sources[i] = "deepl"; }
+              if (tr[j]) { translations[i] = tr[j]; sources[i] = entries[i] ? "dict+deepl" : "deepl"; }
             });
           }
         } catch (e) {
