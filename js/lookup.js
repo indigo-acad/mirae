@@ -2,8 +2,10 @@
    кнопка «послушать» и кнопка «В словарь» (слово попадает в интервальное повторение, js/vocab.js).
    Откуда берётся перевод, по порядку:
    1) слова уроков и словарь ученика (точно и сразу; у корейских слов узнаём основу: 지내지요 → 지내다);
-   2) свой сервис перевода, если его адрес записан в CONFIG.TRANSLATE;
-   3) иначе бесплатный машинный перевод MyMemory (CONFIG.TRANSLATE = "mymemory"); выключается значением false. */
+   2) слово или фраза до 4 слов у вошедшего ученика: база слов школы → словарь (한국어기초사전, Free Dictionary API) → DeepL
+      (функция translate-words, js/dict.js); со словом в словарь уходит и статья словаря: определения, примеры, синонимы;
+   3) длиннее или без входа: свой сервис перевода, если его адрес записан в CONFIG.TRANSLATE,
+      иначе бесплатный машинный перевод MyMemory (CONFIG.TRANSLATE = "mymemory"); выключается значением false. */
 (function(){
 "use strict";
 var KR=window.KR,SRS=window.SRS,CFG=window.CONFIG||{};if(!KR||!SRS)return;
@@ -34,6 +36,9 @@ function local(text,lang){
 
 // ---------- 2–3) перевод из сети ----------
 async function online(text,from){
+  if(KR.dict&&text.split(" ").length<=4){
+    try{var d=await KR.dict.translate(text,from);if(d)return {t:d.t,src:d.src,entry:d.entry,mt:d.src==="deepl"}}catch(e){}
+  }
   var mode=CFG.TRANSLATE===undefined?"mymemory":CFG.TRANSLATE;if(!mode)return null;
   var key="kr_tr:"+from+":"+text;
   try{var c=sessionStorage.getItem(key);if(c)return {t:c,mt:true}}catch(e){}
@@ -65,7 +70,7 @@ function render(){
   if(!pop||!cur)return;var c=cur,ko=c.lang==="ko"?' class="ko"':"";
   var have=KR.vocab&&KR.vocab.find(c.lang,c.word||c.text);
   var tr=c.state==="wait"?'<span class="muted">Ищу перевод…</span>':c.state==="none"?'<span class="muted">Перевод не нашёлся. Слово можно добавить в словарь и вписать перевод там.</span>':
-    KR.esc(c.t)+(c.form?' <small>словарная форма: <b'+ko+' lang="'+c.lang+'">'+KR.esc(c.word)+"</b></small>":"")+(c.mt?" <small>машинный перевод</small>":"");
+    KR.esc(c.t)+(c.form?' <small>словарная форма: <b'+ko+' lang="'+c.lang+'">'+KR.esc(c.word)+"</b></small>":"")+(c.src==="dict"?" <small>словарь"+(c.entry&&c.entry.srcName?": "+KR.esc(String(c.entry.srcName).split(",")[0]):"")+"</small>":c.src==="base"?" <small>база слов школы</small>":c.mt?" <small>машинный перевод"+(c.src==="deepl"?" DeepL":"")+"</small>":"");
   pop.innerHTML='<div class="lk-w"><b'+ko+' lang="'+c.lang+'">'+KR.esc(c.text)+"</b>"+(KR.canSay()?'<button type="button" class="say" data-lk="say" aria-label="Послушать">'+KR.icon("volume",16)+"</button>":"")+
     '<button type="button" class="icb" data-lk="x" aria-label="Закрыть">'+KR.icon("x",16)+"</button></div>"+
     '<div class="lk-t">'+tr+"</div>"+
@@ -92,7 +97,7 @@ async function show(text,lang,rect,node){
   if(l)return;
   var r=null;try{r=await online(text,lang)}catch(e){}
   if(my!==seq||!cur)return;
-  if(r){cur.state="ok";cur.t=r.t;cur.mt=true}else cur.state="none";
+  if(r){cur.state="ok";cur.t=r.t;cur.mt=!!r.mt;cur.src=r.src||"";cur.entry=r.entry||null}else cur.state="none";
   render();place(rect);
 }
 function check(){
@@ -115,7 +120,10 @@ document.addEventListener("click",function(e){
   if(a==="x")return close();
   if(a==="say")return KR.say(cur.text,cur.lang);
   if(a==="add"&&KR.vocab){
-    var r=KR.vocab.add(cur.lang,cur.word||cur.text,cur.t||"",Object.assign({src:"sel",star:1},cur.ctx));
+    // перевод из словаря может быть определением на изучаемом языке: тогда он идёт в определения, а не в перевод
+    var tt=KR.mean?KR.mean.splitTr(cur.t||"",cur.lang):{t:cur.t||"",d:[]};
+    var r=KR.vocab.add(cur.lang,cur.word||cur.text,tt.t,Object.assign({src:"sel",star:1,d:tt.d},cur.ctx));
+    if(r.added&&cur.entry&&KR.dict)r.card=KR.vocab.update(KR.dict.enrich(KR.vocab.get(r.card.id),cur.entry));
     cur.added=r.added?1:2;render();
     if(typeof KR.onVocab==="function")KR.onVocab();
   }

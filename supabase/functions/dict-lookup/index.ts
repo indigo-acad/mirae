@@ -6,9 +6,10 @@
 // Английский: Free Dictionary API (dictionaryapi.dev, данные Викисловаря, CC BY-SA) — определения, примеры,
 //            синонимы, транскрипция; если слова там нет — Викисловарь.
 // Cambridge и NAVER открытого API не дают: подключатся сменными адаптерами здесь же, когда будут лицензии.
-// Вход:  { p_name, p_pin, word, lang: "ko" | "en" }
-// Выход: { found, src, srcName, word, lang, pos, level, ipa, tr_ru: [], defs: [{l, s}], examples: [{s, t}],
-//          cols: [{s, t}], syn: [] }
+// Вход:  { p_name, p_pin, word, lang: "ko" | "en" }  или пакетом { p_name, p_pin, words: [...], langs: [...] } (до 80 слов)
+// Выход: одно слово — { found, src, srcName, word, lang, pos, level, ipa, tr_ru: [], defs: [{l, s}], examples: [{s, t}],
+//          cols: [{s, t}], syn: [] }; пакет — { entries: [...] } в том же порядке (found: false — слова нет).
+// Пакетом функцию вызывает translate-words: база школы → словарь → DeepL.
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -81,7 +82,7 @@ async function krdict(key: string, word: string): Promise<Entry | null> {
     for (const x of blocks(s, "example_info")) {
       const ex = first(x, "example"), tp = first(x, "type");
       if (!ex) continue;
-      if (tp === "구") e.cols.push({ s: ex, t: "" }); else if (tp === "문장") e.examples.push({ s: ex, t: "" });
+      if (tp === "구") e.cols.push({ s: ex.replace(/\.$/, ""), t: "" }); else if (tp === "문장") e.examples.push({ s: ex, t: "" });
     }
     for (const x of blocks(s, "rel_info")) if (/유의어|비슷한말/.test(first(x, "type"))) e.syn.push(first(x, "word"));
   }
@@ -135,14 +136,35 @@ async function wiktionary(word: string, lang: string): Promise<Entry | null> {
   return e.defs.length ? e : null;
 }
 
+/* одно слово: корейский — 한국어기초사전, потом Викисловарь; английский — Free Dictionary API, потом Викисловарь */
+async function lookup(word: string, lang: string): Promise<Entry & { message?: string }> {
+  const errs: string[] = [];
+  const tryIt = async (f: () => Promise<Entry | null>) => { try { return await f(); } catch (e) { errs.push(String((e as Error).message || e)); return null; } };
+  let e: Entry | null = null;
+  if (lang === "ko") {
+    const key = Deno.env.get("KRDICT_KEY") || "";
+    if (key) e = await tryIt(() => krdict(key, word));
+    if (!e) e = await tryIt(() => wiktionary(word, "ko"));
+  } else {
+    e = await tryIt(() => freeDict(word.replace(/^to\s+/i, "")));
+    if (!e) e = await tryIt(() => wiktionary(word, "en"));
+  }
+  if (errs.length) console.error("dict", word, errs.join("; "));
+  return e || { ...empty(word, lang), message: errs.length ? "Словарь сейчас не отвечает." : "Слова нет в словаре." };
+}
+const clean = (w: unknown) => String(w || "").normalize("NFC").trim().replace(/\s+/g, " ");
+const langOf = (w: string, l: unknown) => (l === "ko" || l === "en" ? l : /[\uAC00-\uD7AF]/.test(w) ? "ko" : "en");
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   try {
     const body = await req.json().catch(() => ({}));
-    const name = String(body.p_name || ""), pin = String(body.p_pin || "");
-    const word = String(body.word || "").normalize("NFC").trim().replace(/\s+/g, " ");
-    const lang = body.lang === "ko" || body.lang === "en" ? body.lang : /[가-힯]/.test(word) ? "ko" : "en";
-    if (!name || !pin || !word || word.length > 80) return json({ error: "bad_input", message: "Нет слова или входа." }, 400);
+    const name = String(body.p_name || "").trim().toLowerCase(), pin = String(body.p_pin || "");
+    const batch = Array.isArray(body.words);
+    const words: string[] = batch ? body.words.map(clean) : [clean(body.word)];
+    const langs = words.map((w, i) => langOf(w, batch ? (body.langs || [])[i] : body.lang));
+    if (!name || !pin || !words.length || words.length > 80 || words.some((w) => !w || w.length > 80))
+      return json({ error: "bad_input", message: "Нет слова или входа." }, 400);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!, anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const auth = await fetch(`${supabaseUrl}/rest/v1/rpc/is_teacher`, {
@@ -153,20 +175,14 @@ Deno.serve(async (req) => {
     });
     if (!auth.ok) return json({ error: "unauthorized", message: "Не удалось проверить вход. Войдите на сайт заново." }, 401);
 
-    const errs: string[] = [];
-    const tryIt = async (f: () => Promise<Entry | null>) => { try { return await f(); } catch (e) { errs.push(String((e as Error).message || e)); return null; } };
-    let e: Entry | null = null;
-    // словарная форма для корейского: ищем как есть
-    if (lang === "ko") {
-      const key = Deno.env.get("KRDICT_KEY") || "";
-      if (key) e = await tryIt(() => krdict(key, word));
-      if (!e) e = await tryIt(() => wiktionary(word, "ko"));
-    } else {
-      e = await tryIt(() => freeDict(word.replace(/^to\s+/i, "")));
-      if (!e) e = await tryIt(() => wiktionary(word, "en"));
-    }
-    if (!e) return json({ ...empty(word, lang), message: errs.length ? "Словарь сейчас не отвечает." : "Слова нет в словаре." });
-    return json(e);
+    if (!batch) return json(await lookup(words[0], langs[0]));
+    // пакет: по 6 слов одновременно, чтобы не перегружать словари
+    const entries: Entry[] = new Array(words.length);
+    let next = 0;
+    await Promise.all(Array.from({ length: Math.min(6, words.length) }, async () => {
+      while (next < words.length) { const i = next++; entries[i] = await lookup(words[i], langs[i]); }
+    }));
+    return json({ entries });
   } catch (e) {
     return json({ error: "server_error", message: "Ошибка словаря: " + String((e as Error).message || e).slice(0, 160) }, 500);
   }

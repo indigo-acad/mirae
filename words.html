@@ -24,7 +24,7 @@
   <section id="list"></section>
   <section id="prefs" hidden></section>
 </main>
-<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/words2.js"></script><script src="js/meaning.js"></script><script src="js/ear.js"></script><script src="js/assistant.js"></script>
+<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/words2.js"></script><script src="js/meaning.js"></script><script src="js/dict.js"></script><script src="js/ear.js"></script><script src="js/assistant.js"></script>
 <script>
 /* Тренажёр слов. Расписание как в Anki (js/srs.js), игры взяты из тренажёра группы 2724:
    карточки, выбор перевода на слух, слово в предложении, письмо, сборка слова, поиск пары.
@@ -267,40 +267,7 @@ function gNewRedraw(c){var say=KR.say;KR.say=function(){};try{gNew(c)}finally{KR
    английский — Free Dictionary API / Викисловарь (определения, примеры, синонимы, транскрипция).
    Ответ хранится на устройстве неделю; в карточку попадает только то, чего в ней ещё нет. */
 var S_DF={};   // источник и произношение, подтянутые в форму правки до сохранения
-var DICT_URL=((window.CONFIG||{}).SUPABASE_URL||'')+'/functions/v1/dict-lookup',DQ={};
-async function dictGet(w,l){
-  var k='kr_dict:'+l+':'+SRS.norm(w);
-  try{var x=JSON.parse(localStorage.getItem(k)||'null');if(x&&Date.now()-x.at<7*SRS.DAY)return x.r}catch(e){}
-  if(DQ[k])return DQ[k];
-  var cfg=window.CONFIG||{};
-  DQ[k]=(async function(){
-    var res=await fetch(DICT_URL,{method:'POST',headers:{'Content-Type':'application/json',apikey:cfg.SUPABASE_ANON_KEY,Authorization:'Bearer '+cfg.SUPABASE_ANON_KEY},
-      body:JSON.stringify({p_name:KR.user(),p_pin:localStorage.getItem('kr_pin')||'',word:w.split('/')[0].trim(),lang:l})});
-    var r=await res.json().catch(function(){return {}});
-    if(!res.ok)throw new Error(r.message||('ошибка '+res.status));
-    try{localStorage.setItem(k,JSON.stringify({at:Date.now(),r:r}))}catch(e){}
-    return r;
-  })();
-  try{return await DQ[k]}finally{delete DQ[k]}
-}
-/* статья словаря → карточка: добавляем недостающее, своё ученика и преподавателя не трогаем */
-function enrich(c,r){
-  c=Object.assign({},c);c.dq=1;if(!r||!r.found)return c;
-  var key=function(d){return d.l+':'+String(d.s).toLowerCase()};
-  if(!c.t&&(r.tr_ru||[]).length)c.t=r.tr_ru.slice(0,3).join('; ');
-  var have=(c.d||[]).map(key),nd=(r.defs||[]).filter(function(d){return d.s&&have.indexOf(key(d))<0});
-  // по два определения на язык: изучаемый, английский, русский
-  var per={};nd=nd.filter(function(d){per[d.l]=(per[d.l]||0)+1;return per[d.l]<=2});
-  if(nd.length)c.d=(c.d||[]).concat(nd).slice(0,8);
-  var sy=(c.syn||[]).concat((r.syn||[]).filter(function(x){return (c.syn||[]).map(SRS.norm).indexOf(SRS.norm(x))<0&&SRS.norm(x)!==SRS.norm(c.w)}));
-  if(sy.length)c.syn=sy.slice(0,8);
-  var co=(c.col||[]).concat((r.cols||[]).filter(function(x){return !(c.col||[]).some(function(y){return y.s===x.s})}));
-  if(co.length)c.col=co.slice(0,6);
-  var ex=(r.examples||[])[0];if(!c.ex&&ex&&ex.s){c.ex=ex.s;if(ex.t)c.et=ex.t}
-  if(!c.ipa&&r.ipa)c.ipa=r.ipa;
-  if(r.srcName)c.dsrc=r.srcName;
-  return c;
-}
+var dictGet=KR.dict.get,enrich=KR.dict.enrich;
 /* подтянуть статью к слову; done(c) — когда карточка обновилась */
 async function dictPull(id,done){
   var c=V.get(id);if(!c||!KR.cloud.on||!KR.user())return null;
@@ -839,7 +806,7 @@ function drawList(){
   var F={all:['Все',function(){return true}],new:['Новые',function(c){return !c.st}],learn:['Учу',function(c){return c.st===1||c.st===3}],known:['Знаю',function(c){return c.st===2}],star:['Сложные',function(c){return c.star}]};
   var h='<div class="card glass"><h3>Добавить слово</h3><form id="addf" class="addw" autocomplete="off"><input class="name'+(lang==='ko'?' ko':'')+'" id="aw" lang="'+lang+'" placeholder="Слово: '+G.name+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false"><input class="name" id="at" placeholder="Перевод или определение" aria-label="Перевод или определение" maxlength="300"><button type="submit" class="btn pri">'+KR.icon('plus',16)+'Добавить</button></form><p class="msg" id="amsg" role="status"></p>'+
     '<p class="hint">Несколько значений — через «;». Подойдёт и определение на любом языке: «a place to live», «사는 곳». Синонимы и устойчивые выражения добавляются в карточке слова (карандаш). Слова попадают сюда из уроков, по выделению в тексте урока и от преподавателя. Если добавить слово, которое уже есть, оно вернётся на повторение раньше.</p></div>'+
-    '<div class="card glass"><h3>Добавить список слов</h3><p class="hint">Корейские и английские слова можно вперемешку: по одному в строке, через запятую или парами «слово — перевод» (также «=», «:», Tab из Quizlet и Excel). Перевод может стоять и слева. Несколько значений — через «;», можно определение на любом языке. Пример: «слово — перевод | пример | перевод примера». Слова без перевода сначала ищем в базе слов школы, потом переводит DeepL.</p><textarea class="name" id="bulk-input" rows="5" maxlength="8000" placeholder="runny nose, sore throat\naccommodation — жильё\n식욕 — аппетит\n선생님" aria-label="Список слов"></textarea><div class="done-row"><span></span><button type="button" class="btn pri" data-x="bulk-translate">Разобрать и перевести</button></div><p class="msg" id="bulk-msg" role="status"></p><div id="bulk-preview"></div></div>';
+    '<div class="card glass"><h3>Добавить список слов</h3><p class="hint">Корейские и английские слова можно вперемешку: по одному в строке, через запятую или парами «слово — перевод» (также «=», «:», Tab из Quizlet и Excel). Перевод может стоять и слева. Несколько значений — через «;», можно определение на любом языке. Пример: «слово — перевод | пример | перевод примера». Слова без перевода ищем в базе слов школы, потом в словаре (한국어기초사전, Free Dictionary), и только потом переводит DeepL.</p><textarea class="name" id="bulk-input" rows="5" maxlength="8000" placeholder="runny nose, sore throat\naccommodation — жильё\n식욕 — аппетит\n선생님" aria-label="Список слов"></textarea><div class="done-row"><span></span><button type="button" class="btn pri" data-x="bulk-translate">Разобрать и перевести</button></div><p class="msg" id="bulk-msg" role="status"></p><div id="bulk-preview"></div></div>';
   h=setsCard()+h;
   if(all.length){
     h+='<div class="card glass" id="wlist"><div class="opts">'+Object.keys(F).map(function(k){var n=all.filter(F[k][1]).length;return '<button type="button" data-f="'+k+'" class="'+(filt===k?'sel':'')+'" aria-pressed="'+(filt===k)+'">'+F[k][0]+' · '+n+'</button>'}).join('')+'</div>'+
@@ -941,7 +908,7 @@ function drawBulkPreview(){
   var ok=bulkRows.filter(function(x){return !x.err});
   box.innerHTML='<div class="wl">'+bulkRows.map(function(x,i){
     var had=!x.err&&V.find(x.l,x.w),tag=x.err?'<span class="badge warn">'+esc(x.err)+'</span>':
-      '<span class="badge">'+(LNAME[x.l]||'?')+'</span>'+(x.src==='base'?'<span class="badge ok" title="Перевод из базы слов школы">база</span>':x.src==='deepl'?'<span class="badge" title="Автоперевод DeepL: проверь">DeepL</span>':'')+
+      '<span class="badge">'+(LNAME[x.l]||'?')+'</span>'+(x.src==='base'?'<span class="badge ok" title="Перевод из базы слов школы">база</span>':x.src==='dict'?'<span class="badge ok" title="Из словаря'+(x.entry&&x.entry.srcName?': '+esc(x.entry.srcName):'')+'">словарь</span>':x.src==='deepl'?'<span class="badge" title="Автоперевод DeepL: проверь">DeepL</span>':'')+
       (had?'<span class="badge warn" title="Слово уже есть в словаре: вернётся на повторение раньше">уже есть</span>':'');
     return '<div class="wrow bulk-row'+(x.err?' off':'')+'"><div class="mid"><input class="name'+(x.l==='ko'?' ko':'')+'" data-bw="'+i+'" lang="'+(x.l||'')+'" value="'+esc(x.w)+'" aria-label="Слово '+(i+1)+'"'+(x.err==='повтор'?' disabled':'')+'>'+
       '<input class="name" data-bt="'+i+'" value="'+esc(x.t)+'" placeholder="Перевод (можно оставить пустым)" aria-label="Перевод '+(i+1)+'"'+(x.err==='повтор'?' disabled':'')+'>'+
@@ -956,7 +923,7 @@ async function bulkTranslate(){
   if(ok.length>80){cut=ok.length-80;ok.slice(80).forEach(function(x){x.err='больше 80 слов за раз'})}
   if(btn)btn.disabled=true;
   var need=ok.filter(function(x){return !x.t&&!x.err}).length;
-  msg.textContent=need?'Ищем переводы…':'Разбираем список…';msg.className='msg';
+  msg.textContent=need?'Ищем переводы: база школы, словарь, DeepL…':'Разбираем список…';msg.className='msg';
   var r=need?await KR.W2.translate(bulkRows):{n:0,err:''};
   if(btn)btn.disabled=false;
   drawBulkPreview();
@@ -972,7 +939,8 @@ function bulkSave(){
   var n=0,ko=0,other=0,again=0;
   bulkRows.forEach(function(x){
     if(x.err||!x.w||!x.l)return;
-    var r=addW(x.l,x.w,x.t,{src:'manual-bulk',ex:x.ex,et:x.ex?x.et:''});n++;if(!r.added)again++;if(x.l==='ko')ko++;if(x.l!==lang)other++;
+    var r=addW(x.l,x.w,x.t,{src:'manual-bulk',ex:x.ex,et:x.ex?x.et:''});
+    if(x.entry){var ce=V.get(r.card.id);if(ce)V.update(enrich(ce,x.entry))}n++;if(!r.added)again++;if(x.l==='ko')ko++;if(x.l!==lang)other++;
   });
   bulkRows=[];drawBulkPreview();$('#bulk-input').value='';
   drawToday();drawList();

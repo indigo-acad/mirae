@@ -212,8 +212,8 @@ function parseMine(text){
   });
   return out;
 }
-/* Перевести слова без перевода: база слов школы, потом DeepL (функция supabase/functions/translate-words).
-   items — строки из parseMine; заполняет t и src ('base' | 'deepl'). Возвращает {n: сколько переведено, err}. */
+/* Перевести слова без перевода: база слов школы, потом словарь (dict-lookup), потом DeepL (функция translate-words).
+   items — строки из parseMine; заполняет t, src ('base' | 'dict' | 'deepl') и entry — статью словаря. Возвращает {n: сколько переведено, err}. */
 async function translate(items){
   var miss=items.filter(function(x){return !x.err&&x.w&&!x.t}).slice(0,80);
   if(!miss.length)return {n:0,err:''};
@@ -224,7 +224,9 @@ async function translate(items){
     var data=await res.json().catch(function(){return {}});
     if(!res.ok)throw new Error(data.message||data.error||('ошибка '+res.status));
     var n=0,src=data.sources||[];
-    (data.translations||[]).forEach(function(t,j){if(t&&miss[j]){miss[j].t=t;miss[j].src=src[j]||'deepl';n++}});
+    var ent=data.entries||[];
+    (data.translations||[]).forEach(function(t,j){if(t&&miss[j]){miss[j].t=t;miss[j].src=src[j]||'deepl';n++}
+      if(ent[j]&&ent[j].found&&miss[j]){miss[j].entry=ent[j];if(KR.dict)KR.dict.put(ent[j])}});
     return {n:n,err:''};
   }catch(e){return {n:0,err:String(e&&e.message||'ошибка').slice(0,180)}}
 }

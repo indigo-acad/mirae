@@ -2,9 +2,12 @@
 // 1) Слово ищется в базе слов школы (таблица vocabulary, supabase/vocab2.sql): там переводы, проверенные людьми.
 // 2) Остальное переводит DeepL — с явным языком источника (корейский или английский) и подсказкой,
 //    что это отдельное слово из словаря: без этого DeepL часто ошибается с языком и смыслом коротких слов.
+// Между базой и DeepL — словарь (функция dict-lookup: 한국어기초사전, Free Dictionary API, Викисловарь):
+//    русский перевод из словаря, а если его нет — определение из словаря. DeepL — только для слов, которых нет ни там, ни там.
 // Вход:  { p_name, p_pin, words: string[] (1–80), langs?: ("ko" | "en" | "")[] }  — langs можно не передавать,
 //        тогда язык определяется по буквам (хангыль — корейский, латиница — английский).
-// Выход: { translations: string[], sources: ("base" | "deepl" | "")[] } — по одному на слово, в том же порядке.
+// Выход: { translations: string[], sources: ("base" | "dict" | "deepl" | "")[], entries: (статья словаря | null)[] }
+//        — по одному на слово, в том же порядке; entries — полная статья для слов, найденных в словаре.
 // Секреты: DEEPL_AUTH_KEY. SUPABASE_URL, SUPABASE_ANON_KEY и SUPABASE_SERVICE_ROLE_KEY функция получает сама.
 
 const cors = {
@@ -132,10 +135,36 @@ Deno.serve(async (req) => {
       }
     }
 
+    const entries: unknown[] = clean.map(() => null);
+    const miss = clean.map((_, i) => i).filter((i) => !translations[i]);
+    if (miss.length && body.dict !== false) {
+      try {
+        const r = await fetch(`${supabaseUrl}/functions/v1/dict-lookup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: anonKey, Authorization: req.headers.get("Authorization") || `Bearer ${anonKey}` },
+          body: JSON.stringify({ p_name: name, p_pin: pin, words: miss.map((i) => clean[i]), langs: miss.map((i) => langs[i]) }),
+          signal: AbortSignal.timeout(25000),
+        });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(`dict ${r.status} ${d?.message || ""}`);
+        (d.entries || []).forEach((e: { found?: boolean; lang?: string; tr_ru?: string[]; defs?: { l: string; s: string }[] }, j: number) => {
+          const i = miss[j];
+          if (!e || !e.found) return;
+          const defs = e.defs || [];
+          const t = (e.tr_ru || []).length ? (e.tr_ru || []).slice(0, 3).join("; ")
+            : (defs.find((x) => x.l === "ru") || defs.find((x) => x.l === langs[i]) || defs[0] || { s: "" }).s;
+          entries[i] = e;
+          if (t) { translations[i] = t; sources[i] = "dict"; }
+        });
+      } catch (e) {
+        console.error("dict lookup failed", e);
+      }
+    }
+
     const rest = clean.map((_, i) => i).filter((i) => !translations[i]);
     if (rest.length) {
       if (!deeplKey) {
-        if (rest.length === clean.length) return json({ error: "missing_deepl_secret", message: "Автоперевод не настроен." }, 503);
+        if (rest.length === clean.length) return json({ error: "missing_deepl_secret", message: "Автоперевод не настроен.", translations, sources, entries }, 503);
       } else {
         const groups = new Map<string, number[]>();
         for (const i of rest) groups.set(langs[i], [...(groups.get(langs[i]) || []), i]);
@@ -153,7 +182,7 @@ Deno.serve(async (req) => {
         }
       }
     }
-    return json({ translations, sources });
+    return json({ translations, sources, entries });
   } catch (e) {
     console.error("translate-words error", e);
     const timeout = e instanceof DOMException && (e.name === "TimeoutError" || e.name === "AbortError");
