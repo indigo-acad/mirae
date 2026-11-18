@@ -9,7 +9,7 @@
 var KR=window.KR;if(!KR)return;
 var norm=function(s){return String(s==null?'':s).normalize('NFC').trim().replace(/\s+/g,' ').toLowerCase()};
 var DAY=86400000,DQ={},cfg=function(){return window.CONFIG||{}};
-var key=function(w,l){return 'kr_dict:'+l+':'+norm(String(w).split('/')[0])};
+var key=function(w,l){return 'kr_dict2:'+l+':'+norm(String(w).split('/')[0])};
 function put(r){if(r&&r.word&&r.lang)try{localStorage.setItem(key(r.word,r.lang),JSON.stringify({at:Date.now(),r:r}))}catch(e){}}
 function cached(w,l){try{var x=JSON.parse(localStorage.getItem(key(w,l))||'null');if(x&&Date.now()-x.at<7*DAY)return x.r}catch(e){}return null}
 async function get(w,l){
@@ -52,9 +52,22 @@ function enrich(c,r){
   var ex=(r.examples||[])[0];if(!c.ex&&ex&&ex.s){c.ex=ex.s;if(ex.t)c.et=ex.t}
   if(!c.ipa&&r.ipa)c.ipa=r.ipa;
   if(r.srcName)c.dsrc=r.srcName;
+  if(r.audio&&Object.keys(r.audio).length&&!c.au)c.au=r.audio;
   return c;
 }
+/* Запись произношения из словаря для слова: сначала из карточки ученика (c.au), потом из сохранённой статьи.
+   en — по выбранному произношению (gb → британская запись, us → американская), если нужной нет — любая; ko — запись словаря. */
+function rec(text,l,acc){
+  var n=norm(text);if(!n||n.split(' ').length>3)return '';
+  var a=null;
+  if(KR.vocab){var c=KR.vocab.find(l,text);if(c&&c.au)a=c.au}
+  if(!a){var x=cached(text,l);if(x&&x.audio)a=x.audio}
+  if(!a)return '';
+  if(l==='en'){var want=acc==='us'?'us':'uk';return a[want]||a.any||a[want==='us'?'uk':'us']||a.au||''}
+  return a[l]||'';
+}
+KR.rec=rec;
 /* подпись источника перевода */
 var SRC={base:'база школы',dict:'словарь','dict+deepl':'словарь + DeepL',deepl:'DeepL'};
-KR.dict={get:get,put:put,cached:cached,translate:translate,enrich:enrich,SRC:SRC};
+KR.dict={rec:rec,get:get,put:put,cached:cached,translate:translate,enrich:enrich,SRC:SRC};
 })();

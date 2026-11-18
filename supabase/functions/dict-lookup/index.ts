@@ -4,7 +4,8 @@
 //            уровень (초급/중급/고급), примеры, синонимы. Нужен бесплатный ключ Open API: секрет KRDICT_KEY.
 //            Без ключа — Викисловарь (английские значения корейских слов).
 // Английский: Free Dictionary API (dictionaryapi.dev, данные Викисловаря, CC BY-SA) — определения, примеры,
-//            синонимы, транскрипция; если слова там нет — Викисловарь.
+//            синонимы, транскрипция, запись произношения (британская и американская, если есть); если слова там нет — Викисловарь.
+// Записи произношения: audio = { uk?, us?, ko? } — ссылки на звук из словаря (корейский — если 한국어기초사전 его даёт).
 // Cambridge и NAVER открытого API не дают: подключатся сменными адаптерами здесь же, когда будут лицензии.
 // Вход:  { p_name, p_pin, word, lang: "ko" | "en" }  или пакетом { p_name, p_pin, words: [...], langs: [...] } (до 80 слов)
 // Выход: одно слово — { found, src, srcName, word, lang, pos, level, ipa, tr_ru: [], defs: [{l, s}], examples: [{s, t}],
@@ -23,11 +24,12 @@ type Ex = { s: string; t: string };
 type Def = { l: string; s: string };
 type Entry = {
   found: boolean; src: string; srcName: string; word: string; lang: string; pos: string; level: string; ipa: string;
-  tr_ru: string[]; defs: Def[]; examples: Ex[]; cols: Ex[]; syn: string[];
+  tr_ru: string[]; defs: Def[]; examples: Ex[]; cols: Ex[]; syn: string[]; audio: Record<string, string>;
 };
 const empty = (word: string, lang: string): Entry => ({
-  found: false, src: "", srcName: "", word, lang, pos: "", level: "", ipa: "", tr_ru: [], defs: [], examples: [], cols: [], syn: [],
+  found: false, src: "", srcName: "", word, lang, pos: "", level: "", ipa: "", tr_ru: [], defs: [], examples: [], cols: [], syn: [], audio: {},
 });
+const https = (u: string) => u.replace(/^http:\/\//, "https://").replace(/^\/\//, "https://");
 const uniq = (a: string[]) => {
   const s = new Set<string>(), r: string[] = [];
   for (let x of a) { x = (x || "").replace(/\s+/g, " ").trim(); const k = x.toLowerCase(); if (x && !s.has(k)) { s.add(k); r.push(x); } }
@@ -71,6 +73,9 @@ async function krdict(key: string, word: string): Promise<Entry | null> {
   if (view && blocks(view, "sense_info").length) {
     senses = blocks(view, "sense_info");
     const pr = first(view, "pronunciation"); if (pr && pr !== word) e.ipa = "[" + pr + "]";
+    // запись произношения, если словарь её даёт: ищем ссылку на звук в сведениях о произношении
+    const snd = (blocks(view, "pronunciation_info").join(" ").match(/(?:https?:)?\/\/[^<>\s"]+?\.(?:wav|mp3|ogg|m4a)/i) || [])[0];
+    if (snd) e.audio.ko = https(strip(snd));
   }
   for (const s of senses.slice(0, 4)) {
     const dfn = first(s, "definition"); if (dfn) e.defs.push({ l: "ko", s: dfn });
@@ -102,6 +107,11 @@ async function freeDict(word: string): Promise<Entry | null> {
   const syn: string[] = [];
   for (const en of data) {
     if (!e.ipa) e.ipa = en.phonetic || (en.phonetics || []).map((p: { text?: string }) => p.text).find(Boolean) || "";
+    for (const p of en.phonetics || []) {
+      const a = String(p.audio || ""); if (!a) continue;
+      const k = /-(uk|gb)\.\w+$/i.test(a) ? "uk" : /-us\.\w+$/i.test(a) ? "us" : /-au\.\w+$/i.test(a) ? "au" : "any";
+      if (!e.audio[k]) e.audio[k] = https(a);
+    }
     for (const m of en.meanings || []) {
       if (!e.pos) e.pos = m.partOfSpeech || "";
       syn.push(...(m.synonyms || []));

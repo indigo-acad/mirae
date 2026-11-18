@@ -218,12 +218,22 @@ function localSay(text,lang,cb,acc,alt){
     speechSynthesis.speak(u);
   }catch(e){cb.end&&cb.end()}
 }
+async function recSay(url,cb){
+  if(hasTTS())speechSynthesis.cancel();
+  if(!ttsAudio)ttsAudio=new Audio();
+  ttsAudio.pause();ttsAudio.src=url;ttsAudio.playbackRate=cb.rate?Math.max(.5,cb.rate):1;
+  ttsAudio.onplay=()=>cb.start&&cb.start();ttsAudio.onended=()=>cb.end&&cb.end();ttsAudio.onerror=null;
+  await new Promise((ok,bad)=>{ttsAudio.onerror=()=>bad(new Error("rec"));ttsAudio.play().then(ok,bad)});
+}
 // lang: "ko", "en" или "en-gb" / "en-us" — английское слово с нужным произношением
 function say(text,lang,cb){
   cb=cb||{};text=String(text||"").trim();if(!text)return;
   const m=String(lang||"ko").toLowerCase().match(/^([a-z]{2})(?:-(gb|us))?/)||[0,"ko"],acc=m[1]==="en"?m[2]||"":"";
   lang=m[1];
   if(ttsAudio)ttsAudio.pause();
+  // запись произношения из словаря (js/dict.js): живой голос диктора для отдельного слова; не загрузилась — синтез
+  const rec=typeof window.KR.rec==="function"?window.KR.rec(text,lang,acc||accent()):"";
+  if(rec){recSay(rec,cb).catch(()=>{if(cloudVoice()&&(lang==="ko"||lang==="en"))cloudSay(text,lang,cb,acc).catch(()=>localSay(text,lang,cb,acc));else localSay(text,lang,cb,acc)});return}
   if(cloudVoice()&&(lang==="ko"||lang==="en")){cloudSay(text,lang,cb,acc).catch(()=>localSay(text,lang,cb,acc));return}
   localSay(text,lang,cb,acc);
 }
