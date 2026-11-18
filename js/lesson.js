@@ -358,10 +358,19 @@ function hwLesson(rec){
       sections.push({id:"m--"+String(it.m).replace(/[^a-z0-9_-]/gi,"_"),title:++n+". "+((window.KINDS||{})[m.kind]||"Материал"),icon:"📌",blocks:[{type:"mat",title:m.title,m}]});return}
     const src=LS[it.l];if(!src)return;lang=lang||src.lang||"ko";
     src.sections.forEach(s=>s.blocks.forEach((b,i)=>{const k=s.id+"-"+i;if((it.b||[]).indexOf(k)<0)return;
-      sections.push({id:it.l+"--"+k,title:++n+". "+(b.title||s.title),icon:s.icon,from:src.course+" · "+src.title,blocks:[Object.assign({},b,{src:it.l,srcKey:k})]})}));
+      sections.push({id:it.l+"--"+k,title:++n+". "+(b.title||s.title),icon:s.icon,from:src.course+" · "+src.title,blocks:[hwPick(Object.assign({},b,{src:it.l,srcKey:k}),it.i&&it.i[k])]})}));
   });
   const theory=[];(rec.theory||[]).forEach(t=>{const src=LS[t.l],s=src&&src.sections.find(x=>x.id===t.s);if(s)theory.push({l:t.l,src,s})});
   return {id:"hw-"+rec.id,lang:lang||rec.lang||"ko",course:"Домашка",title:rec.title,subtitle:rec.due?"Сдать до "+fmtDue(rec.due):"Срок не задан",sections,hw:rec,theory};
+}
+/* Преподаватель может задать не всё упражнение, а отдельные задания (it.i: {"<раздел>-<номер>": [номера]}):
+   в домашке остаются только они, по порядку. Номера из урока — в b.subIdx (уходят в результат). */
+function hwPick(b,idx){
+  const key=Array.isArray(b.items)&&["fill","choice","build"].includes(b.type)?"items":b.type==="talk"&&Array.isArray(b.prompts)?"prompts":"";
+  if(!key||!Array.isArray(idx))return b;
+  const ok=[...new Set(idx)].filter(x=>Number.isInteger(x)&&x>=0&&x<b[key].length).sort((a,c)=>a-c);
+  if(!ok.length||ok.length===b[key].length)return b;
+  return Object.assign(b,{[key]:ok.map(x=>b[key][x]),subIdx:ok,subOf:b[key].length});
 }
 function hwTop(){
   const r=L.hw;let h="";
@@ -396,7 +405,7 @@ function hwResult(){
   const items=blocks.map(b=>{
     const p=P[b._key]||{},x={k:b._key,t:String(b.title||"").slice(0,200),type:b.type,done:closed(b)};
     if(x.done)done++;
-    if(b.src){x.l=b.src;x.b=b.srcKey}
+    if(b.src){x.l=b.src;x.b=b.srcKey;if(b.subIdx){x.i=b.subIdx;x.of=b.subOf}}
     if(b.type==="mat"){x.m=b.m.id;const r=window.KR&&KR.matInfo(b.m.id).rep;if(r&&r.t>=L.hw.created)x.rep=String(r.x||"").slice(0,1500)}
     if(b.type==="wtest"){x.score=p.score||0;x.total=p.total||(b.wt.w||[]).length;x.tries=p.tries||0;x.wrong=p.wrong||[];if(p.sec)x.sec=p.sec;score+=x.score;max+=x.total}
     if(EXT.includes(b.type)){

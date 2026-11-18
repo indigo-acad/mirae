@@ -26,7 +26,7 @@ var wp={id:null,words:null};   // слова выбранного словаря
 var hws=null;   // домашка ученика (supabase/homework.sql); null — файла на сервере ещё нет
 var stw={};     // журнал занятий словами по дням (state.wl, пишет js/vocab.js): новые слова и повторения
 var tg={src:'week',lang:'ko',l:'',n:15,k:{tr:1,rev:1,ctx:1,wr:1},min:10};   // тест на начало урока: откуда слова, сколько, какие вопросы
-var hwf={lang:'ko',l:'',sel:{},th:{},mats:{},open:false};   // форма «Задать домашку»: язык, урок в списке, отмеченные задания, теория, материалы
+var hwf={lang:'ko',l:'',sel:{},it:{},th:{},mats:{},open:false};   // форма «Задать домашку»: язык, урок в списке, отмеченные упражнения, отдельные задания в них, теория, материалы
 function isOwner(){return !!(KR.ctx&&KR.ctx.owner)}
 function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.className='msg '+(ok?'ok':'bad')}}
 function vmsg(t,ok){var e=$('#vmsg');if(!e)return msg(t,ok);e.textContent=t;e.className='msg '+(ok?'ok':'bad');if(e.scrollIntoView)e.scrollIntoView({block:'nearest',behavior:'smooth'})}
@@ -284,7 +284,7 @@ async function wpLoad(){
 KR.W2.onpick=function(name){if(name==='sw')wpSync()};
 document.addEventListener('toggle',function(e){if(e.target.id==='wpk'&&e.target.open)wpLoad()},true);
 /* ---------- домашка (supabase/homework.sql) ----------
-   Преподаватель выбирает задания: упражнения из отработки уроков (ученик делает их заново), «Домашнее задание» из урока,
+   Преподаватель выбирает задания: упражнения из отработки уроков целиком или отдельные задания в них (ученик делает их заново), «Домашнее задание» из урока,
    тренажёры и тесты; по желанию — разделы теории, которые ученик откроет кнопкой «Посмотреть теорию»; срок и комментарий.
    Сданная домашка приходит сюда с баллами и ошибками; «Проверено» с комментарием ученик увидит в кабинете. */
 var TYPE_RU={fill:'вписать',choice:'выбрать',build:'собрать',talk:'поговорить'};
@@ -293,34 +293,67 @@ function lessLabel(l){var x=LESS.filter(function(y){return y[0]===l})[0],L=windo
 function hwLessons(){return LESS.filter(function(x){var L=window.LESSONS[x[0]];return L&&(L.lang||'ko')===hwf.lang})}
 // английские уроки — отдельные страницы (kind «lesson»), их можно задать как материал; корейские уроки идут через урок с заданиями
 function hwMats(){return MATERIALS.filter(function(m){return m.kind!=='practice'&&(m.kind!=='lesson'||m.section==='english')&&KR.langOf(m.id)===hwf.lang})}
+/* Отдельные задания внутри упражнения: у «вписать», «выбрать», «собрать» — вопросы (items), у «поговорить» — реплики (prompts).
+   Отмеченное упражнение целиком: hwf.sel[k]. Если отмечена только часть заданий — их номера в hwf.it[k];
+   в домашку они уходят полем i: {"<раздел>-<номер>": [номера заданий]} рядом со списком упражнений b. */
+function hwSubs(b){return ['fill','choice','build'].indexOf(b.type)>=0&&Array.isArray(b.items)?b.items:b.type==='talk'&&Array.isArray(b.prompts)?b.prompts:null}
+function hwBlockOf(l,k){var L=window.LESSONS[l];if(!L)return null;var j=k.lastIndexOf('-'),s=L.sections.filter(function(x){return x.id===k.slice(0,j)})[0];return s?{s:s,b:s.blocks[+k.slice(j+1)]}:null}
+function hwSubN(k){var i=k.indexOf('|'),x=hwBlockOf(k.slice(0,i),k.slice(i+1)),a=x&&x.b&&hwSubs(x.b);return a?a.length:0}
+// выбранные задания упражнения: массив номеров или null, если упражнение отмечено целиком
+function hwPart(k){var a=hwf.it[k],n=hwSubN(k);return hwf.sel[k]&&Array.isArray(a)&&a.length&&a.length<n?a:null}
+function hwSubText(b,x,i){
+  if(typeof x==='string')return '<span class="ko">'+esc(x)+'</span>';
+  var q=b.type==='build'?x.p:x.q,a=Array.isArray(x.a)?x.a[0]:x.a,h='';
+  if(x.say)h+='<span class="muted">на слух:</span> <span class="ko">'+esc(x.say)+'</span> ';
+  if(q)h+='<span class="ko">'+esc(String(q).replace(/___/g,'＿＿'))+'</span>';
+  if(x.r)h+=' <span class="ko muted">→ '+esc(x.r)+'</span>';
+  if(a!=null&&a!=='')h+='<span class="muted"> · ответ: </span><span class="ko">'+esc(a)+'</span>';
+  return h||'Задание '+(i+1);
+}
 function hwPicked(){
-  var items=[],by={},theory=[];
-  Object.keys(hwf.sel).forEach(function(k){if(!hwf.sel[k])return;var i=k.indexOf('|'),l=k.slice(0,i);(by[l]=by[l]||[]).push(k.slice(i+1))});
-  Object.keys(by).forEach(function(l){items.push({l:l,b:by[l]})});
+  var items=[],by={},part={},theory=[];
+  Object.keys(hwf.sel).forEach(function(k){if(!hwf.sel[k])return;var i=k.indexOf('|'),l=k.slice(0,i),bk=k.slice(i+1),pa=hwPart(k);
+    (by[l]=by[l]||[]).push(bk);if(pa){part[l]=part[l]||{};part[l][bk]=pa.slice()}});
+  Object.keys(by).forEach(function(l){var it={l:l,b:by[l]};if(part[l])it.i=part[l];items.push(it)});
   Object.keys(hwf.mats).forEach(function(m){if(hwf.mats[m])items.push({m:m})});
   Object.keys(hwf.th).forEach(function(k){if(!hwf.th[k])return;var i=k.indexOf('|');theory.push({l:k.slice(0,i),s:k.slice(i+1)})});
   return {items:items,theory:theory};
 }
+// сколько отдельных заданий в упражнении урока с учётом выбора (упражнение без вопросов — одно задание)
+function hwCount(it,bk){var x=hwBlockOf(it.l,bk),a=x&&x.b&&hwSubs(x.b),p=it.i&&it.i[bk];return Array.isArray(p)&&p.length?p.length:a?a.length:1}
 function hwAutoTitle(pk){
-  var parts=pk.items.map(function(it){if(it.m)return (MAP[it.m]||{title:it.m}).title;var L=window.LESSONS[it.l];return (L?L.course+' · '+L.title:it.l)+': '+it.b.length+' '+plural(it.b.length,'задание','задания','заданий')});
+  var parts=pk.items.map(function(it){if(it.m)return (MAP[it.m]||{title:it.m}).title;var L=window.LESSONS[it.l],n=0;it.b.forEach(function(bk){n+=hwCount(it,bk)});
+    return (L?L.course+' · '+L.title:it.l)+': '+n+' '+plural(n,'задание','задания','заданий')});
   return parts.join(' + ').slice(0,200);
 }
+// галочка упражнения: «частично», если отмечены не все его задания; подпись «выбрано 3 из 8»
+function hwMarks(){
+  document.querySelectorAll('[data-hwb]').forEach(function(c){var k=c.dataset.hwb,n=hwSubN(k),pa=hwPart(k);
+    c.checked=!!hwf.sel[k];c.indeterminate=!!pa;
+    var bx=c.closest('.hwt-blk'),e=bx&&bx.querySelector('.hwt-cnt');
+    if(e)e.textContent=pa?'выбрано '+pa.length+' из '+n:hwf.sel[k]?'все '+n+' · выбрать отдельные':n+' '+plural(n,'задание','задания','заданий')+' · выбрать отдельные';
+    if(bx)bx.querySelectorAll('[data-hwi]').forEach(function(x){x.checked=!!hwf.sel[k]&&(!pa||pa.indexOf(+x.dataset.ix)>=0)})});
+}
 function hwSummary(){
-  var pk=hwPicked(),n=0,m=0;pk.items.forEach(function(it){if(it.m)m++;else n+=it.b.length});
-  var t=[];if(n)t.push(n+' '+plural(n,'задание','задания','заданий'));if(m)t.push(m+' '+plural(m,'тренажёр или тест','тренажёра или теста','тренажёров или тестов'));if(pk.theory.length)t.push('теория: '+pk.theory.length);
-  var e=$('#hwsum');if(e)e.textContent=t.length?'Выбрано: '+t.join(', '):'Отметьте хотя бы одно задание';
+  hwMarks();
+  var pk=hwPicked(),n=0,q=0,m=0;pk.items.forEach(function(it){if(it.m)m++;else{n+=it.b.length;it.b.forEach(function(bk){q+=hwCount(it,bk)})}});
+  var t=[];if(n)t.push(n+' '+plural(n,'упражнение','упражнения','упражнений')+' ('+q+' '+plural(q,'задание','задания','заданий')+')');if(m)t.push(m+' '+plural(m,'тренажёр или тест','тренажёра или теста','тренажёров или тестов'));if(pk.theory.length)t.push('теория: '+pk.theory.length);
+  var e=$('#hwsum');if(e)e.textContent=t.length?'Выбрано: '+t.join(', '):'Отметьте хотя бы одно упражнение или задание';
   var ti=$('#hwti');if(ti)ti.placeholder=pk.items.length?hwAutoTitle(pk):'Название (по желанию)';
 }
-// задания выбранного урока: отработка и «Домашнее задание» из урока; теория — для подсказки
+// упражнения выбранного урока: отработка и «Домашнее задание» из урока; в каждом можно отметить отдельные задания; теория — для подсказки
 function hwBlocks(){
   var l=hwf.l,L=window.LESSONS[l];if(!L)return '<p class="muted">Уроков с заданиями для этого языка пока нет. Уроки-страницы, тренажёры и тесты выберите в списке «Материалы» ниже.</p>';
   var ex='',th='';
   L.sections.forEach(function(s){var pt=KR.part(s);
     if(pt==='theory'){var k=l+'|'+s.id;th+='<label class="line hwt-pick"><input type="checkbox" data-hwt="'+esc(k)+'"'+(hwf.th[k]?' checked':'')+'><span>'+esc(s.title)+'</span></label>';return}
-    s.blocks.forEach(function(b,i){var k=l+'|'+s.id+'-'+i;
-      ex+='<label class="line hwt-pick"><input type="checkbox" data-hwb="'+esc(k)+'"'+(hwf.sel[k]?' checked':'')+'><span>'+esc(b.title||s.title)+'<span class="muted"> · '+(pt==='hw'?'задание на дом из урока':(TYPE_RU[b.type]||b.type))+'</span></span></label>'});
+    s.blocks.forEach(function(b,i){var k=l+'|'+s.id+'-'+i,subs=hwSubs(b);
+      ex+='<div class="hwt-blk"><label class="line hwt-pick"><input type="checkbox" data-hwb="'+esc(k)+'"'+(hwf.sel[k]?' checked':'')+'><span>'+esc(b.title||s.title)+'<span class="muted"> · '+(pt==='hw'?'задание на дом из урока':(TYPE_RU[b.type]||b.type))+'</span></span></label>';
+      if(subs&&subs.length>1)ex+='<details class="hwt-subs"'+(hwPart(k)?' open':'')+'><summary class="muted"><span class="hwt-cnt"></span></summary>'+
+        subs.map(function(x,j){return '<label class="line hwt-pick hwt-sub"><input type="checkbox" data-hwi="'+esc(k)+'" data-ix="'+j+'"><span><span class="muted">'+(j+1)+'.</span> '+hwSubText(b,x,j)+'</span></label>'}).join('')+'</details>';
+      ex+='</div>'});
   });
-  return '<p class="hwt-h"><b>Задания</b> <span class="muted">(ученик сделает их заново, отдельно от урока)</span></p>'+(ex||'<p class="muted">В этом уроке нет упражнений.</p>')+
+  return '<p class="hwt-h"><b>Упражнения</b> <span class="muted">(ученик сделает их заново, отдельно от урока; можно отметить упражнение целиком или открыть его и выбрать отдельные задания)</span></p>'+(ex||'<p class="muted">В этом уроке нет упражнений.</p>')+
     (th?'<p class="hwt-h"><b>Подсказка: ссылка на теорию</b> <span class="muted">(по желанию: кнопка «Посмотреть теорию»)</span></p>'+th:'');
 }
 function hwForm(){
@@ -340,7 +373,8 @@ function hwForm(){
 function hwItemsText(r){
   return (r.items||[]).map(function(it){if(it.m)return esc((MAP[it.m]||{title:it.m}).title);
     if(it.wt)return 'Тест по словам: '+(it.wt.w||[]).length+' '+plural((it.wt.w||[]).length,'слово','слова','слов');
-    var L=window.LESSONS[it.l],t=it.b.map(function(k){var i=k.lastIndexOf('-'),s=L&&L.sections.filter(function(x){return x.id===k.slice(0,i)})[0],b=s&&s.blocks[+k.slice(i+1)];return b?(b.title||s.title):k});
+    var t=it.b.map(function(k){var x=hwBlockOf(it.l,k),a=x&&x.b&&hwSubs(x.b),p=it.i&&it.i[k];
+      return (x&&x.b?(x.b.title||x.s.title):k)+(Array.isArray(p)&&p.length&&a?' ('+p.length+' из '+a.length+')':'')});
     return esc(lessLabel(it.l))+': '+esc(t.join(', '))}).join('<br>');
 }
 function hwResultHtml(r){
@@ -436,7 +470,12 @@ document.addEventListener('click',async function(e){
 });
 async function hwReload(){try{hws=await KR.api('teacher_hw_list',{p_student:cur})||[]}catch(e){}var c=$('#hwt');if(c){c.outerHTML=hwCardT();hwSummary()}}
 document.addEventListener('change',function(e){var t=e.target;if(!t.dataset)return;
-  if(t.dataset.hwb!==undefined){hwf.sel[t.dataset.hwb]=t.checked;hwSummary()}
+  if(t.dataset.hwb!==undefined){hwf.sel[t.dataset.hwb]=t.checked;delete hwf.it[t.dataset.hwb];hwSummary()}
+  else if(t.dataset.hwi!==undefined){   // отдельное задание внутри упражнения
+    var k=t.dataset.hwi,ix=+t.dataset.ix,n=hwSubN(k),pa=hwPart(k),on=[];
+    if(hwf.sel[k])for(var j=0;j<n;j++)if(!pa||pa.indexOf(j)>=0)on.push(j);
+    on=on.filter(function(x){return x!==ix});if(t.checked)on.push(ix);on.sort(function(a,b){return a-b});
+    hwf.sel[k]=on.length>0;if(on.length&&on.length<n)hwf.it[k]=on;else delete hwf.it[k];hwSummary()}
   else if(t.dataset.hwt!==undefined){hwf.th[t.dataset.hwt]=t.checked;hwSummary()}
   else if(t.dataset.hwm!==undefined){hwf.mats[t.dataset.hwm]=t.checked;hwSummary()}
   else if(t.id==='hwl'){hwf.l=t.value;var bx=$('#hwblk');if(bx)bx.innerHTML=hwBlocks();hwSummary()}
@@ -446,10 +485,10 @@ document.addEventListener('click',async function(e){
   var b=e.target.closest('button');if(!b||!cur)return;
   if(b.dataset.hwlang){hwf.lang=b.dataset.hwlang;var c=$('#hwt');if(c){c.outerHTML=hwCardT();hwSummary()}return}
   if(b.id==='hwgo'){
-    var pk=hwPicked();if(!pk.items.length){msg('Отметьте хотя бы одно задание или тренажёр');return}
+    var pk=hwPicked();if(!pk.items.length){msg('Отметьте хотя бы одно упражнение, задание или тренажёр');return}
     var hw={title:($('#hwti').value||'').trim()||hwAutoTitle(pk),lang:hwf.lang,items:pk.items,theory:pk.theory,due:$('#hwdue').value||null,note:($('#hwnote').value||'').trim()};
     b.disabled=true;
-    try{await KR.api('teacher_hw_save',{p_student:cur,p_hw:hw});hwf={lang:hwf.lang,l:hwf.l,sel:{},th:{},mats:{},open:false};await hwReload();msg('Домашка задана: «'+hw.title+'». Ученик увидит её в кабинете.',true)}
+    try{await KR.api('teacher_hw_save',{p_student:cur,p_hw:hw});hwf={lang:hwf.lang,l:hwf.l,sel:{},it:{},th:{},mats:{},open:false};await hwReload();msg('Домашка задана: «'+hw.title+'». Ученик увидит её в кабинете.',true)}
     catch(x){b.disabled=false;msg(/no_student/.test(x.message||'')?'Этого ученика ведёт другой преподаватель':/no_material/.test(x.message||'')?'Тренажёр не найден в каталоге на сервере — обновите страницу':'Не получилось задать домашку')}
     return;
   }

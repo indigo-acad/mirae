@@ -888,6 +888,13 @@ html:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{
 .hwt-in select,.hwt-in .name{margin:0}
 .hwt-lang{max-width:340px}
 .hwt-pick{align-items:center;cursor:pointer}
+.hwt-blk{border-bottom:1px solid var(--rule)}
+.hwt-blk>.hwt-pick{border:0}
+.hwt-subs{margin:-4px 0 8px 28px}
+.hwt-subs>summary{cursor:pointer;padding:2px 0 6px;font-size:13.5px}
+.hwt-sub{font-size:14.5px;padding:5px 0;align-items:flex-start}
+.hwt-sub input{margin-top:3px}
+.hwt-sub:last-child{border:0}
 .hwt-old{margin-top:14px}
 @media (max-width:420px){.wcab-2{gap:8px}.wcab-i{padding:12px}.wcab-i b{font-size:32px}}
 /* преподаватель: как ученик учит слова (цвета проверены на различимость, в том числе при цветовой слепоте) */
