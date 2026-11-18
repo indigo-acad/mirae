@@ -183,9 +183,9 @@ function accent(){return LS("kr_accent")==="us"?"us":"gb"}
 // ttsOff — до какого времени не просить облачный голос (ошибка функции). Хранится до конца сеанса браузера,
 // чтобы каждая страница не повторяла заведомо неудачный запрос: 503 — ключи голосов ещё не добавлены в Supabase.
 const ttsCache=new Map();let ttsAudio=null,ttsOff=0;
-// 503 — голоса в облаке не настроены: помним 6 часов на устройстве (localStorage), иначе каждая новая вкладка
+// 503 — голоса в облаке не настроены: помним 20 минут на устройстве (localStorage); ключ kr_tts_off2 новый, старые записи на 6 часов не действуют, иначе каждая новая вкладка
 // сначала ждёт облако, и голос устройства включается уже не по нажатию — iPhone и часть Android такой звук не пропускают.
-try{ttsOff=Math.max(+sessionStorage.getItem("kr_tts_off")||0,+localStorage.getItem("kr_tts_off")||0)}catch(e){}
+try{localStorage.removeItem("kr_tts_off");ttsOff=Math.max(+sessionStorage.getItem("kr_tts_off")||0,+localStorage.getItem("kr_tts_off2")||0)}catch(e){}
 // облачный голос: задан адрес, есть связь с базой и ученик вошёл (функция проверяет логин и PIN)
 const cloudVoice=()=>!!(CFG.TTS_URL&&cloud.on&&U()&&localStorage.getItem("kr_pin")&&Date.now()>ttsOff);
 async function cloudSay(text,lang,cb,acc){
@@ -195,7 +195,7 @@ async function cloudSay(text,lang,cb,acc){
     try{r=await fetch(CFG.TTS_URL,{method:"POST",headers:{"Content-Type":"application/json",apikey:CFG.SUPABASE_ANON_KEY,Authorization:"Bearer "+CFG.SUPABASE_ANON_KEY},
       body:JSON.stringify({text:text,lang:lang,accent:ac||undefined,p_name:U(),p_pin:localStorage.getItem("kr_pin")||""})})}
     catch(e){ttsOff=Date.now()+600000;throw e}   // нет связи с функцией: 10 минут говорит голос устройства
-    if(!r.ok){ttsOff=Date.now()+(r.status===503?6*3600000:600000);try{sessionStorage.setItem("kr_tts_off",String(ttsOff));if(r.status===503)localStorage.setItem("kr_tts_off",String(ttsOff))}catch(e){}throw new Error("tts "+r.status)}
+    if(!r.ok){ttsOff=Date.now()+(r.status===503?20*60000:600000);try{sessionStorage.setItem("kr_tts_off",String(ttsOff));if(r.status===503)localStorage.setItem("kr_tts_off2",String(ttsOff))}catch(e){}throw new Error("tts "+r.status)}
     url=URL.createObjectURL(await r.blob());if(ttsCache.size>300)ttsCache.clear();ttsCache.set(key,url);
   }
   if(!ttsAudio)ttsAudio=new Audio();
