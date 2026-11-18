@@ -14,7 +14,7 @@
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Преподаватель</small><h1>Ученики и задания</h1><p>Назначай материалы: ученик увидит только их</p></div></header>
 <main><nav class="seg tnav" aria-label="Разделы преподавателя"><a href="teacher.html" class="on" aria-current="page">Ученики</a><a href="dict.html">Словари</a></nav><div id="m"></div></main>
-<script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/words2.js"></script><script src="js/srs.js"></script><script src="js/assistant.js"></script>
+<script src="data/materials.js"></script><script src="data/parts.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/words2.js"></script><script src="js/srs.js"></script><script src="js/assistant.js"></script>
 <script>
 var $=function(s){return document.querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
@@ -26,7 +26,7 @@ var wp={id:null,words:null};   // слова выбранного словаря
 var hws=null;   // домашка ученика (supabase/homework.sql); null — файла на сервере ещё нет
 var stw={};     // журнал занятий словами по дням (state.wl, пишет js/vocab.js): новые слова и повторения
 var tg={src:'week',lang:'ko',l:'',n:15,k:{tr:1,rev:1,ctx:1,wr:1},min:10};   // тест на начало урока: откуда слова, сколько, какие вопросы
-var hwf={lang:'ko',l:'',sel:{},it:{},th:{},mats:{},open:false};   // форма «Задать домашку»: язык, урок в списке, отмеченные упражнения, отдельные задания в них, теория, материалы
+var hwf={lang:'ko',l:'',sel:{},it:{},th:{},mats:{},mp:{},open:false};   // форма «Задать домашку»: язык, урок в списке, отмеченные упражнения, отдельные задания в них, теория, материалы, отдельные задания тренажёров
 function isOwner(){return !!(KR.ctx&&KR.ctx.owner)}
 function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.className='msg '+(ok?'ok':'bad')}}
 function vmsg(t,ok){var e=$('#vmsg');if(!e)return msg(t,ok);e.textContent=t;e.className='msg '+(ok?'ok':'bad');if(e.scrollIntoView)e.scrollIntoView({block:'nearest',behavior:'smooth'})}
@@ -310,19 +310,34 @@ function hwSubText(b,x,i){
   if(a!=null&&a!=='')h+='<span class="muted"> · ответ: </span><span class="ko">'+esc(a)+'</span>';
   return h||'Задание '+(i+1);
 }
+/* Отдельные задания тренажёра (data/parts.js, собирает tools/parts.js): группы {g, t:[{k, n}]}.
+   Тренажёр целиком: hwf.mats[id]. Часть заданий: их ключи в hwf.mp[id]; в домашку уходят полем p: [ключи],
+   ученик откроет тренажёр с ?only=<ключи> и увидит только их (js/bridge.js). */
+function matParts(id){var P=window.PARTS&&window.PARTS[id];return P&&P.length?P:null}
+function matKeys(id){var a=[];(matParts(id)||[]).forEach(function(g){g.t.forEach(function(x){a.push(x.k)})});return a}
+function matPart(id){var a=hwf.mp[id],n=matKeys(id).length;return hwf.mats[id]&&Array.isArray(a)&&a.length&&a.length<n?a:null}
+function matOn(id){var pa=matPart(id);return hwf.mats[id]?(pa||matKeys(id)).slice():[]}
+function matSet(id,on){var all=matKeys(id);on=all.filter(function(k){return on.indexOf(k)>=0});hwf.mats[id]=on.length>0;if(on.length&&on.length<all.length)hwf.mp[id]=on;else delete hwf.mp[id]}
+function hwMatRow(m){
+  var P=matParts(m.id),h='<div class="hwt-blk"><label class="line hwt-pick"><input type="checkbox" data-hwm="'+esc(m.id)+'"'+(hwf.mats[m.id]?' checked':'')+'><span>'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>';
+  if(P)h+='<details class="hwt-subs"'+(matPart(m.id)?' open':'')+'><summary class="muted"><span class="hwt-cnt"></span></summary>'+P.map(function(g,gi){
+    return '<label class="line hwt-pick hwt-grp"><input type="checkbox" data-hwg="'+esc(m.id)+'" data-gi="'+gi+'"><b>'+esc(g.g)+'</b></label>'+
+      g.t.map(function(x){return '<label class="line hwt-pick hwt-sub hwt-sub2"><input type="checkbox" data-hwp="'+esc(m.id)+'" data-pk="'+esc(x.k)+'"><span>'+esc(x.n)+'</span></label>'}).join('')}).join('')+'</details>';
+  return h+'</div>';
+}
 function hwPicked(){
   var items=[],by={},part={},theory=[];
   Object.keys(hwf.sel).forEach(function(k){if(!hwf.sel[k])return;var i=k.indexOf('|'),l=k.slice(0,i),bk=k.slice(i+1),pa=hwPart(k);
     (by[l]=by[l]||[]).push(bk);if(pa){part[l]=part[l]||{};part[l][bk]=pa.slice()}});
   Object.keys(by).forEach(function(l){var it={l:l,b:by[l]};if(part[l])it.i=part[l];items.push(it)});
-  Object.keys(hwf.mats).forEach(function(m){if(hwf.mats[m])items.push({m:m})});
+  Object.keys(hwf.mats).forEach(function(m){if(!hwf.mats[m])return;var it={m:m},pa=matPart(m);if(pa)it.p=pa.slice();items.push(it)});
   Object.keys(hwf.th).forEach(function(k){if(!hwf.th[k])return;var i=k.indexOf('|');theory.push({l:k.slice(0,i),s:k.slice(i+1)})});
   return {items:items,theory:theory};
 }
 // сколько отдельных заданий в упражнении урока с учётом выбора (упражнение без вопросов — одно задание)
 function hwCount(it,bk){var x=hwBlockOf(it.l,bk),a=x&&x.b&&hwSubs(x.b),p=it.i&&it.i[bk];return Array.isArray(p)&&p.length?p.length:a?a.length:1}
 function hwAutoTitle(pk){
-  var parts=pk.items.map(function(it){if(it.m)return (MAP[it.m]||{title:it.m}).title;var L=window.LESSONS[it.l],n=0;it.b.forEach(function(bk){n+=hwCount(it,bk)});
+  var parts=pk.items.map(function(it){if(it.m)return (MAP[it.m]||{title:it.m}).title+(it.p?' ('+it.p.length+' '+plural(it.p.length,'задание','задания','заданий')+')':'');var L=window.LESSONS[it.l],n=0;it.b.forEach(function(bk){n+=hwCount(it,bk)});
     return (L?L.course+' · '+L.title:it.l)+': '+n+' '+plural(n,'задание','задания','заданий')});
   return parts.join(' + ').slice(0,200);
 }
@@ -333,11 +348,17 @@ function hwMarks(){
     var bx=c.closest('.hwt-blk'),e=bx&&bx.querySelector('.hwt-cnt');
     if(e)e.textContent=pa?'выбрано '+pa.length+' из '+n:hwf.sel[k]?'все '+n+' · выбрать отдельные':n+' '+plural(n,'задание','задания','заданий')+' · выбрать отдельные';
     if(bx)bx.querySelectorAll('[data-hwi]').forEach(function(x){x.checked=!!hwf.sel[k]&&(!pa||pa.indexOf(+x.dataset.ix)>=0)})});
+  document.querySelectorAll('[data-hwm]').forEach(function(c){var id=c.dataset.hwm,bx=c.closest('.hwt-blk');if(!bx||!matParts(id))return;
+    var n=matKeys(id).length,pa=matPart(id),on=matOn(id),e=bx.querySelector('.hwt-cnt');
+    c.checked=!!hwf.mats[id];c.indeterminate=!!pa;
+    if(e)e.textContent=pa?'выбрано '+pa.length+' из '+n:hwf.mats[id]?'все '+n+' · выбрать отдельные':n+' '+plural(n,'задание','задания','заданий')+' · выбрать отдельные';
+    bx.querySelectorAll('[data-hwp]').forEach(function(x){x.checked=on.indexOf(x.dataset.pk)>=0});
+    bx.querySelectorAll('[data-hwg]').forEach(function(x){var g=matParts(id)[+x.dataset.gi],k=g.t.filter(function(y){return on.indexOf(y.k)>=0}).length;x.checked=k>0;x.indeterminate=k>0&&k<g.t.length})});
 }
 function hwSummary(){
   hwMarks();
-  var pk=hwPicked(),n=0,q=0,m=0;pk.items.forEach(function(it){if(it.m)m++;else{n+=it.b.length;it.b.forEach(function(bk){q+=hwCount(it,bk)})}});
-  var t=[];if(n)t.push(n+' '+plural(n,'упражнение','упражнения','упражнений')+' ('+q+' '+plural(q,'задание','задания','заданий')+')');if(m)t.push(m+' '+plural(m,'тренажёр или тест','тренажёра или теста','тренажёров или тестов'));if(pk.theory.length)t.push('теория: '+pk.theory.length);
+  var pk=hwPicked(),n=0,q=0,m=0,mp=0;pk.items.forEach(function(it){if(it.m){m++;if(it.p)mp+=it.p.length}else{n+=it.b.length;it.b.forEach(function(bk){q+=hwCount(it,bk)})}});
+  var t=[];if(n)t.push(n+' '+plural(n,'упражнение','упражнения','упражнений')+' ('+q+' '+plural(q,'задание','задания','заданий')+')');if(m)t.push(m+' '+plural(m,'тренажёр или тест','тренажёра или теста','тренажёров или тестов')+(mp?' (отдельных заданий: '+mp+')':''));if(pk.theory.length)t.push('теория: '+pk.theory.length);
   var e=$('#hwsum');if(e)e.textContent=t.length?'Выбрано: '+t.join(', '):'Отметьте хотя бы одно упражнение или задание';
   var ti=$('#hwti');if(ti)ti.placeholder=pk.items.length?hwAutoTitle(pk):'Название (по желанию)';
 }
@@ -365,13 +386,13 @@ function hwForm(){
     '<div class="seg hwt-lang" role="group" aria-label="Язык">'+[['ko','Корейский'],['en','Английский']].map(function(x){return '<button type="button" data-hwlang="'+x[0]+'" class="'+(hwf.lang===x[0]?'on':'')+'" aria-pressed="'+(hwf.lang===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
     (ls.length?'<label class="field" for="hwl">Урок</label><select id="hwl">'+ls.map(function(x){return '<option value="'+esc(x[0])+'"'+(x[0]===hwf.l?' selected':'')+'>'+esc(x[1])+'</option>'}).join('')+'</select>':'')+
     '<div id="hwblk">'+hwBlocks()+'</div>'+
-    (mats.length?'<details class="hwt-mats"'+(Object.keys(hwf.mats).some(function(k){return hwf.mats[k]})?' open':'')+'><summary>Материалы · '+mats.length+'</summary>'+mats.map(function(m){return '<label class="line hwt-pick"><input type="checkbox" data-hwm="'+esc(m.id)+'"'+(hwf.mats[m.id]?' checked':'')+'><span>'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>'}).join('')+'</details>':'')+
+    (mats.length?'<details class="hwt-mats"'+(Object.keys(hwf.mats).some(function(k){return hwf.mats[k]})?' open':'')+'><summary>Материалы · '+mats.length+'</summary>'+mats.map(hwMatRow).join('')+'</details>':'')+
     '<input id="hwti" class="name" maxlength="200" placeholder="Название (по желанию)">'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="hwdue" type="date" class="name" style="flex:1;min-width:150px;margin:0" aria-label="Срок"><input id="hwnote" class="name" maxlength="1000" placeholder="Комментарий для ученика (по желанию)" style="flex:2;min-width:180px;margin:0"></div>'+
     '<div class="done-row"><span class="muted" id="hwsum"></span><button type="button" class="pri" id="hwgo">Задать домашку</button></div></div></details>';
 }
 function hwItemsText(r){
-  return (r.items||[]).map(function(it){if(it.m)return esc((MAP[it.m]||{title:it.m}).title);
+  return (r.items||[]).map(function(it){if(it.m)return esc((MAP[it.m]||{title:it.m}).title)+(Array.isArray(it.p)&&it.p.length?' ('+it.p.length+' из '+(matKeys(it.m).length||'?')+' заданий)':'');
     if(it.wt)return 'Тест по словам: '+(it.wt.w||[]).length+' '+plural((it.wt.w||[]).length,'слово','слова','слов');
     var t=it.b.map(function(k){var x=hwBlockOf(it.l,k),a=x&&x.b&&hwSubs(x.b),p=it.i&&it.i[k];
       return (x&&x.b?(x.b.title||x.s.title):k)+(Array.isArray(p)&&p.length&&a?' ('+p.length+' из '+a.length+')':'')});
@@ -477,7 +498,12 @@ document.addEventListener('change',function(e){var t=e.target;if(!t.dataset)retu
     on=on.filter(function(x){return x!==ix});if(t.checked)on.push(ix);on.sort(function(a,b){return a-b});
     hwf.sel[k]=on.length>0;if(on.length&&on.length<n)hwf.it[k]=on;else delete hwf.it[k];hwSummary()}
   else if(t.dataset.hwt!==undefined){hwf.th[t.dataset.hwt]=t.checked;hwSummary()}
-  else if(t.dataset.hwm!==undefined){hwf.mats[t.dataset.hwm]=t.checked;hwSummary()}
+  else if(t.dataset.hwm!==undefined){hwf.mats[t.dataset.hwm]=t.checked;delete hwf.mp[t.dataset.hwm];hwSummary()}
+  else if(t.dataset.hwp!==undefined){   // отдельное задание тренажёра
+    var id=t.dataset.hwp,on=matOn(id).filter(function(x){return x!==t.dataset.pk});if(t.checked)on.push(t.dataset.pk);matSet(id,on);hwSummary()}
+  else if(t.dataset.hwg!==undefined){   // все задания одной группы тренажёра
+    var gid=t.dataset.hwg,gk=matParts(gid)[+t.dataset.gi].t.map(function(x){return x.k}),on2=matOn(gid).filter(function(x){return gk.indexOf(x)<0});
+    if(t.checked)on2=on2.concat(gk);matSet(gid,on2);hwSummary()}
   else if(t.id==='hwl'){hwf.l=t.value;var bx=$('#hwblk');if(bx)bx.innerHTML=hwBlocks();hwSummary()}
 });
 document.addEventListener('toggle',function(e){if(e.target.id==='hwnew')hwf.open=e.target.open},true);
@@ -488,7 +514,7 @@ document.addEventListener('click',async function(e){
     var pk=hwPicked();if(!pk.items.length){msg('Отметьте хотя бы одно упражнение, задание или тренажёр');return}
     var hw={title:($('#hwti').value||'').trim()||hwAutoTitle(pk),lang:hwf.lang,items:pk.items,theory:pk.theory,due:$('#hwdue').value||null,note:($('#hwnote').value||'').trim()};
     b.disabled=true;
-    try{await KR.api('teacher_hw_save',{p_student:cur,p_hw:hw});hwf={lang:hwf.lang,l:hwf.l,sel:{},it:{},th:{},mats:{},open:false};await hwReload();msg('Домашка задана: «'+hw.title+'». Ученик увидит её в кабинете.',true)}
+    try{await KR.api('teacher_hw_save',{p_student:cur,p_hw:hw});hwf={lang:hwf.lang,l:hwf.l,sel:{},it:{},th:{},mats:{},mp:{},open:false};await hwReload();msg('Домашка задана: «'+hw.title+'». Ученик увидит её в кабинете.',true)}
     catch(x){b.disabled=false;msg(/no_student/.test(x.message||'')?'Этого ученика ведёт другой преподаватель':/no_material/.test(x.message||'')?'Тренажёр не найден в каталоге на сервере — обновите страницу':'Не получилось задать домашку')}
     return;
   }

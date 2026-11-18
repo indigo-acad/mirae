@@ -300,7 +300,9 @@ const SETS = [
 /* ============ ЛОГИКА ============ */
 let STATE={name:"",started:null,vocab:{}};
 const $=id=>document.getElementById(id);
-const KEY="ielts_places_v2";
+const KEY="ielts_places_v2"+(window.MIRAE_PICK?MIRAE_PICK.suffix:"");
+const MP_HW=window.MIRAE_PICK?" · домашка (выбранные задания)":"";   // MIRAÉ: пометка в отчёте, если тренажёр открыт из домашки
+
 function save(){ try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){} }
 function load(){ try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.name) STATE=s;}catch(e){} }
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
@@ -455,15 +457,15 @@ function dCheck(){
 const SHORT={tr:"перевод",def:"определение",ctx:"в предложении",gaps:"буквы",lis:"на слух",wr:"по переводу"};
 function buildReport(){
   const mins=Math.max(1,Math.round((Date.now()-STATE.started)/60000));
-  let t="📝 <b>IELTS Vocabulary · Places</b>\n👤 "+esc(STATE.name)+"\n🕒 "+new Date().toLocaleString("ru-RU")+" · ≈"+mins+" мин\n📚 Шагов пройдено: "+STEPS.filter(s=>STATE.vocab[s.key]).length+" из "+STEPS.length+"\n";
-  SETS.forEach(st=>{
+  let t="📝 <b>IELTS Vocabulary · Places</b>"+MP_HW+"\n👤 "+esc(STATE.name)+"\n🕒 "+new Date().toLocaleString("ru-RU")+" · ≈"+mins+" мин\n📚 Шагов пройдено: "+STEPS.filter(s=>STATE.vocab[s.key]).length+" из "+STEPS.length+"\n";
+  SETS.forEach(st=>{ if(!STEPS.some(x=>x.set===st))return;   // MIRAÉ: в домашке — только наборы с заданиями
     const got=STEPS.filter(x=>x.set===st&&x.t!=="cards"&&STATE.vocab[x.key]);
     if(!got.length){ t+="\n<b>"+esc(st.name)+"</b>: не начато"; return; }
     const sc=got.reduce((a,x)=>a+STATE.vocab[x.key].score,0), tt=got.reduce((a,x)=>a+STATE.vocab[x.key].total,0);
     t+="\n<b>"+esc(st.name)+"</b>: "+sc+"/"+tt+"\n   "+esc(got.map(x=>SHORT[x.t]+" "+STATE.vocab[x.key].score+"/"+STATE.vocab[x.key].total).join(" · "));
     got.forEach(x=>STATE.vocab[x.key].mistakes.forEach(m=>t+="\n   ✗ "+esc(SHORT[x.t]+": "+m)));
   });
-  const es=STATE.vocab["all:essay"]; t+="\n\n<b>Мини-эссе</b>: "+(es?"слов из урока: "+es.used.length+" ("+esc(es.used.join(", "))+")\n\n"+esc(es.essay):"не сделано");
+  const es=STATE.vocab["all:essay"]; if(STEPS.some(x=>x.key==="all:essay")) t+="\n\n<b>Мини-эссе</b>: "+(es?"слов из урока: "+es.used.length+" ("+esc(es.used.join(", "))+")\n\n"+esc(es.essay):"не сделано");
   return t;
 }
 function chunks(text){ const out=[]; let cur=""; text.split("\n").forEach(l=>{ if((cur+"\n"+l).length>3800){ out.push(cur); cur=l; } else cur=cur?cur+"\n"+l:l; }); if(cur)out.push(cur); return out; }
@@ -525,7 +527,7 @@ async function sendSpeaking(){
   const ids=Object.keys(REC); if(!ids.length){ $("spFb").textContent="Пока нет ни одной записи."; return; }
   $("spSend").disabled=true; $("spFb").textContent="Отправляю…";
   const plan=[1,2,3,4].map(i=>$("p2n"+i).value.trim());
-  let t="🎤 <b>Speaking · Places</b>\n👤 "+esc(STATE.name||"—")+"\n🕒 "+new Date().toLocaleString("ru-RU")+"\n\n<b>Part 2 — план:</b>\n• where: "+esc(plan[0]||"—")+"\n• what it is like: "+esc(plan[1]||"—")+"\n• who lives there: "+esc(plan[2]||"—")+"\n• feelings: "+esc(plan[3]||"—")+"\n"+(REC.p2?"запись: "+fmt(REC.p2.dur):"запись: нет")+"\n\n<b>Part 3:</b>";
+  let t="🎤 <b>Speaking · Places</b>"+MP_HW+"\n👤 "+esc(STATE.name||"—")+"\n🕒 "+new Date().toLocaleString("ru-RU")+(window.MIRAE_PICK&&!MIRAE_PICK.has("p2")?"":"\n\n<b>Part 2 — план:</b>\n• where: "+esc(plan[0]||"—")+"\n• what it is like: "+esc(plan[1]||"—")+"\n• who lives there: "+esc(plan[2]||"—")+"\n• feelings: "+esc(plan[3]||"—")+"\n"+(REC.p2?"запись: "+fmt(REC.p2.dur):"запись: нет"))+(P3.length?"\n\n<b>Part 3:</b>":"");
   P3.forEach((x,i)=>{ const r=REC["p3-"+i]; t+="\n"+(i+1)+". "+esc(x.q)+"\n   план: "+esc($("p3n"+i).value.trim()||"—")+"\n   запись: "+(r?fmt(r.dur):"нет"); });
   try{
     await tg("sendMessage",new URLSearchParams({chat_id:TG_CHAT_ID,text:t,parse_mode:"HTML"}));
@@ -538,6 +540,20 @@ async function sendSpeaking(){
 $("nav").addEventListener("click",e=>{ const t=e.target.dataset.tab; if(!t)return; speechSynthesis.cancel();
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));
   ["vocab","speak"].forEach(x=>$("tab-"+x).classList.toggle("hidden",x!==t)); window.scrollTo(0,0); });
+/* ---------- MIRAÉ: задания для домашки ----------
+   MIRAE_PARTS — задания тренажёра с ключами: из них преподаватель выбирает отдельные задания в «Задать домашку»
+   (node tools/parts.js переносит список в data/parts.js — запустить после правки заданий).
+   Если тренажёр открыт из домашки (?only=…, см. js/bridge.js), остаются только выбранные задания. */
+const MP_NAME=s=>String(s).replace(/^[^A-Za-zА-Яа-яЁё0-9]+/,"");
+const MP_VOCAB=()=>SETS.map(s=>({g:"Лексика · "+s.name,t:STEPS.filter(x=>x.set===s).map(x=>({k:"v:"+x.key,n:MP_NAME(x.name)}))}))
+  .concat(STEPS.some(x=>!x.set)?[{g:"Лексика · итоговые задания",t:STEPS.filter(x=>!x.set).map(x=>({k:"v:"+x.key,n:MP_NAME(x.name)}))}]:[]);
+window.MIRAE_PARTS=MP_VOCAB().concat([
+  {g:"Speaking",t:[{k:"p2",n:"Part 2 · Cue card: Describe a neighbourhood you know well"}].concat(P3.map((x,i)=>({k:"p3:"+i,n:"Part 3 · "+x.q})))}]);
+if(window.MIRAE_PICK){ MIRAE_PICK.keep(STEPS,x=>"v:"+x.key); MIRAE_PICK.take(HINTS,MIRAE_PICK.keep(P3,(x,i)=>"p3:"+i));
+  if(!MIRAE_PICK.has("p2")) $("rec-p2").closest(".card").style.display="none";
+  if(!P3.length) $("p3").closest(".card").style.display="none";
+  MIRAE_PICK.tabs({vocab:STEPS.length,speak:P3.length+(MIRAE_PICK.has("p2")?1:0)}); }
+
 spRender();
 
 load(); if(STATE.name) $("nameInput").value=STATE.name;

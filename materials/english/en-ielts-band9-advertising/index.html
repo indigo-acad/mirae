@@ -324,7 +324,9 @@ const UPGRADE = [
 /* ============ ЛОГИКА ============ */
 let STATE={name:"",started:null,vocab:{}};
 const $=id=>document.getElementById(id);
-const KEY="ielts_ads_state_v1";
+const KEY="ielts_ads_state_v1"+(window.MIRAE_PICK?MIRAE_PICK.suffix:"");
+const MP_HW=window.MIRAE_PICK?" · домашка (выбранные задания)":"";   // MIRAÉ: пометка в отчёте, если тренажёр открыт из домашки
+
 function save(){ try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){} }
 function load(){ try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.name) STATE=s;}catch(e){} }
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
@@ -481,16 +483,16 @@ function dCheck(){
 const SHORT={tr:"перевод",def:"определение",ctx:"в предложении",gaps:"буквы",lis:"на слух",wr:"по переводу"};
 function buildReport(){
   const mins=Math.max(1,Math.round((Date.now()-STATE.started)/60000));
-  let t="📝 <b>IELTS Vocabulary · Advertising (band 9)</b>\n👤 "+esc(STATE.name)+"\n🕒 "+new Date().toLocaleString("ru-RU")+" · ≈"+mins+" мин\n📚 Шагов пройдено: "+STEPS.filter(s=>STATE.vocab[s.key]).length+" из "+STEPS.length+"\n";
-  SETS.forEach(st=>{
+  let t="📝 <b>IELTS Vocabulary · Advertising (band 9)</b>"+MP_HW+"\n👤 "+esc(STATE.name)+"\n🕒 "+new Date().toLocaleString("ru-RU")+" · ≈"+mins+" мин\n📚 Шагов пройдено: "+STEPS.filter(s=>STATE.vocab[s.key]).length+" из "+STEPS.length+"\n";
+  SETS.forEach(st=>{ if(!STEPS.some(x=>x.set===st))return;   // MIRAÉ: в домашке — только наборы с заданиями
     const got=STEPS.filter(x=>x.set===st&&x.t!=="cards"&&STATE.vocab[x.key]);
     if(!got.length){ t+="\n<b>"+esc(st.name)+"</b>: не начато"; return; }
     const sc=got.reduce((a,x)=>a+STATE.vocab[x.key].score,0), tt=got.reduce((a,x)=>a+STATE.vocab[x.key].total,0);
     t+="\n<b>"+esc(st.name)+"</b>: "+sc+"/"+tt+"\n   "+esc(got.map(x=>SHORT[x.t]+" "+STATE.vocab[x.key].score+"/"+STATE.vocab[x.key].total).join(" · "));
     got.forEach(x=>STATE.vocab[x.key].mistakes.forEach(m=>t+="\n   ✗ "+esc(SHORT[x.t]+": "+m)));
   });
-  const up=STATE.vocab["all:up"]; t+="\n\n<b>Апгрейд</b>: "+(up?up.score+"/"+up.total:"не сделано"); if(up) up.mistakes.forEach(m=>t+="\n   ✗ "+esc(m));
-  const es=STATE.vocab["all:essay"]; t+="\n\n<b>Мини-эссе</b>: "+(es?"слов из урока: "+es.used.length+" ("+esc(es.used.join(", "))+")\n\n"+esc(es.essay):"не сделано");
+  const up=STATE.vocab["all:up"]; if(STEPS.some(x=>x.key==="all:up")) t+="\n\n<b>Апгрейд</b>: "+(up?up.score+"/"+up.total:"не сделано"); if(up) up.mistakes.forEach(m=>t+="\n   ✗ "+esc(m));
+  const es=STATE.vocab["all:essay"]; if(STEPS.some(x=>x.key==="all:essay")) t+="\n\n<b>Мини-эссе</b>: "+(es?"слов из урока: "+es.used.length+" ("+esc(es.used.join(", "))+")\n\n"+esc(es.essay):"не сделано");
   return t;
 }
 function chunks(text){ const out=[]; let cur=""; text.split("\n").forEach(l=>{ if((cur+"\n"+l).length>3800){ out.push(cur); cur=l; } else cur=cur?cur+"\n"+l:l; }); if(cur)out.push(cur); return out; }
@@ -647,7 +649,7 @@ async function sendTG(text,btnId,fbId,copyId){
 function sendUnits(){
   const done=UNITS.filter(u=>STATE.units&&STATE.units[u.id]);
   if(!done.length){ $("uFb").textContent="Пока нет ни одного проверенного блока."; return; }
-  let t="📝 <b>Проверка по юнитам</b>\n👤 "+esc(STATE.name||"—")+"\n🕒 "+new Date().toLocaleString("ru-RU")+"\n";
+  let t="📝 <b>Проверка по юнитам</b>"+MP_HW+"\n👤 "+esc(STATE.name||"—")+"\n🕒 "+new Date().toLocaleString("ru-RU")+"\n";
   let s=0,tt=0; done.forEach(u=>{ const r=STATE.units[u.id]; s+=r.score; tt+=r.total; t+="\n<b>"+esc(r.title)+"</b>: "+r.score+"/"+r.total; r.mistakes.forEach(m=>t+="\n   ✗ "+esc(m)); });
   t+="\n\n<b>Итого</b>: "+s+"/"+tt+" · блоков: "+done.length+" из "+UNITS.length;
   sendTG(t,"uSend","uFb","uCopy");
@@ -730,7 +732,7 @@ function sendEssay(){
   const e=ESSAYS.find(x=>x.id===ESS_CUR), st=essState(ESS_CUR), s=eStats(st.text);
   if(s.words<50){ $("eFb").textContent="Сначала напиши эссе (хотя бы 50 слов)."; return; }
   const labels=["Intro","Advantage 1","Advantage 2","Disadvantage 1","Disadvantage 2","Conclusion"];
-  let t="✍️ <b>Essay · "+esc(e.title)+"</b>\n👤 "+esc(STATE.name||"—")+"\n🕒 "+new Date().toLocaleString("ru-RU")+"\n\n<b>План:</b>";
+  let t="✍️ <b>Essay · "+esc(e.title)+"</b>"+MP_HW+"\n👤 "+esc(STATE.name||"—")+"\n🕒 "+new Date().toLocaleString("ru-RU")+"\n\n<b>План:</b>";
   labels.forEach((l,i)=>t+="\n• "+l+": "+esc(st.plan[i]||"—"));
   t+="\n\n<b>Слов: "+s.words+"</b> · связок: "+s.link.length+" · слов по теме: "+s.topic.length+" · слов с сайта: "+s.site.length;
   if(s.site.length) t+="\n("+esc(s.site.join(", "))+")";
@@ -741,6 +743,19 @@ function sendEssay(){
 $("nav").addEventListener("click",e=>{ const t=e.target.dataset.tab; if(!t)return; speechSynthesis.cancel();
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));
   ["vocab","units","essay"].forEach(x=>$("tab-"+x).classList.toggle("hidden",x!==t)); window.scrollTo(0,0); });
+
+/* ---------- MIRAÉ: задания для домашки ----------
+   MIRAE_PARTS — задания тренажёра с ключами: из них преподаватель выбирает отдельные задания в «Задать домашку»
+   (node tools/parts.js переносит список в data/parts.js — запустить после правки заданий).
+   Если тренажёр открыт из домашки (?only=…, см. js/bridge.js), остаются только выбранные задания. */
+const MP_NAME=s=>String(s).replace(/^[^A-Za-zА-Яа-яЁё0-9]+/,"");
+const MP_VOCAB=()=>SETS.map(s=>({g:"Лексика · "+s.name,t:STEPS.filter(x=>x.set===s).map(x=>({k:"v:"+x.key,n:MP_NAME(x.name)}))}))
+  .concat(STEPS.some(x=>!x.set)?[{g:"Лексика · итоговые задания",t:STEPS.filter(x=>!x.set).map(x=>({k:"v:"+x.key,n:MP_NAME(x.name)}))}]:[]);
+window.MIRAE_PARTS=MP_VOCAB().concat([
+  {g:"Проверка юнитов",t:UNITS.map(u=>({k:"u:"+u.id,n:u.title}))},
+  {g:"Essay",t:ESSAYS.map(e=>({k:"e:"+e.id,n:e.title}))}]);
+if(window.MIRAE_PICK){ MIRAE_PICK.keep(STEPS,x=>"v:"+x.key); MIRAE_PICK.keep(UNITS,u=>"u:"+u.id); MIRAE_PICK.keep(ESSAYS,e=>"e:"+e.id);
+  MIRAE_PICK.tabs({vocab:STEPS.length,units:UNITS.length,essay:ESSAYS.length}); }
 
 load(); if(STATE.name) $("nameInput").value=STATE.name;
 uRenderAll(); eTopics();

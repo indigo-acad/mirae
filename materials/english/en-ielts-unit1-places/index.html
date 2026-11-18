@@ -472,7 +472,9 @@ const READINGS = [
 /* ============ ЛОГИКА ============ */
 let STATE = {name:"", started:null, vocab:{}, listening:null, reading:null};
 const $ = id => document.getElementById(id);
-const KEY="ielts_u1_state_v3";
+const KEY="ielts_u1_state_v3"+(window.MIRAE_PICK?MIRAE_PICK.suffix:"");
+const MP_HW=window.MIRAE_PICK?" · домашка (выбранные задания)":"";   // MIRAÉ: пометка в отчёте, если тренажёр открыт из домашки
+
 function save(){ try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){} }
 function load(){ try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.name) STATE=s;}catch(e){} }
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
@@ -786,7 +788,7 @@ function rCheck(id){
 const SHORT={tr:"перевод",def:"определение",gaps:"буквы",scr:"собери слово",lis:"на слух",wr:"по переводу"};
 function rows(){
   const r=[];
-  SETS.forEach(st=>{
+  SETS.forEach(st=>{ if(!STEPS.some(x=>x.set===st))return;   // MIRAÉ: в домашке — только наборы с заданиями
     const got=STEPS.filter(x=>x.set===st && x.t!=="cards" && STATE.vocab[x.key]);
     if(!got.length && !STATE.vocab[st.id+":cards"]){ r.push(["Лексика · "+st.name,null]); return; }
     const sc=got.reduce((a,x)=>a+STATE.vocab[x.key].score,0), tt=got.reduce((a,x)=>a+STATE.vocab[x.key].total,0);
@@ -795,20 +797,20 @@ function rows(){
   });
   STEPS.filter(x=>!x.set).forEach(x=>r.push(["Лексика · "+x.name,STATE.vocab[x.key]||null]));
   LTASKS.forEach(t=>{ const v=(STATE.listening||{})[t.id]; r.push(["Listening · "+t.name.replace(/^Задание \d\.\s*/,""),v||null]); });
-  [11,12].forEach(n=>{ const v=(STATE.textbook||{})[n]; r.push(["Учебник · Track "+n, v||null]); });
+  MP_TB.forEach(n=>{ const v=(STATE.textbook||{})[n]; r.push(["Учебник · Track "+n, v||null]); });
   READINGS.forEach(R=>r.push([R.name,(STATE.readings||{})[R.id]||null]));
   return r;
 }
 function renderResults(){
   $("resTable").innerHTML=rows().map(([k,v])=>"<tr><td>"+esc(k)+"</td><td style='text-align:right'><b>"+(v?(v.total?v.score+" / "+v.total:"✓ сдано"):"<span class=muted>не сделано</span>")+"</b></td></tr>").join("");
   const miss=[]; if(curIdx()<STEPS.length)miss.push("лексика (шаг "+(curIdx()+1)+" из "+STEPS.length+")");
-  if(!(STATE.listening&&Object.keys(STATE.listening).length===LTASKS.length) || !(STATE.textbook&&STATE.textbook[11]&&STATE.textbook[12]))miss.push("Listening");
-  if(!(STATE.readings&&STATE.readings.r1&&STATE.readings.r2))miss.push("Reading");
+  if(!LTASKS.every(t=>STATE.listening&&STATE.listening[t.id]) || !MP_TB.every(n=>STATE.textbook&&STATE.textbook[n]))miss.push("Listening");
+  if(!READINGS.every(R=>STATE.readings&&STATE.readings[R.id]))miss.push("Reading");
   $("resNote").textContent=miss.length?"Ещё не сделано: "+miss.join(", ")+". Можно отправить и так, но лучше сначала закончить.":"Всё сделано! 🎉";
 }
 function buildReport(){
   const mins=Math.max(1,Math.round((Date.now()-STATE.started)/60000));
-  let t="📝 <b>IELTS · Places + Listening Part 1</b>\n👤 "+esc(STATE.name)+"\n🕒 "+new Date().toLocaleString("ru-RU")+" · ≈"+mins+" мин\n📚 Лексика: шаг "+Math.min(curIdx(),STEPS.length)+" из "+STEPS.length+" пройден\n";
+  let t="📝 <b>IELTS · Places + Listening Part 1</b>"+MP_HW+"\n👤 "+esc(STATE.name)+"\n🕒 "+new Date().toLocaleString("ru-RU")+" · ≈"+mins+" мин\n📚 Лексика: шаг "+Math.min(curIdx(),STEPS.length)+" из "+STEPS.length+" пройден\n";
   rows().forEach(([k,v])=>{
     t+="\n<b>"+esc(k)+"</b>: "+(v?(v.total?v.score+"/"+v.total:"сдано"):"не сделано");
     if(v&&v.detail) t+="\n   "+esc(v.detail);
@@ -833,7 +835,22 @@ async function sendResults(){
 function showCopy(text,msg){ $("sendFb").textContent=msg; const b=$("copyBox"); b.value=text.replace(/<\/?b>/g,""); b.classList.remove("hidden"); b.select(); }
 
 /* запуск */
+/* ---------- MIRAÉ: задания для домашки ----------
+   MIRAE_PARTS — задания тренажёра с ключами: из них преподаватель выбирает отдельные задания в «Задать домашку»
+   (node tools/parts.js переносит список в data/parts.js — запустить после правки заданий).
+   Если тренажёр открыт из домашки (?only=…, см. js/bridge.js), остаются только выбранные задания. */
+const MP_NAME=s=>String(s).replace(/^[^A-Za-zА-Яа-яЁё0-9]+/,"");
+const MP_VOCAB=()=>SETS.map(s=>({g:"Лексика · "+s.name,t:STEPS.filter(x=>x.set===s).map(x=>({k:"v:"+x.key,n:MP_NAME(x.name)}))}))
+  .concat(STEPS.some(x=>!x.set)?[{g:"Лексика · итоговые задания",t:STEPS.filter(x=>!x.set).map(x=>({k:"v:"+x.key,n:MP_NAME(x.name)}))}]:[]);
+window.MIRAE_PARTS=MP_VOCAB().concat([
+  {g:"Listening",t:[{k:"tb:11",n:"Учебник · Track 11 (упр. 07–08)"},{k:"tb:12",n:"Учебник · Track 12 (упр. 09–10)"}].concat(LTASKS.map(x=>({k:"l:"+x.id,n:x.name})))},
+  {g:"Reading",t:READINGS.map(R=>({k:"r:"+R.id,n:R.name}))}]);
+const MP_TB=[11,12].filter(n=>!window.MIRAE_PICK||MIRAE_PICK.has("tb:"+n));   // треки учебника в этом прохождении
+if(window.MIRAE_PICK){ MIRAE_PICK.keep(STEPS,x=>"v:"+x.key); MIRAE_PICK.keep(LTASKS,x=>"l:"+x.id); MIRAE_PICK.keep(READINGS,R=>"r:"+R.id);
+  MIRAE_PICK.tabs({vocab:STEPS.length,listening:LTASKS.length+MP_TB.length,reading:READINGS.length,finish:1}); }
+
 tbRender(); lRender(); rRender(); load();
+[11,12].forEach(n=>{ if(MP_TB.indexOf(n)<0){ const c=$("lt-tb"+n); if(c) c.style.display="none"; } });   // MIRAÉ: в домашке — только выбранные треки
 if(STATE.name) $("nameInput").value=STATE.name;
 </script>
 </body>

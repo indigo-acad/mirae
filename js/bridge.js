@@ -10,6 +10,54 @@
       ошибкой, а сайт отчёт сохранил, материал получает ответ «отправлено» и показывает ученику успех.
    Где хранится: общая запись ученика в Supabase (save_progress, site = "school"), ключи state.mat и state.rep,
    на устройстве — localStorage "kr_mat:<логин>". Правила слияния те же, что в js/common.js (mergeMat, mergeRep). */
+/* Домашка с отдельными заданиями. Преподаватель может задать не весь тренажёр, а только выбранные задания
+   («Задать домашку» → материал → «выбрать отдельные»). Тогда ссылка из домашки открывает тренажёр так:
+   …/index.html?hw=<номер домашки>&only=<ключ,ключ,…>. Здесь только разбирается адрес; какие задания оставить,
+   решает сам тренажёр по своему списку window.MIRAE_PARTS (ключи те же, их собирает tools/parts.js в data/parts.js).
+   window.MIRAE_PICK (нет параметра only — нет и объекта):
+     has(k)          — выбрано ли задание с ключом k;
+     keep(arr, key)  — оставить в массиве (на месте) только выбранные элементы, key(x, i) — ключ по исходному номеру;
+                       возвращает исходные номера оставшихся;
+     take(arr, ix)   — оставить в массиве элементы с этими номерами (для параллельных массивов, например подсказок);
+     tabs({вкладка: число заданий}) — спрятать вкладки без заданий и открыть первую оставшуюся;
+     suffix          — добавка к ключу сохранения: прогресс домашки хранится отдельно от обычного прохождения. */
+(function () {
+  "use strict";
+  var q; try { q = new URLSearchParams(location.search) } catch (e) { return }
+  var only = q.get("only"); if (!only) return;
+  var set = {}, n = 0;
+  only.split(",").forEach(function (k) { k = k.trim(); if (k && set[k] !== 1) { set[k] = 1; n++ } });
+  if (!n) return;
+  var hw = (q.get("hw") || "").replace(/[^0-9a-z_-]/gi, "").slice(0, 20);
+  var P = window.MIRAE_PICK = {
+    hw: hw, n: n, suffix: ":hw" + (hw || "x"),
+    has: function (k) { return set[k] === 1 },
+    take: function (arr, ix) { var c = ix.map(function (i) { return arr[i] }); arr.length = 0; Array.prototype.push.apply(arr, c); return arr },
+    keep: function (arr, key) { var ix = []; for (var i = 0; i < arr.length; i++) if (set[key(arr[i], i)] === 1) ix.push(i); P.take(arr, ix); return ix },
+    tabs: function (map) {
+      var btn = function (t) { return document.querySelector('nav button[data-tab="' + t + '"]') }, first = null, act = null;
+      Object.keys(map).forEach(function (t) {
+        var b = btn(t), sec = document.getElementById("tab-" + t);
+        if (!map[t]) { if (b) b.style.display = "none"; if (sec) sec.classList.add("hidden"); return }
+        if (b && !first) first = b;
+        if (b && b.classList.contains("active")) act = b;
+      });
+      if (first && !act) first.click();
+    }
+  };
+  function banner() {
+    if (document.getElementById("mirae-pick")) return;
+    var box = document.getElementById("app") || document.body, d = document.createElement("div");
+    d.id = "mirae-pick";
+    d.style.cssText = "margin:10px 0 14px;padding:12px 16px;border-radius:12px;background:#FFF6E3;border:1.5px solid #D4AF7C;color:#0B1535;font:15px/1.45 system-ui,sans-serif";
+    d.innerHTML = "<b>📌 Домашка от преподавателя.</b> Здесь только задания, которые выбрал преподаватель (" + n + "). " +
+      "Сделай их и нажми «Отправить учителю». <a href=\"" + location.pathname + "\" style=\"color:#1E2A56\">Открыть весь тренажёр</a>";
+    var h = box.querySelector("header");
+    if (h && h.parentNode === box) box.insertBefore(d, h.nextSibling); else box.insertBefore(d, box.firstChild);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", banner); else banner();
+})();
+
 (function () {
   "use strict";
   var path = location.pathname, at = path.indexOf("/materials/");
