@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advertising (band 9) · проверочная на начало урока</title>
+<style>
+:root{--ink:#1d2433;--muted:#667085;--line:#e4e7ec;--bg:#f5f6fa;--card:#fff;--accent:#2f5bea;--ok:#1f9d55;--okbg:#e9f8ef;--bad:#d64545;--badbg:#fdeeee}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;font-size:18px}
+.wrap{max-width:860px;margin:0 auto;padding:18px 14px 80px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+header h1{font-size:22px;margin:0}
+.stat{font-size:17px;font-weight:700}.stat .g{color:var(--ok)}.stat .r{color:var(--bad)}
+.card{background:var(--card);border-radius:16px;padding:24px;margin:14px 0;box-shadow:0 2px 10px #0000000d}
+h2{margin:0 0 6px;font-size:22px}
+.muted{color:var(--muted);font-size:16px}
+button{font:inherit;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#eef0f4;color:var(--ink);margin:4px 4px 4px 0}
+button.primary{background:var(--accent);color:#fff}
+button.okb{background:var(--ok);color:#fff}button.badb{background:var(--bad);color:#fff}
+input[type=text]{font:inherit;padding:9px 11px;border:1.5px solid #c9ced8;border-radius:9px;width:100%}
+.hidden{display:none!important}
+.modes label{display:inline-flex;align-items:center;gap:6px;margin:4px 14px 4px 0;font-size:17px}
+.bar{height:8px;background:#e7e9ef;border-radius:5px;overflow:hidden;margin:8px 0}
+.bar div{height:100%;background:var(--accent);width:0;transition:width .3s}
+.big{font-size:30px;font-weight:700;margin:14px 0}
+.ans{font-size:28px;font-weight:700;color:var(--accent);margin:6px 0}
+.sub{color:var(--muted);font-size:17px}
+table.res{width:100%;border-collapse:collapse;font-size:17px}
+table.res td{padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+kbd{background:#eef0f4;border-radius:5px;padding:1px 6px;font-size:14px}
+@media(max-width:560px){.big{font-size:24px}.ans{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div id="setup" class="card">
+  <h2>👩‍🏫 Advertising · проверочная на начало урока</h2>
+  <p class="muted">Ведёт преподаватель: экран показывает задание, ученик отвечает <b>устно</b>, преподаватель открывает ответ и отмечает ✅ / ❌. Без таймера. Все слова урока band 9 (повторы убраны).</p>
+  <p style="margin:10px 0 4px"><b>Ученик</b></p>
+  <input type="text" id="who" placeholder="Имя (необязательно)" autocomplete="off">
+  <div class="modes">
+    <p style="margin:12px 0 4px"><b>Сколько слов</b></p>
+    <label><input type="radio" name="n" value="0" checked> все (<span id="tot"></span>)</label>
+    <label><input type="radio" name="n" value="30"> 30</label>
+    <label><input type="radio" name="n" value="20"> 20</label>
+    <label><input type="radio" name="n" value="10"> 10</label>
+    <p style="margin:12px 0 4px"><b>Типы заданий</b> <span class="muted">(чередуются)</span></p>
+    <label><input type="checkbox" id="mRu" checked> Перевод → слово</label>
+    <label><input type="checkbox" id="mDef" checked> Определение → слово</label>
+    <label><input type="checkbox" id="mCtx" checked> Пропуск в предложении</label>
+    <label><input type="checkbox" id="mEn"> Слово → перевод</label>
+  </div>
+  <p><button class="primary" onclick="start()">Начать →</button></p>
+  <p class="muted">Клавиши: <kbd>Пробел</kbd> — показать ответ, <kbd>1</kbd> — ✅, <kbd>2</kbd> — ❌.</p>
+</div>
+
+<div id="app" class="hidden">
+  <header><h1 id="ttl">Advertising · warm-up</h1><div class="stat"><span class="g" id="sOk">0</span> ✅ · <span class="r" id="sBad">0</span> ❌</div></header>
+  <div class="card" id="qCard">
+    <div class="bar"><div id="bar"></div></div>
+    <div class="muted" id="qNum"></div>
+    <div class="sub" id="qTask" style="margin-top:4px"></div>
+    <div class="big" id="qPrompt"></div>
+    <div id="aBox" class="hidden">
+      <div class="ans" id="aMain"></div>
+      <div class="sub" id="aSub"></div>
+    </div>
+    <p style="margin-top:16px">
+      <button class="primary" id="showBtn" onclick="reveal()">👀 Показать ответ</button>
+      <span id="markBtns" class="hidden">
+        <button class="okb" onclick="mark(true)">✅ Знает</button>
+        <button class="badb" onclick="mark(false)">❌ Не знает</button>
+      </span>
+      <button onclick="skipBack()" id="backBtn">← Назад</button>
+    </p>
+  </div>
+  <div class="card hidden" id="doneCard">
+    <h2 id="doneTitle"></h2>
+    <div id="review"></div>
+    <p>
+      <button class="primary" id="againBtn" onclick="again()">🔁 Повторить ошибки</button>
+      <button onclick="copyRes()">📋 Скопировать результат</button>
+      <button onclick="location.reload()">В начало</button>
+    </p>
+    <p class="muted" id="copied"></p>
+  </div>
+</div>
+</div>
+<script>
+const WORDS = [{"en": "devastating", "pos": "adj", "ru": "разрушительный, опустошительный", "d": "causing great damage or destruction", "ex": "The flood had a devastating effect on local farms."}, {"en": "precipitation", "pos": "n", "ru": "осадки", "d": "rain, snow or hail that falls to the ground", "ex": "Annual precipitation in the desert is less than 25 mm."}, {"en": "malleable", "pos": "adj", "ru": "податливый, пластичный", "d": "easy to bend or press into a new shape; easily influenced", "ex": "Gold is a soft, malleable metal."}, {"en": "erosion", "pos": "n", "ru": "эрозия, размывание", "d": "the process by which rock, sand and soil are broken down and carried away by wind, water or ice", "ex": "Coastal erosion is destroying the cliffs year by year."}, {"en": "fossil", "pos": "n", "ru": "окаменелость, ископаемое", "d": "a trace of an ancient plant or animal that has been preserved in rock", "ex": "Scientists found a dinosaur fossil in the desert."}, {"en": "latitude", "pos": "n", "ru": "широта (географическая)", "d": "the distance north or south of the equator", "ex": "Countries at a high latitude have long winter nights."}, {"en": "mild", "pos": "adj", "ru": "мягкий, умеренный", "d": "not too cold or too hot; not strong or severe", "ex": "The region has a mild climate all year round."}, {"en": "smelt", "pos": "v", "ru": "плавить, выплавлять (металл)", "d": "to heat rock in order to get the metal out of it", "ex": "Ancient people learned to smelt copper about 7,000 years ago."}, {"en": "damp", "pos": "adj", "ru": "сырой, влажный", "d": "slightly wet, often in an unpleasant way; humid", "ex": "The house was cold and damp in winter."}, {"en": "pristine", "pos": "adj", "ru": "нетронутый, первозданный, безупречно чистый", "d": "fresh and clean; not spoiled or corrupted", "ex": "The island still has pristine beaches."}, {"en": "algae", "pos": "n", "ru": "водоросли", "d": "very simple plants that grow in or near water", "ex": "Warm water causes algae to grow quickly in the lake."}, {"en": "pervasive", "pos": "adj", "ru": "всепроникающий, повсеместный", "d": "spreading through every part of something", "ex": "Plastic pollution has become pervasive in the oceans."}, {"en": "notoriously", "pos": "adv", "ru": "как известно (в плохом смысле), печально известно", "d": "in a way that is famous for something bad", "ex": "The city is notoriously expensive for tourists."}, {"en": "inevitable", "pos": "adj", "ru": "неизбежный", "d": "certain to happen; impossible to avoid", "ex": "Price rises are inevitable when energy costs go up."}, {"en": "inexorable", "pos": "adj", "ru": "неумолимый, неотвратимый", "d": "impossible to stop or change; unrelenting", "ex": "We are witnessing the inexorable rise of online shopping."}, {"en": "vital", "pos": "adj", "ru": "жизненно важный", "d": "necessary or essential; extremely important", "ex": "Advertising is vital for a new business."}, {"en": "laden", "pos": "adj", "ru": "нагруженный, обременённый", "d": "heavily loaded or weighed down with something", "ex": "Shoppers left the mall laden with bags."}, {"en": "unprecedented", "pos": "adj", "ru": "беспрецедентный", "d": "never done or known before", "ex": "Online sales reached an unprecedented level last year."}, {"en": "bargain", "pos": "n", "ru": "выгодная покупка", "d": "something bought for less than its usual price", "ex": "This coat was a real bargain at half price."}, {"en": "own-label products", "pos": "n", "ru": "продукты собственной марки (магазина)", "d": "goods sold under the shop's own name, usually cheaper", "ex": "Supermarkets sell own-label products at lower prices."}, {"en": "retail", "pos": "n", "ru": "розничная торговля", "d": "the business of selling goods to the public in shops", "ex": "She has worked in retail for ten years."}, {"en": "made redundant", "pos": "phr", "ru": "попасть под сокращение, быть уволенным по сокращению", "d": "lost your job because your employer no longer needs you", "ex": "Hundreds of workers were made redundant when the factory closed."}, {"en": "buggy", "pos": "n", "ru": "детская коляска (прогулочная)", "d": "a light folding chair on wheels for pushing a small child", "ex": "The shop has wide aisles for parents with a buggy."}, {"en": "affiliate", "pos": "n", "ru": "филиал, дочерняя компания; партнёр", "d": "a company or organisation connected to a larger one", "ex": "The bank opened an affiliate in Dubai."}, {"en": "overdraft", "pos": "n", "ru": "овердрафт (уход в минус по счёту)", "d": "money you spend from your bank account that is more than you have in it", "ex": "He had to pay interest on his overdraft."}, {"en": "go viral", "pos": "phr", "ru": "стать вирусным, мгновенно разлететься по сети", "d": "to spread very quickly to a huge number of people online", "ex": "It is impossible to predict which videos will go viral."}, {"en": "run a campaign", "pos": "phr", "ru": "проводить (рекламную) кампанию", "d": "to organise a planned series of activities to reach a goal", "ex": "The charity decided to run a campaign against plastic waste."}, {"en": "vulnerable", "pos": "adj", "ru": "уязвимый, незащищённый", "d": "easily harmed, tricked or influenced", "ex": "Children are especially vulnerable to advertising."}, {"en": "bombard", "pos": "v", "ru": "засыпать, забрасывать (рекламой)", "d": "to attack or overwhelm someone with a lot of things at once", "ex": "Companies bombard us with adverts every time we go online."}, {"en": "unsolicited", "pos": "adj", "ru": "незапрошенный, непрошеный", "d": "not asked for and not wanted", "ex": "I receive dozens of unsolicited emails every day."}, {"en": "solicited", "pos": "adj", "ru": "запрошенный (то, о чём просили)", "d": "asked for or requested by the person who receives it", "ex": "We only send solicited emails to customers who have subscribed."}, {"en": "intrusive", "pos": "adj", "ru": "навязчивый, вторгающийся", "d": "disturbing your privacy or attention in an unwelcome way", "ex": "Pop-up adverts are annoying and intrusive."}, {"en": "ubiquitous", "pos": "adj", "ru": "вездесущий, повсеместный", "d": "seeming to be everywhere at the same time", "ex": "Smartphones have become ubiquitous in modern life."}, {"en": "impulse buying", "pos": "n", "ru": "импульсивные покупки", "d": "buying something suddenly without planning or thinking", "ex": "Sweets near the till encourage impulse buying."}, {"en": "billboard", "pos": "n", "ru": "рекламный щит", "d": "a very large board next to a road, used for advertisements", "ex": "A giant billboard advertised the new film."}, {"en": "prime time", "pos": "n", "ru": "прайм-тайм (лучшее телевизионное время)", "d": "the evening hours when most people watch TV", "ex": "Adverts during prime time cost a fortune."}, {"en": "saturated", "pos": "adj", "ru": "перенасыщенный (о рынке)", "d": "so full of something that no more can be added", "ex": "The smartphone market is saturated, so firms must advertise heavily."}, {"en": "household name", "pos": "n", "ru": "широко известный бренд, имя на слуху", "d": "a person or brand that almost everyone knows", "ex": "After the campaign, the brand became a household name."}, {"en": "a double-edged sword", "pos": "n", "ru": "палка о двух концах, обоюдоострый меч", "d": "something that has both good and bad effects", "ex": "Social media advertising is a double-edged sword."}, {"en": "appeal to", "pos": "v", "ru": "привлекать, апеллировать к", "d": "to attract or interest a particular group of people", "ex": "Adverts often appeal to our emotions rather than our logic."}, {"en": "compile", "pos": "v", "ru": "составлять, собирать (данные, список)", "d": "to collect information and put it together in a list or report", "ex": "Marketers compile data about what customers search for."}, {"en": "catchy", "pos": "adj", "ru": "запоминающийся, цепляющий", "d": "(of a tune or slogan) easy to remember and pleasant", "ex": "A catchy slogan stays in your head for years."}, {"en": "boost", "pos": "v", "ru": "повышать, стимулировать", "d": "to make something increase or improve", "ex": "A celebrity endorsement can boost sales overnight."}, {"en": "endorsement", "pos": "n", "ru": "рекомендация, одобрение (знаменитостью)", "d": "public support of a product, often by a famous person", "ex": "The sportsman's endorsement made the trainers hugely popular."}, {"en": "gullible", "pos": "adj", "ru": "доверчивый, легковерный", "d": "easily tricked because you believe what people tell you", "ex": "Gullible shoppers believe every miracle claim."}, {"en": "stand out", "pos": "phr v", "ru": "выделяться", "d": "to be easy to notice because of being different", "ex": "In a crowded market, brands need to stand out."}, {"en": "persuasive", "pos": "adj", "ru": "убедительный", "d": "able to make people believe or do something", "ex": "The commercial was so persuasive that sales doubled in a month."}, {"en": "manipulate", "pos": "v", "ru": "манипулировать", "d": "to control or influence people in a clever and often unfair way", "ex": "Some adverts manipulate children into wanting expensive toys."}, {"en": "compelling", "pos": "adj", "ru": "убедительный, неотразимый", "d": "so interesting or strong that you have to pay attention", "ex": "The campaign told a compelling story about a family farm."}, {"en": "misleading", "pos": "adj", "ru": "вводящий в заблуждение", "d": "giving the wrong idea or impression", "ex": "The claim that the drink was healthy turned out to be misleading."}, {"en": "exaggerate", "pos": "v", "ru": "преувеличивать", "d": "to describe something as bigger or better than it really is", "ex": "Advertisers often exaggerate the benefits of their products."}, {"en": "aspirational", "pos": "adj", "ru": "(о товаре) символ успеха, «к которому стремятся»", "d": "showing a lifestyle that people would like to have", "ex": "Car adverts are full of aspirational images of successful people."}, {"en": "materialistic", "pos": "adj", "ru": "материалистичный", "d": "caring too much about money and possessions", "ex": "Critics argue that advertising makes society more materialistic."}, {"en": "consumerism", "pos": "n", "ru": "потребительство, культ потребления", "d": "the idea that buying more and more things is good", "ex": "Black Friday is a symbol of modern consumerism."}, {"en": "subliminal", "pos": "adj", "ru": "подсознательный, скрытый", "d": "affecting your mind without you noticing it", "ex": "Subliminal messages in adverts are banned in many countries."}, {"en": "product placement", "pos": "n", "ru": "продакт-плейсмент, скрытая реклама", "d": "when a company pays for its product to appear in a film or TV show", "ex": "Product placement in films is a subtle form of marketing."}, {"en": "sponsorship", "pos": "n", "ru": "спонсорство", "d": "paying for an event or team in return for advertising", "ex": "Sports sponsorship is worth billions of dollars."}, {"en": "influencer", "pos": "n", "ru": "инфлюенсер, блогер", "d": "a person who is paid to promote products on social media", "ex": "The brand hired an influencer with two million followers."}, {"en": "viral", "pos": "adj", "ru": "вирусный", "d": "spreading very quickly on the internet", "ex": "The funny video went viral and was watched by millions."}, {"en": "revenue", "pos": "n", "ru": "доход, выручка", "d": "the money that a company receives", "ex": "Social media sites earn most of their revenue from advertising."}, {"en": "target audience", "pos": "n", "ru": "целевая аудитория", "d": "the group of people an advert is made for", "ex": "The target audience for this campaign is teenagers."}, {"en": "raise awareness", "pos": "phr", "ru": "повышать осведомлённость", "d": "to make more people know about something", "ex": "The campaign aims to raise awareness of healthy eating."}, {"en": "boost sales", "pos": "phr", "ru": "резко увеличить продажи", "d": "to make a company sell more", "ex": "A clever slogan can boost sales dramatically."}, {"en": "word of mouth", "pos": "phr", "ru": "сарафанное радио", "d": "when people tell their friends about something", "ex": "The restaurant became popular through word of mouth."}, {"en": "cut-throat competition", "pos": "phr", "ru": "жёсткая конкуренция", "d": "very strong and unfair rivalry between companies", "ex": "There is cut-throat competition between mobile phone companies."}, {"en": "false claims", "pos": "phr", "ru": "ложные заявления", "d": "statements about a product that are not true", "ex": "The company was fined for making false claims about its cream."}, {"en": "impose a ban", "pos": "phr", "ru": "ввести запрет", "d": "to officially stop something from happening", "ex": "Many countries impose a ban on tobacco advertising."}, {"en": "tighten regulations", "pos": "phr", "ru": "ужесточить правила", "d": "to make rules stricter", "ex": "The government plans to tighten regulations on online adverts."}, {"en": "brand loyalty", "pos": "phr", "ru": "лояльность к бренду", "d": "when customers keep buying the same brand", "ex": "Free gifts help companies build brand loyalty."}, {"en": "deceptive advertising", "pos": "phr", "ru": "обманная реклама", "d": "adverts that trick people with untrue information", "ex": "Deceptive advertising should be punished with heavy fines."}];
+const $=id=>document.getElementById(id);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+$("tot").textContent=WORDS.length;
+const TASK={ru:"Скажи по-английски:",def:"Какое это слово? (определение)",ctx:"Какое слово пропущено?",en:"Переведи на русский:"};
+
+// пропуск: ищем слово (и формы вроде -s/-ed/-ing) в примере
+function gap(w){
+  const core=w.en.replace(/^a /,"").replace(/ to$/,"");
+  const parts=core.split(" ").map(p=>p.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));
+  const stem=parts.map((p,i)=>i===0?p.replace(/e$/,"")+"\\w*":p+"\\w*").join("\\s+");
+  const re=new RegExp("\\b"+(w.en.startsWith("a ")?"a\\s+":"")+stem,"i");
+  return re.test(w.ex)? w.ex.replace(re,m=>"_____"):null;
+}
+let QS=[],I=0,RES=[],shown=false,who="";
+function types(){const t=[];["Ru","Def","Ctx","En"].forEach(k=>{if($("m"+k).checked)t.push(k.toLowerCase());});return t.length?t:["ru"];}
+function build(words){const t=types();return shuffle(words).map((w,i)=>{let k=t[i%t.length];let g=null;
+  if(k==="ctx"){g=gap(w);if(!g)k=t.find(x=>x!=="ctx")||"ru";}
+  const p=k==="ru"?w.ru:k==="def"?w.def:k==="ctx"?g:w.en;
+  return {k,w,p};});}
+function run(words){QS=build(words);I=0;RES=[];$("setup").classList.add("hidden");$("app").classList.remove("hidden");
+  $("doneCard").classList.add("hidden");$("qCard").classList.remove("hidden");stat();show();}
+function start(){who=$("who").value.trim();if(who)$("ttl").textContent="Advertising · "+who;
+  const n=+document.querySelector('input[name=n]:checked').value;run(n?shuffle(WORDS).slice(0,n):WORDS);}
+function stat(){$("sOk").textContent=RES.filter(r=>r===true).length;$("sBad").textContent=RES.filter(r=>r===false).length;}
+function show(){const q=QS[I];shown=false;
+  $("bar").style.width=(100*I/QS.length)+"%";$("qNum").textContent="Слово "+(I+1)+" из "+QS.length;
+  $("qTask").textContent=TASK[q.k];$("qPrompt").textContent=q.p;
+  $("aBox").classList.add("hidden");$("markBtns").classList.add("hidden");$("showBtn").classList.remove("hidden");
+  $("backBtn").classList.toggle("hidden",I===0);}
+function reveal(){if(shown)return;shown=true;const q=QS[I];
+  $("aMain").textContent=q.k==="en"?q.w.ru:q.w.en+"  ("+q.w.pos+")";
+  $("aSub").innerHTML=(q.k==="en"?"":esc(q.w.ru)+"<br>")+"<i>"+esc(q.w.ex)+"</i>";
+  $("aBox").classList.remove("hidden");$("showBtn").classList.add("hidden");$("markBtns").classList.remove("hidden");}
+function mark(ok){if(!shown)return;RES[I]=ok;stat();I++;if(I>=QS.length)finish();else show();}
+function skipBack(){if(I>0){I--;RES.length=I;stat();show();}}
+document.addEventListener("keydown",e=>{if($("app").classList.contains("hidden")||!$("doneCard").classList.contains("hidden"))return;
+  if(e.key===" "){e.preventDefault();reveal();}else if(e.key==="1")mark(true);else if(e.key==="2")mark(false);});
+function finish(){$("qCard").classList.add("hidden");$("doneCard").classList.remove("hidden");
+  const ok=RES.filter(Boolean).length,pct=Math.round(100*ok/QS.length);
+  $("doneTitle").textContent="🎯 "+ok+" / "+QS.length+" ("+pct+"%)";
+  const bad=QS.filter((q,i)=>!RES[i]);
+  let h=bad.length?'<p class="muted">Слова на повторение:</p><table class="res">':'<p>🎉 Без ошибок!</p>';
+  bad.forEach(q=>{h+='<tr><td><b>'+esc(q.w.en)+'</b></td><td>'+esc(q.w.ru)+'</td></tr>';});
+  $("review").innerHTML=h+(bad.length?'</table>':'');$("againBtn").classList.toggle("hidden",!bad.length);}
+function again(){run(QS.filter((q,i)=>!RES[i]).map(q=>q.w));}
+function copyRes(){const ok=RES.filter(Boolean).length;
+  const t="Advertising (band 9) · проверочная на начало урока"+(who?" · "+who:"")+"\n"+new Date().toLocaleDateString("ru-RU")+"\nРезультат: "+ok+"/"+QS.length+
+  "\nОшибки: "+(QS.filter((q,i)=>!RES[i]).map(q=>q.w.en).join(", ")||"нет");
+  navigator.clipboard.writeText(t).then(()=>$("copied").textContent="Скопировано ✓",()=>$("copied").textContent=t);}
+</script>
+</body>
+</html>

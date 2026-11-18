@@ -106,6 +106,14 @@ window.MATERIALS=[
   "level": "band 9"
  },
  {
+  "id": "en-test-band9-start",
+  "section": "english",
+  "kind": "class",
+  "title": "Advertising · проверочная на начало урока (band 9)",
+  "path": "materials/english/en-test-band9-start/",
+  "level": "band 9"
+ },
+ {
   "id": "ko-topik3-vocab",
   "section": "korean",
   "kind": "trainer",
