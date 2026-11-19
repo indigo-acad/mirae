@@ -28,7 +28,9 @@ var DEF={
   newDay:10,      // новых слов в день
   revDay:100,     // повторений в день
   games:{cards:1,tr:1,mean:1,ctx:1,wr:1,build:1,pairs:1,hear:1,dict:1,say:1},
-  ctxm:{},        // режим отработки по языкам: {ko: "ru", en: "ctx"}; нет языка — "ru"
+  ctxm:{},        // режим отработки по языкам: {ko: "ru", en: "ctx"}; нет языка — "ru" (прежняя настройка, см. gls)
+  gls:{},         // направления: на каком языке значение слова. {ko: ["ru","en","ctx"]} — корейское слово отрабатывается
+                  // с русским, с английским и в контексте вперемешку. Нет языка — берётся из ctxm
   lw:"ask"        // слова нового урока: ask — спросить ученика, auto — добавить сразу, off — не добавлять
 };
 function num(v,d,lo,hi){v=parseFloat(v);return isFinite(v)?Math.max(lo,Math.min(hi,v)):d}
@@ -47,9 +49,19 @@ function cfg(s){
     ease:num(s.ease,DEF.ease,1.3,4),hard:num(s.hard,DEF.hard,1,2),bonus:num(s.bonus,DEF.bonus,1,2),
     lapse:num(s.lapse,DEF.lapse,0,1),mod:num(s.mod,DEF.mod,.5,2),maxIvl:Math.round(num(s.maxIvl,DEF.maxIvl,7,3650)),
     newDay:Math.round(num(s.newDay,DEF.newDay,0,200)),revDay:Math.round(num(s.revDay,DEF.revDay,1,2000)),games:g,
-    lw:s.lw==="auto"||s.lw==="off"?s.lw:DEF.lw,ctxm:ctxm(s.ctxm)};
+    lw:s.lw==="auto"||s.lw==="off"?s.lw:DEF.lw,ctxm:ctxm(s.ctxm),gls:gls(s.gls)};
 }
 function ctxm(m){var o={};if(m&&typeof m==="object")Object.keys(m).forEach(function(l){if(/^[a-z]{2,3}$/.test(l)&&CTXM.indexOf(m[l])>=0)o[l]=m[l]});return o
+}
+/* направления по языкам: "ru", "ctx" или код другого языка (не самого слова) */
+function gls(m){
+  var o={};if(!m||typeof m!=="object")return o;
+  Object.keys(m).forEach(function(l){
+    if(!/^[a-z]{2,3}$/.test(l)||!Array.isArray(m[l]))return;
+    var a=m[l].filter(function(x,i,arr){return (x==="ru"||x==="ctx"||(/^[a-z]{2}$/.test(x)&&x!==l))&&arr.indexOf(x)===i}).slice(0,6);
+    if(a.length)o[l]=a;
+  });
+  return o;
 }
 function dayStart(t){var d=new Date(t);d.setHours(0,0,0,0);return d.getTime()}
 function norm(w){return String(w==null?"":w).normalize("NFC").trim().replace(/\s+/g," ").toLowerCase()}
