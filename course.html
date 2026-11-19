@@ -28,6 +28,13 @@ function programKo(){
   var C=COURSE,C2=window.COURSE2;
   var ch=function(l){
     var x={key:l.id||('soon-'+l.no),tag:l.tag||l.no+'과',title:l.title,ko:!l.ru,scene:l.scene};
+    if(l.mat){   // глава-материал из каталога (materials/...): доступ и «пройдено» как у материалов
+      var m=(window.MATERIALS||[]).filter(function(q){return q.id===l.mat})[0]; if(!m){x.state='soon';return x}
+      x.key=m.id; if(!KR.can(m.id)){x.state='lock';return x}
+      var d=KR.taken().indexOf(m.id)>=0;x.n=d?1:0;x.tot=1;x.pct=d?100:0;x.state=d?'done':'open';x.href=m.path;x.go=d?'Повторить':'Открыть';
+      x.extra='<button data-take="'+esc(m.id)+'" aria-pressed="'+d+'">'+(d?KR.icon('check',16)+' Пройдено':'Отметить пройденным')+'</button>';
+      return x;
+    }
     if(!l.id){x.state='soon';return x}
     if(!KR.can('lesson-'+l.id)){x.state='lock';return x}
     var p=KR.progress(l.id);x.n=p.n;x.tot=p.tot;x.pct=p.pct;x.P=p.P;x.state=p.pct>=100?'done':'open';
