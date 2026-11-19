@@ -1063,7 +1063,8 @@ document.addEventListener('keydown',function(e){
 });
 // пришли данные из облака: сводку обновляем всегда, а список — только если ученик сейчас ничего не вводит
 function typing(){var a=document.activeElement;return !!a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)}
-V.onchange=function(){drawToday();if(!S&&!typing()&&!editing)drawList()};
+V.onchange=function(){if(KR.lang()!==lang&&!S){drawAll();return}   // слова пришли из облака: язык словаря мог смениться
+  drawToday();if(!S&&!typing()&&!editing)drawList()};
 KR.onLang=function(){stopListen();if(S)stop();else drawAll()};
 if(window.speechSynthesis)speechSynthesis.onvoiceschanged=function(){if(!$('#prefs').hidden&&!typing())drawPrefs()};
 if(KR.require()){KR.topbar('words');drawAll();KR.load().then(function(){
