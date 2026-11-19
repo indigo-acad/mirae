@@ -67,8 +67,11 @@
   <!-- ученик без открытых курсов -->
   <div id="waitBox" data-for="wait"></div>
 
+  <!-- ученик: слова на сегодня и домашка (есть и до того, как преподаватель открыл курсы) -->
+  <div class="home-cards" id="homeCards" data-for="school wait"></div>
+
   <!-- ученик: разделы его школы -->
-  <section class="tiles four" data-for="school" aria-label="Разделы школы">
+  <section class="tiles four" data-for="school wait" aria-label="Разделы школы">
     <a class="tile glass reveal" href="course.html">
       <div class="tile-top"><span class="tile-ic" data-ic="book" data-s="22"></span><span class="tile-go" data-ic="arrowUp" data-s="18"></span></div>
       <div class="tile-tx"><h3>Курс</h3><p id="tCourse">Программа по шагам</p></div>
@@ -158,7 +161,7 @@
 
 <footer class="foot"><span>MIRAÉ · The Indigo Language Academy</span><i>Languages open worlds.</i></footer>
 
-<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/sky.js"></script>
+<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/sky.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/home-cards.js"></script>
 <script>
 KR.topbar("home");KR.koFont();
 var $=function(s){return document.querySelector(s)},root=document.documentElement;
@@ -183,9 +186,23 @@ function render(){
     $("#phGo").href=m==="wait"?"cabinet.html":"auth.html";$("#phGoT").textContent=m==="wait"?"Открыть кабинет":"Войти в кабинет";
     if(m==="wait")$("#waitBox").innerHTML=KR.noCoursesCard();
   }
+  drawCards();
   KR.hush();
   if(sky){sky.set({flat:m==="school"});sky.refresh()}else horizon();
 }
+
+// ---------- слова на сегодня и домашка ----------
+var HW=null;
+function drawCards(){
+  var box=$("#homeCards"),m=mode();if(!box||m==="guest")return;
+  box.innerHTML=KR.cards.words()+((KR.ctx||{}).teacher||HW===null?"":KR.cards.homework(HW));
+}
+document.addEventListener("click",function(e){
+  var b=e.target.closest("[data-hwseen]");if(!b)return;var id=+b.dataset.hwseen;
+  (HW||[]).forEach(function(r){if(r.id===id)r.seen=Date.now()});drawCards();
+  KR.api("hw_seen",{p_id:id}).catch(function(){});
+});
+if(KR.vocab)KR.vocab.onchange=drawCards;
 
 // ---------- карточка фразы (гость) ----------
 var PH={
@@ -232,7 +249,7 @@ if(sky){
 }
 KR.onLang=render;
 render();KR.reveal();
-if(KR.user())KR.load().then(render);
+if(KR.user())KR.load().then(render).then(function(){return KR.ctx.teacher?null:KR.homework()}).then(function(l){if(l){HW=l;drawCards()}});
 </script>
 </body>
 </html>

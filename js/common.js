@@ -474,7 +474,7 @@ window.KR={
           '<nav aria-label="Разделы сайта">'+a("course.html",icon("book",17)+"Курс","course")+a("words.html",icon("cards",17)+"Слова","words")+a("practice.html",icon("pencil",17)+'<span class="xs-hide">Доп.&nbsp;</span>упражнения',"practice")+(cx.teacher?a("teacher.html",icon("users",17)+"Ученики","teacher"):"")+"</nav>"+
           '<div class="top-r">'+langSwitch()+acc+"</div></div>";
       }else{
-        h='<div class="top user">'+logo+"<nav aria-label=\"Разделы сайта\">"+tl+"</nav><div class=\"top-r\">"+acc+"</div></div>";
+        h='<div class="top user">'+logo+"<nav aria-label=\"Разделы сайта\">"+a("words.html",icon("cards",17)+"Слова","words")+a("practice.html",icon("pencil",17)+'<span class="xs-hide">Доп.&nbsp;</span>упражнения',"practice")+tl+"</nav><div class=\"top-r\">"+acc+"</div></div>";
       }
     }
     el.innerHTML=h;

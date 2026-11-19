@@ -858,6 +858,8 @@ html:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{
 .wcab-i .muted{font-size:13.5px}
 .wcab-f{margin:12px 0 0;font-size:14px}
 .wcab-f a{color:inherit;font-weight:600}
+main.home>.home-cards{display:grid;gap:16px;margin-top:clamp(8px,2vw,24px)}
+main.home>.home-cards:empty{display:none}
 .hw-row{display:flex;justify-content:space-between;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--rule)}
 .hwc .tb-h+.hw-row,.hwc .hw-cm+.hw-row{border-top:0}
 .hw-tx{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 220px}
