@@ -19,9 +19,11 @@
   <section id="pod" class="card glass play pod" aria-live="polite" hidden></section>
   <div class="seg wtabs" id="tabs" role="tablist" aria-label="Словарь и настройки">
     <button type="button" role="tab" data-tab="list" aria-selected="true">Мои слова</button>
+    <button type="button" role="tab" data-tab="stats" aria-selected="false">Статистика</button>
     <button type="button" role="tab" data-tab="prefs" aria-selected="false">Настройки</button>
   </div>
   <section id="list"></section>
+  <section id="stats" hidden></section>
   <section id="prefs" hidden></section>
 </main>
 <script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/words2.js"></script><script src="js/meaning.js"></script><script src="js/dict.js"></script><script src="js/ear.js"></script><script src="js/assistant.js"></script>
@@ -920,6 +922,31 @@ function drawList(){
   if(POD&&POD.c&&!POD.end)markRow(POD.c.id);
 }
 
+// ---------- общая статистика словаря ----------
+/* Уровни слов, точность, прогноз повторений на неделю, занятия за 14 дней (журнал kr_wlog, js/vocab.js), самые трудные слова. */
+function drawStats(){
+  var all=V.all(DL()),now=Date.now(),ds=SRS.dayStart(now),DAY=SRS.DAY;
+  var lv={n:0,l:0,s:0,m:0,g:0};all.forEach(function(c){if(!c.st)lv.n++;else if(c.st!==2)lv.l++;else if((c.ivl||0)>=21)lv.g++;else if((c.ivl||0)>=7)lv.m++;else lv.s++});
+  var reps=0,laps=0;all.forEach(function(c){reps+=c.reps||0;laps+=c.lap||0});
+  var bar=function(rows,max){return '<div class="sbars">'+rows.map(function(r){return '<div class="sbar"><span>'+r[0]+'</span><i><b style="width:'+(max?Math.round(r[1]/max*100):0)+'%"></b></i><em>'+r[1]+'</em></div>'}).join('')+'</div>'};
+  var L=[['Новые',lv.n],['Учу сейчас',lv.l],['Начинаю запоминать',lv.s],['Запоминаю (7+ дн)',lv.m],['Знаю хорошо (21+ дн)',lv.g]];
+  var fc=[];for(var i=0;i<7;i++){var a=ds+i*DAY,b=a+DAY;fc.push([i===0?'Сегодня':i===1?'Завтра':new Date(a).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric'}),all.filter(function(c){return c.st&&(i===0?c.due<b:c.due>=a&&c.due<b)}).length])}
+  var log={};try{log=JSON.parse(localStorage.getItem('kr_wlog:'+KR.user())||'{}')||{}}catch(e){}
+  var act=[],streak=0,run=true;for(var j=0;j<14;j++){var dt=new Date(ds-j*DAY),k=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'),x=log[k]||{n:0,r:0,ok:0};
+    var n=x.n+x.r;if(n)streak+=run?1:0;else if(j>0)run=false;act.push([dt.toLocaleDateString('ru-RU',{day:'numeric',month:'short'}),n,x.ok])}
+  act.reverse();var aMax=Math.max.apply(null,act.map(function(r){return r[1]}).concat([1]));
+  var hard=all.filter(function(c){return c.st}).map(function(c){return {c:c,s:(c.lap||0)*2+(c.pe||0)+(c.tc||0)*2+(c.star?1:0)}}).filter(function(x){return x.s>0}).sort(function(a,b){return b.s-a.s}).slice(0,12);
+  var box=function(n,t){return '<div><b>'+n+'</b><span class="muted">'+t+'</span></div>'};
+  var h='<div class="card glass wstats"><h3>'+KR.icon('target',20)+' Статистика'+(MIXL?' · все языки':' · '+KR.LANGS[lang].name)+'</h3>'+
+    '<div class="stat">'+box(all.length,'всего слов')+box(lv.m+lv.g,'запомнено')+box(reps?Math.round((reps-laps)/reps*100)+'%':'—','вспоминаю')+box(streak,'дней подряд')+'</div>'+
+    '<h4>Уровни слов</h4>'+bar(L,Math.max.apply(null,L.map(function(r){return r[1]}).concat([1])))+
+    '<h4>Повторения на неделю вперёд</h4>'+bar(fc,Math.max.apply(null,fc.map(function(r){return r[1]}).concat([1])))+
+    '<h4>Занятия за 14 дней</h4><p class="muted tb-sub">Ответов в день (новые слова и повторения)</p><div class="sact">'+act.map(function(r){return '<div title="'+r[0]+': '+r[1]+' ответов, верно '+r[2]+'"><i style="height:'+Math.round(r[1]/aMax*100)+'%"></i><small>'+r[0].split(' ')[0]+'</small></div>'}).join('')+'</div>'+
+    '<h4>Самые трудные слова</h4>'+(hard.length?'<div class="wl">'+hard.map(function(x){var c=x.c;return '<div class="wrow">'+sayBtn(c.w,c.l)+'<button type="button" class="mid wopen" data-open="'+esc(c.id)+'"><b>'+word(c)+'</b><span class="muted">'+esc(trOf(c))+' · забывал(а) '+(c.lap||0)+', ошибок '+(c.pe||0)+(c.tc?', возвращал учитель '+c.tc:'')+'</span></button>'+badge(c)+'</div>'}).join('')+'</div>'+
+      '<div class="done-row"><span></span><button type="button" data-x="hard-go">'+KR.icon('repeat',16)+' Отработать трудные</button></div>':'<p class="muted">Трудных слов пока нет.</p>')+'</div>';
+  $('#stats').innerHTML=h;
+}
+
 // ---------- настройки: интервалы, игры, голос ----------
 function drawPrefs(){
   var s=V.settings(),vs=KR.voices(lang),cur=KR.pickVoice(lang);
@@ -1034,7 +1061,7 @@ function bulkSave(){
 }
 
 // ---------- события ----------
-function setTab(t){[].forEach.call(document.querySelectorAll('#tabs button'),function(b){b.setAttribute('aria-selected',b.dataset.tab===t)});$('#list').hidden=t!=='list';$('#prefs').hidden=t!=='prefs';if(t==='prefs')drawPrefs()}
+function setTab(t){[].forEach.call(document.querySelectorAll('#tabs button'),function(b){b.setAttribute('aria-selected',b.dataset.tab===t)});$('#list').hidden=t!=='list';$('#prefs').hidden=t!=='prefs';$('#stats').hidden=t!=='stats';if(t==='prefs')drawPrefs();if(t==='stats')drawStats()}
 /* языки словаря: открытые курсы и все языки, на которых у ученика есть слова (английские слова у ученицы корейского) */
 function wlangs(){var s={};KR.langs().forEach(function(l){s[l]=1});V.all().forEach(function(c){if(KR.LANGS[c.l])s[c.l]=1});return Object.keys(KR.LANGS).filter(function(l){return s[l]})}
 function wkey(){return 'kr_wlang:'+KR.user()}
@@ -1049,7 +1076,7 @@ function langBar(){
   return '<div class="opts wlangs" role="group" aria-label="Язык словаря">'+ls.map(function(l){return b(l,'<span lang="'+l+'">'+esc(KR.LANGS[l].name)+'</span> · '+(n[l]||0),!MIXL&&l===lang)}).join('')+
     b('all','Все языки · '+V.all().length,MIXL)+'</div>';
 }
-function drawAll(){lang=wlang();MIXL=wmix();KR.topbar('words');drawToday();if(!S){drawList();if(!$('#prefs').hidden&&!typing())drawPrefs()}}
+function drawAll(){lang=wlang();MIXL=wmix();KR.topbar('words');drawToday();if(!S){drawList();if(!$('#prefs').hidden&&!typing())drawPrefs();if(!$('#stats').hidden)drawStats()}}
 document.addEventListener('click',function(e){
   var b=e.target.closest('button');if(!b)return;var d=b.dataset;
   if(d.say!==undefined){KR.say(d.say,d.l);return}
@@ -1104,6 +1131,7 @@ document.addEventListener('click',function(e){
   if(d.x==='to-ear'){stopPod();return start('ear')}
   if(d.x==='free-ear'){stopListen();stopPod();return start('ear',true)}
   if(d.x==='free-go'){stopListen();return start('free')}
+  if(d.x==='hard-go'){var hs=V.settings();hs.scope=['hard'];V.setSettings(hs);stopListen();window.scrollTo(0,0);return start('free')}
   if(d.sc)return freeScope(d.sc);
   if(d.send){var sid=b.dataset.id;V.send([sid],d.send);drawAll();var dl3=$('#wdlg');if(dl3&&dl3.open)openCard(sid);return}
   if(d.x==='ear-say')return earPlay(false);
