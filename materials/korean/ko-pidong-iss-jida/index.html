@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Урок · 피동 + -아/어 있다 + -아/어지다</title>
+<style>
+  :root{--ink:#1d2433;--muted:#667085;--line:#e4e7ec;--bg:#f5f6fa;--card:#fff;--accent:#2f5bea;--ok:#1f9d55;--okbg:#e9f8ef;--bad:#d64545;--badbg:#fdeeee;--kp:#c2338f}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  .ko{font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:18px 14px 80px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+  header h1{font-size:20px;margin:0}
+  .who{font-size:14px;color:var(--muted)}
+  .card{background:var(--card);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 2px 10px #0000000d}
+  h2{margin:0 0 6px;font-size:20px} h3{margin:4px 0 6px;font-size:17px}
+  .muted{color:var(--muted);font-size:14px}
+  button{font:inherit;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#eef0f4;color:var(--ink);margin:4px 4px 4px 0}
+  button.primary{background:var(--accent);color:#fff}
+  button.dark{background:var(--ink);color:#fff}
+  button.sm{font-size:14px;padding:6px 12px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text],input[type=password]{font:inherit;padding:9px 11px;border:1.5px solid #c9ced8;border-radius:9px;width:100%}
+  input.ok{border-color:var(--ok)!important;background:var(--okbg)!important}
+  input.bad{border-color:var(--bad)!important;background:var(--badbg)!important}
+  .hidden{display:none!important}
+  #stage{scroll-margin-top:48px}
+  .bar{height:8px;background:#e7e9ef;border-radius:5px;overflow:hidden;margin:8px 0}
+  .bar div{height:100%;background:var(--accent);width:0;transition:width .3s}
+  .big{font-size:21px;font-weight:600;margin:10px 0}
+  .feedback{min-height:24px;margin-top:8px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .opts.three{grid-template-columns:1fr 1fr 1fr}
+  .opts.one{grid-template-columns:1fr}
+  .opts button{margin:0;padding:12px;text-align:left;background:#f1f3f7;font-size:17px}
+  .opts button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .opts button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  .blank{color:var(--accent);font-weight:700}
+  .why{background:#f3f6ff;border-radius:10px;padding:10px 12px;margin-top:10px;font-weight:400}
+  .why .full{font-size:18px;margin-bottom:4px}
+  mark{background:#ffe58a;padding:0 2px;border-radius:3px}
+  nav.path .grp{margin:12px 0 4px;font-weight:700}
+  .ex{display:flex;flex-wrap:wrap;gap:6px}
+  .ex button{margin:0}
+  .ex button.done{background:var(--okbg);outline:1.5px solid var(--ok)}
+  /* правило */
+  .rule{font-size:16px}
+  .rule h4{margin:16px 0 6px;font-size:17px}
+  .rule h4:first-child{margin-top:0}
+  table.tbl{width:100%;border-collapse:collapse;font-size:15px;margin:6px 0}
+  table.tbl th,table.tbl td{border:1px solid #c5cbd6;padding:7px 8px;vertical-align:top;text-align:left}
+  table.tbl th{background:#f1f3f7;white-space:nowrap}
+  .box{border-radius:10px;padding:10px 13px;margin:12px 0}
+  .box.tip{background:#eef3ff}
+  .box.warn{background:#fff3e6}
+  .box.kp{background:#fdeff8;border-left:4px solid var(--kp)}
+  .yes{color:var(--ok);font-weight:700}
+  .no{color:var(--bad);text-decoration:line-through}
+  .chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:18px;margin:8px 0}
+  .chain span.st{background:#fff;border:1.5px solid #c5cbd6;border-radius:9px;padding:4px 10px}
+  .chain small{display:block;font-size:12px;color:var(--muted)}
+  /* текст с выбором */
+  .reading{background:#fffdf5;border:1px solid #efe6c4;border-radius:10px;padding:14px 16px;font-size:17px;line-height:2.1}
+  .reading h4{margin:0 0 6px;text-align:center;font-size:19px;line-height:1.4}
+  .ch{white-space:nowrap}
+  .ch sup{font-weight:700;color:var(--accent)}
+  .ch button{margin:0 1px;padding:2px 9px;font-size:16px;border-radius:7px;background:#f1f3f7}
+  .ch button.sel{background:#dfe6ff;outline:2px solid var(--accent)}
+  .ch button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .ch button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  .speed{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin-top:6px}
+  table.res{width:100%;border-collapse:collapse;font-size:15px}
+  table.res td{padding:6px 4px;border-bottom:1px solid var(--line)}
+  details summary{cursor:pointer}
+  @media(max-width:560px){.opts,.opts.three{grid-template-columns:1fr}table.tbl{font-size:14px}.rule{font-size:15px}}
+</style>
+</head>
+<body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+<div id="login" class="card" style="margin-top:44px">
+  <h2>🇰🇷 피동 + <span class="ko">-아/어 있다</span> + <span class="ko">-아/어지다</span></h2>
+  <p class="muted">Урок с объяснениями и упражнениями: что такое 피동, когда <span class="ko">-아/어지다</span>, когда <span class="ko">-아/어 있다</span> и как они работают вместе (<span class="ko">문이 열려 있어요</span>, <span class="ko">불이 켜져 있어요</span>). Все примеры — из мира кей-попа 🎤</p>
+  <p class="muted">⌨️ Для письменных заданий нужна корейская раскладка (на телефоне добавь «한국어» в настройках клавиатуры).</p>
+  <p>Как тебя зовут?</p>
+  <input type="text" id="nameInput" placeholder="Имя" autocomplete="off" onkeydown="if(event.key==='Enter')$('pinInput').focus()">
+  <div id="pinRow"><p style="margin-bottom:4px">PIN-код (4 цифры)</p>
+  <input type="password" id="pinInput" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off" style="max-width:160px" onkeydown="if(event.key==='Enter')start()">
+  <p class="muted" style="margin-top:4px">Первый раз — придумай PIN и запомни. С этим именем и PIN прогресс откроется на любом устройстве.</p></div>
+  <div class="feedback" id="loginFb" style="color:var(--bad)"></div>
+  <p><button class="primary" onclick="start()">Начать →</button></p>
+</div>
+
+<div id="app" class="hidden">
+  <header style="margin-top:40px"><h1>피동 + <span class="ko">있다 · 지다</span></h1><div class="who">👤 <span id="who"></span> <span id="cloud"></span></div></header>
+  <div class="card">
+    <p class="muted" style="margin-top:0">Иди по шагам: сначала правило, потом упражнения. Следующий шаг откроется, когда закончишь текущий. Ошибки возвращаются в конце упражнения.</p>
+    <div class="bar"><div id="vBar"></div></div>
+    <div id="vProg" class="muted"></div>
+    <div class="speed">🔊 Скорость голоса <input type="range" id="rate" min="0.5" max="1.1" step="0.05" value="0.85"> <span id="rateVal">0.85</span></div>
+    <div class="speed">🗣 Голос <select id="voiceSel" onchange="try{localStorage.setItem('topik_voice',voices[this.value].name)}catch(e){}; say('안녕하세요')" style="font:inherit;font-size:14px;max-width:240px"></select></div>
+  </div>
+
+  <div class="card">
+    <details id="kpDet"><summary><b>🎤 Слова кей-попа в этом уроке</b> <span class="muted">— нажми, чтобы открыть</span></summary>
+      <table class="res" style="margin-top:8px" id="kpList"></table>
+    </details>
+  </div>
+
+  <div class="card" id="stage">
+    <div class="muted" id="sStep"></div>
+    <h3 id="sTitle"></h3>
+    <div id="sBody"></div>
+  </div>
+
+  <div class="card">
+    <h3>📨 Отправить учителю</h3>
+    <p class="muted">Можно отправлять после каждого занятия: прогресс сохраняется.</p>
+    <button class="primary" id="sendBtn" onclick="sendResults()">Отправить результаты</button>
+    <div class="feedback" id="sendFb"></div>
+    <textarea id="copyBox" class="hidden" style="width:100%;height:180px;font:13px monospace;margin-top:8px"></textarea>
+  </div>
+
+  <div class="card">
+    <h3>Весь путь</h3>
+    <p class="muted">✓ — сделано (можно нажать и повторить), ▶ — сейчас, 🔒 — пока закрыто.</p>
+    <nav class="path" id="path"></nav>
+  </div>
+</div>
+</div>
+
+<script>
+/* ============ TELEGRAM ============ */
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID = "347625701";
+/* ============ SUPABASE ============ */
+const SB_URL = "https://nusfkwtmnbhnbnckhrfk.supabase.co";
+const SB_KEY = "sb_publishable_UmWyFo7ciEc-m9x1ZIfkNw_yeQQAgf8";
+const SB_ON  = SB_URL.startsWith("https://");
+const KEY = "pdiss_v1";
+
+/* ============ СЛОВА КЕЙ-ПОПА ============ */
+const KPOP = [
+  ["응원봉","лайтстик (фанатский светящийся жезл)"],
+  ["포토카드","фотокарточка участника (лежит в альбоме)"],
+  ["떼창","когда весь зал поёт хором вместе с артистом"],
+  ["직캠","фанкам — видео, где снят один участник"],
+  ["칼군무","идеально синхронный танец («танец как нож»)"],
+  ["막내","самый младший участник группы"],
+  ["대기실","гримёрка"],
+  ["연습실","репетиционный зал"],
+  ["컴백","камбэк — выход нового альбома"],
+  ["팬사인회","фансайн — встреча, где артисты подписывают альбомы"],
+  ["팬카페","официальное фан-сообщество в интернете"],
+  ["기획사","агентство (продюсерская компания)"],
+  ["피켓팅","«кровавый тикетинг»: 피 (кровь) + 티켓팅 — билеты раскупают за секунды"],
+  ["댓글이 달리다","появляются комментарии (пассив от 달다)"]
+];
+
+/* ============ ПРАВИЛА ============ */
+const R1 = `<h4>Актив (능동) и пассив (피동)</h4>
+<table class="tbl"><tr><th>능동 · актив</th><th>피동 · пассив</th></tr>
+<tr><td class="ko">팬들이 응원봉을 <b>켰어요</b>.</td><td class="ko">응원봉이 <b>켜졌어요</b>.</td></tr>
+<tr><td>Фанаты <b>включили</b> лайтстики.<br><span class="muted">Важно, <u>кто</u> сделал.</span></td><td>Лайтстики <b>зажглись</b>.<br><span class="muted">Важно, <u>что случилось</u>. Кто сделал — неважно или неизвестно.</span></td></tr></table>
+<h4>Как образовать пассив</h4>
+<table class="tbl">
+<tr><th class="ko">-이-</th><td class="ko">보다 → 보이다 · 놓다 → 놓이다 · 쓰다 → 쓰이다 · 쌓다 → 쌓이다</td></tr>
+<tr><th class="ko">-히-</th><td class="ko">닫다 → 닫히다 · 잡다 → 잡히다 · 막다 → 막히다</td></tr>
+<tr><th class="ko">-리-</th><td class="ko">열다 → 열리다 · 듣다 → 들리다 · 걸다 → 걸리다 · 팔다 → 팔리다 · 부르다 → 불리다</td></tr>
+<tr><th class="ko">-기-</th><td class="ko">잠그다 → 잠기다 · 담다 → 담기다 · 끊다 → 끊기다</td></tr>
+<tr><th class="ko">-아/어지다</th><td class="ko">켜다 → 켜지다 · 끄다 → 꺼지다 · 정하다 → 정해지다</td></tr>
+<tr><th class="ko">하다 → 되다</th><td class="ko">공개하다 → 공개되다 · 재생하다 → 재생되다</td></tr></table>
+<div class="box tip">💡 <b>Подсказка по падежам.</b><br>Актив: <span class="ko">누가 + 무엇<b>을/를</b></span> + глагол.<br>Пассив: <span class="ko">무엇<b>이/가</b></span> + пассивный глагол.<br>Если нужно сказать, <i>кем</i> сделано: <span class="ko"><b>에게/한테</b></span> — люди и животные, <span class="ko"><b>에</b></span> — вещи и явления.<br>
+<span class="ko">아이돌이 팬들<b>에게</b> 둘러싸였어요.</span> — Айдола окружили фанаты.<br><span class="ko">모기<b>에</b> 물렸어요.</span> — Меня укусил комар.</div>`;
+
+const R2 = `<h4>-아/어지다: два значения</h4>
+<table class="tbl">
+<tr><th>Глагол + -아/어지다</th><td><b>пассив</b> — для глаголов, у которых нет формы с 이/히/리/기<br>
+<span class="ko">켜다 → 켜지다</span> (включаться), <span class="ko">끄다 → 꺼지다</span> (гаснуть), <span class="ko">만들다 → 만들어지다</span>, <span class="ko">지우다 → 지워지다</span>, <span class="ko">정하다 → 정해지다</span>, <span class="ko">이루다 → 이루어지다</span>, <span class="ko">전하다 → 전해지다</span></td></tr>
+<tr><th>Прилагательное + -아/어지다</th><td><b>«становиться»</b> — изменение состояния<br>
+<span class="ko">유명하다 → 유명해지다</span> (стать известным), <span class="ko">많다 → 많아지다</span>, <span class="ko">예쁘다 → 예뻐지다</span>, <span class="ko">가깝다 → 가까워지다</span></td></tr></table>
+<div class="box tip"><b>Как присоединять:</b> гласная ㅏ/ㅗ в последнем слоге → <span class="ko">-아지다</span> (<span class="ko">많아지다</span>); остальные → <span class="ko">-어지다</span> (<span class="ko">만들어지다, 켜지다</span>); <span class="ko">하다 → 해지다</span> (<span class="ko">정해지다, 유명해지다</span>).</div>
+<div class="box kp">🎤 <span class="ko">데뷔하고 1년 만에 그룹이 <b>유명해졌어요</b>.</span> — Через год после дебюта группа стала знаменитой.<br>
+<span class="ko">드디어 컴백 날짜가 <b>정해졌어요</b>!</span> — Наконец-то определена дата камбэка!</div>
+<h4>Какой пассив выбрать?</h4>
+<p>Если у глагола уже есть пассив с <span class="ko">이/히/리/기</span> — берём его: <span class="ko">열다 → <span class="yes">열리다</span></span>, а не <span class="ko no">열어지다</span>; <span class="ko">보다 → <span class="yes">보이다</span></span>.</p>
+<div class="box warn">⚠️ <b>Двойной пассив — ошибка.</b> Нельзя ставить суффикс и <span class="ko">-어지다</span> одновременно:<br>
+<span class="ko">잊다 → <span class="yes">잊히다</span> → <span class="no">잊혀지다</span></span><br>
+<span class="ko">쓰다 → <span class="yes">쓰이다</span> → <span class="no">쓰여지다</span></span><br>
+<span class="ko">보다 → <span class="yes">보이다</span> → <span class="no">보여지다</span></span></div>
+<div class="box kp">🎤 В песнях и в живой речи двойной пассив встречается постоянно. Знаменитая песня 이용 <span class="ko">«잊혀진 계절»</span> (1982), которую в Корее включают каждое 31 октября, по норме должна была бы называться <span class="ko">«잊힌 계절»</span>. На TOPIK и в письменной речи выбираем норму.</div>`;
+
+const R3 = `<h4>-아/어 있다 = результат остался</h4>
+<p>Действие уже закончилось, а его результат «остался» и виден сейчас.</p>
+<div class="chain ko"><span class="st">앉다<small>сесть</small></span> → <span class="st">앉아 있다<small>сел и сидит</small></span></div>
+<p><b>Только с глаголами без <span class="ko">을/를</span>:</b></p>
+<ul>
+<li>непереходные: <span class="ko">앉다 → 앉아 있다, 서다 → 서 있다, 눕다 → 누워 있다, 오다 → 와 있다, 가다 → 가 있다, 남다 → 남아 있다, 붙다 → 붙어 있다, 들다 → 들어 있다, 숨다 → 숨어 있다</span></li>
+<li>пассивы: <span class="ko">열리다 → 열려 있다, 놓이다 → 놓여 있다</span> (подробно — в следующем блоке)</li></ul>
+<h4>-고 있다 — совсем другое</h4>
+<ol><li>действие идёт сейчас: <span class="ko">멤버들이 안무를 <b>연습하고 있어요</b>.</span> — Участники репетируют хореографию.</li>
+<li>одежда и то, что держим в руках: <span class="ko">입고 / 쓰고 / 신고 / 끼고 / 들고 있어요</span></li></ol>
+<table class="tbl"><tr><th>-고 있다 · процесс</th><th>-아/어 있다 · результат</th></tr>
+<tr><td class="ko">무대에 <b>올라가고 있어요</b>.<div class="muted">Поднимается на сцену (идёт по лестнице).</div></td><td class="ko">무대에 <b>올라가 있어요</b>.<div class="muted">Уже на сцене.</div></td></tr>
+<tr><td class="ko">공연장에 <b>오고 있어요</b>.<div class="muted">Едет на концерт (в пути).</div></td><td class="ko">공연장에 벌써 <b>와 있어요</b>.<div class="muted">Уже на месте.</div></td></tr>
+<tr><td class="ko">응원봉을 <b>들고 있어요</b>.<div class="muted">Держит лайтстик в руке (들다 = держать, есть 을).</div></td><td class="ko">앨범에 포토카드가 <b>들어 있어요</b>.<div class="muted">В альбоме лежит карточка (들다 = входить, быть внутри).</div></td></tr></table>
+<div class="box warn">⚠️ Одежда — всегда <span class="ko">-고 있다</span>: <span class="ko yes">재킷을 입고 있어요</span>, а не <span class="ko no">재킷을 입어 있어요</span>.</div>`;
+
+const R4 = `<h4>Главная формула урока</h4>
+<p>Хочешь сказать про состояние, а глагол переходный (с <span class="ko">을/를</span>)? Сначала делаем <b>пассив</b>, потом добавляем <b><span class="ko">-아/어 있다</span></b>.</p>
+<div class="chain ko"><span class="st">열다<small>문을 · открыть</small></span> → <span class="st">열리다<small>문이 · открыться</small></span> → <span class="st">열려 있다<small>быть открытым</small></span></div>
+<div class="chain ko"><span class="st">켜다<small>불을 · включить</small></span> → <span class="st">켜지다<small>불이 · включиться</small></span> → <span class="st">켜져 있다<small>быть включённым</small></span></div>
+<table class="tbl"><tr><th>누가 해요 · действие</th><th>일어나요 · событие</th><th>상태 · результат</th></tr>
+<tr><td class="ko">매니저가 문을 잠가요</td><td class="ko">문이 잠겨요</td><td class="ko"><b>문이 잠겨 있어요</b></td></tr>
+<tr><td class="ko">스태프가 조명을 켜요</td><td class="ko">조명이 켜져요</td><td class="ko"><b>조명이 켜져 있어요</b></td></tr>
+<tr><td class="ko">팬이 포스터에 이름을 써요</td><td class="ko">이름이 쓰여요</td><td class="ko"><b>이름이 쓰여 있어요</b></td></tr>
+<tr><td class="ko">스태프가 의자를 놓아요</td><td class="ko">의자가 놓여요</td><td class="ko"><b>의자가 놓여 있어요</b></td></tr>
+<tr><td class="ko">멤버가 벽에 사진을 걸어요</td><td class="ko">사진이 걸려요</td><td class="ko"><b>사진이 걸려 있어요</b></td></tr>
+<tr><td class="ko">기획사가 순서를 정해요</td><td class="ko">순서가 정해져요</td><td class="ko"><b>순서가 정해져 있어요</b></td></tr></table>
+<p class="muted">Менеджер запирает дверь → дверь запирается → дверь заперта.</p>
+<h4>Одно слово — четыре смысла</h4>
+<table class="tbl">
+<tr><td class="ko"><b>문이 열렸어요.</b></td><td>Дверь открылась. — <i>событие</i>, момент</td></tr>
+<tr><td class="ko"><b>문이 열려 있어요.</b></td><td>Дверь открыта. — <i>картинка сейчас</i></td></tr>
+<tr><td class="ko"><b>문이 열려 있었어요.</b></td><td>Дверь была открыта. — <i>картинка, которую увидели раньше</i> (как в историях: «пришла домой, а дверь открыта»)</td></tr>
+<tr><td class="ko"><b>문이 열리고 있어요.</b></td><td>Дверь открывается. — <i>процесс</i> прямо сейчас</td></tr></table>
+<h4>Где это используется</h4>
+<ol>
+<li><b>Описание комнаты, сцены, картинки</b> (на TOPIK — 말하기 и 쓰기): <span class="ko">벽에 포스터가 걸려 있어요. 책상 위에 앨범이 놓여 있어요.</span></li>
+<li><b>Надписи</b>: <span class="ko">여기에 뭐라고 쓰여 있어요?</span> — Что здесь написано?<br><span class="muted">💬 В разговоре часто слышно <span class="ko">«써 있다»</span>, но по норме — <span class="ko">쓰여 있다</span>.</span></li>
+<li><b>Состояние вещей и техники</b>: <span class="ko">전원이 꺼져 있어…</span> — так начинается автоответчик, когда телефон выключен.</li>
+<li><b>Известные факты</b>: <span class="ko">알려져 있다</span> — «известно, что…»: <span class="ko">한국은 케이팝으로 잘 알려져 있어요.</span></li>
+<li><b>Правила и решения</b>: <span class="ko">정해져 있다</span> — «уже определено»: <span class="ko">무대 순서는 이미 정해져 있어요.</span></li></ol>
+<div class="box tip">📌 <b>Запомни набор:</b> <span class="ko">열려 · 닫혀 · 잠겨 · 켜져 · 꺼져 · 놓여 · 걸려 · 쓰여 · 적혀 · 쌓여 · 꽂혀 · 담겨 · 알려져 · 정해져 + 있다</span></div>`;
+
+const R5 = `<h4>Пять частых ошибок</h4>
+<table class="tbl">
+<tr><td class="ko no">문을 열어 있어요</td><td class="ko yes">문이 열려 있어요</td><td>с <span class="ko">있다</span> нельзя переходный глагол с <span class="ko">을/를</span> — сначала пассив</td></tr>
+<tr><td class="ko no">불이 켜 있어요</td><td class="ko yes">불이 켜져 있어요</td><td><span class="ko">켜다</span> переходный → <span class="ko">켜지다</span> → <span class="ko">켜져 있다</span></td></tr>
+<tr><td class="ko no">이름이 쓰여져 있어요</td><td class="ko yes">이름이 쓰여 있어요</td><td>двойной пассив</td></tr>
+<tr><td class="ko no">문이 열어졌어요</td><td class="ko yes">문이 열렸어요</td><td>у <span class="ko">열다</span> есть <span class="ko">열리다</span></td></tr>
+<tr><td class="ko no">모자를 써 있어요</td><td class="ko yes">모자를 쓰고 있어요</td><td>одежда и аксессуары — <span class="ko">-고 있다</span></td></tr></table>`;
+
+const R6 = `<h4>🎧 Пассив в названиях песен</h4>
+<table class="tbl"><tr><th>Песня</th><th>Форма</th><th>Что это</th></tr>
+<tr><td>태연 <span class="ko">«들리나요»</span><div class="muted">саундтрек дорамы <span class="ko">«베토벤 바이러스»</span>, 2008</div></td><td class="ko"><b>들리다</b></td><td><span class="ko">듣다 → 들리다</span> (-리-). «Слышно ли тебе?» — голос «слышится» сам.</td></tr>
+<tr><td>장범준 <span class="ko">«흔들리는 꽃들 속에서 네 샴푸향이 느껴진 거야»</span><div class="muted">саундтрек дорамы <span class="ko">«멜로가 체질»</span>, 2019</div></td><td class="ko"><b>흔들리다<br>느껴지다</b></td><td>В одном названии сразу два вида пассива: <span class="ko">흔들다 → 흔들리다</span> (-리-) и <span class="ko">느끼다 → 느껴지다</span> (-어지다).<br>«Среди качающихся цветов почувствовался запах твоего шампуня».</td></tr>
+<tr><td>이용 <span class="ko">«잊혀진 계절»</span>, 1982<div class="muted">в 2013 году её спела 아이유 в дораме <span class="ko">«최고다 이순신»</span></div></td><td class="ko"><b>잊혀지다</b></td><td>Двойной пассив: <span class="ko">잊다 → 잊히다</span> + <span class="ko">-어지다</span>. По норме — <span class="ko">«잊힌 계절»</span>.</td></tr>
+<tr><td>NELL <span class="ko">«기억을 걷는 시간»</span></td><td class="ko"><b>놓여진</b></td><td>В тексте песни звучит <span class="ko">놓여진</span> — тоже двойной пассив. По норме — <span class="ko">놓인</span>.</td></tr></table>
+<div class="box kp">🎤 <b>Почему в песнях так часто двойной пассив?</b> <span class="ko">잊혀진, 놓여진, 보여진</span> звучат длиннее и мягче и лучше ложатся на мелодию. Многие считают это поэтической вольностью. Но в TOPIK и в письменной речи выбираем норму: <span class="ko">잊힌, 놓인, 보인</span>.</div>
+<div class="box tip">🔎 <b>Как искать пассив в песнях:</b> слушай формы <span class="ko">들려, 보여, 느껴져, 잊혀, 갇혀, 담겨, 닫혀, 열려</span> — это почти всегда 피동. А если после них стоит <span class="ko">있어</span> (<span class="ko">갇혀 있어, 담겨 있어</span>), это 피동 + <span class="ko">-아/어 있다</span>: состояние, которое длится.</div>`;
+
+/* ============ БЛОКИ И ЗАДАНИЯ ============ */
+const BLOCKS = [
+ {id:"B1", name:"1 · Что такое 피동", steps:[
+  {t:"rule", name:"📘 Правило", html:R1},
+  {t:"mc", name:"Актив или пассив?", hint:"Посмотри на падеж (이/가 или 을/를) и выбери форму.", items:[
+   {s:"콘서트 티켓이 1분 만에 다 ( ).", o:["팔렸어요","팔았어요"], a:"팔렸어요", ru:"Билеты на концерт раскупили за 1 минуту.", why:"티켓이 (이/가) → пассив 팔리다. Вот что такое 피켓팅!"},
+   {s:"기획사가 새 뮤직비디오를 ( ).", o:["공개했어요","공개됐어요"], a:"공개했어요", ru:"Агентство опубликовало новый клип.", why:"기획사가 … 뮤직비디오를 (을/를) → актив 공개하다."},
+   {s:"공연장 밖에서도 팬들의 떼창이 ( ).", o:["들렸어요","들었어요"], a:"들렸어요", ru:"Даже снаружи концертного зала было слышно, как фанаты поют хором.", why:"떼창이 → «слышаться» = пассив 들리다."},
+   {s:"공연 중에 갑자기 무대 조명이 ( ).", o:["꺼졌어요","껐어요"], a:"꺼졌어요", ru:"Во время выступления вдруг погас свет на сцене.", why:"조명이, погас сам → 꺼지다."},
+   {s:"매니저가 연습실 문을 ( ).", o:["잠갔어요","잠겼어요"], a:"잠갔어요", ru:"Менеджер запер дверь репетиционной.", why:"매니저가 문을 → актив 잠그다 (잠갔어요)."},
+   {s:"드디어 컴백 날짜가 ( ).", o:["정해졌어요","정했어요"], a:"정해졌어요", ru:"Наконец определена дата камбэка.", why:"날짜가 → пассив 정해지다."},
+   {s:"팬사인회에서 아이돌이 팬들에게 ( ).", o:["둘러싸였어요","둘러쌌어요"], a:"둘러싸였어요", ru:"На фансайне айдола окружили фанаты.", why:"팬들에게 (кем) → пассив 둘러싸이다."},
+   {s:"앨범을 뜯자 반짝이는 포토카드가 ( ).", o:["보였어요","봤어요"], a:"보였어요", ru:"Как только я распечатала альбом, показалась блестящая фотокарточка.", why:"포토카드가 → «быть видным» = пассив 보이다."},
+   {s:"팬미팅에서 아이돌이 내 이름을 ( ).", o:["불렀어요","불렸어요"], a:"불렀어요", ru:"На фанмитинге айдол назвал моё имя!", why:"아이돌이 이름을 → актив 부르다."},
+   {s:"싸이의 '강남스타일'은 유튜브에서 처음으로 10억 번 넘게 ( ) 뮤직비디오예요.", o:["재생된","재생한"], a:"재생된", ru:"«강남스타일» Сая — первый клип на Ютубе, который посмотрели больше миллиарда раз.", why:"клип посмотрели (с ним случилось) → 재생되다 (하다 → 되다)."}
+  ]}
+ ]},
+ {id:"B2", name:"2 · -아/어지다", steps:[
+  {t:"rule", name:"📘 Правило", html:R2},
+  {t:"wr", name:"✍️ Образуй форму с -아/어지다", hint:"Напиши словарную форму. Пробелы не важны.", items:[
+   {q:"켜다 + -아/어지다", a:["켜지다"], ru:"включаться"},
+   {q:"끄다 + -아/어지다", a:["꺼지다"], ru:"выключаться, гаснуть"},
+   {q:"만들다 + -아/어지다", a:["만들어지다"], ru:"создаваться"},
+   {q:"정하다 + -아/어지다", a:["정해지다"], ru:"определяться"},
+   {q:"지우다 + -아/어지다", a:["지워지다"], ru:"стираться, удаляться"},
+   {q:"이루다 + -아/어지다", a:["이루어지다","이뤄지다"], ru:"сбываться"},
+   {q:"전하다 + -아/어지다", a:["전해지다"], ru:"передаваться, доходить"},
+   {q:"유명하다 + -아/어지다", a:["유명해지다"], ru:"становиться известным"},
+   {q:"많다 + -아/어지다", a:["많아지다"], ru:"становиться больше"},
+   {q:"가깝다 + -아/어지다", a:["가까워지다"], ru:"сближаться"}
+  ]},
+  {t:"mc", name:"Выбери форму", hint:"Пассив, «становиться» или актив? И не попадись на двойной пассив!", items:[
+   {s:"데뷔하고 1년 만에 그룹이 아주 ( ).", o:["유명해졌어요","유명했어요"], a:"유명해졌어요", ru:"Через год после дебюта группа стала очень известной.", why:"«стала» → прилагательное + -아/어지다."},
+   {s:"실수로 콘서트 사진 파일이 다 ( ).", o:["지워졌어요","지웠어요"], a:"지워졌어요", ru:"Файлы с фото с концерта случайно удалились.", why:"파일이, случайно → пассив 지워지다."},
+   {s:"팬들의 마음이 멤버들에게 잘 ( ).", o:["전해졌어요","전했어요"], a:"전해졌어요", ru:"Чувства фанатов хорошо дошли до участников.", why:"마음이 → пассив 전해지다."},
+   {s:"연습생 때의 꿈이 드디어 ( ).", o:["이루어졌어요","이뤘어요"], a:"이루어졌어요", ru:"Мечта времён стажёрства наконец сбылась.", why:"꿈이 → пассив 이루어지다."},
+   {s:"공연 10분 전에 공연장 문이 ( ).", o:["열렸어요","열어졌어요"], a:"열렸어요", ru:"За 10 минут до концерта открылись двери зала.", why:"у 열다 есть 열리다 → 열어지다 не используем."},
+   {s:"포스터에 ( ) 문구를 읽어 보세요.", o:["쓰인","쓰여진"], a:"쓰인", ru:"Прочитай надпись на постере.", why:"쓰여지다 — двойной пассив. Норма: 쓰이다 → 쓰인."},
+   {s:"컴백 후에 해외 팬이 더 ( ).", o:["많아졌어요","많았어요"], a:"많아졌어요", ru:"После камбэка зарубежных фанатов стало больше.", why:"«стало больше» → 많아지다."},
+   {s:"공연이 시작되면 응원봉이 자동으로 ( ).", o:["켜져요","켜요"], a:"켜져요", ru:"Когда начинается концерт, лайтстики включаются автоматически.", why:"응원봉이, само → 켜지다."},
+   {s:"이 앨범은 팬들을 위해 ( ).", o:["만들어졌어요","만들었어요"], a:"만들어졌어요", ru:"Этот альбом создан для фанатов.", why:"앨범은 (что) + создан → пассив 만들어지다."},
+   {s:"그 노래는 아직 ( ) 않았어요. 팬들이 지금도 불러요.", o:["잊히지","잊혀지지"], a:"잊히지", ru:"Эта песня ещё не забыта. Фанаты поют её до сих пор.", why:"잊혀지다 — двойной пассив (как в песне «잊혀진 계절»). Норма: 잊히다."}
+  ]}
+ ]},
+ {id:"B3", name:"3 · -아/어 있다 и -고 있다", steps:[
+  {t:"rule", name:"📘 Правило", html:R3},
+  {t:"mc", name:"-고 있다 или -아/어 있다?", hint:"Процесс или результат? Есть ли 을/를? Одежда?", items:[
+   {s:"팬들이 손에 응원봉을 ( ).", o:["들고 있어요","들어 있어요"], a:"들고 있어요", ru:"Фанаты держат в руках лайтстики.", why:"응원봉을 (을/를), держат → -고 있다."},
+   {s:"앨범 안에 포토카드가 두 장 ( ).", o:["들어 있어요","들고 있어요"], a:"들어 있어요", ru:"В альбоме лежат две фотокарточки.", why:"들다 = быть внутри, без 을/를 → -어 있다."},
+   {s:"멤버들이 무대 위에 일렬로 ( ).", o:["서 있어요","서고 있어요"], a:"서 있어요", ru:"Участники стоят на сцене в ряд.", why:"встали и стоят → 서 있다."},
+   {s:"리더가 오늘 검은색 재킷을 ( ).", o:["입고 있어요","입어 있어요"], a:"입고 있어요", ru:"Лидер сегодня в чёрном пиджаке.", why:"одежда → всегда -고 있다."},
+   {s:"공연이 끝났지만 팬들이 아직 공연장에 많이 ( ).", o:["남아 있어요","남고 있어요"], a:"남아 있어요", ru:"Концерт закончился, но в зале ещё осталось много фанатов.", why:"остались и находятся там → 남아 있다."},
+   {s:"지금 멤버들이 새 안무를 ( ).", o:["연습하고 있어요","연습해 있어요"], a:"연습하고 있어요", ru:"Сейчас участники репетируют новую хореографию.", why:"действие идёт сейчас → -고 있다."},
+   {s:"피곤한 막내가 소파에 ( ).", o:["누워 있어요","눕고 있어요"], a:"누워 있어요", ru:"Уставший макнэ лежит на диване.", why:"лёг и лежит → 누워 있다 (눕다, ㅂ → 워)."},
+   {s:"대기실 벽에 멤버들 사진이 ( ).", o:["붙어 있어요","붙고 있어요"], a:"붙어 있어요", ru:"На стене гримёрки наклеены фото участников.", why:"붙다 (быть приклеенным) — без 을/를, состояние → 붙어 있다."},
+   {s:"매니저가 지금 차 문을 ( ).", o:["닫고 있어요","닫혀 있어요"], a:"닫고 있어요", ru:"Менеджер сейчас закрывает дверь машины.", why:"매니저가 문을, действие сейчас → -고 있다."},
+   {s:"팬들이 벌써 공연장 앞에 ( ).", o:["와 있어요","오고 있어요"], a:"와 있어요", ru:"Фанаты уже пришли и ждут у входа в зал.", why:"벌써 = уже на месте → 와 있다. 오고 있다 = ещё в пути."}
+  ]}
+ ]},
+ {id:"B4", name:"4 · 피동 + -아/어 있다 вместе", steps:[
+  {t:"rule", name:"📘 Правило", html:R4},
+  {t:"mc", name:"Действие, событие или состояние?", hint:"Кто-то делает (을/를)? Само случилось (момент)? Или это картинка-результат?", items:[
+   {s:"리허설 때 스태프가 무대 조명을 ( ).", o:["켰어요","켜졌어요","켜져 있어요"], a:"켰어요", ru:"На репетиции сотрудники включили свет на сцене.", why:"스태프가 조명을 → актив."},
+   {s:"연습실에 들어가 보니 불이 ( ).", o:["켜져 있었어요","켰어요","켜고 있었어요"], a:"켜져 있었어요", ru:"Когда я зашла в репетиционную, свет был включён.", why:"то, что увидела, — состояние → 켜져 있었다."},
+   {s:"공연 중에 갑자기 마이크가 ( ).", o:["꺼졌어요","꺼져 있어요","껐어요"], a:"꺼졌어요", ru:"Во время выступления вдруг выключился микрофон.", why:"«вдруг» — событие, момент → 꺼졌다."},
+   {s:"멤버한테 전화했는데 전화기가 ( ).", o:["꺼져 있었어요","껐어요","끄고 있었어요"], a:"꺼져 있었어요", ru:"Я позвонила участнику, а телефон был выключен.", why:"состояние в тот момент → 꺼져 있었다 (как автоответчик: 전원이 꺼져 있어…)."},
+   {s:"무대 가운데에 의자 하나가 ( ).", o:["놓여 있어요","놓았어요","놓고 있어요"], a:"놓여 있어요", ru:"В центре сцены стоит один стул.", why:"описание сцены, 의자가 → 놓여 있다."},
+   {s:"응원봉에 멤버 이름이 ( ).", o:["쓰여 있어요","쓰고 있어요","썼어요"], a:"쓰여 있어요", ru:"На лайтстике написано имя участника.", why:"надпись, 이름이 → 쓰여 있다."},
+   {s:"대기실 문이 ( ). 열쇠가 없으면 못 들어가요.", o:["잠겨 있어요","잠가요","잠그고 있어요"], a:"잠겨 있어요", ru:"Дверь гримёрки заперта. Без ключа не войти.", why:"문이 + состояние → 잠기다 + 어 있다."},
+   {s:"이 노래에는 팬들에 대한 고마움이 ( ).", o:["담겨 있어요","담고 있어요","담았어요"], a:"담겨 있어요", ru:"В этой песне заключена благодарность фанатам.", why:"고마움이 (이/가) → 담겨 있다. (С 을 можно: 노래는 고마움을 담고 있어요.)"},
+   {s:"이 그룹은 칼군무로 잘 ( ).", o:["알려져 있어요","알리고 있어요","알려요"], a:"알려져 있어요", ru:"Эта группа известна своей идеально синхронной хореографией.", why:"«известен чем-то» → 알려져 있다 (устойчивое выражение)."},
+   {s:"공연 시작 직전, 무대 커튼이 천천히 ( ).", o:["열리고 있어요","열려 있어요","열고 있어요"], a:"열리고 있어요", ru:"Перед самым началом концерта занавес медленно открывается.", why:"«медленно» — процесс прямо сейчас, само → 열리고 있다."},
+   {s:"무대 순서는 이미 ( ). 바꿀 수 없어요.", o:["정해져 있어요","정하고 있어요","정해요"], a:"정해져 있어요", ru:"Порядок выступлений уже определён. Изменить нельзя.", why:"уже определено → 정해져 있다."},
+   {s:"책상 위에 팬레터가 산처럼 ( ).", o:["쌓여 있어요","쌓고 있어요","쌓아요"], a:"쌓여 있어요", ru:"На столе горой лежат письма от фанатов.", why:"팬레터가 + картинка → 쌓여 있다."}
+  ]},
+  {t:"wr", name:"✍️ Глагол → пассив → + -아/어 있다", hint:"Дан глагол-действие. Напиши форму состояния (например: 열다 → 열려 있다). Пробелы не важны.", items:[
+   {q:"열다", a:["열려 있다"], ru:"быть открытым"},
+   {q:"닫다", a:["닫혀 있다"], ru:"быть закрытым"},
+   {q:"잠그다", a:["잠겨 있다"], ru:"быть запертым"},
+   {q:"켜다", a:["켜져 있다"], ru:"быть включённым"},
+   {q:"끄다", a:["꺼져 있다"], ru:"быть выключенным"},
+   {q:"놓다", a:["놓여 있다"], ru:"лежать, стоять (о предмете)"},
+   {q:"걸다", a:["걸려 있다"], ru:"висеть"},
+   {q:"쓰다", a:["쓰여 있다"], ru:"быть написанным"},
+   {q:"쌓다", a:["쌓여 있다"], ru:"лежать грудой"},
+   {q:"담다", a:["담겨 있다"], ru:"содержаться, быть вложенным"},
+   {q:"꽂다", a:["꽂혀 있다"], ru:"быть воткнутым, вставленным"},
+   {q:"정하다", a:["정해져 있다"], ru:"быть определённым"},
+   {q:"알리다", a:["알려져 있다"], ru:"быть известным"}
+  ]}
+ ]},
+ {id:"B5", name:"5 · Найди ошибку", steps:[
+  {t:"rule", name:"📘 Частые ошибки", html:R5},
+  {t:"err", name:"Какое предложение правильное?", hint:"Одно предложение правильное, во втором — ошибка.", items:[
+   {o:["문이 열려 있어요.","문을 열어 있어요."], why:"열다 — переходный. С 있다 нужен пассив: 문이 열려 있다."},
+   {o:["포스터에 이름이 쓰여 있어요.","포스터에 이름이 쓰여져 있어요."], why:"쓰여지다 — двойной пассив. Правильно: 쓰여 있다."},
+   {o:["리더가 모자를 쓰고 있어요.","리더가 모자를 써 있어요."], why:"головной убор, одежда → -고 있다."},
+   {o:["응원봉이 다 켜져 있어요.","응원봉이 다 켜 있어요."], why:"켜다 → 켜지다 → 켜져 있다."},
+   {o:["갑자기 문이 열렸어요.","갑자기 문이 열어졌어요."], why:"у 열다 есть 열리다 — 열어지다 не нужен."},
+   {o:["무대 위에 꽃이 놓여 있어요.","무대 위에 꽃을 놓여 있어요."], why:"пассив + 있다 → 이/가: 꽃이 놓여 있다."},
+   {o:["데뷔 후에 더 유명해졌어요.","데뷔 후에 더 유명되었어요."], why:"«стать известным» → 유명하다 + 지다 = 유명해지다."},
+   {o:["그 순간은 잊히지 않아요.","그 순간은 잊혀지지 않아요."], why:"잊혀지다 — двойной пассив (хоть и звучит в песнях). Норма: 잊히다."}
+  ]}
+ ]},
+ {id:"BS", name:"6 · 🎧 피동 в песнях", steps:[
+  {t:"rule", name:"🎧 Песни", html:R6},
+  {t:"mc", name:"Разбери форму из песни", hint:"Формы из названий и текстов настоящих песен.", items:[
+   {s:"태연 «들리나요»: 들리다 = 듣다 + ( )", o:["-리-","-기-"], a:"-리-", ru:"«Слышно ли?»", why:"듣다 → 들리다 «слышаться». Голос слышен сам, без усилия."},
+   {s:"장범준 «흔들리는 꽃들…»: 흔들리다 — это ( )", o:["пассив от 흔들다","актив"], a:"пассив от 흔들다", ru:"«качающиеся цветы»", why:"바람이 꽃을 흔들다 (ветер качает цветы) → 꽃이 흔들리다 (цветы качаются)."},
+   {s:"«…네 샴푸향이 느껴진 거야»: 느껴지다 = 느끼다 + ( )", o:["-어지다","-히-"], a:"-어지다", ru:"«почувствовался запах твоего шампуня»", why:"запах «чувствуется» сам, я специально не принюхиваюсь → 느끼다 + -어지다."},
+   {s:"이용 «잊혀진 계절»: по норме правильно — «( ) 계절».", o:["잊힌","잊혀진"], a:"잊힌", ru:"«Забытое время года»", why:"잊히다 — уже пассив. + -어지다 = двойной пассив. Норма: 잊힌."},
+   {s:"NELL «기억을 걷는 시간»: в песне «놓여진», а по норме — ( ).", o:["놓인","놓은"], a:"놓인", ru:"«поставленный, стоящий»", why:"놓이다 → 놓인. 놓은 — актив («который я поставил»)."},
+   {s:"Фанаты поют так громко, что песня ( ) даже на улице.", o:["들려요","들어요"], a:"들려요", ru:"Песня слышна даже на улице.", why:"노래가 → «слышится» = 들리다."}
+  ]},
+  {t:"free", name:"✍️ Найди пассив в своей песне", hint:"Послушай любимую песню и найди в ней пассив (들려, 보여, 느껴져, 잊혀, 갇혀, 담겨…). Напиши: исполнитель — песня — форма — от какого глагола. Например: 태연 — 들리나요 — 들리다 — 듣다. Можно несколько."}
+ ]},
+ {id:"B6", name:"7 · Текст: ночь перед днём рождения", steps:[
+  {t:"text", name:"📖 Выбери правильное в тексте"}
+ ]},
+ {id:"B7", name:"8 · Опиши сцену", steps:[
+  {t:"wr", name:"✍️ Что мы видим на сцене?", hint:"До концерта 10 минут. Опиши, что видишь: поставь глагол в форму состояния с -아/어 있어요.", items:[
+   {q:"무대 위에 마이크가 ( ). (놓다)", a:["놓여 있어요"], ru:"На сцене стоят микрофоны."},
+   {q:"벽에 큰 포스터가 ( ). (걸다)", a:["걸려 있어요"], ru:"На стене висит большой постер."},
+   {q:"포스터에 그룹 이름이 ( ). (쓰다)", a:["쓰여 있어요"], ru:"На постере написано название группы."},
+   {q:"무대 조명은 아직 ( ). (끄다)", a:["꺼져 있어요"], ru:"Свет на сцене ещё выключен."},
+   {q:"팬들의 응원봉은 벌써 다 ( ). (켜다)", a:["켜져 있어요"], ru:"Лайтстики фанатов уже все горят."},
+   {q:"대기실 문이 ( ). (잠그다)", a:["잠겨 있어요"], ru:"Дверь гримёрки заперта."},
+   {q:"무대 옆에 선물 상자들이 ( ). (쌓다)", a:["쌓여 있어요"], ru:"Возле сцены сложены коробки с подарками."},
+   {q:"멤버들은 무대 뒤에 ( ). (서다)", a:["서 있어요"], ru:"Участники стоят за сценой."},
+   {q:"공연장 문은 벌써 ( ). (열다)", a:["열려 있어요"], ru:"Двери зала уже открыты."},
+   {q:"꽃다발에 작은 카드가 ( ). (꽂다)", a:["꽂혀 있어요"], ru:"В букет вставлена маленькая открытка."},
+   {q:"노래 순서는 이미 ( ). (정하다)", a:["정해져 있어요"], ru:"Порядок песен уже определён."}
+  ]}
+ ]}
+];
+
+/* ============ ТЕКСТ (как в учебнике: выбери из двух) ============ */
+const STORY = {
+ title:"생일 전날 밤, 연습실에서",
+ parts:[
+  "나는 아이돌 그룹 '미래'의 막내다. 내일은 내 스무 번째 생일이다. 밤 11시, 개인 연습을 하려고 혼자 연습실에 갔다. 그런데 뭔가 이상했다. 어제 나가기 전에 분명히 문을 ",
+  {o:["잠갔는데","잠겼는데"], a:"잠갔는데", why:"문을 (을/를), это я запер → актив 잠그다."},
+  " 문이 ",
+  {o:["열어","열려"], a:"열려", why:"문이 + 있었다 → пассив 열리다 → 열려 있었다."},
+  " 있었다. 안은 깜깜했다. 불이 다 ",
+  {o:["꺼","꺼져"], a:"꺼져", why:"불이 + 있었다 → 꺼지다 → 꺼져 있었다 (꺼 있다 — нельзя, 끄다 переходный)."},
+  " 있었다. 내가 불을 ",
+  {o:["켜자","켜지자"], a:"켜자", why:"내가 불을 → актив 켜다 → 켜자 («как только я включил»)."},
+  " 어디선가 이상한 소리가 ",
+  {o:["들었다","들렸다"], a:"들렸다", why:"소리가 → «послышался» = пассив 들리다."},
+  ". 거울에는 빨간 글씨로 '막내야, 뒤를 봐!'라고 ",
+  {o:["쓰고","쓰여"], a:"쓰여", why:"надпись → 쓰이다 → 쓰여 있었다."},
+  " 있었다. 뒤를 돌아보니 테이블 위에 큰 케이크가 ",
+  {o:["놓아","놓여"], a:"놓여", why:"케이크가 → 놓이다 → 놓여 있었다."},
+  " 있었고, 벽에는 내 사진이 ",
+  {o:["걸려","걸고"], a:"걸려", why:"사진이 → 걸리다 → 걸려 있었다."},
+  " 있었다. 케이크에는 초 스무 개가 ",
+  {o:["켜고","켜져"], a:"켜져", why:"초가 (свечи) → 켜지다 → 켜져 있었다."},
+  " 있었다. 그때 소파 뒤에서 형들이 \"생일 축하해!\" 하고 뛰어나왔다. 알고 보니 매니저 형이 미리 연습실 문을 ",
+  {o:["열었고","열렸고"], a:"열었고", why:"매니저 형이 문을 → актив 열다."},
+  ", 형들은 소파 뒤에 숨어 있었던 것이다. 선물 상자를 열어 보니 안에 팬들의 편지가 가득 ",
+  {o:["들고","들어"], a:"들어", why:"편지가 внутри коробки → 들다 (быть внутри) → 들어 있었다. 들고 있다 = держать в руках."},
+  " 있었다. 편지마다 팬들의 사랑이 ",
+  {o:["담아","담겨"], a:"담겨", why:"사랑이 → 담기다 → 담겨 있었다."},
+  " 있었다. 나는 너무 감동해서 눈물이 났다. 그날 찍은 사진을 팬카페에 올리자 하루 만에 댓글이 만 개 넘게 ",
+  {o:["달렸다","달았다"], a:"달렸다", why:"댓글이 → пассив 달리다 («появились комментарии»)."},
+  ". 그날 이후 멤버들과 나는 더 ",
+  {o:["가까워졌다","가까웠다"], a:"가까워졌다", why:"«стали ближе» → прилагательное 가깝다 + -아/어지다."},
+  "."
+ ],
+ ru:"Я — макнэ айдол-группы «Мирэ». Завтра мне исполняется двадцать. В 11 вечера я пошёл один в репетиционную позаниматься. Но что-то было не так. Вчера перед уходом я точно запер дверь, а она была открыта. Внутри было темно: весь свет был выключен. Как только я включил свет, откуда-то послышался странный звук. На зеркале красными буквами было написано: «Макнэ, обернись!». Я обернулся — на столе стоял большой торт, а на стене висела моя фотография. На торте горели двадцать свечей. Тут из-за дивана с криком «С днём рождения!» выскочили старшие участники. Оказалось, менеджер заранее открыл репетиционную, а ребята прятались за диваном. Я открыл подарочную коробку — внутри было полно писем от фанатов. В каждом письме была любовь фанатов. Я так растрогался, что заплакал. Как только я выложил фото того дня в фан-кафе, за сутки под ним набралось больше десяти тысяч комментариев. С того дня мы с участниками стали ещё ближе."
+};
+
+/* ============ ЛОГИКА ============ */
+const $=id=>document.getElementById(id);
+let STATE={name:"",started:null,done:{}};
+let PIN="";
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function norm(s){ return (s||"").normalize("NFC").replace(/[\s.,!?·~]/g,""); }
+function isRight(v,answers){ const n=norm(v); return n!==""&&answers.some(a=>norm(a)===n); }
+
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(STATE)); if(PIN) localStorage.setItem(KEY+"_pin",PIN);}catch(e){} cloudSave(); }
+function load(){ try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.name) STATE=s;}catch(e){} if(!STATE.done) STATE.done={}; }
+async function rpc(fn,args){ const r=await fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"},body:JSON.stringify(args)});
+  const t=await r.text(); if(!r.ok){ let m=t; try{m=JSON.parse(t).message}catch(e){} throw new Error(m); } return t?JSON.parse(t):null; }
+let cloudT=null;
+function cloudSave(){ if(!SB_ON||!PIN||!STATE.name) return; clearTimeout(cloudT); $("cloud").textContent="☁️…";
+  cloudT=setTimeout(async()=>{ try{ await rpc("save_progress",{p_site:KEY,p_name:STATE.name,p_pin:PIN,p_state:STATE}); $("cloud").textContent="☁️✓"; }catch(e){ $("cloud").textContent="⚠️ не сохранено в облако"; } },1200); }
+
+/* голос */
+let voices=[];
+function vRank(v){ const n=v.name; return /Natural|Online|Neural|SunHi|InJoon|Hyunsu/i.test(n)?0:/Google|Yuna|Siri|Premium|Enhanced|Improved/i.test(n)?1:2; }
+function loadVoices(){ voices=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang)).sort((a,b)=>vRank(a)-vRank(b));
+  const sel=$("voiceSel"); if(!sel) return; let saved=null; try{saved=localStorage.getItem("topik_voice")}catch(e){}
+  sel.innerHTML=voices.length?voices.map((v,i)=>'<option value="'+i+'">'+esc(v.name)+'</option>').join(""):'<option>корейский голос не найден</option>';
+  const k=voices.findIndex(v=>v.name===saved); if(k>=0) sel.value=k; }
+if("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+function say(text){ if(!("speechSynthesis" in window)) return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text);
+  const cv=voices[parseInt(($("voiceSel")||{}).value)]||voices[0]; if(cv){u.voice=cv;u.lang=cv.lang;} else u.lang="ko-KR"; u.rate=parseFloat($("rate").value); speechSynthesis.speak(u); }
+$("rate").oninput=()=>$("rateVal").textContent=$("rate").value;
+
+$("kpList").innerHTML=KPOP.map(k=>'<tr><td style="width:34px"><button class="sm" style="margin:0;padding:4px 8px" onclick="say('+esc(JSON.stringify(k[0]))+')">🔊</button></td><td class="ko" style="font-weight:600;white-space:nowrap">'+esc(k[0])+'</td><td>'+esc(k[1])+'</td></tr>').join("");
+
+/* шаги */
+const STEPS=[];
+BLOCKS.forEach(b=>b.steps.forEach((s,i)=>STEPS.push({key:b.id+":"+i,block:b,...s})));
+/* MIRAÉ: отдельные задания для домашки (js/bridge.js) */
+window.MIRAE_PARTS=BLOCKS.map(b=>({g:b.name,t:STEPS.filter(x=>x.block===b).map(x=>({k:"v:"+x.key,n:x.name}))}));
+if(window.MIRAE_PICK){ MIRAE_PICK.keep(STEPS,x=>"v:"+x.key); }
+
+function curIdx(){ const i=STEPS.findIndex(s=>!STATE.done[s.key]); return i<0?STEPS.length:i; }
+function renderPath(){
+  const ci=curIdx(), dn=STEPS.filter(s=>STATE.done[s.key]).length;
+  $("vBar").style.width=(100*dn/STEPS.length)+"%"; $("vProg").textContent="Пройдено шагов: "+dn+" из "+STEPS.length;
+  let h="",last=null;
+  STEPS.forEach((s,i)=>{
+    if(s.block!==last){ if(last) h+="</div>"; h+='<div class="grp">'+esc(s.block.name)+'</div><div class="ex">'; last=s.block; }
+    const st=STATE.done[s.key]?"done":i===ci?"cur":"lock";
+    h+='<button class="sm '+(st==="done"?"done":"")+'" '+(st==="lock"?"disabled":"")+' onclick="openStep('+i+')">'+(st==="done"?"✓ ":st==="cur"?"▶ ":"🔒 ")+esc(s.name)+'</button>';
+  });
+  $("path").innerHTML=h+"</div>";
+}
+function goCurrent(){ openStep(curIdx()); }
+function openStep(i){
+  if("speechSynthesis" in window) speechSynthesis.cancel();
+  if(i>=STEPS.length){ $("sStep").textContent=""; $("sTitle").textContent="🎉 Всё пройдено! 수고했어요!"; $("sBody").innerHTML='<p>Нажми «Отправить результаты» ниже. Любой шаг можно повторить в списке «Весь путь».</p>'; renderPath(); return; }
+  const s=STEPS[i];
+  $("sStep").textContent="Шаг "+(i+1)+" из "+STEPS.length+" · "+s.block.name;
+  $("sTitle").textContent=s.name;
+  if(s.t==="rule") showRule(s); else if(s.t==="text") runText(s); else if(s.t==="free") runFree(s); else runDrill(s);
+  renderPath(); $("stage").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function finish(key,obj){ STATE.done[key]=obj; save(); renderPath(); }
+
+/* правило */
+function showRule(s){
+  $("sBody").innerHTML='<div class="rule">'+s.html+'</div><p><button class="primary" id="ruleOk">Понятно →</button></p>';
+  $("ruleOk").onclick=()=>{ finish(s.key,{name:s.name,seen:true}); goCurrent(); };
+}
+
+/* свободный ответ */
+function runFree(s){
+  const prev=(STATE.done[s.key]&&STATE.done[s.key].text)||"";
+  $("sBody").innerHTML='<p>'+esc(s.hint)+'</p><textarea id="fIn" class="ko" style="width:100%;height:130px;font:inherit;font-size:16px;padding:10px;border:1.5px solid #c9ced8;border-radius:9px"></textarea>'+
+    '<div class="feedback" id="fFb"></div><p><button class="primary" id="fOk">Сохранить и дальше →</button></p>';
+  $("fIn").value=prev;
+  $("fOk").onclick=()=>{ const v=$("fIn").value.trim(); if(v.length<3){ $("fFb").innerHTML='<span style="color:var(--bad)">Напиши хотя бы одну песню и форму.</span>'; return; }
+    finish(s.key,{name:s.name,text:v}); goCurrent(); };
+}
+
+/* упражнения: mc / err / wr */
+let D=null;
+function runDrill(s){
+  D={s,items:s.items,queue:shuffle(s.items.map((_,i)=>i)),total:s.items.length,first:0,done:0,wrong:new Set(),mistakes:[],cur:null,lock:false,retype:false};
+  $("sBody").innerHTML='<p class="muted">'+esc(s.hint||"")+'</p><div class="bar"><div id="dBar"></div></div><div class="big" id="dPrompt"></div><div id="dOpts"></div>'+
+   '<div id="dWrite" class="hidden"><input type="text" id="dIn" class="ko" lang="ko" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">'+
+   '<button class="primary" onclick="dCheck()">Проверить</button><button class="sm" onclick="dHint()">💡 Первый слог</button></div><div class="feedback" id="dFb"></div>';
+  $("dIn").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.isComposing){ if($("dNext")) dNext(); else dCheck(); } });
+  dNext();
+}
+function blankHtml(sent){ return esc(sent).replace("( )",'<span class="blank">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</span>'); }
+function fullSent(it){ return it.s.replace("( )",it.a); }
+function dNext(){
+  D.lock=false; D.retype=false; $("dBar").style.width=(100*D.done/D.total)+"%"; $("dFb").innerHTML=""; $("dOpts").innerHTML=""; $("dOpts").className="";
+  if(!D.queue.length){
+    $("dWrite").classList.add("hidden");
+    $("dPrompt").innerHTML="✅ Готово! С первого раза: "+D.first+" / "+D.total;
+    finish(D.s.key,{name:D.s.name,score:D.first,total:D.total,mistakes:D.mistakes});
+    $("dFb").innerHTML='<button class="primary" onclick="goCurrent()">Дальше →</button>'; return;
+  }
+  D.cur=D.queue.shift(); const it=D.items[D.cur], t=D.s.t;
+  if(t==="mc"){
+    $("dWrite").classList.add("hidden");
+    $("dPrompt").innerHTML='<span class="ko">'+blankHtml(it.s)+'</span><div class="muted" style="font-size:15px;font-weight:400;margin-top:6px">'+esc(it.ru)+'</div>';
+    $("dOpts").className="opts"+(it.o.length===3?" three":"");
+    shuffle(it.o).forEach(o=>{ const b=document.createElement("button"); b.textContent=o; b.className="ko"; b.onclick=()=>dPick(b,o); $("dOpts").appendChild(b); });
+  } else if(t==="err"){
+    $("dWrite").classList.add("hidden");
+    $("dPrompt").innerHTML='Какое предложение правильное?';
+    $("dOpts").className="opts one";
+    shuffle(it.o).forEach(o=>{ const b=document.createElement("button"); b.textContent=o; b.className="ko"; b.onclick=()=>dPick(b,o); $("dOpts").appendChild(b); });
+  } else {
+    $("dWrite").classList.remove("hidden");
+    const q=it.q.includes("( )")?blankHtml(it.q):esc(it.q)+(D.s.block.id==="B4"?' → ? <span class="muted" style="font-weight:400">(+ 있다)</span>':' = ?');
+    $("dPrompt").innerHTML='<span class="ko">'+q+'</span><div class="muted" style="font-size:15px;font-weight:400;margin-top:4px">'+esc(it.ru)+'</div>';
+    $("dIn").value=""; $("dIn").className="ko"; $("dIn").focus();
+  }
+}
+function result(ok,given){ const it=D.items[D.cur];
+  if(ok){ if(!D.wrong.has(D.cur)) D.first++; D.done++; }
+  else{ if(!D.wrong.has(D.cur)){ D.wrong.add(D.cur); D.mistakes.push((it.a&&typeof it.a==="string"?it.a:(it.o?it.o[0]:it.a[0]))+" (ответ: "+(given||"—")+")"); } D.queue.push(D.cur); } }
+function nextBtn(){ return '<p><button class="primary" id="dNext" onclick="dNext()">Дальше →</button></p>'; }
+function dPick(btn,o){
+  if(D.lock) return; D.lock=true; const it=D.items[D.cur], right=D.s.t==="err"?it.o[0]:it.a, ok=o===right;
+  [...$("dOpts").children].forEach(b=>{ b.disabled=true; if(b.textContent===right) b.classList.add("ok"); }); if(!ok) btn.classList.add("bad");
+  result(ok,o);
+  const full=D.s.t==="err"?right:fullSent(it);
+  const mark=D.s.t==="err"?esc(full):esc(full).replace(esc(it.a),'<mark>'+esc(it.a)+'</mark>');
+  $("dFb").innerHTML='<div class="why"><div class="full ko">'+(ok?"👍 ":"✗ ")+mark+' <button class="dark sm" onclick="say('+esc(JSON.stringify(full))+')">🔊</button></div>'+
+    '<div>'+esc(it.why)+'</div>'+(ok?"":'<div class="muted">Это задание будет ещё раз в конце.</div>')+'</div>'+nextBtn();
+  say(full); setTimeout(()=>{ const n=$("dNext"); if(n) n.focus(); },50);
+}
+function dHint(){ if(D.lock) return; const it=D.items[D.cur]; $("dFb").innerHTML='Начинается на: <b class="ko" style="font-size:20px">'+esc(it.a[0][0])+'…</b>'; $("dIn").focus(); }
+function dCheck(){
+  if(D.lock) return; const it=D.items[D.cur], v=$("dIn").value; if(!v.trim()) return;
+  if(D.retype){
+    if(isRight(v,it.a)){ D.lock=true; $("dIn").className="ko ok"; $("dFb").innerHTML="👍 Теперь правильно. Будет ещё раз в конце."+nextBtn(); }
+    else{ $("dIn").className="ko bad"; $("dFb").innerHTML='Ещё не так. Напиши точно: <b class="ko">'+esc(it.a[0])+'</b>'; }
+    return;
+  }
+  const ok=isRight(v,it.a); $("dIn").className="ko "+(ok?"ok":"bad"); result(ok,v);
+  const full=it.q.includes("( )")?it.q.replace(/\s*\([^)]*\)\s*$/,"").replace("( )",it.a[0]):it.a[0];
+  say(full);
+  if(ok){ D.lock=true; $("dFb").innerHTML='<div class="why"><div class="full ko">👍 '+esc(full)+'</div><div>'+esc(it.ru)+'</div></div>'+nextBtn(); }
+  else{ D.retype=true; $("dFb").innerHTML='Правильно: <b class="ko" style="font-size:22px">'+esc(it.a[0])+'</b><br>Перепечатай правильно и нажми «Проверить».'; $("dIn").value=""; $("dIn").focus(); }
+}
+
+/* текст с выбором */
+let T=null;
+function runText(s){
+  T={s,sel:{},checked:false}; let h='<p class="muted">Прочитай историю и выбери в каждой скобке правильный вариант (как в учебнике). Потом нажми «Проверить».</p><div class="reading ko"><h4>'+esc(STORY.title)+'</h4>';
+  let n=0;
+  STORY.parts.forEach(p=>{ if(typeof p==="string"){ h+=esc(p); return; } const k=n++;
+    h+='<span class="ch" id="ch'+k+'"><sup>'+(k+1)+')</sup>('+p.o.map((o,j)=>'<button onclick="tPick('+k+','+j+')">'+esc(o)+'</button>').join(" / ")+')</span>'; });
+  h+='</div><p><button class="dark sm" onclick="sayStory()">🔊 Прочитать вслух (после проверки)</button></p><p><button class="primary" id="tCheck" onclick="tCheck()">Проверить</button></p><div class="feedback" id="tFb"></div>';
+  $("sBody").innerHTML=h;
+}
+function choices(){ return STORY.parts.filter(p=>typeof p!=="string"); }
+function tPick(k,j){ if(T.checked) return; T.sel[k]=j; [...$("ch"+k).querySelectorAll("button")].forEach((b,i)=>b.classList.toggle("sel",i===j)); }
+function storyText(){ return STORY.parts.map(p=>typeof p==="string"?p:p.a).join(""); }
+function sayStory(){ if(!T||!T.checked){ $("tFb").innerHTML='<span class="muted">Сначала нажми «Проверить».</span>'; return; } say(storyText()); }
+function tCheck(){
+  const C=choices(); const miss=C.findIndex((_,k)=>T.sel[k]===undefined);
+  if(miss>=0){ $("tFb").innerHTML='<span style="color:var(--bad)">Выбери вариант в скобке '+(miss+1)+').</span>'; $("ch"+miss).scrollIntoView({behavior:"smooth",block:"center"}); return; }
+  T.checked=true; let score=0; const mistakes=[]; let why="";
+  C.forEach((p,k)=>{ const bs=[...$("ch"+k).querySelectorAll("button")], ok=p.o[T.sel[k]]===p.a;
+    bs.forEach((b,i)=>{ b.classList.remove("sel"); if(p.o[i]===p.a) b.classList.add("ok"); else if(i===T.sel[k]) b.classList.add("bad"); });
+    if(ok) score++; else { mistakes.push(p.a+" (ответ: "+p.o[T.sel[k]]+")"); why+='<div style="margin:4px 0"><b>'+(k+1)+')</b> <span class="ko">'+esc(p.a)+'</span> — '+esc(p.why)+'</div>'; } });
+  $("tCheck").classList.add("hidden");
+  finish(T.s.key,{name:T.s.name,score,total:C.length,mistakes});
+  $("tFb").innerHTML='<div class="big">Правильно: '+score+' / '+C.length+'</div>'+(why?'<div class="why"><b>Разбор ошибок</b>'+why+'</div>':'<p>🎉 Без ошибок! 완벽해요!</p>')+
+   '<details style="margin-top:10px"><summary><b>Перевод текста</b></summary><p>'+esc(STORY.ru)+'</p></details>'+
+   '<details style="margin-top:6px"><summary><b>Все объяснения</b></summary>'+C.map((p,k)=>'<div style="margin:4px 0"><b>'+(k+1)+')</b> <span class="ko">'+esc(p.a)+'</span> — '+esc(p.why)+'</div>').join("")+'</details>'+
+   '<p><button onclick="runText(T.s)">↺ Пройти текст ещё раз</button> <button class="primary" onclick="goCurrent()">Дальше →</button></p>';
+}
+
+/* вход */
+async function start(){
+  const n=$("nameInput").value.trim(); if(!n){$("nameInput").focus();return;}
+  if(SB_ON){
+    const pin=$("pinInput").value.trim(); if(!/^\d{4,8}$/.test(pin)){ $("loginFb").textContent="Введи PIN из 4 цифр."; $("pinInput").focus(); return; }
+    $("loginFb").textContent="Загружаю…"; $("loginFb").style.color="var(--muted)";
+    try{ const remote=await rpc("load_progress",{p_site:KEY,p_name:n,p_pin:pin});
+      if(remote&&remote.done){ STATE=remote; STATE.name=n; }
+      else if(STATE.name.toLowerCase()!==n.toLowerCase()) STATE={name:n,started:Date.now(),done:{}};
+      PIN=pin; $("loginFb").textContent="";
+    }catch(e){ $("loginFb").style.color="var(--bad)";
+      if(/wrong_pin/.test(e.message)){ $("loginFb").textContent="Неверный PIN для этого имени. Если это не ты — добавь к имени фамилию."; return; }
+      $("loginFb").textContent="Нет связи с сервером — прогресс пока сохранится только на этом устройстве."; PIN="";
+      if(STATE.name!==n) STATE={name:n,started:Date.now(),done:{}}; }
+  } else if(STATE.name!==n) STATE={name:n,started:Date.now(),done:{}};
+  if(!STATE.started) STATE.started=Date.now();
+  save(); $("login").classList.add("hidden"); $("app").classList.remove("hidden"); $("who").textContent=STATE.name; goCurrent();
+}
+
+/* отчёт учителю */
+function buildReport(){
+  const mins=Math.max(1,Math.round((Date.now()-(STATE.started||Date.now()))/60000));
+  let t="📝 <b>Урок · 피동 + -아/어 있다 + -아/어지다</b>\n👤 "+esc(STATE.name)+"\n🕒 "+new Date().toLocaleString("ru-RU")+" · ≈"+mins+" мин\n📚 Шагов: "+STEPS.filter(s=>STATE.done[s.key]).length+" из "+STEPS.length+"\n";
+  BLOCKS.forEach(b=>{ const got=STEPS.filter(x=>x.block===b&&x.t!=="rule"&&STATE.done[x.key]);
+    const all=STEPS.filter(x=>x.block===b&&x.t!=="rule"); if(!all.length) return;
+    if(!got.length){ t+="\n<b>"+esc(b.name)+"</b>: не начато"; return; }
+    got.forEach(x=>{ const r=STATE.done[x.key];
+      if(r.text!==undefined){ t+="\n<b>"+esc(b.name)+"</b> · "+esc(x.name)+":\n   ✍️ "+esc(r.text); return; }
+      t+="\n<b>"+esc(b.name)+"</b> · "+esc(x.name)+": "+r.score+"/"+r.total; (r.mistakes||[]).forEach(m=>t+="\n   ✗ "+esc(m)); });
+  });
+  return t;
+}
+function chunks(text){ const out=[]; let cur=""; text.split("\n").forEach(l=>{ if((cur+"\n"+l).length>3800){ out.push(cur); cur=l; } else cur=cur?cur+"\n"+l:l; }); if(cur) out.push(cur); return out; }
+async function sendResults(){
+  const text=buildReport(); $("sendBtn").disabled=true; $("sendFb").textContent="Отправляю…";
+  try{ for(const part of chunks(text)){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+    $("sendFb").textContent="✅ Отправлено! 잘했어요!"; $("sendBtn").disabled=false; }
+  catch(e){ $("sendBtn").disabled=false; $("sendFb").textContent="Не получилось отправить ("+e.message+"). Скопируй текст и отправь вручную:"; const b=$("copyBox"); b.value=text.replace(/<\/?b>/g,""); b.classList.remove("hidden"); b.select(); }
+}
+
+if(!SB_ON) $("pinRow").classList.add("hidden");
+load(); try{PIN=localStorage.getItem(KEY+"_pin")||"";}catch(e){}
+if(STATE.name) $("nameInput").value=STATE.name; if(PIN) $("pinInput").value=PIN;
+/* автовход из страницы с вкладками (#auto=...) */
+(function(){ const m=location.hash.match(/^#auto=(.+)$/); if(!m) return;
+  try{ const a=JSON.parse(decodeURIComponent(escape(atob(m[1])))); history.replaceState(null,"",location.pathname+location.search);
+    $("nameInput").value=a.n; $("pinInput").value=a.p; setTimeout(()=>start(),50); }catch(e){} })();
+</script>
+</body>
+</html>

@@ -202,6 +202,14 @@ window.MATERIALS=[
   "level": "3급"
  },
  {
+  "id": "ko-pidong-iss-jida",
+  "section": "korean",
+  "kind": "lesson",
+  "title": "피동 + -아/어 있다 + -아/어지다 · урок с кей-попом",
+  "path": "materials/korean/ko-pidong-iss-jida/",
+  "level": "3급"
+ },
+ {
   "id": "ko-sago-vocab",
   "section": "korean",
   "kind": "trainer",
