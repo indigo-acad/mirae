@@ -14,7 +14,7 @@
 <div id="topbar"></div>
 <header class="band course-hero"><div class="in"><small id="sub"></small><h1 id="ct"></h1><p id="cp"></p><div id="cta" class="hero-cta"></div></div></header>
 <main class="course"><div id="list"></div></main>
-<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script>
+<script src="data/course.js"></script><script src="data/materials.js?v=2"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script>
 <script>
 /* Программа показана как путь: части и главы на одной линии. Раздел зависит от языка (переключатель в шапке).
    Корейский: уроки 서울대 한국어+ с прогрессом по блокам. Английский: материалы программы из каталога,
@@ -51,17 +51,24 @@ function programKo(){
   var C4=window.COURSE4; if(C4)parts.push({t:C4.title.split(' · ')[1]||'',ko:true,items:C4.lessons.map(ch)});
   return {sub:C.subtitle,title:C2?C.title.split(' · ')[0]:C.title,ko:true,note:'Основной курс идёт по учебнику, методику потом настроим под себя',unit:'блоков',parts:parts};
 }
+// Английский: курсы из window.EN_COURSES (data/materials.js) идут отдельными частями, по полю course у материала;
+// материалы без курса — в части «IELTS».
 function programEn(){
   var done=KR.taken();
-  var items=MATERIALS.filter(function(m){return m.section==='english'&&m.kind!=='class'}).map(function(m){
+  var one=function(m){
     var x={key:m.id,tag:((window.KINDS||{})[m.kind]||'')+(m.level?' · '+m.level:''),title:m.title,mat:m.id};
     if(!KR.can(m.id)){x.state='lock';return x}
     var d=done.indexOf(m.id)>=0;x.n=d?1:0;x.tot=1;x.state=d?'done':'open';x.href=m.path;x.go='Открыть';
     var a=KR.assignedInfo(m.id);x.meta=a&&(a.due||a.note)?((a.due?'срок '+a.due:'')+(a.due&&a.note?' · ':'')+(a.note||'')):'';
     x.extra='<button data-take="'+esc(m.id)+'" aria-pressed="'+d+'">'+(d?KR.icon('check',16)+' Пройдено':'Отметить пройденным')+'</button>';
     return x;
-  });
-  return {sub:'Программа',title:(window.SECTIONS||{}).english||'English',note:'Тренажёры, домашние задания и проверочные по программе. Пройденное отмечай сам.',unit:'материалов',parts:[{t:'IELTS',items:items}]};
+  };
+  var list=MATERIALS.filter(function(m){return m.section==='english'&&m.kind!=='class'});
+  var C=window.EN_COURSES||[],ids=C.map(function(c){return c.id});
+  var parts=C.map(function(c){return {t:c.title,items:list.filter(function(m){return m.course===c.id}).map(one)}}).filter(function(p){return p.items.length});
+  var rest=list.filter(function(m){return ids.indexOf(m.course)<0}).map(one);
+  if(rest.length)parts.push({t:'IELTS',items:rest});
+  return {sub:'Программа',title:(window.SECTIONS||{}).english||'English',note:'Тренажёры, домашние задания и проверочные по программе. Пройденное отмечай сам.',unit:'материалов',parts:parts};
 }
 // миниатюра урока: фрагмент пейзажа раздела, по кругу из пяти
 function thumb(k){return 'img/thumb-'+(KR.lang()==='en'?'en':'ko')+'-'+(k%5+1)+'.svg'}

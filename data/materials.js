@@ -1,6 +1,17 @@
 window.SECTIONS={"korean": "Корейский язык", "english": "English · IELTS", "quests": "Квесты", "kids": "Для малышей", "course": "Основной курс"};
 window.KINDS={"trainer": "Тренажёр", "test": "Проверочная", "class": "Для урока", "game": "Игра", "quest": "Квест", "homework": "Домашка", "lesson": "Урок", "practice": "Отработка", "words": "Словарь"};
+// Курсы английского раздела: на странице курса материал с полем "course" стоит в своей части, остальные — в части «IELTS».
+window.EN_COURSES=[{"id": "ielts45", "title": "IELTS Band 4–5"}];
 window.MATERIALS=[
+ {
+  "id": "en-ielts45-l1-free-time",
+  "section": "english",
+  "kind": "lesson",
+  "course": "ielts45",
+  "title": "IELTS 4–5 · Урок 1 · Free time & adventure holidays",
+  "path": "materials/english/en-ielts45-l1-free-time/",
+  "level": "band 4–5"
+ },
  {
   "id": "en-ielts-unit1-places",
   "section": "english",
