@@ -316,7 +316,7 @@ function hwSubText(b,x,i){
    Тренажёр целиком: hwf.mats[id]. Часть заданий: их ключи в hwf.mp[id]; в домашку уходят полем p: [ключи]
    (и pn — названия для ученика, pt — сколько заданий всего); ученик откроет тренажёр с ?only=<ключи>. */
 var MPARTS={};   // id тренажёра → список групп; 'wait' — загружается; [] — отдельных заданий нет
-function matPickable(m){return m&&m.kind==='trainer'&&m.path&&m.path!=='#'}
+function matPickable(m){return m&&m.path&&m.path!=='#'&&(m.kind==='trainer'||(m.kind==='lesson'&&m.path.indexOf('materials/')===0))}
 function matParts(id){var P=MPARTS[id];return Array.isArray(P)&&P.length?P:null}
 function matKeys(id){var a=[];(matParts(id)||[]).forEach(function(g){g.t.forEach(function(x){a.push(x.k)})});return a}
 function matPart(id){var a=hwf.mp[id],n=matKeys(id).length;return hwf.mats[id]&&Array.isArray(a)&&a.length&&a.length<n?a:null}
