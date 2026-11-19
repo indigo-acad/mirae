@@ -1038,3 +1038,4 @@ main.home>.home-cards:empty{display:none}
 .box{border-radius:10px;padding:10px 12px;margin:10px 0;background:#0000000a}.box.warn{background:#ffb3401f}.box.tip{background:#4aa3ff1a}.box.kp{background:#c86bff1a}
 .chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}.chain .st{border:1px solid #0003;border-radius:8px;padding:4px 8px;text-align:center}.chain .st small{display:block;opacity:.7;font-size:.8em}
 .yes{color:#1a8f4c;font-weight:600}.no{color:#c0392b;text-decoration:line-through}
+.reading{line-height:2.1}.opts.inl{display:inline;margin:0 2px}.opts.inl button{padding:1px 8px;margin:0 2px}.opts.inl sup{opacity:.6;margin-right:2px}

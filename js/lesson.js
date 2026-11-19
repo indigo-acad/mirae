@@ -230,6 +230,10 @@ function block(b){
       const v=(P[b._key]&&P[b._key].v&&P[b._key].v[i])||"";
       const parts=it.q.split("___");
       return `<div class="ex" data-i="${i}"><span class="q ko">${esc(parts[0])}<input class="ans ko" data-b="${b._key}" data-i="${i}" value="${esc(v)}" aria-label="Ответ ${i+1}" autocomplete="off" autocapitalize="off" spellcheck="false">${esc(parts[1]||"")}</span><span class="fb" id="fb-${b._key}-${i}"></span></div>`}).join("")+doneRow(b);
+  }else if(b.type==="choice"&&Array.isArray(b.story)){   // текст с выбором прямо в строке: story[i] — текст перед пропуском i, последний — хвост
+    h+=`<p class="muted">${esc(b.instr)}</p><div class="reading ko">`+b.items.map((it,i)=>{
+      const sel=(P[b._key]&&P[b._key].v&&P[b._key].v[i])||"";
+      return esc(b.story[i]||"").replace(/\n/g,"<br>")+`<span class="opts inl" data-b="${b._key}" data-i="${i}"><sup>${i+1})</sup>${it.opts.map(o=>`<button class="${sel===o?"sel":""}" data-o="${esc(o)}">${esc(o)}</button>`).join("")}<span class="fb" id="fb-${b._key}-${i}"></span></span>`}).join("")+esc(b.story[b.items.length]||"").replace(/\n/g,"<br>")+`</div>`+doneRow(b);
   }else if(b.type==="choice"){
     h+=`<p class="muted">${esc(b.instr)}</p>`;
     h+=b.items.map((it,i)=>{
