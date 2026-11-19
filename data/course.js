@@ -13,7 +13,12 @@ window.COURSE = {
 window.COURSE2 = {
   id: "snu2", title: "서울대 한국어+ · 2급", subtitle: "Основной курс",
   lessons: [
-    { no: 11, title: "-아/어다 주다", id: "l11-adaju" },
+    { no: 11, title: "-아/어다 주다", id: "l11-adaju" }
+  ]
+};
+window.COURSE4 = {
+  id: "snu3", title: "서울대 한국어+ · 3급", subtitle: "Основной курс",
+  lessons: [
     { no: "피동", tag: "Грамматика · 피동", title: "피동 + -아/어 있다 + -아/어지다", mat: "ko-pidong-iss-jida" }
   ]
 };

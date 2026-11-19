@@ -48,6 +48,7 @@ function programKo(){
   var C3=window.COURSE3;   // CLT-синтез · A1: идёт после хангыля, если назначен хотя бы один урок (преподаватель видит всегда)
   if(C3&&C3.lessons.some(function(l){return KR.can('lesson-'+l.id)}))parts.splice(C0&&parts[0].t==='한글'?1:0,0,{t:'CLT · A1',items:C3.lessons.map(function(l){return ch(Object.assign({ru:true},l))})});
   if(C2)parts.push({t:C2.title.split(' · ')[1]||'',ko:true,items:C2.lessons.map(ch)});
+  var C4=window.COURSE4; if(C4)parts.push({t:C4.title.split(' · ')[1]||'',ko:true,items:C4.lessons.map(ch)});
   return {sub:C.subtitle,title:C2?C.title.split(' · ')[0]:C.title,ko:true,note:'Основной курс идёт по учебнику, методику потом настроим под себя',unit:'блоков',parts:parts};
 }
 function programEn(){
