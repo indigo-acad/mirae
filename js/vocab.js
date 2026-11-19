@@ -105,6 +105,25 @@ var V={
     if(out.back.length||out.done.length){save();push();changed()}
     return out;
   },
+  /* Ответ в тренировке по выбору (см. SRS.train): слово «на сегодня» получает обычную оценку, слово «на потом» от ошибки
+     возвращается раньше. Возвращает {c, k} или null, если расписание не изменилось. */
+  train:function(id,grade){
+    var c=D.w[id];if(!c)return null;var now=Date.now(),r=SRS.train(c,grade,D.s,now);
+    if(!r)return null;
+    if(r.k==="rev"){if(c.st===2){var ds=SRS.dayStart(now);D.rv=D.rv&&D.rv.d===ds?{d:ds,n:D.rv.n+1}:{d:ds,n:1}}logAnswer(!c.st,grade>=3,now)}
+    put(r.c);changed();return r;
+  },
+  /* Показать слова снова сегодня (today) или завтра (tom) — так решил учитель или ученик (SRS.send). */
+  send:function(ids,when){
+    var now=Date.now(),out=[];(ids||[]).forEach(function(id){var c=D.w[id];if(!c)return;c=SRS.send(c,when,D.s,now);D.w[id]=c;D.d[id]=1;delete D.x[id];out.push(c)});
+    if(out.length){save();push();changed()}return out;
+  },
+  /* Слова для тренировки по выбору: keys — области (SRS.SCOPES), по умолчанию из настроек. Сначала те, что пора повторить. */
+  scope:function(lang,keys){
+    var now=Date.now();keys=keys||V.settings().scope;
+    return V.all(lang).filter(function(c){return keys.some(function(k){return SRS.inScope(c,k,now)})})
+      .sort(function(a,b){return (SRS.isDue(b,now)?1:0)-(SRS.isDue(a,now)?1:0)||a.due-b.due});
+  },
   /* Слова ученика, которые есть в тексте (ответ или предложение из упражнения). Английский: слово целиком и с простым
      окончанием (books, played, making, studies). Корейский: словарная форма или основа из двух и более слогов в начале
      слова; основа из одного слога (가다, 사다) узнаётся только в словарной форме, иначе было бы много ложных совпадений.

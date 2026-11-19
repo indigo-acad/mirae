@@ -6,14 +6,18 @@
    src (откуда слово), star (отмечено учеником), st (0 новое, 1 учу, 2 повторяю, 3 переучиваю),
    due (когда показать, мс), ivl (интервал, дни), ef (лёгкость), step (шаг изучения), reps, lap (забывания),
    b (сколько раз слово добавляли повторно), fr / lr (первый и последний показ), a / u (добавлено / изменено),
-   pe / pm (ошибок в упражнениях уроков и день последней такой ошибки).
+   pe / pm (ошибок в упражнениях уроков и день последней такой ошибки), sh (интервал сокращён тренажёром, тестом или учителем:
+   следующее «Хорошо» растит его мягко, в полтора раза, а не в «лёгкость» раз), tc (сколько раз учитель возвращал слово).
 
    Оценки: 1 «Снова», 2 «Трудно», 3 «Хорошо», 4 «Легко». */
 (function(root){
 "use strict";
 var MIN=60000,DAY=86400000,AHEAD=20*MIN;
 var GAMES=["cards","tr","mean","ctx","wr","build","pairs","hear","dict","say"];   // hear, dict, say — на слух и вслух (js/ear.js)
-var CTXM=["ru","ctx","mix"];   // как отрабатывать: с русским, в контексте (только изучаемый язык), вперемешку
+var CTXM=["ru","ctx","mix"];
+/* Тренировка по выбору: из каких слов собирать тренажёры. Можно отметить несколько, слова берутся из всех отмеченных.
+   Новые (ещё не разобранные) слова сюда не попадают: они разбираются в своём блоке. */
+var SCOPES=["today","tom","d3","week","hard","all"];   // как отрабатывать: с русским, в контексте (только изучаемый язык), вперемешку
 var DEF={
   steps:[1,10],   // шаги изучения нового слова, минуты
   relearn:[10],   // шаг для забытого слова, минуты
@@ -31,6 +35,7 @@ var DEF={
   ctxm:{},        // режим отработки по языкам: {ko: "ru", en: "ctx"}; нет языка — "ru" (прежняя настройка, см. gls)
   gls:{},         // направления: на каком языке значение слова. {ko: ["ru","en","ctx"]} — корейское слово отрабатывается
                   // с русским, с английским и в контексте вперемешку. Нет языка — берётся из ctxm
+  scope:["today","tom"],   // тренировка по выбору: какие слова отрабатывать в тренажёрах (см. SCOPES)
   lw:"ask"        // слова нового урока: ask — спросить ученика, auto — добавить сразу, off — не добавлять
 };
 function num(v,d,lo,hi){v=parseFloat(v);return isFinite(v)?Math.max(lo,Math.min(hi,v)):d}
@@ -49,7 +54,22 @@ function cfg(s){
     ease:num(s.ease,DEF.ease,1.3,4),hard:num(s.hard,DEF.hard,1,2),bonus:num(s.bonus,DEF.bonus,1,2),
     lapse:num(s.lapse,DEF.lapse,0,1),mod:num(s.mod,DEF.mod,.5,2),maxIvl:Math.round(num(s.maxIvl,DEF.maxIvl,7,3650)),
     newDay:Math.round(num(s.newDay,DEF.newDay,0,200)),revDay:Math.round(num(s.revDay,DEF.revDay,1,2000)),games:g,
-    lw:s.lw==="auto"||s.lw==="off"?s.lw:DEF.lw,ctxm:ctxm(s.ctxm),gls:gls(s.gls)};
+    lw:s.lw==="auto"||s.lw==="off"?s.lw:DEF.lw,ctxm:ctxm(s.ctxm),gls:gls(s.gls),scope:scope(s.scope)};
+}
+function scope(a){a=(Array.isArray(a)?a:[]).filter(function(x,i,arr){return SCOPES.indexOf(x)>=0&&arr.indexOf(x)===i});return a.length?a:DEF.scope.slice()}
+/* Слово пора отрабатывать по расписанию: изучаемое (шаги в минутах) или повторение на сегодня. */
+function isDue(c,now){var st=c.st||0;return (st===1||st===3||st===2)&&c.due<dayStart(now)+DAY}
+/* Подходит ли слово под область тренировки. today — пора по расписанию; tom — по плану завтра; d3 / week — по плану
+   в ближайшие 3 / 7 дней (без сегодняшних); hard — забывалось, ошибки в упражнениях, сокращал учитель или отмечено звёздочкой;
+   all — все слова в работе. */
+function inScope(c,k,now){
+  var st=c.st||0,ds=dayStart(now);if(!st)return false;
+  if(k==="all")return true;
+  if(k==="today")return isDue(c,now);
+  if(k==="hard")return !!(c.lap||c.pe||c.tc||c.star||(c.ef&&c.ef<2.2));
+  if(isDue(c,now))return false;
+  var to=ds+DAY*(k==="tom"?2:k==="d3"?4:k==="week"?8:0);
+  return c.due<to;
 }
 function ctxm(m){var o={};if(m&&typeof m==="object")Object.keys(m).forEach(function(l){if(/^[a-z]{2,3}$/.test(l)&&CTXM.indexOf(m[l])>=0)o[l]=m[l]});return o
 }
@@ -83,6 +103,11 @@ function next(c,g,S,now){
       c.lap=(c.lap||0)+1;c.ef=Math.max(1.3,ef-.2);c.ivl=Math.max(1,Math.round(ivl*S.lapse));
       c.st=3;c.step=0;c.due=now+S.relearn[0]*MIN;return c;
     }
+    if(c.sh&&g<4){delete c.sh;                         // интервал недавно сократили за ошибку: растим осторожно
+      if(g===2){c.ef=Math.max(1.3,ef-.15);n=ivl}else n=Math.max(ivl+1,Math.round(ivl*1.5*S.mod));
+      c.ivl=Math.min(S.maxIvl,n);c.due=dayStart(now)+c.ivl*DAY;return c;
+    }
+    delete c.sh;
     if(g===2){c.ef=Math.max(1.3,ef-.15);n=Math.max(ivl+1,Math.round(ivl*S.hard*S.mod))}
     else if(g===3){n=Math.max(ivl+1,Math.round((ivl+late/2)*ef*S.mod))}
     else{c.ef=ef+.15;n=Math.max(ivl+2,Math.round((ivl+late)*ef*S.bonus*S.mod))}
@@ -100,7 +125,7 @@ function next(c,g,S,now){
 /* Слово добавили ещё раз (ученик выделил его снова или учитель добавил повторно): оно вернётся раньше. */
 function bump(c,now){
   c=Object.assign({},c);c.b=(c.b||0)+1;c.u=now;
-  if(c.st===2){c.ivl=Math.max(1,Math.round((c.ivl||1)/2));c.due=Math.min(c.due,now)}
+  if(c.st===2){c.ivl=Math.max(1,Math.round((c.ivl||1)/2));c.due=Math.min(c.due,now);c.sh=1}
   else if(c.st===1||c.st===3){c.step=0;c.due=now}
   else c.pri=now;                                       // новое слово поднимается в начало очереди
   return c;
@@ -117,6 +142,30 @@ function practice(c,ok,S,now){
   if(!ok){n=bump(c,now);n.b=c.b;if(!n.b)delete n.b;n.pe=(c.pe||0)+1;n.pm=ds;return n}
   if((c.st||0)!==2||c.due>=ds+DAY)return null;
   return next(c,3,S,now);
+}
+/* Ответ в тренажёре по выбору (или в любой тренировке вне обычной отработки). Слово, которое и так пора отрабатывать,
+   получает обычную оценку, как в Anki. Слово, которое по плану позже (завтра, через неделю), от верного ответа не меняется,
+   а от ошибки возвращается раньше: интервал вдвое короче, слово приходит на повторение сегодня (см. practice).
+   Возвращает {c: новая карточка, k: "rev" — засчитано как повторение, "back" — вернётся раньше} или null. */
+function train(c,g,S,now){
+  if(!c||!c.st)return null;
+  if(isDue(c,now))return {c:next(c,g,S,now),k:"rev"};
+  if(g>1)return null;
+  var n=practice(c,false,S,now);return n?{c:n,k:"back"}:null;
+}
+/* Учитель (или сам ученик) решил, когда слово показать снова: today — сегодня, заново, как после «Снова»; tom — завтра.
+   Ошибки в упражнениях в этот день слово больше не сдвигают (pm). */
+function send(c,when,S,now){
+  S=cfg(S);c=Object.assign({},c);var st=c.st||0,ds=dayStart(now);
+  c.u=now;c.pm=ds;c.tc=(c.tc||0)+1;
+  if(!st){c.pri=now;return c}                           // новое слово: в начало очереди новых
+  if(when==="today"){
+    if(st===2){c.lap=(c.lap||0)+1;c.ef=Math.max(1.3,(c.ef||S.ease)-.2);c.ivl=Math.max(1,Math.round((c.ivl||1)*S.lapse));c.st=3}
+    c.step=0;c.due=now;delete c.sh;return c;
+  }
+  if(st===2){c.ef=Math.max(1.3,(c.ef||S.ease)-.15);c.ivl=1;c.sh=1}
+  else c.step=0;
+  c.due=ds+DAY;return c;
 }
 function span(ms){
   if(ms<MIN)return "<1 мин";
@@ -146,5 +195,5 @@ function plan(cards,S,now,revDone){
 }
 /* Следующая карточка: сначала то, что учим прямо сейчас, потом повторения, потом новые, потом ближайшие шаги. */
 function pick(p){return p.learn[0]||p.rev[0]||p.fresh[0]||p.soon[0]||null}
-root.SRS={DEF:DEF,GAMES:GAMES,MIN:MIN,DAY:DAY,cfg:cfg,norm:norm,id:makeId,make:make,next:next,bump:bump,practice:practice,label:label,span:span,plan:plan,pick:pick,dayStart:dayStart};
+root.SRS={DEF:DEF,GAMES:GAMES,MIN:MIN,DAY:DAY,cfg:cfg,norm:norm,id:makeId,make:make,next:next,bump:bump,practice:practice,train:train,send:send,isDue:isDue,inScope:inScope,SCOPES:SCOPES,label:label,span:span,plan:plan,pick:pick,dayStart:dayStart};
 })(typeof window!=="undefined"?window:globalThis);

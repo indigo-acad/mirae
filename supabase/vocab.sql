@@ -106,6 +106,29 @@ begin
 end;
 $fn$ language plpgsql security definer set search_path = public, extensions;
 
+-- 5б) Преподаватель: записать новое расписание слов ученика после теста «с учителем» (test.html, js/wtest.js).
+-- Карточки считает сайт (js/srs.js: «сегодня», «завтра», «авто»); здесь — только проверка и запись.
+-- Меняются только слова, которые у ученика уже есть, и только если карточка не новее присланной (поле u).
+create or replace function public.teacher_vocab_put(p_name text, p_pin text, p_student text, p_words jsonb)
+returns jsonb as $fn$
+declare
+  s text := lower(trim(coalesce(p_student, '')));
+  ws jsonb := coalesce(p_words, '[]'::jsonb);
+  w jsonb; n int := 0; k int;
+begin
+  perform public._school_teacher(p_name, p_pin);
+  if jsonb_typeof(ws) <> 'array' or jsonb_array_length(ws) > 300 then raise exception 'bad_input'; end if;
+  for w in select * from jsonb_array_elements(ws) loop
+    if jsonb_typeof(w) <> 'object' or coalesce(w->>'id', '') !~ '^(ko|en):.{1,120}$' or length(w::text) > 3000
+       or coalesce(w->>'w', '') = '' or jsonb_typeof(w->'u') is distinct from 'number' then raise exception 'bad_input'; end if;
+    update public.vocab set data = w, updated_at = now()
+     where student = s and id = w->>'id' and coalesce((data->>'u')::numeric, 0) <= (w->>'u')::numeric;
+    get diagnostics k = row_count; n := n + k;
+  end loop;
+  return jsonb_build_object('updated', n);
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
+
 -- 6) Если ученика удаляют, его словарь удаляется вместе с ним.
 create or replace function public._school_vocab_cleanup()
 returns trigger as $fn$
@@ -122,3 +145,4 @@ grant execute on function public.vocab_sync(text, text, jsonb, jsonb, jsonb) to 
 grant execute on function public.teacher_vocab(text, text, text) to anon;
 grant execute on function public.teacher_vocab_add(text, text, text, jsonb) to anon;
 grant execute on function public.teacher_vocab_delete(text, text, text, jsonb) to anon;
+grant execute on function public.teacher_vocab_put(text, text, text, jsonb) to anon;

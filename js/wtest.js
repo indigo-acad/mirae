@@ -4,6 +4,11 @@
      «Показать ответ», «Дальше», счёт ✅/❌, в конце ошибки и «Повторить ошибки». Без таймера. Клавиши: 1–4 — вариант, Enter — дальше;
    - self — самостоятельно: ответ сразу проверяется и не исправляется, может быть таймер. Ответы сдвигают повторение слов
      в словаре ученика (KR.vocab.practice), а тест из домашки записывает результат в ответы домашки.
+   Словарь ученика: в обоих режимах ответы меняют расписание слов. Самостоятельно — сами (KR.vocab.practice).
+   С учителем — у каждого ответа выбор «когда слово вернётся»: «авто» (ошибка сокращает интервал, верный ответ засчитывается,
+   если слово пора повторять), «сегодня» (заново, как после «Снова») или «завтра» (SRS.send). Записывается в конце теста:
+   с устройства преподавателя — в словарь ученика из SPEC.who (функции teacher_vocab и teacher_vocab_put, supabase/vocab.sql),
+   с устройства ученика — в его словарь.
    Откуда слова: ?id=<ключ> — тест собрал преподаватель (localStorage kr_wtest:<ключ>); ?l=<урок> — слова урока;
    ?hw=<номер>&k=<блок> — тест из домашки.
    Вопросы: tr — слово → перевод (выбор); rev — перевод → слово (выбор); ctx — вставить слово в предложение (видны первые
@@ -15,7 +20,7 @@ var Q=new URLSearchParams(location.search),$=function(s){return document.querySe
 var KINDS={tr:"Перевод (выбор)",rev:"Слово по переводу (выбор)",ctx:"Вставь в предложение",wr:"Напиши слово"};
 var TASK={tr:"Выбери перевод.",rev:"Выбери слово.",ctx:"Вставь слово в предложение. Видны первые буквы, черта — буква (в корейском — слог).",wr:"Напиши слово по переводу."};
 var MODE=Q.get("mode")==="class"?"class":"self";
-var SPEC=null,QS=[],I=0,RES=[],locked=false,T0=0,tick=null,HWC=null;
+var SPEC=null,QS=[],I=0,RES=[],locked=false,T0=0,tick=null,HWC=null,CH={},DONE={},SUM='';
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
 function norm(s){return String(s==null?"":s).normalize("NFC").toLowerCase().replace(/[’']/g,"").replace(/[\s.,!?…«»"()\-–—]/g,"")}
 var isKo=function(s){return /[ㄱ-ㆎ가-힣]/.test(s)};
@@ -121,25 +126,78 @@ function answer(given,shown){
   var fb=$("#wtfb");fb.className="wt-fb "+(ok?"ok":"bad");
   fb.innerHTML=(ok?"✅ ":shown?"👀 ":"❌ Верно: ")+'<b'+wcls(q.w.w)+'>'+esc(q.w.w)+'</b> — '+esc(q.w.t)+' <button type="button" class="say" data-say="'+esc(q.w.w)+'" aria-label="Послушать">'+ic("volume",16)+'</button>'+
     (q.w.ex&&q.k!=="ctx"?'<div class="wt-ex"><span'+wcls(q.w.ex)+'>'+esc(q.w.ex)+'</span>'+(q.w.et?' <span class="muted">— '+esc(q.w.et)+'</span>':'')+'</div>':q.k==="ctx"&&!ok?'<div class="wt-ex muted">В предложении: '+esc(q.ans)+'</div>':'');
+  if(MODE==="class"&&canSend())fb.insertAdjacentHTML("beforeend",sendRow(q.w.w,ok));
   var r=$('[data-wt="reveal"]');if(r)r.hidden=true;var f=$("#wtf button");if(f)f.hidden=true;
   var n=$('[data-wt="next"]');n.hidden=false;n.textContent="";n.insertAdjacentHTML("beforeend",(I+1<QS.length?"Дальше":"Итог")+ic("arrow",16));n.focus({preventScroll:true});
   score();
+}
+// ---------- словарь ученика ----------
+function teacherDev(){return !!(KR.ctx&&KR.ctx.teacher)}
+function canSend(){return teacherDev()?!!(SPEC&&SPEC.who):!!(KR.vocab&&KR.user())}
+var SENDN={auto:"авто",today:"сегодня",tom:"завтра"};
+function sendRow(w,ok){
+  var ch=CH[w]||"auto";
+  return '<div class="wt-send" data-w="'+esc(w)+'"><span class="muted">Вернуть слово:</span>'+["auto","today","tom"].map(function(k){
+    return '<button type="button" data-ws="'+k+'" class="'+(ch===k?"sel":"")+'" aria-pressed="'+(ch===k)+'" title="'+(k==="auto"?(ok?"по расписанию":"интервал сократится, слово придёт сегодня"):k==="today"?"заново, как после «Снова»":"повторить завтра")+'">'+SENDN[k]+(k==="auto"?(ok?" · по плану":" · раньше"):"")+'</button>'}).join("")+'</div>';
+}
+/* Записать результат теста в расписание слов. Слово меняется один раз за тест; выбор «сегодня» или «завтра»,
+   сделанный позже (в «Повторить ошибки»), заменяет «авто». Возвращает текст для итога. */
+async function applyWords(){
+  var lang=SPEC.lang||"ko",by={};
+  QS.forEach(function(q,i){var w=q.w.w,ok=!!(RES[i]&&RES[i].ok);by[w]=by[w]===false?false:ok});
+  var todo=Object.keys(by).filter(function(w){var ch=CH[w]||"auto";return !DONE[w]||(ch!=="auto"&&DONE[w]!==ch)});
+  if(!todo.length)return SUM;
+  var now=Date.now(),cards={},out=[],n={today:0,tom:0,back:0,rev:0,none:0,miss:0};
+  if(teacherDev()){var list=await KR.api("teacher_vocab",{p_student:SPEC.who});(list||[]).forEach(function(c){if(c&&c.id)cards[c.id]=c})}
+  else KR.vocab.all(lang).forEach(function(c){cards[c.id]=c});
+  todo.forEach(function(w){
+    var c=cards[SRS.id(lang,w)],ch=CH[w]||"auto";DONE[w]=ch;
+    if(!c){n.miss++;return}
+    if(ch!=="auto"){out.push({c:SRS.send(c,ch,null,now),ch:ch});n[ch]++;return}
+    var x=SRS.practice(c,by[w],null,now);if(!x){n.none++;return}
+    out.push({c:x,ch:"auto"});if(by[w])n.rev++;else n.back++;
+  });
+  if(out.length){
+    if(teacherDev())await KR.api("teacher_vocab_put",{p_student:SPEC.who,p_words:out.map(function(x){return x.c})});
+    else{var tl=out.filter(function(x){return x.ch!=="auto"});
+      ["today","tom"].forEach(function(k){var ids=tl.filter(function(x){return x.ch===k}).map(function(x){return x.c.id});if(ids.length)KR.vocab.send(ids,k)});
+      var res={};out.filter(function(x){return x.ch==="auto"}).forEach(function(x){res[x.c.id]=by[x.c.w]});KR.vocab.practice(res)}
+  }
+  var parts=[];
+  if(n.today)parts.push("сегодня (заново): "+n.today);if(n.tom)parts.push("завтра: "+n.tom);if(n.back)parts.push("интервал сокращён, вернутся сегодня: "+n.back);
+  if(n.rev)parts.push("засчитано как повторение: "+n.rev);if(n.miss)parts.push("нет в словаре: "+n.miss);
+  SUM=(SUM?SUM+" · ":"")+(parts.length?parts.join(" · "):"расписание не изменилось");
+  return SUM;
+}
+function sumBox(){
+  if(MODE!=="class"||!canSend())return "";
+  var who=teacherDev()?"Словарь ученика"+(SPEC.who?" ("+esc(SPEC.who)+")":""):"Твой словарь";
+  return '<p class="muted wt-sum" id="wtsum">'+who+': записываем…</p>';
+}
+async function runApply(){
+  var e=$("#wtsum");if(!e)return;
+  try{var t=await applyWords();e.textContent=(teacherDev()?"Словарь ученика":"Твой словарь")+": "+t+"."}
+  catch(x){DONE={};e.textContent=x&&x.status===404?"Расписание слов не записано: выполните в Supabase файл supabase/vocab.sql (функция teacher_vocab_put).":"Не получилось записать в словарь: "+(x&&x.message||"нет связи")+". Нажмите «Записать ещё раз».";
+    e.insertAdjacentHTML("beforeend",' <button type="button" data-wt="apply">Записать ещё раз</button>')}
 }
 function next(){if(!locked)return;I++;if(I>=QS.length)finish();else show()}
 function finish(){
   clearInterval(tick);tick=null;
   var ok=RES.filter(function(r){return r&&r.ok}).length,bad=QS.map(function(q,i){return [q,RES[i]||{ok:false,given:""}]}).filter(function(x){return !x[1].ok});
   if(MODE==="self")saveSelf(ok,bad);
-  var h='<section class="card wt-done"><h3>🎯 '+ok+' / '+QS.length+'</h3>'+(bad.length?'<p class="muted">Повторить:</p><table class="wt-res">'+bad.map(function(x){var q=x[0],r=x[1];return '<tr><td><b'+wcls(q.w.w)+'>'+esc(q.w.w)+'</b></td><td>'+esc(q.w.t)+'</td><td class="muted">'+(r.given==null?"👀 показан":r.given===""?"нет ответа":'<s>'+esc(r.given)+'</s>')+'</td></tr>'}).join("")+'</table>':'<p>🎉 Без ошибок!</p>');
+  var h='<section class="card wt-done"><h3>🎯 '+ok+' / '+QS.length+'</h3>'+sumBox()+(MODE==="self"&&SUM?'<p class="muted wt-sum">'+esc(SUM)+'</p>':'')+(bad.length?'<p class="muted">Повторить:</p><table class="wt-res">'+bad.map(function(x){var q=x[0],r=x[1];return '<tr><td><b'+wcls(q.w.w)+'>'+esc(q.w.w)+'</b></td><td>'+esc(q.w.t)+'</td><td class="muted">'+(r.given==null?"👀 показан":r.given===""?"нет ответа":'<s>'+esc(r.given)+'</s>')+'</td></tr>'}).join("")+'</table>':'<p>🎉 Без ошибок!</p>');
   h+='<div class="wt-acts">';
   if(HWC)h+='<span class="muted">Результат сохранён в домашке.</span><a class="btn pri" href="'+esc(SPEC.back)+'">Вернуться к домашке'+ic("arrow",16)+'</a>';
   else h+=(bad.length?'<button type="button" class="btn pri" data-wt="again-bad">🔁 Повторить ошибки</button>':'')+'<button type="button" data-wt="restart">Сначала</button>';
   $("#wtq").outerHTML=h+'</div></section>';score();
   var c=$("#wtclock");if(c)c.textContent="";
+  if(MODE==="class"&&canSend())runApply();
 }
 // самостоятельно: интервалы слов ученика и результат домашки
 function saveSelf(ok,bad){
-  if(KR.vocab&&!(KR.ctx&&KR.ctx.teacher)){var res={};QS.forEach(function(q,i){var c=KR.vocab.find(SPEC.lang||"ko",q.w.w);if(c)res[c.id]=res[c.id]===false?false:!!(RES[i]&&RES[i].ok)});try{KR.vocab.practice(res)}catch(e){}}
+  if(KR.vocab&&!(KR.ctx&&KR.ctx.teacher)){var res={};QS.forEach(function(q,i){var c=KR.vocab.find(SPEC.lang||"ko",q.w.w);if(c)res[c.id]=res[c.id]===false?false:!!(RES[i]&&RES[i].ok)});
+    try{var pr=KR.vocab.practice(res),pt=[];if(pr.back.length)pt.push("вернутся на повторение сегодня: "+pr.back.length);if(pr.done.length)pt.push("засчитано как повторение: "+pr.done.length);
+      SUM=pt.length?"В словаре: "+pt.join(" · ")+".":""}catch(e){}}
   if(!HWC)return;
   var k="kr_progress:"+KR.user()+":hw-"+HWC.rec.id,P={};try{P=JSON.parse(localStorage.getItem(k)||"{}")}catch(e){}
   var prev=P[HWC.key]||{},wr=bad.slice(0,30).map(function(x){var q=x[0],r=x[1];return {q:String(qText(q)).slice(0,200),g:String(r.given==null?"":r.given).slice(0,100),a:String(q.ans).slice(0,100)}});
@@ -158,6 +216,8 @@ document.addEventListener("click",function(e){
   if(d.say!==undefined)return KR.say(d.say,isKo(d.say)?"ko":SPEC&&SPEC.lang||"en");
   if(d.opt!==undefined&&!locked){var q=QS[I];return answer(q.opts[+d.opt],false)}
   if(d.wt==="start")return start();
+  if(d.ws){var row=b.closest(".wt-send");if(!row)return;CH[row.dataset.w]=d.ws;[].forEach.call(row.querySelectorAll("button"),function(x){var on=x.dataset.ws===d.ws;x.classList.toggle("sel",on);x.setAttribute("aria-pressed",on)});return}
+  if(d.wt==="apply"){var ap=b.closest("p");b.remove();if(ap)ap.textContent="Записываем…";return runApply()}
   if(d.wt==="reveal")return answer(null,true);
   if(d.wt==="next")return next();
   if(d.wt==="restart"){clearInterval(tick);tick=null;return setup()}

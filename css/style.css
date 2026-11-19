@@ -998,6 +998,16 @@ main.home>.home-cards:empty{display:none}
 /* ---------- слова на слух и вслух (words.html, js/ear.js) ---------- */
 .tb-more{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 8px}
 .tb-more button{display:inline-flex;align-items:center;gap:8px}
+/* тренировка по выбору (words.html) */
+.tfree{margin:16px 0 4px;padding-top:14px;border-top:1px solid var(--line,rgba(255,255,255,.12))}
+.tfree h4{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:17px}
+.tf-sc{margin:4px 0 0}
+.wsend{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px}
+/* тест с учителем: когда слово вернётся в словаре ученика (test.html) */
+.wt-send{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px;font-size:14px}
+.wt-send button{padding:5px 12px;border-radius:14px}
+.wt-send button.sel{outline:2px solid currentColor}
+.wt-sum{margin-top:12px}
 .ear-ctl{display:flex;justify-content:center;align-items:center;gap:12px;margin:6px 0 4px}
 .ear-play{display:grid;place-items:center;width:72px;height:72px;padding:0;border-radius:50%;background:var(--gold);color:#0B1535;border-color:var(--gold)}
 .ear-play:hover{background:var(--gold-hi)}
