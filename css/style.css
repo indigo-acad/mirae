@@ -1056,3 +1056,17 @@ main.home>.home-cards:empty{display:none}
 .wstat-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .wstat-g div{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:10px;background:var(--fill,rgba(0,0,0,.04))}
 .wstat-g span{font-size:13px}.wstat-g b{font-size:15px}
+
+/* общая статистика словаря (words.html) */
+.wstats h4{margin:18px 0 8px;font-size:16px}
+.sbars{display:flex;flex-direction:column;gap:6px}
+.sbar{display:grid;grid-template-columns:minmax(110px,40%) 1fr 34px;align-items:center;gap:8px;font-size:14px}
+.sbar i{height:10px;border-radius:6px;background:var(--fill,rgba(127,127,127,.15));overflow:hidden}
+.sbar i b{display:block;height:100%;border-radius:6px;background:var(--gold,#d6b06f)}
+.sbar em{font-style:normal;text-align:right;font-weight:600}
+.sact{display:flex;align-items:flex-end;gap:4px;height:110px;padding-bottom:18px}
+.sact div{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative}
+.sact i{display:block;width:100%;min-height:2px;border-radius:4px 4px 0 0;background:var(--gold,#d6b06f)}
+.sact small{position:absolute;bottom:-18px;font-size:11px;opacity:.7}
+.wstats .stat{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media(max-width:560px){.wstats .stat{grid-template-columns:repeat(2,minmax(0,1fr))}}
