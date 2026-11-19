@@ -431,7 +431,11 @@ window.KR={
   langs(){if(!U())return[];const c=window.KR.ctx,x=(c&&c.langs)||(J("kr_ctx:"+U(),null)||{}).langs;return Array.isArray(x)?x.filter(l=>LANGS[l]):[]},
   hasLang(){return KR.langs().length>0},
   // текущий раздел; пока ничего не открыто, возвращает "ko", чтобы страницы не падали (оформление при этом нейтральное)
-  lang(){const ls=KR.langs(),l=LS("kr_lang:"+U());if(ls.indexOf(l)>=0)return l;if(ls[0])return ls[0];const h=LS("kr_hwlang:"+U());return LANGS[h]?h:"ko"},
+  lang(){const ls=KR.langs(),l=LS("kr_lang:"+U());if(ls.indexOf(l)>=0)return l;if(ls[0])return ls[0];const h=LS("kr_hwlang:"+U());if(LANGS[h])return h;
+    // нет ни курсов, ни домашки: язык, на котором больше всего слов в словаре ученика (слова от преподавателя)
+    try{const w=(JSON.parse(localStorage.getItem("kr_vocab:"+U())||"{}").w)||{},c={};Object.keys(w).forEach(k=>{const l=k.split(":")[0];if(LANGS[l])c[l]=(c[l]||0)+1});
+      const t=Object.keys(c).sort((a,b)=>c[b]-c[a])[0];if(t)return t}catch(e){}
+    return "ko"},
   // карточка для ученика, которому ещё не открыли ни одного курса
   noCoursesCard(){
     if((window.KR.ctx||{}).pending)return '<div class="card glass nocourse"><h3>'+icon("users",20)+'Заявка преподавателя отправлена</h3><p class="muted">Владелец школы подтвердит её, и здесь откроется панель преподавателя. Обычно это занимает не больше дня.</p></div>';
