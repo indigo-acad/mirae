@@ -1033,3 +1033,8 @@ main.home>.home-cards:empty{display:none}
 .pod-meta{text-align:center;font-size:14px;margin:12px 0 0}
 @media(max-width:560px){.dcells i{min-width:22px;font-size:20px}.dcells.ko i{min-width:34px;font-size:23px}.ear-play{width:64px;height:64px}}
 @media(prefers-reduced-motion:reduce){.ear-play.on,button.mic.on{animation:none}.pod-timer i{animation:none}}
+/* правила урока 3급 · 피동 (таблицы, подсказки, цепочки) */
+.tbl{border-collapse:collapse;width:100%;margin:8px 0}.tbl th,.tbl td{border:1px solid #0002;padding:6px 8px;text-align:left;vertical-align:top}
+.box{border-radius:10px;padding:10px 12px;margin:10px 0;background:#0000000a}.box.warn{background:#ffb3401f}.box.tip{background:#4aa3ff1a}.box.kp{background:#c86bff1a}
+.chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}.chain .st{border:1px solid #0003;border-radius:8px;padding:4px 8px;text-align:center}.chain .st small{display:block;opacity:.7;font-size:.8em}
+.yes{color:#1a8f4c;font-weight:600}.no{color:#c0392b;text-decoration:line-through}
