@@ -159,8 +159,9 @@ function vocabCard(){
   var hw=function(c){return (c.lap||0)*2+(c.pe||0)*2+(c.b||0)};   // забывания в тренажёре, ошибки в упражнениях уроков, повторные добавления
   var hard=voc.filter(function(c){return c.lap||c.b||c.pe}).sort(function(a,b){return hw(b)-hw(a)}).slice(0,8);
   var row=function(c,del){return '<div class="line" style="align-items:center;justify-content:space-between"><div><b'+(c.l==='ko'?' class="ko"':'')+' lang="'+esc(c.l)+'">'+esc(c.w)+'</b> <span class="muted">· '+esc(c.t||'без перевода')+
-    (c.lap?' · забывалось: '+c.lap:'')+(c.pe?' · ошибок в упражнениях: '+c.pe:'')+(c.b?' · добавляли повторно: '+c.b:'')+(c.star?' · сложное для ученика':'')+'</span></div>'+(del?'<button data-vdel="'+esc(c.id)+'" aria-label="Убрать слово">'+KR.icon('trash',15)+'</button>':'')+'</div>'};
-  var h='<div class="card"><h3>Словарь ученика</h3><p class="muted">Корейский: '+cnt('ko')+' · английский: '+cnt('en')+' · к повторению сегодня: '+due+'</p>'+wordActivity();
+    (c.lap?' · забывалось: '+c.lap:'')+(c.pe?' · ошибок в упражнениях: '+c.pe:'')+(c.b?' · добавляли повторно: '+c.b:'')+(c.star?' · сложное для ученика':'')+(c.tc?' · возвращали: '+c.tc:'')+
+    (c.st?'<br><small>повторений '+(c.reps||0)+(c.reps?' · вспомнил(а) '+Math.max(0,Math.round(((c.reps||0)-(c.lap||0))/c.reps*100))+'%':'')+(c.st===2?' · интервал '+SRS.span((c.ivl||1)*SRS.DAY):' · учит сейчас')+' · следующее '+(c.due<=now?'сегодня':'через '+SRS.span(c.due-now))+'</small>':'<br><small>новое, ещё не разобрано</small>')+'</span></div>'+(del?'<button data-vdel="'+esc(c.id)+'" aria-label="Убрать слово">'+KR.icon('trash',15)+'</button>':'')+'</div>'};
+  var h='<div class="card"><h3>Словарь ученика</h3><p class="muted">Корейский: '+cnt('ko')+' · английский: '+cnt('en')+' · к повторению сегодня: '+due+'</p>'+wordActivity()+wordStatsT();
   if(hard.length)h+='<p style="margin:12px 0 4px"><b>Даются трудно</b></p>'+hard.map(function(c){return row(c,false)}).join('');
   h+='<p style="margin:14px 0 4px"><b>Добавить слова</b></p>'+
     '<textarea id="vtext" aria-label="Список слов для ученика" placeholder="Корейские и английские вперемешку&#10;runny nose, sore throat&#10;accommodation — жильё&#10;식욕 — аппетит" style="min-height:120px" maxlength="8000"></textarea>'+
@@ -182,6 +183,16 @@ function wordDays(){
   return {days:days,approx:approx};
 }
 function dayLabel(t){return new Date(t).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}
+/* общая статистика словаря ученика: уровни слов, точность, повторения на неделю вперёд (как вкладка «Статистика» у ученика) */
+function wordStatsT(){
+  if(!voc||!voc.length)return '';var now=Date.now(),ds=SRS.dayStart(now),DAY=SRS.DAY,lv=[0,0,0,0,0],reps=0,laps=0;
+  voc.forEach(function(c){reps+=c.reps||0;laps+=c.lap||0;lv[!c.st?0:c.st!==2?1:(c.ivl||0)>=21?4:(c.ivl||0)>=7?3:2]++});
+  var bar=function(rows){var m=Math.max.apply(null,rows.map(function(r){return r[1]}).concat([1]));return '<div class="sbars">'+rows.map(function(r){return '<div class="sbar"><span>'+r[0]+'</span><i><b style="width:'+Math.round(r[1]/m*100)+'%"></b></i><em>'+r[1]+'</em></div>'}).join('')+'</div>'};
+  var fc=[];for(var i=0;i<7;i++){var a=ds+i*DAY,b=a+DAY;fc.push([i===0?'Сегодня':i===1?'Завтра':new Date(a).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric'}),voc.filter(function(c){return c.st&&(i===0?c.due<b:c.due>=a&&c.due<b)}).length])}
+  return '<div class="wstats wlog"><p class="wlog-h"><b>Статистика словаря</b> <span class="muted">· запомнено '+(lv[3]+lv[4])+' из '+voc.length+(reps?' · вспоминает '+Math.round((reps-laps)/reps*100)+'% повторений':'')+'</span></p>'+
+    '<h4>Уровни слов</h4>'+bar([['Новые',lv[0]],['Учит сейчас',lv[1]],['Начинает запоминать',lv[2]],['Запоминает (7+ дн)',lv[3]],['Знает хорошо (21+ дн)',lv[4]]])+
+    '<h4>Повторения на неделю вперёд</h4>'+bar(fc)+'</div>';
+}
 function wordActivity(){
   var D=wordDays(),days=D.days,wk=days.slice(7),now=Date.now(),W=7*SRS.DAY;
   var sum=function(a,k){return a.reduce(function(s,d){return s+d[k]},0)},act=wk.filter(function(d){return d.n+d.r>0}).length;
