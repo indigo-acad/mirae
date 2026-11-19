@@ -242,6 +242,14 @@ window.MATERIALS=[
   "level": "3급"
  },
  {
+  "id": "ko-invite-vocab",
+  "section": "korean",
+  "kind": "trainer",
+  "title": "어휘 · 초대와 약속 (приглашения и встречи)",
+  "path": "materials/korean/ko-invite-vocab/",
+  "level": "2급"
+ },
+ {
   "id": "ko-school-vocab",
   "section": "korean",
   "kind": "trainer",
