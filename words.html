@@ -712,6 +712,19 @@ function setFirst(id){
   if(m){m.textContent=n?'Новых слов в начале очереди: '+n+'. Нажми «Учить новые слова» вверху.':'Новых слов в этом словаре нет.';m.className='msg ok'}
 }
 /* полная карточка слова: всё из базы школы + своё (сложное слово, заметка) */
+/* статистика по слову в карточке: сколько раз повторяли, забывания, ошибки в упражнениях, интервал, когда вернётся */
+function wstats(c){
+  if(!c.st)return '<div class="wstat"><h4>Статистика</h4><p class="muted">Слово ещё не разобрано: статистика появится после первого повторения.</p></div>';
+  var now=Date.now(),d=function(t){return t?new Date(t).toLocaleDateString('ru-RU',{day:'numeric',month:'short'}):'—'};
+  var ok=(c.reps||0)-(c.lap||0),pct=c.reps?Math.max(0,Math.round(ok/c.reps*100)):0;
+  var lvl=c.st!==2?'учу сейчас':(c.ivl||0)>=21?'знаю хорошо':(c.ivl||0)>=7?'запоминаю':'начинаю запоминать';
+  var row=function(k,v){return '<div><span class="muted">'+k+'</span><b>'+v+'</b></div>'};
+  return '<div class="wstat"><h4>Статистика</h4><div class="wstat-g">'+
+    row('Уровень',lvl)+row('Повторений',c.reps||0)+row('Вспомнил(а)',c.reps?pct+'%':'—')+row('Забывал(а)',c.lap||0)+
+    row('Ошибок в упражнениях',c.pe||0)+row('Возвращал учитель',c.tc||0)+
+    row('Интервал',c.st===2?SRS.span((c.ivl||1)*SRS.DAY):'шаги изучения')+row('Следующее',c.due<=now?'сегодня':'через '+SRS.span(c.due-now))+
+    row('Начал(а) учить',d(c.fr))+row('Последний раз',d(c.lr))+(c.b?row('Добавляли снова',c.b):'')+'</div></div>';
+}
 function openCard(id){
   var c=V.get(id);if(!c)return;
   var d=$('#wdlg');if(!d){d=document.createElement('dialog');d.id='wdlg';d.className='wdlg card';d.setAttribute('aria-label','Карточка слова');document.body.appendChild(d);d.addEventListener('close',saveNote)}
@@ -720,6 +733,7 @@ function openCard(id){
   d.dataset.id=id;
   d.innerHTML='<form method="dialog" class="wdlg-in"><div class="wdlg-top"><span class="muted">'+esc(st)+' · '+esc(KR.W2.source(src,set&&set.title))+'</span>'+
     '<button type="submit" class="icb" aria-label="Закрыть">'+KR.icon('x',18)+'</button></div>'+KR.W2.card(i,c)+
+    wstats(c)+
     '<div class="wdlg-me"><button type="button" class="pick'+(c.star?' on':'')+'" data-star="'+esc(c.id)+'" aria-pressed="'+!!c.star+'">'+KR.icon('star',16)+(c.star?'Сложное слово':'Отметить как сложное')+'</button>'+
     '<label class="field" for="wnote">Моя заметка</label><textarea id="wnote" class="name" rows="2" maxlength="500" placeholder="Как запомнить, где встретилось слово">'+esc(c.note||'')+'</textarea>'+
     (c.st?'<div class="opts wsend" role="group" aria-label="Повторить раньше"><span class="muted">Повторить раньше:</span><button type="button" data-send="today" data-id="'+esc(c.id)+'">Сегодня</button><button type="button" data-send="tom" data-id="'+esc(c.id)+'">Завтра</button></div>':'')+

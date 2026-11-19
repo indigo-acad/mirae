@@ -1049,3 +1049,10 @@ main.home>.home-cards:empty{display:none}
 .chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}.chain .st{border:1px solid #0003;border-radius:8px;padding:4px 8px;text-align:center}.chain .st small{display:block;opacity:.7;font-size:.8em}
 .yes{color:#1a8f4c;font-weight:600}.no{color:#c0392b;text-decoration:line-through}
 .reading{line-height:2.1}.opts.inl{display:inline;margin:0 2px}.opts.inl button{padding:1px 8px;margin:0 2px}.opts.inl sup{opacity:.6;margin-right:2px}
+
+/* статистика слова в карточке (words.html) */
+.wstat{margin:14px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
+.wstat h4{margin:0 0 8px;font-size:16px}
+.wstat-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.wstat-g div{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:10px;background:var(--fill,rgba(0,0,0,.04))}
+.wstat-g span{font-size:13px}.wstat-g b{font-size:15px}
