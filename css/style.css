@@ -998,6 +998,16 @@ main.home>.home-cards:empty{display:none}
 /* ---------- слова на слух и вслух (words.html, js/ear.js) ---------- */
 .tb-more{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 8px}
 .tb-more button{display:inline-flex;align-items:center;gap:8px}
+/* тренировка по выбору (words.html) */
+.tfree{margin:16px 0 4px;padding-top:14px;border-top:1px solid var(--line,rgba(255,255,255,.12))}
+.tfree h4{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:17px}
+.tf-sc{margin:4px 0 0}
+.wsend{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px}
+/* тест с учителем: когда слово вернётся в словаре ученика (test.html) */
+.wt-send{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px;font-size:14px}
+.wt-send button{padding:5px 12px;border-radius:14px}
+.wt-send button.sel{outline:2px solid currentColor}
+.wt-sum{margin-top:12px}
 .ear-ctl{display:flex;justify-content:center;align-items:center;gap:12px;margin:6px 0 4px}
 .ear-play{display:grid;place-items:center;width:72px;height:72px;padding:0;border-radius:50%;background:var(--gold);color:#0B1535;border-color:var(--gold)}
 .ear-play:hover{background:var(--gold-hi)}
@@ -1039,3 +1049,10 @@ main.home>.home-cards:empty{display:none}
 .chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}.chain .st{border:1px solid #0003;border-radius:8px;padding:4px 8px;text-align:center}.chain .st small{display:block;opacity:.7;font-size:.8em}
 .yes{color:#1a8f4c;font-weight:600}.no{color:#c0392b;text-decoration:line-through}
 .reading{line-height:2.1}.opts.inl{display:inline;margin:0 2px}.opts.inl button{padding:1px 8px;margin:0 2px}.opts.inl sup{opacity:.6;margin-right:2px}
+
+/* статистика слова в карточке (words.html) */
+.wstat{margin:14px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
+.wstat h4{margin:0 0 8px;font-size:16px}
+.wstat-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.wstat-g div{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:10px;background:var(--fill,rgba(0,0,0,.04))}
+.wstat-g span{font-size:13px}.wstat-g b{font-size:15px}
