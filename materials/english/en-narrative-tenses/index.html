@@ -312,6 +312,7 @@ function go(id){
     story:rStory,fix:rFix,join:rJoin,book:rBook,write:rWrite,send:rSend}[id];
   $("pane").innerHTML=""; f();
   const i=TABS.findIndex(t=>t.id===id);
+  if(!["learn","send"].includes(id)) $("pane").insertAdjacentHTML("beforeend",`<div class="actions"><button class="sm" id="tsend-${id}" onclick="sendTask('${id}')">📩 Send this task to the teacher</button> <span class="muted" id="tsfb-${id}"></span></div>`);
   if(i<TABS.length-1) $("pane").insertAdjacentHTML("beforeend",`<div class="actions" style="text-align:right"><button class="primary" onclick="go('${TABS[i+1].id}')">Next: ${TABS[i+1].t.replace(/^\S+ · /,"")} →</button></div>`);
 }
 function card(html){ $("pane").insertAdjacentHTML("beforeend",`<div class="card">${html}</div>`); }
@@ -592,6 +593,25 @@ function buildReport(){
   if(STATE.story && STATE.story.trim()){ const s=storyStats(STATE.story);
     t+=`\n\n✍️ <b>Story</b>${STATE.prompt?" — "+esc(STATE.prompt):""} (${s.words} words, PC ${s.pc}, PP ${s.pp}):\n${esc(STATE.story.trim())}`; }
   return t;
+}
+/* отчёт по одному заданию — кнопка «Send this task» под каждой вкладкой */
+const TASK_KEYS={book:["book2a","book2b","book135a","book135c"]};
+function buildTaskReport(id){
+  const tab=TABS.find(t=>t.id===id), title=tab?tab.t.replace(/^\S+ · /,""):id;
+  let t=`📒 <b>Narrative Tenses B1 · ${esc(title)}</b>\n👤 <b>${esc(STATE.name)}</b>\n🕒 ${new Date().toLocaleString("ru-RU")}\n`;
+  if(id==="write"){ const s=storyStats(STATE.story||"");
+    return t+(STATE.story&&STATE.story.trim()?`\n✍️ <b>Story</b>${STATE.prompt?" — "+esc(STATE.prompt):""} (${s.words} words, PC ${s.pc}, PP ${s.pp}):\n${esc(STATE.story.trim())}`:"\n✍️ Story: not written yet"); }
+  (TASK_KEYS[id]||[id]).filter(k=>NAMES[k]).forEach(k=>{ const r=STATE.res[k];
+    if(!r){ t+=`\n▫️ ${NAMES[k]}: not done`; return; }
+    t+=`\n${r.score===r.total?"✅":"🔸"} <b>${NAMES[k]}: ${r.score}/${r.total}</b>`; r.wrong.forEach(w=>t+=`\n   • ${esc(w)}`); });
+  return t;
+}
+async function sendTask(id){
+  const b=$("tsend-"+id), fb=$("tsfb-"+id), text=buildTaskReport(id); b.disabled=true; fb.textContent="Sending…";
+  try{ for(const part of chunks(text)){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+    fb.textContent="✅ Sent!"; }
+  catch(e){ fb.textContent="Couldn't send — your answers are saved, send everything at the end (🚀 Send)."; }
+  b.disabled=false;
 }
 function chunks(text){ const out=[]; let cur=""; text.split("\n").forEach(l=>{ if((cur+"\n"+l).length>3800){ out.push(cur); cur=l; } else cur=cur?cur+"\n"+l:l; }); if(cur)out.push(cur); return out; }
 async function sendResults(){

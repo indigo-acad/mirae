@@ -410,7 +410,7 @@ function hwResult(){
     const p=P[b._key]||{},x={k:b._key,t:String(b.title||"").slice(0,200),type:b.type,done:closed(b)};
     if(x.done)done++;
     if(b.src){x.l=b.src;x.b=b.srcKey;if(b.subIdx){x.i=b.subIdx;x.of=b.subOf}}
-    if(b.type==="mat"){x.m=b.m.id;if(b.p&&b.p.length)x.p=b.p.length;const r=window.KR&&KR.matInfo(b.m.id).rep;if(r&&r.t>=L.hw.created)x.rep=String(r.x||"").slice(0,1500)}
+    if(b.type==="mat"){x.m=b.m.id;if(b.p&&b.p.length)x.p=b.p.length;const r=window.KR&&KR.matInfo(b.m.id).rep;if(r&&r.t>=L.hw.created)x.rep=String(r.x||"").slice(0,8000)}
     if(b.type==="wtest"){x.score=p.score||0;x.total=p.total||(b.wt.w||[]).length;x.tries=p.tries||0;x.wrong=p.wrong||[];if(p.sec)x.sec=p.sec;score+=x.score;max+=x.total}
     if(EXT.includes(b.type)){
       x.score=p.score||0;x.total=b.items.length;x.tries=p.tries||0;score+=x.score;max+=x.total;
