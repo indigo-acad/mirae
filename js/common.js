@@ -385,7 +385,10 @@ window.KR={
     return{n,tot,pct:tot?Math.round(n/tot*100):0,P}},
   part,lessonWords,
   /* Домашка от преподавателя (supabase/homework.sql): заданная и недавно сданная. null — на сервере ещё нет этих функций. */
-  async homework(){try{const r=await api("my_homework");return Array.isArray(r)?r:[]}
+  async homework(){try{const r=await api("my_homework");
+      // язык домашки запоминаем: ученику без открытых курсов словарь показываем на этом языке, а не по умолчанию
+      if(Array.isArray(r)&&U()){const c={};r.forEach(x=>{if(LANGS[x.lang])c[x.lang]=(c[x.lang]||0)+1});const t=Object.keys(c).sort((a,b)=>c[b]-c[a])[0];if(t)LS("kr_hwlang:"+U(),t)}
+      return Array.isArray(r)?r:[]}
     catch(e){return e&&(e.status===404||/Could not find the function/.test(e.message||""))?null:[]}},
   taken:()=>takenObj(U()).l||[],
   // что известно о материале из папки materials/: открытия и время (act) и последний отчёт преподавателю (rep)
@@ -428,7 +431,7 @@ window.KR={
   langs(){if(!U())return[];const c=window.KR.ctx,x=(c&&c.langs)||(J("kr_ctx:"+U(),null)||{}).langs;return Array.isArray(x)?x.filter(l=>LANGS[l]):[]},
   hasLang(){return KR.langs().length>0},
   // текущий раздел; пока ничего не открыто, возвращает "ko", чтобы страницы не падали (оформление при этом нейтральное)
-  lang(){const ls=KR.langs(),l=LS("kr_lang:"+U());return ls.indexOf(l)>=0?l:(ls[0]||"ko")},
+  lang(){const ls=KR.langs(),l=LS("kr_lang:"+U());if(ls.indexOf(l)>=0)return l;if(ls[0])return ls[0];const h=LS("kr_hwlang:"+U());return LANGS[h]?h:"ko"},
   // карточка для ученика, которому ещё не открыли ни одного курса
   noCoursesCard(){
     if((window.KR.ctx||{}).pending)return '<div class="card glass nocourse"><h3>'+icon("users",20)+'Заявка преподавателя отправлена</h3><p class="muted">Владелец школы подтвердит её, и здесь откроется панель преподавателя. Обычно это занимает не больше дня.</p></div>';
