@@ -640,10 +640,14 @@ const BLOCKS={
 };
 Object.keys(BLOCKS).forEach(id=>{ const B=BLOCKS[id]; if(B.arr) B.n=B.arr.length; });
 const bkeys=["book2a","book2b","book135a","book135c"];
-window.MIRAE_PARTS=[
-  {g:"Narrative Tenses",t:TABS.filter(x=>["warm","story","write"].includes(x.id)).map(x=>({k:"t:"+x.id,n:x.t.replace(/^\S+ · /,"")}))}]
-  .concat(Object.keys(BLOCKS).map(id=>{ const B=BLOCKS[id]; return {g:B.g,t:Array.from({length:B.n},(_,i)=>({k:"b:"+id+":"+i,n:B.arr?B.name(B.arr[i],i):B.name(i)}))}; }))
-  .concat([{g:"Coursebook",t:[{k:"e:book2a",n:"Exercise 2A · Choose the correct word or phrase"},{k:"e:book2b",n:"Exercise 2B · Past Simple, Past Continuous or Past Perfect"},{k:"e:book135a",n:"p. 135 · Ex 1 · Past Simple or Past Continuous"},{k:"e:book135c",n:"p. 135 · Ex 3 · Choose A, B or C"}]}]);
+/* задания в порядке вкладок урока: Warm-up, Learn, Choose, Meaning, Story gaps, Fix it, Join, Coursebook, Your story */
+const BOOKP={g:"📘 Coursebook",t:[{k:"e:book2a",n:"Exercise 2A · Choose the correct word or phrase"},{k:"e:book2b",n:"Exercise 2B · Past Simple, Past Continuous or Past Perfect"},{k:"e:book135a",n:"p. 135 · Ex 1 · Past Simple or Past Continuous"},{k:"e:book135c",n:"p. 135 · Ex 3 · Choose A, B or C"}]};
+window.MIRAE_PARTS=TABS.filter(x=>x.id!=="send").map(x=>{
+  if(x.id==="book") return BOOKP;
+  const B=BLOCKS[x.id];
+  if(B) return {g:B.g,t:Array.from({length:B.n},(_,i)=>({k:"b:"+x.id+":"+i,n:B.arr?B.name(B.arr[i],i):B.name(i)}))};
+  return {g:x.t,t:[{k:"t:"+x.id,n:x.t.replace(/^\S+ · /,"")+(x.id==="write"?" — writing 80–150 words + speaking":"")}]};
+});
 if(window.MIRAE_PICK){ const P=MIRAE_PICK;
   const bOn=(id,i)=>P.has("t:"+id)||P.has("b:"+id+":"+i);
   const tabOn=id=>P.has("t:"+id)||(BLOCKS[id]&&Array.from({length:BLOCKS[id].n},(_,i)=>i).some(i=>P.has("b:"+id+":"+i)));
