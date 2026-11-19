@@ -8,6 +8,7 @@ window.LESSONS["l3-pidong"] = {
  "sections": [
   {
    "id": "words",
+   "part": "theory",
    "title": "Слова кей-попа",
    "icon": "🎤",
    "blocks": [
@@ -77,6 +78,7 @@ window.LESSONS["l3-pidong"] = {
   },
   {
    "id": "b1",
+   "part": "theory",
    "title": "Что такое 피동",
    "icon": "📘",
    "blocks": [
@@ -84,7 +86,15 @@ window.LESSONS["l3-pidong"] = {
      "type": "text",
      "title": "Правило",
      "html": "<h4>Актив (능동) и пассив (피동)</h4>\n<table class=\"tbl\"><tr><th>능동 · актив</th><th>피동 · пассив</th></tr>\n<tr><td class=\"ko\">팬들이 응원봉을 <b>켰어요</b>.</td><td class=\"ko\">응원봉이 <b>켜졌어요</b>.</td></tr>\n<tr><td>Фанаты <b>включили</b> лайтстики.<br><span class=\"muted\">Важно, <u>кто</u> сделал.</span></td><td>Лайтстики <b>зажглись</b>.<br><span class=\"muted\">Важно, <u>что случилось</u>. Кто сделал — неважно или неизвестно.</span></td></tr></table>\n<h4>Как образовать пассив</h4>\n<table class=\"tbl\">\n<tr><th class=\"ko\">-이-</th><td class=\"ko\">보다 → 보이다 · 놓다 → 놓이다 · 쓰다 → 쓰이다 · 쌓다 → 쌓이다</td></tr>\n<tr><th class=\"ko\">-히-</th><td class=\"ko\">닫다 → 닫히다 · 잡다 → 잡히다 · 막다 → 막히다</td></tr>\n<tr><th class=\"ko\">-리-</th><td class=\"ko\">열다 → 열리다 · 듣다 → 들리다 · 걸다 → 걸리다 · 팔다 → 팔리다 · 부르다 → 불리다</td></tr>\n<tr><th class=\"ko\">-기-</th><td class=\"ko\">잠그다 → 잠기다 · 담다 → 담기다 · 끊다 → 끊기다</td></tr>\n<tr><th class=\"ko\">-아/어지다</th><td class=\"ko\">켜다 → 켜지다 · 끄다 → 꺼지다 · 정하다 → 정해지다</td></tr>\n<tr><th class=\"ko\">하다 → 되다</th><td class=\"ko\">공개하다 → 공개되다 · 재생하다 → 재생되다</td></tr></table>\n<div class=\"box tip\">💡 <b>Подсказка по падежам.</b><br>Актив: <span class=\"ko\">누가 + 무엇<b>을/를</b></span> + глагол.<br>Пассив: <span class=\"ko\">무엇<b>이/가</b></span> + пассивный глагол.<br>Если нужно сказать, <i>кем</i> сделано: <span class=\"ko\"><b>에게/한테</b></span> — люди и животные, <span class=\"ko\"><b>에</b></span> — вещи и явления.<br>\n<span class=\"ko\">아이돌이 팬들<b>에게</b> 둘러싸였어요.</span> — Айдола окружили фанаты.<br><span class=\"ko\">모기<b>에</b> 물렸어요.</span> — Меня укусил комар.</div>"
-    },
+    }
+   ]
+  },
+  {
+   "id": "b1-ex",
+   "part": "practice",
+   "title": "Что такое 피동 · упражнения",
+   "icon": "✏️",
+   "blocks": [
     {
      "type": "choice",
      "id": "ex1",
@@ -188,6 +198,7 @@ window.LESSONS["l3-pidong"] = {
   },
   {
    "id": "b2",
+   "part": "theory",
    "title": "-아/어지다",
    "icon": "🔁",
    "blocks": [
@@ -195,7 +206,15 @@ window.LESSONS["l3-pidong"] = {
      "type": "text",
      "title": "Правило",
      "html": "<h4>-아/어지다: два значения</h4>\n<table class=\"tbl\">\n<tr><th>Глагол + -아/어지다</th><td><b>пассив</b> — для глаголов, у которых нет формы с 이/히/리/기<br>\n<span class=\"ko\">켜다 → 켜지다</span> (включаться), <span class=\"ko\">끄다 → 꺼지다</span> (гаснуть), <span class=\"ko\">만들다 → 만들어지다</span>, <span class=\"ko\">지우다 → 지워지다</span>, <span class=\"ko\">정하다 → 정해지다</span>, <span class=\"ko\">이루다 → 이루어지다</span>, <span class=\"ko\">전하다 → 전해지다</span></td></tr>\n<tr><th>Прилагательное + -아/어지다</th><td><b>«становиться»</b> — изменение состояния<br>\n<span class=\"ko\">유명하다 → 유명해지다</span> (стать известным), <span class=\"ko\">많다 → 많아지다</span>, <span class=\"ko\">예쁘다 → 예뻐지다</span>, <span class=\"ko\">가깝다 → 가까워지다</span></td></tr></table>\n<div class=\"box tip\"><b>Как присоединять:</b> гласная ㅏ/ㅗ в последнем слоге → <span class=\"ko\">-아지다</span> (<span class=\"ko\">많아지다</span>); остальные → <span class=\"ko\">-어지다</span> (<span class=\"ko\">만들어지다, 켜지다</span>); <span class=\"ko\">하다 → 해지다</span> (<span class=\"ko\">정해지다, 유명해지다</span>).</div>\n<div class=\"box kp\">🎤 <span class=\"ko\">데뷔하고 1년 만에 그룹이 <b>유명해졌어요</b>.</span> — Через год после дебюта группа стала знаменитой.<br>\n<span class=\"ko\">드디어 컴백 날짜가 <b>정해졌어요</b>!</span> — Наконец-то определена дата камбэка!</div>\n<h4>Какой пассив выбрать?</h4>\n<p>Если у глагола уже есть пассив с <span class=\"ko\">이/히/리/기</span> — берём его: <span class=\"ko\">열다 → <span class=\"yes\">열리다</span></span>, а не <span class=\"ko no\">열어지다</span>; <span class=\"ko\">보다 → <span class=\"yes\">보이다</span></span>.</p>\n<div class=\"box warn\">⚠️ <b>Двойной пассив — ошибка.</b> Нельзя ставить суффикс и <span class=\"ko\">-어지다</span> одновременно:<br>\n<span class=\"ko\">잊다 → <span class=\"yes\">잊히다</span> → <span class=\"no\">잊혀지다</span></span><br>\n<span class=\"ko\">쓰다 → <span class=\"yes\">쓰이다</span> → <span class=\"no\">쓰여지다</span></span><br>\n<span class=\"ko\">보다 → <span class=\"yes\">보이다</span> → <span class=\"no\">보여지다</span></span></div>\n<div class=\"box kp\">🎤 В песнях и в живой речи двойной пассив встречается постоянно. Знаменитая песня 이용 <span class=\"ko\">«잊혀진 계절»</span> (1982), которую в Корее включают каждое 31 октября, по норме должна была бы называться <span class=\"ko\">«잊힌 계절»</span>. На TOPIK и в письменной речи выбираем норму.</div>"
-    },
+    }
+   ]
+  },
+  {
+   "id": "b2-ex",
+   "part": "practice",
+   "title": "-아/어지다 · упражнения",
+   "icon": "✏️",
+   "blocks": [
     {
      "type": "fill",
      "id": "ex2",
@@ -368,6 +387,7 @@ window.LESSONS["l3-pidong"] = {
   },
   {
    "id": "b3",
+   "part": "theory",
    "title": "-아/어 있다 и -고 있다",
    "icon": "🧍",
    "blocks": [
@@ -375,7 +395,15 @@ window.LESSONS["l3-pidong"] = {
      "type": "text",
      "title": "Правило",
      "html": "<h4>-아/어 있다 = результат остался</h4>\n<p>Действие уже закончилось, а его результат «остался» и виден сейчас.</p>\n<div class=\"chain ko\"><span class=\"st\">앉다<small>сесть</small></span> → <span class=\"st\">앉아 있다<small>сел и сидит</small></span></div>\n<p><b>Только с глаголами без <span class=\"ko\">을/를</span>:</b></p>\n<ul>\n<li>непереходные: <span class=\"ko\">앉다 → 앉아 있다, 서다 → 서 있다, 눕다 → 누워 있다, 오다 → 와 있다, 가다 → 가 있다, 남다 → 남아 있다, 붙다 → 붙어 있다, 들다 → 들어 있다, 숨다 → 숨어 있다</span></li>\n<li>пассивы: <span class=\"ko\">열리다 → 열려 있다, 놓이다 → 놓여 있다</span> (подробно — в следующем блоке)</li></ul>\n<h4>-고 있다 — совсем другое</h4>\n<ol><li>действие идёт сейчас: <span class=\"ko\">멤버들이 안무를 <b>연습하고 있어요</b>.</span> — Участники репетируют хореографию.</li>\n<li>одежда и то, что держим в руках: <span class=\"ko\">입고 / 쓰고 / 신고 / 끼고 / 들고 있어요</span></li></ol>\n<table class=\"tbl\"><tr><th>-고 있다 · процесс</th><th>-아/어 있다 · результат</th></tr>\n<tr><td class=\"ko\">무대에 <b>올라가고 있어요</b>.<div class=\"muted\">Поднимается на сцену (идёт по лестнице).</div></td><td class=\"ko\">무대에 <b>올라가 있어요</b>.<div class=\"muted\">Уже на сцене.</div></td></tr>\n<tr><td class=\"ko\">공연장에 <b>오고 있어요</b>.<div class=\"muted\">Едет на концерт (в пути).</div></td><td class=\"ko\">공연장에 벌써 <b>와 있어요</b>.<div class=\"muted\">Уже на месте.</div></td></tr>\n<tr><td class=\"ko\">응원봉을 <b>들고 있어요</b>.<div class=\"muted\">Держит лайтстик в руке (들다 = держать, есть 을).</div></td><td class=\"ko\">앨범에 포토카드가 <b>들어 있어요</b>.<div class=\"muted\">В альбоме лежит карточка (들다 = входить, быть внутри).</div></td></tr></table>\n<div class=\"box warn\">⚠️ Одежда — всегда <span class=\"ko\">-고 있다</span>: <span class=\"ko yes\">재킷을 입고 있어요</span>, а не <span class=\"ko no\">재킷을 입어 있어요</span>.</div>"
-    },
+    }
+   ]
+  },
+  {
+   "id": "b3-ex",
+   "part": "practice",
+   "title": "-아/어 있다 и -고 있다 · упражнения",
+   "icon": "✏️",
+   "blocks": [
     {
      "type": "choice",
      "id": "ex4",
@@ -479,6 +507,7 @@ window.LESSONS["l3-pidong"] = {
   },
   {
    "id": "b4",
+   "part": "theory",
    "title": "피동 + -아/어 있다 вместе",
    "icon": "🚪",
    "blocks": [
@@ -486,7 +515,15 @@ window.LESSONS["l3-pidong"] = {
      "type": "text",
      "title": "Правило",
      "html": "<h4>Главная формула урока</h4>\n<p>Хочешь сказать про состояние, а глагол переходный (с <span class=\"ko\">을/를</span>)? Сначала делаем <b>пассив</b>, потом добавляем <b><span class=\"ko\">-아/어 있다</span></b>.</p>\n<div class=\"chain ko\"><span class=\"st\">열다<small>문을 · открыть</small></span> → <span class=\"st\">열리다<small>문이 · открыться</small></span> → <span class=\"st\">열려 있다<small>быть открытым</small></span></div>\n<div class=\"chain ko\"><span class=\"st\">켜다<small>불을 · включить</small></span> → <span class=\"st\">켜지다<small>불이 · включиться</small></span> → <span class=\"st\">켜져 있다<small>быть включённым</small></span></div>\n<table class=\"tbl\"><tr><th>누가 해요 · действие</th><th>일어나요 · событие</th><th>상태 · результат</th></tr>\n<tr><td class=\"ko\">매니저가 문을 잠가요</td><td class=\"ko\">문이 잠겨요</td><td class=\"ko\"><b>문이 잠겨 있어요</b></td></tr>\n<tr><td class=\"ko\">스태프가 조명을 켜요</td><td class=\"ko\">조명이 켜져요</td><td class=\"ko\"><b>조명이 켜져 있어요</b></td></tr>\n<tr><td class=\"ko\">팬이 포스터에 이름을 써요</td><td class=\"ko\">이름이 쓰여요</td><td class=\"ko\"><b>이름이 쓰여 있어요</b></td></tr>\n<tr><td class=\"ko\">스태프가 의자를 놓아요</td><td class=\"ko\">의자가 놓여요</td><td class=\"ko\"><b>의자가 놓여 있어요</b></td></tr>\n<tr><td class=\"ko\">멤버가 벽에 사진을 걸어요</td><td class=\"ko\">사진이 걸려요</td><td class=\"ko\"><b>사진이 걸려 있어요</b></td></tr>\n<tr><td class=\"ko\">기획사가 순서를 정해요</td><td class=\"ko\">순서가 정해져요</td><td class=\"ko\"><b>순서가 정해져 있어요</b></td></tr></table>\n<p class=\"muted\">Менеджер запирает дверь → дверь запирается → дверь заперта.</p>\n<h4>Одно слово — четыре смысла</h4>\n<table class=\"tbl\">\n<tr><td class=\"ko\"><b>문이 열렸어요.</b></td><td>Дверь открылась. — <i>событие</i>, момент</td></tr>\n<tr><td class=\"ko\"><b>문이 열려 있어요.</b></td><td>Дверь открыта. — <i>картинка сейчас</i></td></tr>\n<tr><td class=\"ko\"><b>문이 열려 있었어요.</b></td><td>Дверь была открыта. — <i>картинка, которую увидели раньше</i> (как в историях: «пришла домой, а дверь открыта»)</td></tr>\n<tr><td class=\"ko\"><b>문이 열리고 있어요.</b></td><td>Дверь открывается. — <i>процесс</i> прямо сейчас</td></tr></table>\n<h4>Где это используется</h4>\n<ol>\n<li><b>Описание комнаты, сцены, картинки</b> (на TOPIK — 말하기 и 쓰기): <span class=\"ko\">벽에 포스터가 걸려 있어요. 책상 위에 앨범이 놓여 있어요.</span></li>\n<li><b>Надписи</b>: <span class=\"ko\">여기에 뭐라고 쓰여 있어요?</span> — Что здесь написано?<br><span class=\"muted\">💬 В разговоре часто слышно <span class=\"ko\">«써 있다»</span>, но по норме — <span class=\"ko\">쓰여 있다</span>.</span></li>\n<li><b>Состояние вещей и техники</b>: <span class=\"ko\">전원이 꺼져 있어…</span> — так начинается автоответчик, когда телефон выключен.</li>\n<li><b>Известные факты</b>: <span class=\"ko\">알려져 있다</span> — «известно, что…»: <span class=\"ko\">한국은 케이팝으로 잘 알려져 있어요.</span></li>\n<li><b>Правила и решения</b>: <span class=\"ko\">정해져 있다</span> — «уже определено»: <span class=\"ko\">무대 순서는 이미 정해져 있어요.</span></li></ol>\n<div class=\"box tip\">📌 <b>Запомни набор:</b> <span class=\"ko\">열려 · 닫혀 · 잠겨 · 켜져 · 꺼져 · 놓여 · 걸려 · 쓰여 · 적혀 · 쌓여 · 꽂혀 · 담겨 · 알려져 · 정해져 + 있다</span></div>"
-    },
+    }
+   ]
+  },
+  {
+   "id": "b4-ex",
+   "part": "practice",
+   "title": "피동 + -아/어 있다 вместе · упражнения",
+   "icon": "✏️",
+   "blocks": [
     {
      "type": "choice",
      "id": "ex5",
@@ -706,6 +743,7 @@ window.LESSONS["l3-pidong"] = {
   },
   {
    "id": "b5",
+   "part": "theory",
    "title": "Найди ошибку",
    "icon": "🔎",
    "blocks": [
@@ -713,7 +751,15 @@ window.LESSONS["l3-pidong"] = {
      "type": "text",
      "title": "Частые ошибки",
      "html": "<h4>Пять частых ошибок</h4>\n<table class=\"tbl\">\n<tr><td class=\"ko no\">문을 열어 있어요</td><td class=\"ko yes\">문이 열려 있어요</td><td>с <span class=\"ko\">있다</span> нельзя переходный глагол с <span class=\"ko\">을/를</span> — сначала пассив</td></tr>\n<tr><td class=\"ko no\">불이 켜 있어요</td><td class=\"ko yes\">불이 켜져 있어요</td><td><span class=\"ko\">켜다</span> переходный → <span class=\"ko\">켜지다</span> → <span class=\"ko\">켜져 있다</span></td></tr>\n<tr><td class=\"ko no\">이름이 쓰여져 있어요</td><td class=\"ko yes\">이름이 쓰여 있어요</td><td>двойной пассив</td></tr>\n<tr><td class=\"ko no\">문이 열어졌어요</td><td class=\"ko yes\">문이 열렸어요</td><td>у <span class=\"ko\">열다</span> есть <span class=\"ko\">열리다</span></td></tr>\n<tr><td class=\"ko no\">모자를 써 있어요</td><td class=\"ko yes\">모자를 쓰고 있어요</td><td>одежда и аксессуары — <span class=\"ko\">-고 있다</span></td></tr></table>"
-    },
+    }
+   ]
+  },
+  {
+   "id": "b5-ex",
+   "part": "practice",
+   "title": "Найди ошибку · упражнения",
+   "icon": "✏️",
+   "blocks": [
     {
      "type": "choice",
      "id": "ex7",
@@ -799,6 +845,7 @@ window.LESSONS["l3-pidong"] = {
   },
   {
    "id": "bs",
+   "part": "theory",
    "title": "🎧 피동 в песнях",
    "icon": "🎧",
    "blocks": [
@@ -806,7 +853,15 @@ window.LESSONS["l3-pidong"] = {
      "type": "text",
      "title": "Песни",
      "html": "<h4>🎧 Пассив в названиях песен</h4>\n<table class=\"tbl\"><tr><th>Песня</th><th>Форма</th><th>Что это</th></tr>\n<tr><td>태연 <span class=\"ko\">«들리나요»</span><div class=\"muted\">саундтрек дорамы <span class=\"ko\">«베토벤 바이러스»</span>, 2008</div></td><td class=\"ko\"><b>들리다</b></td><td><span class=\"ko\">듣다 → 들리다</span> (-리-). «Слышно ли тебе?» — голос «слышится» сам.</td></tr>\n<tr><td>장범준 <span class=\"ko\">«흔들리는 꽃들 속에서 네 샴푸향이 느껴진 거야»</span><div class=\"muted\">саундтрек дорамы <span class=\"ko\">«멜로가 체질»</span>, 2019</div></td><td class=\"ko\"><b>흔들리다<br>느껴지다</b></td><td>В одном названии сразу два вида пассива: <span class=\"ko\">흔들다 → 흔들리다</span> (-리-) и <span class=\"ko\">느끼다 → 느껴지다</span> (-어지다).<br>«Среди качающихся цветов почувствовался запах твоего шампуня».</td></tr>\n<tr><td>이용 <span class=\"ko\">«잊혀진 계절»</span>, 1982<div class=\"muted\">в 2013 году её спела 아이유 в дораме <span class=\"ko\">«최고다 이순신»</span></div></td><td class=\"ko\"><b>잊혀지다</b></td><td>Двойной пассив: <span class=\"ko\">잊다 → 잊히다</span> + <span class=\"ko\">-어지다</span>. По норме — <span class=\"ko\">«잊힌 계절»</span>.</td></tr>\n<tr><td>NELL <span class=\"ko\">«기억을 걷는 시간»</span></td><td class=\"ko\"><b>놓여진</b></td><td>В тексте песни звучит <span class=\"ko\">놓여진</span> — тоже двойной пассив. По норме — <span class=\"ko\">놓인</span>.</td></tr></table>\n<div class=\"box kp\">🎤 <b>Почему в песнях так часто двойной пассив?</b> <span class=\"ko\">잊혀진, 놓여진, 보여진</span> звучат длиннее и мягче и лучше ложатся на мелодию. Многие считают это поэтической вольностью. Но в TOPIK и в письменной речи выбираем норму: <span class=\"ko\">잊힌, 놓인, 보인</span>.</div>\n<div class=\"box tip\">🔎 <b>Как искать пассив в песнях:</b> слушай формы <span class=\"ko\">들려, 보여, 느껴져, 잊혀, 갇혀, 담겨, 닫혀, 열려</span> — это почти всегда 피동. А если после них стоит <span class=\"ko\">있어</span> (<span class=\"ko\">갇혀 있어, 담겨 있어</span>), это 피동 + <span class=\"ko\">-아/어 있다</span>: состояние, которое длится.</div>"
-    },
+    }
+   ]
+  },
+  {
+   "id": "bs-ex",
+   "part": "practice",
+   "title": "🎧 피동 в песнях · упражнения",
+   "icon": "✏️",
+   "blocks": [
     {
      "type": "choice",
      "id": "ex8",
@@ -881,9 +936,10 @@ window.LESSONS["l3-pidong"] = {
    ]
   },
   {
-   "id": "b6",
-   "title": "Текст: ночь перед днём рождения",
-   "icon": "📖",
+   "id": "b6-ex",
+   "part": "practice",
+   "title": "Текст: ночь перед днём рождения · упражнения",
+   "icon": "✏️",
    "blocks": [
     {
      "type": "choice",
@@ -1040,9 +1096,10 @@ window.LESSONS["l3-pidong"] = {
    ]
   },
   {
-   "id": "b7",
-   "title": "Опиши сцену",
-   "icon": "🎤",
+   "id": "b7-ex",
+   "part": "practice",
+   "title": "Опиши сцену · упражнения",
+   "icon": "✏️",
    "blocks": [
     {
      "type": "fill",
