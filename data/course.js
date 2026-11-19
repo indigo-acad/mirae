@@ -13,7 +13,8 @@ window.COURSE = {
 window.COURSE2 = {
   id: "snu2", title: "서울대 한국어+ · 2급", subtitle: "Основной курс",
   lessons: [
-    { no: 11, title: "-아/어다 주다", id: "l11-adaju" }
+    { no: 11, title: "-아/어다 주다", id: "l11-adaju" },
+    { no: "어휘", tag: "어휘", title: "초대와 약속", id: "v2-invite" }
   ]
 };
 window.COURSE4 = {
