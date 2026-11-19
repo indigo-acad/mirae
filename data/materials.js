@@ -66,6 +66,14 @@ window.MATERIALS=[
   "level": "band 9"
  },
  {
+  "id": "en-ielts-speaking",
+  "section": "english",
+  "kind": "trainer",
+  "title": "IELTS Speaking · гайд и тренажёр (Part 1–3, openers)",
+  "path": "materials/english/en-ielts-speaking/",
+  "level": "band 5 → 8+"
+ },
+ {
   "id": "en-hw-feelings",
   "section": "english",
   "kind": "homework",

@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS Speaking · гайд и тренажёр (Part 1–3, openers)</title>
+<style>
+  :root{--ink:#1d2433;--muted:#667085;--line:#e4e7ec;--bg:#f5f6fa;--card:#fff;--accent:#2f5bea;--ok:#1f9d55;--okbg:#e9f8ef;--bad:#d64545;--badbg:#fdeeee;--warn:#b7791f;--warnbg:#fff7e6;--b6:#eef0f4;--b6t:#475467;--b7:#e3f5e9;--b7t:#17703a;--b8:#f1e8ff;--b8t:#6b21a8}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  .wrap{max-width:860px;margin:0 auto;padding:18px 14px 90px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:28px 0 6px;flex-wrap:wrap}
+  header h1{font-size:20px;margin:0}
+  .who{font-size:14px;color:var(--muted)}
+  .who a{color:var(--accent);cursor:pointer}
+  .card{background:var(--card);border-radius:16px;padding:18px 20px;margin:14px 0;box-shadow:0 2px 10px #0000000d}
+  h2{margin:0 0 6px;font-size:21px}
+  h3{margin:4px 0 8px;font-size:17px}
+  h4{margin:14px 0 6px;font-size:15.5px}
+  p{margin:6px 0}
+  .muted{color:var(--muted);font-size:14px}
+  .small{font-size:13.5px}
+  button{font:inherit;border:0;border-radius:10px;padding:9px 15px;cursor:pointer;background:#eef0f4;color:var(--ink);margin:4px 4px 4px 0}
+  button.primary{background:var(--accent);color:#fff}
+  button.dark{background:var(--ink);color:#fff}
+  button.sm{font-size:14px;padding:6px 11px}
+  button.ico{padding:2px 7px;margin:0 4px 0 0;font-size:14px;background:#eef3ff}
+  button.live{background:var(--bad);color:#fff}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text],textarea,select{font:inherit;padding:9px 11px;border:1.5px solid #c9ced8;border-radius:9px;width:100%;background:#fff}
+  textarea{resize:vertical;line-height:1.5}
+  select{width:auto;padding:5px 8px}
+  nav{display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5;scrollbar-width:thin}
+  nav button{margin:0;font-size:14.5px;white-space:nowrap;flex:0 0 auto}
+  nav button.active{background:var(--ink);color:#fff}
+  .hidden{display:none!important}
+  details{margin:6px 0} summary{cursor:pointer;padding:5px 0;font-weight:600}
+  details.box{border:1px solid var(--line);border-radius:12px;padding:6px 14px;background:#fcfcfd}
+  details.box[open]{padding-bottom:12px}
+  ul.pb{margin:4px 0 8px;padding-left:20px} ul.pb li{margin:3px 0}
+  table.tbl{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0}
+  table.tbl th,table.tbl td{border:1px solid #d5d9e1;padding:7px;vertical-align:top;text-align:left}
+  table.tbl th{background:#f1f3f7}
+  .scroll{overflow-x:auto}
+  mark{background:#fff1a8;padding:0 2px;border-radius:3px}
+  .reading{background:#fffdf5;border:1px solid #efe6c4;border-radius:10px;padding:12px 15px;font-size:15.5px}
+  .reading p{margin:6px 0}
+  .bd{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:1px 7px;margin-right:4px;vertical-align:1px}
+  .bd6{background:var(--b6);color:var(--b6t)} .bd7{background:var(--b7);color:var(--b7t)} .bd8{background:var(--b8);color:var(--b8t)}
+  .chip{display:inline-block;background:#eef3ff;border-radius:20px;padding:3px 11px;margin:3px;font-size:14px;cursor:pointer}
+  .chip.c6{background:var(--b6)} .chip.c7{background:var(--b7)} .chip.c8{background:var(--b8)}
+  .chip.okc{background:var(--okbg)} .chip.badc{background:var(--badbg)} .chip.warnc{background:var(--warnbg)}
+  .chip small{color:var(--muted)}
+  .pick{display:flex;flex-wrap:wrap;gap:6px}
+  .pick button{margin:0;font-size:14px;padding:7px 11px}
+  .pick button.sel{background:var(--accent);color:#fff}
+  .pick button.done{outline:1.5px solid var(--ok)}
+  .pick button.done::after{content:" ✓";color:var(--ok)}
+  .pick button.sel.done::after{color:#bff5d2}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .col{border-radius:12px;padding:10px 12px}
+  .col.c6{background:#f6f7f9} .col.c7{background:#f2fbf5} .col.c8{background:#faf5ff}
+  .col h4{margin:0 0 6px}
+  .op{display:flex;align-items:flex-start;gap:6px;margin:4px 0;font-size:14.5px}
+  .op .star{cursor:pointer;color:#c2c7d0;font-size:17px;line-height:1.2;user-select:none}
+  .op .star.on{color:#f0b400}
+  .op .say{cursor:pointer}
+  .abox{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin:12px 0;background:#fff}
+  .abox .aq{font-size:16px;margin-bottom:6px}
+  .ahint{font-size:13.5px;color:var(--muted);margin:2px 0 8px}
+  .arow{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:6px}
+  .tm{font-weight:700;font-variant-numeric:tabular-nums;margin:0 6px}
+  .tm.red{color:var(--bad)} .tm.amber{color:var(--warn)} .tm.green{color:var(--ok)}
+  .res{margin-top:10px;border-top:1px dashed var(--line);padding-top:10px;font-size:14.5px}
+  .res ul{margin:4px 0;padding-left:0;list-style:none}
+  .res li{margin:3px 0}
+  .est{display:inline-block;font-size:22px;font-weight:800;background:var(--ink);color:#fff;border-radius:10px;padding:2px 12px;margin-right:8px}
+  .bars{display:grid;grid-template-columns:auto 1fr auto;gap:4px 8px;align-items:center;margin:8px 0;font-size:13.5px}
+  .bar{height:8px;background:#e7e9ef;border-radius:5px;overflow:hidden}
+  .bar div{height:100%;background:var(--accent)}
+  .tips{background:var(--warnbg);border-radius:10px;padding:8px 12px;margin:8px 0}
+  .tips ol{margin:4px 0;padding-left:20px}
+  .mist{background:var(--badbg);border-radius:10px;padding:8px 12px;margin:8px 0}
+  .selfchk label{display:block;margin:4px 0;font-size:14px}
+  .ex .item{padding:10px 0;border-bottom:1px dashed var(--line)}
+  .ex .item:last-child{border-bottom:0}
+  .ex .opts{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+  .ex .opts button{margin:0;text-align:left;background:#f1f3f7}
+  .ex .opts button.ok{background:var(--okbg);outline:2px solid var(--ok)}
+  .ex .opts button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  .ex .expl{font-size:14px;margin-top:5px}
+  .ex .gaprow{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
+  .ex .gaprow input{max-width:260px}
+  .ex .gaprow input.ok{border-color:var(--ok);background:var(--okbg)}
+  .ex .gaprow input.bad{border-color:var(--bad);background:var(--badbg)}
+  .score{font-size:16px;font-weight:700;margin-top:10px}
+  .cue{border:2px solid var(--ink);border-radius:10px;padding:14px 18px;background:#fff;font-size:16px}
+  .cue ul{margin:6px 0 6px 0;padding-left:22px}
+  .notes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .notes label{font-size:13px;color:var(--muted)}
+  .big{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;text-align:center;margin:6px 0}
+  .rapidq{font-size:22px;font-weight:700;text-align:center;margin:10px 0}
+  .flag{display:inline-block;font-size:11.5px;font-weight:700;background:#fff0d6;color:#9a5b00;border-radius:6px;padding:1px 6px;margin-left:4px;vertical-align:1px}
+  .model p{margin:8px 0}
+  .feedback{min-height:22px;margin-top:8px;font-weight:600}
+  .sumrow{padding:6px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+  .speed{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted)}
+  @media(max-width:620px){.grid3{grid-template-columns:1fr}.notes{grid-template-columns:1fr}.card{padding:15px 14px}header h1{font-size:18px}}
+</style>
+</head>
+<body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+
+<div id="login" class="card">
+  <h2>🎤 IELTS Speaking · гайд и тренажёр</h2>
+  <p class="muted">Все три части экзамена, openers, слова и грамматика по бэндам, автопроверка ответа и отправка учителю.</p>
+  <p>Как тебя зовут?</p>
+  <input type="text" id="nameInput" placeholder="Имя" autocomplete="off" onkeydown="if(event.key==='Enter')start()">
+  <p><button class="primary" onclick="start()">Начать →</button></p>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>🎤 IELTS Speaking</h1>
+    <div class="who">👤 <span id="who"></span> · <a onclick="logout()">сменить</a>
+      <span class="speed">🔊 <select id="rate" onchange="STATE.rate=this.value;save()"><option value="0.8">медленно</option><option value="0.92" selected>нормально</option><option value="1.05">быстро</option></select></span></div>
+  </header>
+  <nav id="nav">
+    <button data-tab="guide">📖 Гайд</button>
+    <button data-tab="open">🚀 Openers</button>
+    <button data-tab="p1">1️⃣ Part 1</button>
+    <button data-tab="p2">2️⃣ Part 2</button>
+    <button data-tab="p3">3️⃣ Part 3</button>
+    <button data-tab="voc">📚 Лексика</button>
+    <button data-tab="gram">🧩 Грамматика</button>
+    <button data-tab="mock">🎯 Пробный экзамен</button>
+    <button data-tab="send">📨 Учителю</button>
+  </nav>
+
+<!-- ================= ГАЙД ================= -->
+<section id="tab-guide" class="hidden">
+  <div class="card">
+    <h2>📖 Гайд по IELTS Speaking</h2>
+    <p>Speaking — это разговор с экзаменатором один на один, 11–14 минут, запись на диктофон. Ниже всё, что нужно знать о формате, критериях и стратегиях. Открывай разделы по очереди, в конце — квиз и чек-листы.</p>
+    <p class="muted">Как работать с тренажёром: 🚀 Openers → 1️⃣ Part 1 (2 темы в день) → 2️⃣ Part 2 (1 карточка в день) → 3️⃣ Part 3 (1 тема в день) → 📚 и 🧩 по 10 минут → 🎯 пробный экзамен раз в неделю → 📨 отправить учителю.</p>
+  </div>
+
+  <div class="card">
+    <details class="box" open><summary>🗺 Как устроен экзамен</summary>
+      <div class="scroll"><table class="tbl">
+        <tr><th></th><th>Part 1 · Interview</th><th>Part 2 · Long turn</th><th>Part 3 · Discussion</th></tr>
+        <tr><td><b>Время</b></td><td>4–5 минут</td><td>3–4 минуты: 1 мин подготовки + до 2 мин речи</td><td>4–5 минут</td></tr>
+        <tr><td><b>Что происходит</b></td><td>Экзаменатор представляется, проверяет документ. Потом 3 темы по 3–5 вопросов. Первая тема всегда <i>Work / Study</i> или <i>Home / Hometown</i>.</td><td>Карточка с темой и 4 пунктами. Бумага и карандаш для заметок. Говоришь один, экзаменатор остановит на 2:00 и может задать 1–2 коротких вопроса.</td><td>Абстрактные вопросы по теме Part 2: про людей, общество, прошлое и будущее.</td></tr>
+        <tr><td><b>Длина ответа</b></td><td>2–4 предложения, 15–30 секунд</td><td>Говори до остановки: цель 1:45–2:00</td><td>4–6 предложений, 30–60 секунд</td></tr>
+        <tr><td><b>Главное</b></td><td>Прямой ответ + причина + деталь. Естественно, без заученного текста.</td><td>Связная история по всем пунктам, детали, чувства, прошедшие времена.</td><td>Позиция, аргументы, примеры, другая сторона, осторожные формулировки.</td></tr>
+      </table></div>
+    </details>
+
+    <details class="box"><summary>📊 4 критерия: чем band 5 отличается от band 8</summary>
+      <p>Каждый критерий — 25% балла. Итог — среднее: например, 7 + 6 + 6 + 7 = 26 / 4 = <b>6.5</b>.</p>
+      <div class="scroll"><table class="tbl">
+        <tr><th>Критерий</th><th><span class="bd bd6">5</span></th><th><span class="bd bd6">6</span></th><th><span class="bd bd7">7</span></th><th><span class="bd bd8">8–9</span></th></tr>
+        <tr><td><b>Fluency &amp; Coherence</b><br><span class="muted">беглость и связность</span></td><td>Держит речь, но с паузами, повторами, самоисправлениями. Связки однообразные: and, but, because.</td><td>Готов говорить развёрнуто, но иногда сбивается. Связок хватает, не всегда к месту.</td><td>Говорит долго без видимого усилия. Паузы бывают при поиске слова. Разнообразные связки и discourse markers.</td><td>Бегло, паузы только чтобы обдумать мысль. Идеи развиты логично.</td></tr>
+        <tr><td><b>Lexical Resource</b><br><span class="muted">лексика</span></td><td>Слов хватает на знакомые темы, но мало. Перефразировать трудно.</td><td>Слов достаточно для темы. Бывают неточности, смысл ясен. Умеет перефразировать.</td><td>Гибко пользуется лексикой. Есть менее частотные слова, идиомы и collocations, чувствует стиль.</td><td>Широкий запас, точность значения, естественные идиомы. Ошибки редки.</td></tr>
+        <tr><td><b>Grammatical Range &amp; Accuracy</b><br><span class="muted">грамматика</span></td><td>Простые предложения в основном верны, сложные — с ошибками.</td><td>Смесь простых и сложных, но гибкость ограничена. Ошибки в сложных, понять можно.</td><td>Разные сложные структуры, много предложений без ошибок.</td><td>Широкий диапазон, почти все предложения без ошибок.</td></tr>
+        <tr><td><b>Pronunciation</b><br><span class="muted">произношение</span></td><td>В целом понятно, но отдельные слова искажены, мало интонации.</td><td>Понятно. Ударение и интонация есть, но не всегда.</td><td>Легко понять. Интонация и ударение работают, акцент не мешает.</td><td>Понятно всё время, гибкая интонация, естественный ритм.</td></tr>
+      </table></div>
+      <p class="muted">Акцент — не проблема. Проблема — когда из-за звуков, ударений или монотонности экзаменатору трудно понять.</p>
+    </details>
+
+    <details class="box"><summary>🧭 Формулы ответа для каждой части</summary>
+      <h4>Part 1 · A + R + E (Answer + Reason + Example)</h4>
+      <div class="reading"><b>Q:</b> Do you like cooking?<br><span class="bd bd7">A</span> <mark>Not really, to be honest.</mark> <span class="bd bd7">R</span> I've never had the patience for complicated recipes, <span class="bd bd7">E</span> so most evenings I just throw together a salad or order something in.</div>
+      <h4>Part 2 · 5 блоков на 2 минуты</h4>
+      <ol class="pb">
+        <li><b>Opener</b> (5–10 сек): что выбрал + крючок. <i>The person I'd like to talk about is…, who…</i></li>
+        <li><b>Фон</b> (20–30 сек): когда, где, кто. <i>To give you a bit of background…</i></li>
+        <li><b>Детали</b> (40–50 сек): средние пункты карточки, конкретика, цифры, ощущения.</li>
+        <li><b>Чувства и оценка</b> (30–40 сек): последний пункт «and explain…» — самая важная часть для балла.</li>
+        <li><b>Вывод</b> (5–10 сек): <i>So all in all…</i> Если время осталось — сравнение «тогда / сейчас», «что было бы, если…».</li>
+      </ol>
+      <h4>Part 3 · P-R-E-C (Position, Reason, Example, Contrast)</h4>
+      <div class="reading"><b>Q:</b> Should children use smartphones?<br><span class="bd bd8">P</span> <mark>To a certain extent, yes</mark>, but with clear limits. <span class="bd bd8">R</span> Phones are part of modern life, and children need to learn to use them responsibly. <span class="bd bd8">E</span> My nephew, for example, uses a language app every day and his English has improved dramatically. <span class="bd bd8">C</span> <mark>That said</mark>, too much screen time can affect sleep and concentration, so I think parents should set a daily limit.</div>
+    </details>
+
+    <details class="box"><summary>⏱ Сколько говорить</summary>
+      <ul class="pb">
+        <li><b>Part 1:</b> 15–30 секунд (2–4 предложения, 25–70 слов). Одно слово — мало; минута — много, экзаменатор перебьёт.</li>
+        <li><b>Part 2:</b> до остановки. 2 минуты — это примерно 220–300 слов. Меньше 1:30 — минус по беглости.</li>
+        <li><b>Part 3:</b> 30–60 секунд (60–120 слов). Ответ без аргумента и примера — band 5–6, даже если грамматика хорошая.</li>
+        <li><b>Темп:</b> нормальная речь — 110–160 слов в минуту. Быстрее — не лучше: беглость = плавность, а не скорость.</li>
+      </ul>
+    </details>
+
+    <details class="box"><summary>🆘 Что делать, если…</summary>
+      <div class="scroll"><table class="tbl">
+        <tr><th>Ситуация</th><th>Что сказать</th></tr>
+        <tr><td>Не расслышал или не понял вопрос</td><td>Sorry, could you repeat the question, please? <span class="muted">(Part 1: экзаменатор только повторит; Part 3: может перефразировать — Could you rephrase that?)</span></td></tr>
+        <tr><td>Не знаешь, что ответить</td><td>That's not something I've given much thought to, but I suppose… — и всё равно ответь.</td></tr>
+        <tr><td>Забыл слово</td><td>Перефразируй: <i>the thing you use to…, a kind of…, the person who…</i>. Это даже плюс к Lexical Resource.</td></tr>
+        <tr><td>Ошибся и заметил</td><td>Исправься коротко и иди дальше: <i>…he go — he goes there every day.</i></td></tr>
+        <tr><td>Part 2: закончил раньше 2 минут</td><td>Добавь: как бы отреагировал сейчас; что было бы, если…; посоветуешь ли другим; чем это отличается от…</td></tr>
+        <tr><td>Экзаменатор перебил</td><td>Это нормально и на балл не влияет: в Part 1 и 3 у него ограничено время.</td></tr>
+        <tr><td>Нужна секунда подумать</td><td>Let me think about that for a second… / That's a tricky one… — не чаще раза за часть.</td></tr>
+      </table></div>
+    </details>
+
+    <details class="box"><summary>🚫 10 ошибок, которые стоят бэнда</summary>
+      <ol class="pb">
+        <li>Заученные тексты: экзаменатор слышит «чтение», ответ часто не по вопросу.</li>
+        <li>Ответ одним словом в Part 1 или 15 секунд в Part 2.</li>
+        <li>Повтор вопроса: «Do you like music? — Yes, I like music.»</li>
+        <li>«As for me…», «In my opinion» перед фактами о себе.</li>
+        <li>Идиомы ради идиом: «It's raining cats and dogs» в ответе про любимую погоду.</li>
+        <li>Только простые предложения — даже без ошибок это band 5–6 по грамматике.</li>
+        <li>very, good, interesting, a lot of — в каждом предложении.</li>
+        <li>Неверное время: вопрос о детстве — ответ в настоящем.</li>
+        <li>Монотонная речь и одинаковое ударение во всех словах.</li>
+        <li>Part 3 только про себя, без обобщений про людей и общество.</li>
+      </ol>
+    </details>
+
+    <details class="box"><summary>🗣 Беглость и произношение: что тренировать</summary>
+      <ul class="pb">
+        <li><b>Ударение в словах:</b> PHOtograph — phoTOgraphy — photoGRAphic; deVElopment; ecoNOmic; COMfortable.</li>
+        <li><b>Окончания -ed:</b> /t/ worked, /d/ played, /ɪd/ wanted. <b>-s:</b> /s/ books, /z/ dogs, /ɪz/ watches.</li>
+        <li><b>Schwa /ə/:</b> безударные гласные ослабляются: about, today, comfortable.</li>
+        <li><b>Связная речь и сокращения:</b> I'd_love_to, turn_it_off, it's, I've, wouldn't. Без сокращений речь звучит как письменная.</li>
+        <li><b>Интонация перечисления:</b> cats ↗, dogs ↗ and rabbits ↘.</li>
+        <li><b>Паузы между смысловыми группами:</b> <i>When I was a kid | we used to spend every summer | at my grandma's.</i></li>
+        <li><b>th:</b> think /θ/, this /ð/ — не «синк» и не «зис».</li>
+      </ul>
+      <h4>Упражнения</h4>
+      <ul class="pb">
+        <li><b>Shadowing:</b> включи 🔊 у образца и повторяй за голосом с той же интонацией, 5 минут в день.</li>
+        <li><b>Запиши себя</b> (🔴 в любом ответе) и послушай: где паузы, где «эээ», где монотонно.</li>
+        <li><b>4-3-2:</b> одну карточку Part 2 расскажи за 4 минуты, потом за 3, потом за 2. Речь становится плотнее и увереннее.</li>
+      </ul>
+    </details>
+
+    <details class="box"><summary>✅ Чек-листы</summary>
+      <h4>За неделю до экзамена</h4>
+      <ul class="pb">
+        <li>☐ Есть 3–4 opener-а на каждый тип вопроса (раздел Openers → ⭐).</li>
+        <li>☐ Пройдены все основные темы Part 1 и 20+ тем из прогноза.</li>
+        <li>☐ Подготовлены «универсальные истории»: 2 человека, 2 места, 1 вещь, 3 события.</li>
+        <li>☐ Есть 10–15 слов band 7+ к каждой частой теме.</li>
+        <li>☐ Сделан хотя бы 1 пробный экзамен с записью голоса.</li>
+      </ul>
+      <h4>В день экзамена</h4>
+      <ul class="pb">
+        <li>☐ Поговори по-английски 10 минут до входа (с собой, с подкастом).</li>
+        <li>☐ Слушай вопрос до конца, отвечай на время вопроса.</li>
+        <li>☐ В Part 2 используй всю минуту подготовки: только ключевые слова.</li>
+        <li>☐ Не бойся переспросить — это не снижает балл.</li>
+      </ul>
+      <h4>После каждого ответа</h4>
+      <div id="guideChecks"></div>
+    </details>
+  </div>
+  <div id="exHost-guide"></div>
+</section>
+
+<!-- ================= OPENERS ================= -->
+<section id="tab-open" class="hidden">
+  <div class="card">
+    <h2>🚀 Openers: как начинать ответ</h2>
+    <p><b>Opener</b> — первые 1–2 секунды ответа. Он показывает беглость, даёт время подумать и делает речь естественной. Но opener ≠ вода: сразу после него — <b>прямой ответ</b>.</p>
+    <div class="reading"><b>Правило:</b> opener + ответ в первом предложении → причина → деталь.<br>
+    ✗ <i>Well, it's a very interesting question. Music is a very interesting thing in our life…</i><br>
+    ✓ <i><mark>Absolutely</mark> — I'm really into jazz at the moment, mainly because…</i></div>
+    <p class="muted">Нажми ⭐ у фраз, которые хочешь сделать своими: они будут подсказкой в каждом ответе Part 1 и уйдут учителю как «твой набор». Цель — по 2–3 на каждый тип вопроса. 🔊 — послушать.</p>
+  </div>
+  <div id="openTypes"></div>
+  <div class="card">
+    <h3>Part 2: первые слова и связки</h3>
+    <div id="openP2"></div>
+  </div>
+  <div class="card">
+    <h3>Part 3: openers по типам вопросов</h3>
+    <div id="openP3"></div>
+  </div>
+  <div class="card">
+    <h3>🚫 Чего избегать</h3>
+    <div class="scroll"><table class="tbl" id="openAvoid"></table></div>
+  </div>
+  <div id="exHost-open"></div>
+  <div class="card" id="rapidCard">
+    <h3>⚡ Скорострел: opener за 3 секунды</h3>
+    <p class="muted">10 случайных вопросов Part 1. Вопрос звучит → 3 секунды подумать → отвечай 1–2 предложения: opener + ответ + причина. Отвечай голосом (🎤 надиктовать или 🔴 записать) или пиши. Автопроверка смотрит: есть ли opener, прямой ответ, нет ли повтора вопроса, есть ли продолжение.</p>
+    <div id="rapid"></div>
+  </div>
+  <div class="card" id="bankCard">
+    <h3>⭐ Мой набор openers</h3>
+    <div id="bank"></div>
+  </div>
+</section>
+
+<!-- ================= PART 1 ================= -->
+<section id="tab-p1" class="hidden">
+  <div class="card">
+    <h2>1️⃣ Part 1 · Interview</h2>
+    <details class="box"><summary>Как отвечать в Part 1</summary>
+      <ul class="pb">
+        <li>Экзаменатор задаёт вопросы по 3 темам. Первая — <b>Work / Study</b> или <b>Home / Hometown</b>, потом 2 темы из списка (часто — из прогноза).</li>
+        <li>Формула: <b>opener + прямой ответ → причина → пример или деталь</b>. 2–4 предложения.</li>
+        <li>Время глагола = время вопроса: <i>Did you…?</i> → прошедшее; <i>Would you…?</i> → I'd…; <i>Have you ever…?</i> → present perfect + past simple.</li>
+        <li>Перефразируй вопрос: <i>Do you like reading?</i> → <i>Yes, I'm a real bookworm.</i></li>
+        <li>Одно слово band 7+ и одна сложная структура в каждом ответе — уже заметный шаг вверх.</li>
+      </ul>
+    </details>
+    <p class="muted">Выбери тему. У каждой: все вопросы с автопроверкой, слова по бэндам (band 6 → 7 → 8+), образец band 6 и band 8 для сравнения. <span class="flag">прогноз</span> — тема из прогноза на май–август 2026.</p>
+  </div>
+  <div class="card"><div id="p1Pick"></div></div>
+  <div id="p1Topic"></div>
+</section>
+
+<!-- ================= PART 2 ================= -->
+<section id="tab-p2" class="hidden">
+  <div class="card">
+    <h2>2️⃣ Part 2 · Long turn (cue card)</h2>
+    <details class="box"><summary>Как устроена Part 2 и как готовиться за 1 минуту</summary>
+      <ul class="pb">
+        <li>Дают карточку: тема + 4 пункта. 1 минута на заметки, потом говоришь до 2 минут, экзаменатор остановит.</li>
+        <li><b>План за минуту</b> — только ключевые слова в 5 строк: Opener / Фон / Детали / Чувства / Вывод. Плюс 3 «сильных» слова и 1 структура, которые точно скажешь (например, <i>If I hadn't…, I would never have…</i>).</li>
+        <li>Говори в прошедшем времени, если история в прошлом. Present simple — для того, что верно и сейчас.</li>
+        <li>Последний пункт (<i>and explain why…</i>) — самый важный: там оценка, чувства и сложная грамматика.</li>
+        <li>Не читай пункты карточки вслух как список: «Now the second point: where…» — плавные переходы лучше.</li>
+      </ul>
+      <h4>Если осталось время</h4>
+      <ul class="pb"><li>Как бы ты отреагировал сейчас? <i>If it happened today, I'd probably…</i></li><li>Сравнение: <i>Compared to how I felt back then…</i></li><li>Совет другим: <i>I'd definitely recommend it to anyone who…</i></li><li>Ещё одна деталь: <i>One more thing I should mention is…</i></li></ul>
+    </details>
+    <details class="box"><summary>Openers и связки для Part 2</summary><div id="p2Links"></div></details>
+    <details class="box"><summary>🧩 Универсальные истории: одна история — много карточек</summary><div id="p2Cats"></div></details>
+    <details class="box"><summary>📝 Образцы band 8 (и один band 6 для сравнения)</summary><div id="p2Models"></div></details>
+  </div>
+  <div class="card"><h3>Карточки: прогноз май – август 2026</h3><div id="p2Pick"></div></div>
+  <div id="p2Card"></div>
+</section>
+
+<!-- ================= PART 3 ================= -->
+<section id="tab-p3" class="hidden">
+  <div class="card">
+    <h2>3️⃣ Part 3 · Discussion</h2>
+    <details class="box"><summary>Типы вопросов и формулы ответа</summary><div id="p3Types"></div></details>
+    <details class="box"><summary>Openers для Part 3</summary><div id="p3Open"></div></details>
+    <p class="muted">Part 3 — разговор про людей и общество. Отвечай 4–6 предложений: позиция → причина → пример → другая сторона → вывод. Осторожные формулировки (I'd say, tend to, to some extent) — признак band 7+.</p>
+  </div>
+  <div class="card"><div id="p3Pick"></div></div>
+  <div id="p3Theme"></div>
+</section>
+
+<!-- ================= ЛЕКСИКА ================= -->
+<section id="tab-voc" class="hidden">
+  <div class="card">
+    <h2>📚 Лексика по бэндам</h2>
+    <p>Lexical Resource растёт не от «умных слов», а от <b>точности</b>: подходящие сочетания (collocations), менее частотные слова там, где они к месту, перефраз и немного естественных идиом.</p>
+    <ul class="pb">
+      <li><span class="bd bd6">6</span> понятные базовые слова: good, interesting, I like.</li>
+      <li><span class="bd bd7">7</span> точнее и разнообразнее: rewarding, fascinating, I'm really into.</li>
+      <li><span class="bd bd8">8+</span> идиоматично и естественно: invaluable, thought-provoking, it's right up my street.</li>
+    </ul>
+    <p class="muted">Нажми на слово — оно прозвучит.</p>
+  </div>
+  <div class="card"><h3>Замены: band 6 → 7 → 8+</h3><div id="vocUp"></div></div>
+  <div class="card"><h3>Связки по функциям</h3><div id="vocLink"></div></div>
+  <div class="card"><h3>Естественные идиомы</h3><div id="vocIdi"></div></div>
+  <div id="exHost-voc"></div>
+</section>
+
+<!-- ================= ГРАММАТИКА ================= -->
+<section id="tab-gram" class="hidden">
+  <div class="card">
+    <h2>🧩 Грамматика для Speaking</h2>
+    <p>Для band 7 нужно не «много сложного», а <b>несколько разных структур, сказанных без ошибок</b>. В каждом ответе старайся использовать хотя бы одну из карточек ниже. Автопроверка в ответах показывает, какие структуры она нашла.</p>
+  </div>
+  <div id="gramCards"></div>
+  <div id="exHost-gram"></div>
+</section>
+
+<!-- ================= ПРОБНЫЙ ЭКЗАМЕН ================= -->
+<section id="tab-mock" class="hidden">
+  <div class="card">
+    <h2>🎯 Пробный экзамен</h2>
+    <p>Полный Speaking test: Part 1 (3 темы по 4 вопроса) → Part 2 (карточка, 1 минута подготовки, 2 минуты речи) → Part 3 (5 вопросов). Отвечай голосом: 🔴 запись уходит учителю, 🎤 диктовка даёт автопроверку.</p>
+    <button class="primary" onclick="mockNew()">🎲 Собрать новый экзамен</button>
+  </div>
+  <div id="mock"></div>
+</section>
+
+<!-- ================= ОТПРАВКА ================= -->
+<section id="tab-send" class="hidden">
+  <div class="card">
+    <h2>📨 Отправить учителю</h2>
+    <p class="muted">В отчёт попадут упражнения (баллы и ошибки), твои ответы с автопроверкой и чек-листами, набор openers и записи голоса.</p>
+    <label><input type="checkbox" id="sNew" checked onchange="sendRender()"> только новое после прошлой отправки</label>
+    <label><input type="checkbox" id="sRec" checked> отправить записи голоса</label>
+    <div id="sSum" style="margin-top:10px"></div>
+    <button class="primary" id="sBtn" onclick="sendAll()">📨 Отправить учителю</button>
+    <div class="feedback" id="sFb"></div>
+    <textarea id="sCopy" class="hidden" style="height:180px;font:13px monospace;margin-top:8px"></textarea>
+  </div>
+</section>
+</div>
+</div>
+
+<script src="data-core.js"></script>
+<script src="data-p1.js"></script>
+<script src="data-p23.js"></script>
+<script>
+/* ============ НАСТРОЙКИ TELEGRAM (как в других тренажёрах школы) ============ */
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID = "347625701";
+const MP_HW = window.MIRAE_PICK ? " · домашка (выбранные задания)" : "";
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const jsq = s => esc(JSON.stringify(String(s)));
+const mk = s => esc(s).replace(/\[\[(.+?)\]\]/g,"<mark>$1</mark>");
+const strip = s => String(s).replace(/\[\[|\]\]/g,"");
+const para = s => mk(s).split(/\n\n+/).map(p=>"<p>"+p+"</p>").join("");
+const wc = s => (String(s).match(/[A-Za-z][A-Za-z'’-]*/g)||[]).length;
+const fmt = t => { t=Math.max(0,Math.round(t)); return Math.floor(t/60)+":"+String(t%60).padStart(2,"0"); };
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const kid = k => String(k).replace(/[^A-Za-z0-9]/g,"_");
+const BDG = b => '<span class="bd bd'+(b>=8?8:b>=7?7:6)+'">'+(b>=8?"8+":b)+'</span>';
+
+/* Полные списки (для скорострела и пробного экзамена) — до фильтра домашки */
+const ALL_P1 = P1.slice(), ALL_P2 = P2.slice(), ALL_P3 = P3.slice();
+const MODEL_BY_CAT = {person:"helper", place:"cityvisit", object:"cantlive", experience:"decision", media:"movie", future:"perfectjob"};
+
+/* ============ СОСТОЯНИЕ ============ */
+const LS = "ielts_speaking_v1";
+let STATE = {};
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function loadFor(name){ try{ STATE = JSON.parse(lsGet(LS+":"+name.toLowerCase())||"{}")||{}; }catch(e){ STATE={}; } STATE.name=name; STATE.ex=STATE.ex||{}; STATE.ans=STATE.ans||{}; STATE.fav=STATE.fav||[]; }
+let saveT=null;
+function save(){ if(!STATE.name) return; clearTimeout(saveT); saveT=setTimeout(()=>{ lsSet(LS+":"+STATE.name.toLowerCase(), JSON.stringify(STATE)); lsSet(LS+":last", STATE.name); },150); }
+function saveNow(){ if(!STATE.name) return; clearTimeout(saveT); lsSet(LS+":"+STATE.name.toLowerCase(), JSON.stringify(STATE)); lsSet(LS+":last", STATE.name); }
+window.addEventListener("pagehide", saveNow);
+
+function start(){
+  const n=$("nameInput").value.trim(); if(!n){ $("nameInput").focus(); return; }
+  loadFor(n); saveNow();
+  $("login").classList.add("hidden"); $("app").classList.remove("hidden"); $("who").textContent=STATE.name;
+  if(STATE.rate) $("rate").value=STATE.rate;
+  const vis=[...document.querySelectorAll("#nav button")].filter(b=>b.style.display!=="none").map(b=>b.dataset.tab);
+  openTab(vis.includes(STATE.tab)?STATE.tab:vis[0]); markDone();
+}
+function logout(){ saveNow(); if(RECA) RECA.stop(); if(DICT) DICT.stop(); Object.keys(REC).forEach(k=>{ try{ URL.revokeObjectURL(REC[k].url); }catch(e){} delete REC[k]; }); $("app").classList.add("hidden"); $("login").classList.remove("hidden"); $("nameInput").value=""; STATE={}; RENDERED={}; }
+
+/* ============ ВКЛАДКИ ============ */
+const TABS=["guide","open","p1","p2","p3","voc","gram","mock","send"];
+let RENDERED={};
+$("nav").addEventListener("click", e=>{ const b=e.target.closest("button[data-tab]"); if(b) openTab(b.dataset.tab); });
+function openTab(t){
+  if(!t) return;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));
+  TABS.forEach(x=>$("tab-"+x).classList.toggle("hidden",x!==t));
+  if(!STATE.name) return;
+  STATE.tab=t; save();
+  if(t==="send" || !RENDERED[t]){ RENDERED[t]=1; RENDER[t](); }
+  window.scrollTo(0,0);
+}
+
+/* ============ ОЗВУЧКА ============ */
+let VOICES=[];
+function loadVoices(){ try{ VOICES=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang)); }catch(e){} }
+if("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+function pickVoice(){
+  const pref=[/en-GB/i,/en-AU|en-IE/i,/en-US/i];
+  for(const re of pref){ const good=VOICES.filter(v=>re.test(v.lang)); const best=good.find(v=>/natural|neural|premium|enhanced|google|online/i.test(v.name))||good[0]; if(best) return best; }
+  return null;
+}
+function say(text, cb){
+  if(!("speechSynthesis" in window)){ alert("Браузер не поддерживает озвучку. Открой сайт в Chrome или Safari."); return; }
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(strip(text)); const v=pickVoice(); if(v){ u.voice=v; u.lang=v.lang; } else u.lang="en-GB";
+  u.rate=parseFloat(STATE.rate||$("rate").value)||0.92; if(cb) u.onend=cb; speechSynthesis.speak(u);
+}
+function beep(f){ try{ const C=window.AudioContext||window.webkitAudioContext; const c=new C(); const o=c.createOscillator(), g=c.createGain(); o.frequency.value=f||880; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0.25,c.currentTime); o.start(); o.stop(c.currentTime+0.4); }catch(e){} }
+
+/* ============ АВТОПРОВЕРКА ОТВЕТА ============ */
+function phr(s){ return String(s).toLowerCase().replace(/[’`]/g,"'").replace(/\(.*?\)/g,"").replace(/[!?.…]/g,"").replace(/-/g," ").replace(/\s+/g," ").trim(); }
+function reEsc(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
+function phraseRe(p){
+  const ws=p.split(" ").filter(Boolean).map(w=>{
+    if(/^(my|your|his|her|their|our)$/.test(w)) return "(?:my|your|his|her|their|our)";
+    if(/^(someone|something|sb|sth)$/.test(w)) return "\\w+(?:\\s\\w+)?";
+    if(/^[a-z]{4,}$/.test(w)) return /e$/.test(w) ? reEsc(w.slice(0,-1))+"(?:e|es|ed|ing)" : reEsc(w)+"(?:s|es|ed|ing)?";
+    return reEsc(w);
+  });
+  return new RegExp("\\b"+ws.join("[\\s-]+")+"\\b");
+}
+const LEX=[]; const LEXSEEN={};
+const MARKERS=new Set(SIG.map(x=>x[0]).concat(...Object.values(LINKERS).map(g=>g.l.map(x=>x.trim()))));
+const COMMON=new Set("for me it is it's the a an of to in on and but so i my you your very really much more all time day way yes no not do does at with that this there here be been what how why when one first last thing things good great nice big lot lots a few some most well just only also too can will would could should".split(" "));
+const LEX_SKIP=new Set(["love to","really","most people","a lot of people","these days","nowadays","at the moment","simple","common","busy","get better","develop","support","down","content","popular","modern","huge","tiny","issue","consider","realise","assist","help","week","more"]);
+const BASIC=new Set(["recycle","volunteer","admire","inspire","explore","achieve","expand","cheer","water","bloom","ban","fine","fluent","imaginative","talented","peaceful","cosy","creative","organised","nervous","celebrate","charming","festive","encourage","enforce","adapt","contribute","teamwork","episode","sunrise","forecast","pollution","landmark","dull","immersion","motivation","bilingual","cuisine","heritage","leisure","hectic","unwind","perks","burnout","integrity","resilience","selfless","possessions","consumerism","materialistic","declutter","obsolete"]);
+function addLex(s,b,src){
+  String(s).split(/\s*\/\s*/).forEach(v=>{
+    let p=phr(v).replace(/^(be|to|a|an|the|i'm|i'd|i've|it's)\s+/,"").replace(/^be\s+/,"");
+    if(!p || p.length<4 || LEXSEEN[p]) return;
+    if(src==="card" && !p.includes(" ") && p.length<8 && !BASIC.has(p)) return;
+    if(src==="chunk" && !p.includes(" ")) return;
+    if(OVERUSED.includes(p) || LEX_SKIP.has(p) || MARKERS.has(p)) return;
+    if(p.split(" ").every(x=>COMMON.has(x))) return;
+    LEXSEEN[p]=1; LEX.push({p, b, re:phraseRe(p)});
+  });
+}
+UPGRADES.forEach(u=>{ u.b7.forEach(x=>addLex(x,7)); u.b8.forEach(x=>addLex(x,8)); });
+IDIOMS.forEach(x=>addLex(x[0],8));
+ALL_P1.forEach(t=>{ t.v7.forEach(x=>addLex(x[0],7)); t.v8.forEach(x=>addLex(x[0],8)); });
+ALL_P2.forEach(c=>c.v.forEach(x=>addLex(x[0],7,"card")));
+ALL_P3.forEach(t=>t.v.forEach(x=>addLex(x[0],7,"card")));
+/* выделенные [[…]] фразы из образцов — тоже язык band 7+ */
+(function(){ const src=[]; ALL_P1.forEach(t=>src.push(t.b8)); ALL_P3.forEach(t=>src.push(t.b8)); Object.keys(P2_MODELS).forEach(k=>{ if(P2_MODELS[k].band>=8) src.push(P2_MODELS[k].text); }); OPENERS.forEach(o=>src.push(o.model));
+  src.forEach(x=>{ (String(x).match(/\[\[(.+?)\]\]/g)||[]).forEach(m=>{ const c=m.slice(2,-2), n=wc(c); if(n>=2 && n<=5) addLex(c,7,"chunk"); }); }); })();
+LEX.sort((a,b)=>b.p.length-a.p.length);
+
+const ADJ_ING=new Set("interesting amazing boring exciting relaxing annoying confusing surprising frightening inspiring satisfying challenging demanding rewarding embarrassing depressing fascinating disappointing stunning charming outstanding breathtaking thrilling terrifying shocking touching moving worrying tiring exhausting refreshing encouraging entertaining calming soothing gripping amusing striking appealing missing willing nothing something anything everything thing king morning evening building ceiling during including according interesting uplifting nerve-racking".split(" "));
+const ADJ_ED=new Set("bored tired interested excited married surprised scared worried pleased amazed relaxed stressed exhausted satisfied disappointed embarrassed confused annoyed used involved obsessed fascinated impressed shocked delighted thrilled hooked attached determined dedicated motivated organised organized talented crowded packed experienced qualified skilled concerned prepared engaged frustrated overwhelmed".split(" "));
+const THAT_VERB=new Set("think thought say said realise realised realize realized know knew feel felt believe believed mean means meant hope hoped sure so such seem seems agree claim claims show shows showed noticed notice found find argue suggest suggests told tell imagine guess suppose admit understand learn learned learnt read heard hear remember forget forgot clear true fact obvious possible likely important lucky glad happy surprised proud aware worried afraid convinced and but now".split(" "));
+function grammarFound(t){
+  const out=[], has=(n,ok)=>{ if(ok && !out.includes(n)) out.push(n); }; let re0;
+  has("Present Perfect", /\b(have|has|'ve|i've|we've|they've|you've|he's|she's|it's)\s+(never\s+|always\s+|just\s+|already\s+|recently\s+|ever\s+)?(been|done|seen|gone|made|had|taken|got|gotten|known|met|read|written|spoken|bought|found|given|grown|become|come|felt|left|kept|lost|heard|thought|told|won|eaten|driven|flown|chosen|forgotten|tried|lived|worked|started|learned|learnt|used|changed|visited|travelled|traveled|watched|played|studied|noticed|realised|realized|wanted|decided|moved|improved|loved|enjoyed|managed|taught|spent|built|become)\b/.test(t));
+  has("Present Perfect Continuous", /\b(have|has|'ve|'s)\s+been\s+\w{2,}ing\b/.test(t));
+  let ps=false; re0=/\b(i|we|they|he|she|it|you)\s+(was|were|went|did|had|saw|came|got|made|took|bought|felt|thought|told|said|found|left|met|spent|gave|knew|became|began|wrote|ate|drove|flew|ran|heard|kept|lost|paid|taught|won|chose|forgot|grew|\w{2,}ed)\b/g; let m0; while((m0=re0.exec(t))) if(!/[^r]eed$/.test(m0[2])) ps=true;
+  has("Past Simple", ps || /\b(yesterday|last (week|year|month|summer|winter|time)|\w+ ago|when i was)\b/.test(t));
+  let m, re=/\b(was|were)\s+(\w{2,}ing)\b/g, pc=false; while((m=re.exec(t))) if(!ADJ_ING.has(m[2])) pc=true; has("Past Continuous", pc);
+  has("Past Perfect", /\b(had|i'd|we'd|they'd|she'd|he'd)\s+(already\s+|never\s+|just\s+|always\s+)?(been|done|seen|gone|made|had|taken|got|known|met|read|bought|found|grown|become|come|felt|left|lost|heard|thought|told|forgotten|imagined|expected|planned|finished|started|\w{2,}[^e]ed)\b/.test(t));
+  re=/\b(\w+)\s+used to\s+\w+/g; let ut=false; while((m=re.exec(t))) if(!/^(am|is|are|was|were|be|been|get|got|getting|'m|i'm)$/.test(m[1])) ut=true;
+  has("used to / would (прошлое)", ut || /^used to\b/.test(t) || /\bwe'd (spend|go|play|sit|walk|watch)\b|\bwe would (spend|go|play|sit|walk|watch)\b/.test(t));
+  has("Future / планы", /\b(will|'ll|going to|planning to|hoping to|plan to|hope to|intend to|bound to|likely to)\b/.test(t));
+  has("Условные (if…would/will)", /\bif\b[^.!?]{0,80}\b(would|'d|will|'ll|could|might)\b|\b(would|'d|could)\b[^.!?]{0,60}\bif\b/.test(t));
+  has("3-й / смешанный тип условных", /\bif\b[^.!?]{0,60}\b(had|hadn't|'d)\s+\w+[^.!?]{0,60}\b(would|could|might|'d)\b|\b(would|could|might|wouldn't|couldn't)\s+(not\s+|never\s+)?have\s+\w{2,}(ed|en|ne|wn|t)\b/.test(t));
+  has("Придаточные (which / who / where)", /(,|\b[a-z]{3,})\s+(which|who|whose|whom|where)\s+(?!to\b)\w+/.test(t));
+  has("Cleft (What I love is…)", /\bwhat (i|we|they|people|really|struck|surprised|impressed|stood out|made|i'd|i'm)\b[^.!?]{0,60}\b(is|was)\b|\bthe (thing|reason|main reason|best thing|worst thing|problem|one thing) (that|why|i|which)[^.!?]{0,60}\b(is|was)\b|\bit (was|is|wasn't) (only )?(when|then|not until|until)\b/.test(t));
+  re=/\b(\w{2,}er) than\b/g; let cmp=false; while((m=re.exec(t))) if(!/^(rather|other|whether)$/.test(m[1])) cmp=true;
+  has("Сравнения", cmp || /\b(more|less) \w+ than\b|\bthe (most|least) \w+|\bthe (best|worst)\b|\bthe \w{3,}est\b|\bas \w+ as\b|\b(far|much|a lot|way) (more|less|better|worse)\b|\bthe more\b/.test(t));
+  re=/\b(is|are|was|were|been|being|be|get|gets|got|'s|'re)\s+(\w{3,}ed|built|made|known|seen|given|taken|written|grown|born|held|sold|taught|told|found|thought|brought|kept|left|paid|spent|run)\b/g; let pas=false; while((m=re.exec(t))) if(!ADJ_ED.has(m[2]) && !/eed$/.test(m[2])) pas=true;
+  has("Пассив", pas);
+  has("Модальные (might / could / must have)", /\b(might|may|could) (well )?(be|have|not|\w+)\b|\b(must|can't|couldn't) have \w+/.test(t));
+  has("Причастный оборот (Having…, Looking back,…)", /(^|[.!?]\s+)(having|being|living|growing|looking|walking|coming|feeling|knowing|compared|born|brought|raised|working|studying|thinking|given|seen)\b[^.!?,]{2,60},/.test(t));
+  has("Wish / if only", /\bi wish\b|\bif only\b/.test(t));
+  has("Сложноподчинённые (when / because / although…)", /\b(when|because|although|though|while|whereas|since|unless|as soon as|even though|so that|as long as|provided that|until|whenever)\b/.test(t));
+  has("would rather / prefer … to", /\b(would|'d) rather\b|\bprefer \w+(\s\w+){0,3} to \w+ing\b|\bprefer \w+ing\b[^.!?]{0,40}\bto \w+ing\b/.test(t));
+  re=/(^|[.!?;:]\s+|—\s*)(\w{3,}ing)\b[^.!?,]{0,40}\b(is|was|helps|makes|gives|has|doesn't|isn't|can|takes|keeps|lets)\b/g; let ger=false; while((m=re.exec(t))) if(!ADJ_ING.has(m[2])) ger=true;
+  has("Герундий как подлежащее (Cooking helps me…)", ger);
+  re=/\b([a-z]{3,})\s+that\s+(i|we|you|they|he|she|it|is|are|was|were|has|have|had|can|will|would|\w+s|\w+ed)\b/g; let rel=false; while((m=re.exec(t))) if(!THAT_VERB.has(m[1])) rel=true;
+  if(rel) has("Придаточные (which / who / where)", true);
+  re=/\b(am|is|are|'m|'re|'s)\s+(\w{2,}ing)\b/g; let prc=false; while((m=re.exec(t))) if(!ADJ_ING.has(m[2]) && m[2]!=="going") prc=true;
+  has("Present Continuous (тренды, сейчас)", prc);
+  return out;
+}
+const WB=p=>new RegExp("(^|[^a-z'])"+reEsc(p.trim())+"(?![a-z])");
+const SIG_RE=SIG.map(([p,b])=>({p,b,re:WB(p)}));
+const LINK_RE={}; Object.keys(LINKERS).forEach(k=>{ LINK_RE[k]=LINKERS[k].l.map(x=>({x:x.trim(),re:WB(x)})); });
+const FEEL_RE=/\b(felt|feel|feeling|proud|thrilled|delighted|over the moon|nervous|relieved|grateful|disappointed|excited|moved|looking back|i realised|i realized|it meant|means a lot|i was so|i was really|i was absolutely)\b/;
+const SEQ_RE=/\b(to begin with|first of all|at first|after that|afterwards|then|later on|eventually|in the end|finally|looking back|as for|to give you|so all in all|all in all)\b/;
+const GEN_RE=/\b(people|society|most|many|young people|older people|children|governments?|nowadays|these days|in general|generally|in my country|everyone|the majority)\b/;
+const POS_RE=/\b(i think|i'd say|i would say|i believe|personally|yes|no|definitely|to some extent|to a certain extent|it depends|it largely depends|in my view|from my point|absolutely|not really|i'm convinced|i'm inclined|i'd argue|i suppose|i guess|it's hard to say|i'm not sure|ideally|in general|i couldn't agree|on the whole|by and large|it's a bit of|it's a double)\b/;
+const BADINTRO=[
+ [/^(well,?\s+)?(it'?s|this is|that'?s|it is|what a)\s+(a |an )?(very |really |quite )?(interesting|good|difficult|hard|nice|great|tricky) question/,"Не начинай с «It's a very interesting question» — это пустая фраза. Сразу ответ: «Definitely…», «Not really…», «I'd say…»."],
+ [/^(speaking|talking) about\b/,"«Speaking about…» в начале звучит заученно. Сразу ответ."],
+ [/^as for me\b/,"«As for me» — типичная ошибка русскоговорящих. Лучше: Personally… / For me… / I'd say…"],
+ [/^in my humble opinion\b/,"«In my humble opinion» — шаблон. Лучше: I'd say… / Personally…"]
+];
+const STOP=new Set("do does did you your are is was were the a an of in on to what which how why when where who have has it that this there any often much many usually think would could can will be at for with or and about some most your yours ever kind sort type".split(" "));
+function qType(q){
+  const s=q.toLowerCase();
+  if(/how often|do you often|how much time|how frequently/.test(s)) return "freq";
+  if(/\bprefer\b|\brather\b/.test(s) || (/^(do|would|is|are)\b/.test(s) && / or /.test(s))) return "pref";
+  if(/^why\b/.test(s)) return "why";
+  if(/\b(did you|when you were|as a child|when you were younger|in your childhood|used to)\b/.test(s) && !/would/.test(s)) return "past";
+  if(/\b(would you|if you could|if you had|do you plan|will you|in the future)\b/.test(s)) return "hypo";
+  if(/\b(in your country|most people|do people|popular|do you think|is it important|should|why do people)\b/.test(s)) return "gen";
+  if(/\b(what is .* like|what's .* like|describe|tell me about|what are .* like)\b/.test(s)) return "desc";
+  if(/^(what|which|who|where|when|how)\b/.test(s)) return "what";
+  return "yn";
+}
+function sentences(text){ return String(text).split(/[.!?]+(?:\s+|$)|\n+/).map(x=>x.trim()).filter(x=>wc(x)>=2); }
+function analyze(text, part, q, topicVocab){
+  const raw=String(text).replace(/[’`]/g,"'").trim(), t=" "+raw.toLowerCase().replace(/\s+/g," ")+" ", tt=t.trim();
+  const w=wc(raw), punct=/[.!?]/.test(raw);
+  const sents=punct?sentences(raw):[raw];
+  const words=tt.split(/\s+/);
+  const first=(punct?(sents[0]||""):words.slice(0,16).join(" ")).toLowerCase();
+  const zone=words.slice(0,16).join(" ");
+  const A={w, s:punct?sents.length:null, part};
+  // opener
+  let op=null; SIG_RE.forEach(({p,b,re})=>{ const m=re.exec(zone); if(!m) return; const at=m.index; if(!op || at<op.at-2 || (Math.abs(at-op.at)<=2 && (b>op.b || (b===op.b && p.length>op.p.length)))) op={p,b,at}; });
+  if(op) op={p:op.p,b:op.b};
+  A.op=op;
+  A.bad=[]; BADINTRO.forEach(([re,msg])=>{ if(re.test(tt)) A.bad.push(msg); });
+  if(/^in my opinion\b/.test(tt) && q && ["yn","freq","past","what","desc"].includes(qType(q)) && part!==3) A.bad.push("«In my opinion» — только для мнений. Про свои привычки и факты говори сразу: «I usually…», «Yes, I do…».");
+  A.direct=!A.bad.length;
+  // повтор вопроса
+  A.repeat=false;
+  if(q){ const qw=q.toLowerCase().replace(/[^a-z' ]/g," ").split(/\s+/).filter(x=>x.length>2&&!STOP.has(x)); const fw=new Set(first.replace(/[^a-z' ]/g," ").split(/\s+/)); const hit=qw.filter(x=>fw.has(x)).length; if(qw.length>=2 && hit/qw.length>=0.75 && wc(first)<=qw.length+6) A.repeat=true; }
+  // связки по функциям
+  A.fn={}; Object.keys(LINK_RE).forEach(k=>{ let f=[...new Set(LINK_RE[k].filter(L=>L.re.test(tt)).map(L=>L.x))]; f=f.filter(x=>!f.some(y=>y!==x&&y.includes(x))); if(f.length) A.fn[k]=f; });
+  if(A.fn.reason && A.fn.reason.length===1 && A.fn.reason[0]==="as a result of") delete A.fn.reason;
+  // дискурсивные маркеры band 7+ во всём тексте
+  A.dm=[...new Set(SIG_RE.filter(x=>x.b>=7 && x.re.test(tt)).map(x=>x.p))];
+  // лексика band 7+
+  const found=[]; let rest=tt;
+  LEX.forEach(L=>{ if(L.re.test(rest)){ found.push(L); rest=rest.replace(L.re," ~ "); } });
+  A.lex=found.map(L=>L.p); A.lex8=found.filter(L=>L.b>=8).length; A.dm=A.dm.filter(p=>!A.lex.some(l=>l.includes(p)||p.includes(l)));
+  A.topic=(topicVocab||[]).filter(v=>{ const p=phr(v).replace(/^(be|a|an|the)\s+/,""); return p && phraseRe(p).test(tt); });
+  // грамматика
+  A.gr=grammarFound(tt);
+  // ошибки
+  A.mist=[];
+  MISTAKES.forEach(([re,msg],i)=>{
+    if(i===MISTAKES.length-1){ const g=/\b(he|she) (don't|have|go|like|want|live|work|study)\b/g; let m; while((m=g.exec(tt))){ const prev=tt.slice(0,m.index).trim().split(/\s+/).pop()||""; if(!THIRD_OK.includes(prev)){ A.mist.push(msg); break; } } return; }
+    if(re.test(tt)) A.mist.push(msg);
+  });
+  // простые слова
+  const tto=tt.replace(/\b(big fan|big deal|a big part|very much so|thank you very much)\b/g," ");
+  const over=[]; OVERUSED.forEach(o=>{ const n=(tto.match(new RegExp("\\b"+reEsc(o)+"\\b","g"))||[]).length; const lim=o==="really"?3:o==="very"?2:1; if(n>=lim) over.push({w:o,n}); });
+  A.over=over;
+  A.contr=/\b\w+'(m|s|re|ve|d|ll)\b|n't\b/.test(tt);
+  A.ands=(tt.match(/\band\b/g)||[]).length;
+  // целевые длины
+  const T={0:[10,45],1:[25,75],2:[200,320],3:[55,140]}[part];
+  A.tmin=T[0]; A.tmax=T[1];
+  // оценка
+  const ext=["reason","example","contrast","hedge","result","add"].filter(k=>A.fn[k]).length;
+  let len= w<T[0]*0.5?0 : w<T[0]?1 : 2;
+  let fc=len+(part===1?Math.min(2,ext):ext>=4?2:ext>=2?1.5:ext>=1?1:0);
+  if(op && op.b>=7 && part!==2) fc+=0.3; if(!A.direct) fc-=0.5; if(A.repeat) fc-=0.3; if(part===1 && w>110) fc-=0.5;
+  const k=A.lex.length, LT={1:[1,2,3],2:[3,5,8],3:[2,3,5],0:[1,2,3]}[part];
+  let lr=k>=LT[2]?3.3:k>=LT[1]?2.4:k>=LT[0]?1.5:0.5; lr+=Math.min(0.75,A.dm.length*0.25); if(A.lex8) lr+=0.3;
+  const ov=over.reduce((s,o)=>s+o.n,0); if(ov>Math.max(3,w/14)) lr-=0.6; else if(ov>Math.max(2,w/25)) lr-=0.3;
+  const g=A.gr.length, GT={1:[1,2,4],2:[2,4,6],3:[2,3,5],0:[1,2,3]}[part];
+  let gr=g>=GT[2]?3.5:g>=GT[1]?2.6:g>=GT[0]?1.6:0.6; gr-=A.mist.length*0.6;
+  const cl=x=>Math.max(0,Math.min(4,x));
+  A.sc={fc:cl(fc), lr:cl(lr), gr:cl(gr)};
+  const avg=(A.sc.fc+A.sc.lr+A.sc.gr)/3;
+  A.band= avg<1?"5": avg<1.7?"5.5": avg<2.3?"6": avg<2.8?"6.5": avg<3.3?"7": avg<3.7?"7.5":"8+";
+  // подсказки
+  const tips=[];
+  if(w<T[0]) tips.push(part===2?"Для 2 минут нужно примерно 220–300 слов. Добавь детали к каждому пункту карточки и больше о чувствах.":part===3?"Ответ короткий для Part 3: добавь причину, пример и другую сторону (4–6 предложений).":"Расширь ответ: прямой ответ → причина → пример (2–4 предложения).");
+  if(part===1 && w>110) tips.push("Слишком длинно для Part 1: 2–4 предложения, иначе экзаменатор перебьёт.");
+  if((part===0||part===1||part===3) && !op) tips.push("Начни с opener-а, например: "+openerSuggest(q,part)+".");
+  A.bad.forEach(b=>tips.push(b));
+  if(A.repeat) tips.push("Не повторяй вопрос дословно — замени на do / it / короткую оценку («Yes, I'm really into it»).");
+  if(part!==0 && !A.fn.reason) tips.push("Добавь причину: mainly because… / the main reason is…");
+  if((part===1||part===3) && !A.fn.example) tips.push("Добавь пример или деталь: for instance… / the other day… / a few years ago…");
+  if(part===0 && !A.fn.reason && !A.fn.example) tips.push("После ответа сразу продолжай: «…mainly because…» — так opener превращается в полноценный ответ.");
+  if(part===3 && !A.fn.contrast) tips.push("Покажи другую сторону: That said, … / On the other hand, …");
+  if(part===3 && !A.fn.hedge) tips.push("Добавь осторожность: I'd say… / tend to… / to some extent…");
+  if(part===3 && !GEN_RE.test(t)) tips.push("Part 3 — про людей и общество: people, young people, society, in my country.");
+  if(part===2 && !FEEL_RE.test(t)) tips.push("Расскажи о чувствах и оценке — это последний пункт карточки и главный источник балла.");
+  if(part===2 && !SEQ_RE.test(t)) tips.push("Добавь связки рассказа: To give you a bit of background… / After that… / Looking back… / So all in all…");
+  if(q && qType(q)==="past" && !A.gr.some(x=>/Past|used to/.test(x))) tips.push("Вопрос о прошлом — отвечай в прошедшем: used to…, I went…, we would…");
+  if(q && qType(q)==="hypo" && !/\b(would|'d|i'd love|ideally|if)\b/.test(t)) tips.push("Вопрос «would / if» — отвечай с would: I'd love to… / If I had the chance, I'd…");
+  over.filter(o=>UPMAP[o.w]).slice(0,2).forEach(o=>tips.push("Вместо «"+o.w+"» попробуй: "+UPMAP[o.w].join(", ")+"."));
+  if(g<GT[0]+1 && part!==0) tips.push("Добавь сложную структуру: "+({1:"used to / present perfect / which…",2:"past perfect, If I hadn't…, I would never have…, What I remember most is…",3:"comparatives (far more… than), passive (it's widely believed), might / could"}[part])+".");
+  if(w>35 && !A.contr) tips.push("В устной речи естественны сокращения: I'm, it's, I'd, don't.");
+  if(w>25 && A.ands/w>0.08) tips.push("Много «and»: свяжи иначе — which…, so…, whereas…, what's more…");
+  A.tips=tips.slice(0, part===2?6:5);
+  return A;
+}
+const UPMAP={}; (function(){ const m={"good":"good","bad":"bad","nice":"good","interesting":"interesting","boring":"boring","important":"important","difficult":"difficult","easy":"easy","big":"big","beautiful":"beautiful","cheap":"cheap","expensive":"expensive","happy":"happy","sad":"sad","very":"very","really":"very","a lot":"a lot of","thing":"thing","things":"thing","many":"many people"}; Object.keys(m).forEach(k=>{ const u=UPGRADES.find(x=>x.base===m[k]); if(u) UPMAP[k]=u.b7.slice(0,3).map(x=>x.replace(/\s*\(.*?\)/,"")); }); })();
+function openerSuggest(q,part){
+  if(part===3) return "«I'd say that…», «It largely depends on…», «To a certain extent, yes, but…»";
+  const ty=q?qType(q):"yn", O=OPENERS.find(o=>o.id===ty)||OPENERS[0];
+  const fav=(STATE.fav||[]).filter(f=>f.indexOf(ty+"|")===0).map(f=>f.slice(ty.length+1));
+  const pool=(fav.length?fav:O.b7.slice(0,2).concat(O.b8.slice(0,1)));
+  return pool.slice(0,3).map(x=>"«"+x+"»").join(", ");
+}
+function bandOfOpener(a){ return a.op ? BDG(a.op.b)+"«"+esc(a.op.p)+"»" : "нет"; }
+/* авто-галочки чек-листа */
+const AUTO={
+ 0:[a=>!!a.op, a=>a.direct, a=>!a.repeat, null],
+ 1:[a=>a.direct&&(!!a.op||a.w>0), a=>!!a.fn.reason, a=>!!a.fn.example, a=>!a.repeat, a=>a.w>=20&&a.w<=90, a=>a.lex.length>=1, null],
+ 2:[null, a=>a.w>=200, a=>!!a.op||/^(i'd like|i'm going|the (person|place|thing|film|book))/.test(a.first||""), a=>!a.mist.some(m=>/didn't|неправильный/.test(m)), a=>a.feel, a=>a.lex.length>=3, a=>a.seq],
+ 3:[a=>a.pos, a=>(!!a.fn.reason&&!!a.fn.example)||(a.fn.reason||[]).length>=2, a=>a.gen, a=>!!a.fn.contrast, a=>!!a.fn.hedge, a=>!!a.fn.sum||/\b(so|overall|that's why)\b/.test(a.last||"")]
+};
+
+/* ============ ОТВЕТ: поле, диктовка, запись, проверка ============ */
+const CTX={}, REC={}; let RECA=null, DICT=null, P2T={};
+function ansOf(key){ STATE.ans[key]=STATE.ans[key]||{}; return STATE.ans[key]; }
+function abox(key, q, part, ctx){
+  ctx=ctx||{}; CTX[key]={q,part,ctx}; const a=STATE.ans[key]||{}, id=kid(key);
+  let h='<div class="abox" id="ab-'+id+'">';
+  if(!ctx.noQ) h+='<div class="aq"><button class="ico" title="Послушать" onclick="say('+jsq(q)+')">🔊</button><b>'+esc(q)+'</b>'+(a.an?' <span class="muted small">· проверено</span>':'')+'</div>';
+  if(part===1||part===0) h+='<div class="ahint">Тип: <b>'+esc((OPENERS.find(o=>o.id===qType(q))||{}).t||"")+'</b> · openers: '+esc(openerSuggest(q,part))+'</div>';
+  h+='<textarea id="ta-'+id+'" rows="'+(part===2?9:part===3?5:3)+'" placeholder="'+(part===2?"Надиктуй рассказ (🎤) или запиши голос (🔴), потом проверь. Можно и написать.":"Напиши или надиктуй ответ (🎤)…")+'" oninput="taInput(\''+key+'\')">'+esc(a.text||"")+'</textarea>';
+  h+='<div class="arow"><button class="sm" id="dbtn-'+id+'" onclick="dictToggle(\''+key+'\')">🎤 Надиктовать</button><button class="sm" id="rbtn-'+id+'" onclick="recToggle(\''+key+'\')">🔴 Записать голос</button><span class="tm" id="tm-'+id+'"></span><button class="sm primary" onclick="check(\''+key+'\')">✅ Проверить</button></div>';
+  h+='<div id="rp-'+id+'">'+(REC[key]?audioHTML(key):"")+'</div><div id="res-'+id+'">'+(a.an?resultHTML(key):"")+'</div></div>';
+  return h;
+}
+function taInput(key){ const a=ansOf(key), c=CTX[key]||{}; a.text=$("ta-"+kid(key)).value; a.t=Date.now(); a.label=a.label||label(key); a.q=a.q||c.q; if(a.part==null) a.part=c.part; save(); }
+function label(key){ const c=CTX[key]; return c&&c.ctx&&c.ctx.label||""; }
+function check(key){
+  const c=CTX[key], id=kid(key), text=$("ta-"+id).value.trim();
+  if(wc(text)<2){ $("res-"+id).innerHTML='<div class="res muted">Сначала напиши или надиктуй ответ.</div>'; return; }
+  const an=analyze(text,c.part,c.q,c.ctx.vocab);
+  const tl=text.toLowerCase().replace(/[’`]/g,"'"); const ss=sentences(text);
+  an.first=(ss[0]||tl).toLowerCase(); an.last=(ss[ss.length-1]||"").toLowerCase();
+  an.feel=FEEL_RE.test(tl); an.seq=SEQ_RE.test(tl); an.gen=GEN_RE.test(" "+tl+" "); an.pos=POS_RE.test(tl.split(/\s+/).slice(0,16).join(" "));
+  const a=ansOf(key); a.text=text; a.q=c.q; a.part=c.part; a.label=label(key); a.t=Date.now();
+  const prev=a.chk||[]; a.chk=CHECK[c.part].map((_,i)=>{ const f=AUTO[c.part][i]; return f? !!f(an) : !!prev[i]; });
+  a.an={w:an.w,s:an.s,op:an.op,direct:an.direct,repeat:an.repeat,fn:an.fn,dm:an.dm,lex:an.lex,topic:an.topic,gr:an.gr,mist:an.mist,over:an.over,tips:an.tips,sc:an.sc,band:an.band,tmin:an.tmin,tmax:an.tmax,bad:an.bad};
+  save(); $("res-"+id).innerHTML=resultHTML(key); markDone();
+}
+function resultHTML(key){
+  const a=STATE.ans[key], A=a.an, part=a.part, id=kid(key); if(!A) return "";
+  const yes=(ok,txt)=>'<li>'+(ok?"✅":"⬜")+" "+txt+'</li>';
+  let h='<div class="res">';
+  if(part!==0){
+    h+='<div><span class="est">≈ '+A.band+'</span><span class="muted">ориентир по тексту ответа. Беглость, паузы и произношение послушает учитель по записи.</span></div>';
+    const bar=(n,v)=>'<span>'+n+'</span><div class="bar"><div style="width:'+(v/4*100)+'%"></div></div><span class="muted">'+(["слабо","средне","хорошо","сильно","сильно"][Math.floor(v)])+'</span>';
+    h+='<div class="bars">'+bar("Развёрнутость и связность",A.sc.fc)+bar("Лексика",A.sc.lr)+bar("Грамматика",A.sc.gr)+'</div>';
+  } else {
+    const pts=[!!A.op,A.direct,!A.repeat,!!(A.fn.reason||A.fn.example)].filter(Boolean).length;
+    h+='<div><span class="est">'+pts+' / 4</span><span class="muted">opener · прямой ответ · без повтора вопроса · продолжение</span></div>';
+  }
+  h+='<ul>';
+  if(part!==2) h+=yes(!!A.op,"Opener: "+bandOfOpener(A));
+  h+=yes(A.direct, A.direct?"Сразу к делу, без пустого вступления":"Пустое вступление в начале");
+  if(part!==2) h+=yes(!A.repeat, A.repeat?"Повтор слов вопроса в первом предложении":"Вопрос не повторён дословно");
+  h+=yes(!!A.fn.reason,"Причина"+(A.fn.reason?": "+esc(A.fn.reason.join(", ")):""));
+  if(part!==0) h+=yes(!!A.fn.example,"Пример / деталь"+(A.fn.example?": "+esc(A.fn.example.join(", ")):""));
+  if(part===3||part===2) h+=yes(!!A.fn.contrast,"Контраст / другая сторона"+(A.fn.contrast?": "+esc(A.fn.contrast.join(", ")):""));
+  if(part===3) h+=yes(!!A.fn.hedge,"Осторожные формулировки"+(A.fn.hedge?": "+esc(A.fn.hedge.join(", ")):""));
+  const okLen=A.w>=A.tmin && A.w<=A.tmax*1.3;
+  h+='<li>'+(okLen?"✅":"⚠️")+' Длина: <b>'+A.w+'</b> слов'+(A.s?", "+A.s+" предл.":"")+' <span class="muted">(норма: '+A.tmin+'–'+A.tmax+')</span></li>';
+  if(a.dict && a.dsec>3) h+='<li>🎙 Темп диктовки: <b>'+Math.round(a.dwords/(a.dsec/60))+'</b> слов/мин <span class="muted">(естественно: 110–160)</span></li>';
+  h+='</ul>';
+  if(part!==0){
+    h+='<div>Лексика band 7+: <b>'+(A.lex.length+A.dm.length)+'</b> '+A.lex.map(x=>'<span class="chip c7">'+esc(x)+'</span>').join("")+A.dm.map(x=>'<span class="chip c8">'+esc(x)+'</span>').join("")+'</div>';
+    if(A.topic&&A.topic.length) h+='<div>Слова темы: '+A.topic.map(x=>'<span class="chip okc">'+esc(x)+'</span>').join("")+'</div>';
+    h+='<div>Грамматика: <b>'+A.gr.length+'</b> '+(A.gr.length?A.gr.map(x=>'<span class="chip">'+esc(x)+'</span>').join(""):'<span class="muted">сложных структур не найдено</span>')+'</div>';
+    if(A.over.length) h+='<div>Простые слова: '+A.over.map(o=>'<span class="chip warnc">'+esc(o.w)+(o.n>1?" ×"+o.n:"")+'</span>').join("")+'</div>';
+  }
+  if(A.mist.length) h+='<div class="mist"><b>Проверь:</b><br>'+A.mist.map(esc).join("<br>")+'</div>';
+  if(A.tips.length) h+='<div class="tips"><b>Что улучшить:</b><ol>'+A.tips.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ol></div>';
+  h+='<div class="selfchk"><b>Чек-лист</b> <span class="muted">(часть галочек поставлена автоматически — проверь и отметь остальное)</span>';
+  CHECK[part].forEach((c,i)=>{ h+='<label><input type="checkbox" '+(a.chk&&a.chk[i]?"checked":"")+' onchange="chkSet(\''+key+'\','+i+',this.checked)"> '+esc(c)+'</label>'; });
+  h+='</div>';
+  const c=CTX[key];
+  if(c&&c.ctx&&c.ctx.model) h+='<details><summary>Сравни с образцом</summary>'+c.ctx.model+'</details>';
+  h+='</div>';
+  return h;
+}
+function chkSet(key,i,v){ const a=ansOf(key); a.chk=a.chk||[]; a.chk[i]=v; a.t=Date.now(); save(); }
+function audioHTML(key){ const r=REC[key]; return '<audio controls src="'+r.url+'" style="width:100%;margin-top:6px"></audio><div class="muted small">🎙 запись '+fmt(r.dur)+' — уйдёт учителю при отправке (вкладка 📨). Хранится, пока страница открыта.</div>'; }
+
+/* Диктовка (распознавание речи) */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function dictToggle(key){
+  if(DICT){ const same=DICT.key===key; DICT.stop(); if(same) return; }
+  if(!SR){ alert("Этот браузер не умеет распознавать речь. Открой сайт в Chrome (компьютер, Android) или Safari (iPhone), либо напиши ответ текстом и запиши голос кнопкой 🔴."); return; }
+  if(RECA){ alert("Сначала останови запись голоса."); return; }
+  const id=kid(key), ta=$("ta-"+id), base=ta.value.trim()?ta.value.trim()+" ":"", btn=$("dbtn-"+id);
+  let fin="", on=true, r=null, finished=false; const t0=Date.now();
+  btn.textContent="⏹ Стоп"; btn.classList.add("live"); p2Speak(key,true);
+  const tick=setInterval(()=>{ $("tm-"+id).textContent="🎤 "+fmt((Date.now()-t0)/1000); },500);
+  function mkR(){
+    r=new SR(); r.lang="en-GB"; r.continuous=false; r.interimResults=true; r.maxAlternatives=1;
+    r.onresult=e=>{ let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const tr=e.results[i][0].transcript; if(e.results[i].isFinal) fin+=tr.trim()+" "; else interim+=tr; } ta.value=base+fin+interim; };
+    r.onerror=e=>{ if(/not-allowed|service-not-allowed|audio-capture/.test(e.error)){ on=false; alert("Нет доступа к микрофону или к распознаванию речи. Разреши микрофон в настройках браузера или напиши ответ текстом."); } };
+    r.onend=()=>{ if(on){ try{ mkR(); }catch(e){ done(); } } else done(); };
+    r.start();
+  }
+  function done(){
+    if(finished) return; finished=true; clearInterval(tick); DICT=null; btn.textContent="🎤 Надиктовать"; btn.classList.remove("live"); p2Speak(key,false);
+    const dur=(Date.now()-t0)/1000; ta.value=(base+fin).trim();
+    const a=ansOf(key); a.text=ta.value; a.dict=true; a.dsec=Math.round(dur); a.dwords=wc(fin); a.t=Date.now(); a.label=a.label||label(key); save();
+    $("tm-"+id).textContent="✓ "+fmt(dur); if(wc(fin)>=2) check(key);
+  }
+  function stop(){ on=false; try{ r&&r.stop(); }catch(e){} setTimeout(done,1500); }
+  DICT={key,stop};
+  try{ mkR(); }catch(e){ done(); alert("Не получилось включить распознавание речи: "+e.message); }
+}
+/* Запись голоса для учителя */
+async function recToggle(key){
+  if(RECA && RECA.key===key){ RECA.stop(); return; }
+  if(RECA){ alert("Сначала останови текущую запись."); return; }
+  if(DICT){ alert("Сначала останови диктовку."); return; }
+  if(!navigator.mediaDevices||!window.MediaRecorder){ alert("Этот браузер не умеет записывать звук. Открой сайт в Chrome или Safari (iPhone: iOS 14.3+)."); return; }
+  let stream; try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }catch(e){ alert("Нет доступа к микрофону. Разреши доступ в настройках браузера."); return; }
+  const types=["audio/ogg;codecs=opus","audio/webm;codecs=opus","audio/mp4","audio/webm"]; const mime=types.find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||"";
+  const mr=new MediaRecorder(stream, mime?{mimeType:mime}:undefined), parts=[], t0=Date.now(), id=kid(key);
+  const part=(CTX[key]||{}).part, max=part===2?150:part===3?120:part===0?40:75;
+  mr.ondataavailable=e=>{ if(e.data.size) parts.push(e.data); };
+  const tick=setInterval(()=>{ const s=(Date.now()-t0)/1000; $("tm-"+id).textContent="● "+fmt(s)+" / "+fmt(max); if(s>=max) stop(); },250);
+  function stop(){ if(mr.state!=="inactive") mr.stop(); }
+  mr.onstop=()=>{ clearInterval(tick); stream.getTracks().forEach(t=>t.stop()); RECA=null; p2Speak(key,false);
+    const type=mr.mimeType||mime||"audio/webm", blob=new Blob(parts,{type}), dur=(Date.now()-t0)/1000;
+    if(REC[key]) try{ URL.revokeObjectURL(REC[key].url); }catch(e){}
+    REC[key]={blob,mime:type,dur,url:URL.createObjectURL(blob),t:Date.now()};
+    const a=ansOf(key); a.rec=Math.round(dur); a.q=a.q||(CTX[key]||{}).q; a.part=(a.part!=null)?a.part:part; a.label=a.label||label(key); a.t=Date.now(); save();
+    $("rbtn-"+id).textContent="🔁 Перезаписать"; $("tm-"+id).textContent="✓ "+fmt(dur); $("rp-"+id).innerHTML=audioHTML(key); markDone();
+  };
+  mr.start(1000); RECA={key,stop}; $("rbtn-"+id).textContent="⏹ Остановить"; $("rp-"+id).innerHTML=""; p2Speak(key,true);
+}
+
+/* ============ УПРАЖНЕНИЯ ============ */
+function exSt(id){ STATE.ex[id]=STATE.ex[id]||{ans:{},ord:{}}; return STATE.ex[id]; }
+function exItems(id){
+  const E=EX[id]; if(E.items) return {kind:E.kind, items:E.items};
+  const st=exSt(id);
+  if(!st.gen){
+    if(E.kind==="upgrade"){ st.gen=shuffle(UPGRADES).slice(0,15).map(u=>{ const others=shuffle(UPGRADES.filter(x=>x!==u)).slice(0,3).map(x=>x.fit[0]); return {q:u.s, o:[u.fit[0]].concat(others.filter(x=>!u.fit.includes(x))), e:"Band 7: "+u.b7.join(", ")+" · band 8+: "+u.b8.join(", ")}; }); st.k="choice"; }
+    else if(E.kind==="upgradeType"){ st.gen=shuffle(UPGRADES).slice(0,15).map(u=>({q:u.s, a:u.fit, h:"первая буква: "+u.fit[0][0]+"… ("+u.fit[0].length+" букв)"})); st.k="gap"; }
+    else if(E.kind==="colloc"){ st.gen=shuffle(COLLOC).slice(0,12).map(c=>({q:c[0], o:[c[1]].concat(shuffle(COLLOC_VERBS.filter(v=>v!==c[1])).slice(0,3)), e:c[0].replace("___",c[1])})); st.k="choice"; }
+    else if(E.kind==="idioms"){ st.gen=shuffle(IDIOMS).slice(0,12).map(d=>({q:"«"+d[0]+"» — "+d[2], o:[d[1]].concat(shuffle(IDIOMS.filter(x=>x!==d)).slice(0,3).map(x=>x[1])), e:d[0]+" = "+d[1]})); st.k="choice"; }
+    save();
+  }
+  return {kind:st.k, items:st.gen};
+}
+function exBox(id){ return '<div class="card ex" id="ex-'+kid(id)+'"></div>'; }
+function exRender(id){
+  const host=$("ex-"+kid(id)); if(!host) return;
+  const E=EX[id], st=exSt(id), {kind,items}=exItems(id);
+  let h='<h3>'+esc(E.t)+'</h3>';
+  if(kind==="gap") h+='<p class="muted">Напиши пропущенное и нажми Enter или «Проверить». Ошибку можно исправить.</p>';
+  items.forEach((it,i)=>{
+    const ans=st.ans[i];
+    h+='<div class="item"><b>'+(i+1)+'.</b> '+esc(it.q);
+    if(kind==="choice"){
+      if(!st.ord[i]) st.ord[i]=shuffle(it.o.map((_,j)=>j));
+      h+='<div class="opts">'+st.ord[i].map(j=>{ const o=it.o[j]; let cls=""; if(ans){ if(j===0) cls="ok"; else if(ans.v===o) cls="bad"; } return '<button class="'+cls+'" '+(ans?"disabled":"")+' onclick="exChoose(\''+id+'\','+i+','+j+')">'+esc(o)+'</button>'; }).join("")+'</div>';
+      if(ans) h+='<div class="expl">'+(ans.ok?"✅ Верно.":"❌ Верно: <b>"+esc(it.o[0])+"</b>.")+(it.e?' <span class="muted">'+esc(it.e)+'</span>':"")+'</div>';
+    } else {
+      h+='<div class="gaprow"><input type="text" id="g-'+kid(id)+'-'+i+'" class="'+(ans?(ans.ok?"ok":"bad"):"")+'" value="'+esc(ans?ans.v:"")+'" autocomplete="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key===\'Enter\')exGap(\''+id+'\','+i+')"><button class="sm" onclick="exGap(\''+id+'\','+i+')">Проверить</button>'+(it.h?'<span class="muted small">💡 '+esc(it.h)+'</span>':'')+'</div>';
+      if(ans) h+='<div class="expl">'+(ans.ok?"✅ Верно.":"❌ Можно: <b>"+esc(it.a.join(" / "))+"</b>")+'</div>';
+    }
+    h+='</div>';
+  });
+  const done=Object.keys(st.ans).length, ok=Object.values(st.ans).filter(x=>x.ok).length;
+  h+='<div class="score">Сделано '+done+' из '+items.length+' · верно: '+ok+'</div>';
+  h+='<button class="sm" onclick="exReset(\''+id+'\')">🔁 Заново'+(E.items?"":" (новый набор)")+'</button>';
+  host.innerHTML=h; save();
+}
+function exChoose(id,i,j){ const st=exSt(id), it=exItems(id).items[i]; st.ans[i]={v:it.o[j],ok:j===0}; st.t=Date.now(); exRender(id); markDone(); }
+function nrm(s){
+  s=" "+String(s).toLowerCase().replace(/[’`]/g,"'").replace(/[.,!?;:"«»()]/g," ")+" ";
+  s=s.replace(/\bwon't\b/g,"will not").replace(/\bcan't\b/g,"cannot").replace(/\bcan not\b/g,"cannot").replace(/n't\b/g," not").replace(/'ve\b/g," have").replace(/'re\b/g," are").replace(/'ll\b/g," will").replace(/'m\b/g," am").replace(/'s\b/g," is");
+  return s.replace(/\s+/g," ").trim();
+}
+function gapOk(v,acc){ const vs=[v, String(v).replace(/^\s*(i|we|they|he|she|it|you)\b\s*/i,"")]; return vs.some(u=>{ u=String(u).replace(/[’`]/g,"'"); const a=nrm(u.replace(/'d\b/g," would")), b=nrm(u.replace(/'d\b/g," had")); return acc.some(x=>{ const n=nrm(x); return n===a||n===b; }); }); }
+function exGap(id,i){ const st=exSt(id), it=exItems(id).items[i], v=$("g-"+kid(id)+"-"+i).value.trim(); if(!v) return; st.ans[i]={v,ok:gapOk(v,it.a)}; st.t=Date.now(); exRender(id); const nx=$("g-"+kid(id)+"-"+(i+1)); if(nx&&st.ans[i].ok) nx.focus(); markDone(); }
+function exReset(id){ if(!confirm("Начать упражнение заново?")) return; delete STATE.ex[id]; exSt(id).t=Date.now(); exRender(id); }
+
+/* ============ РЕНДЕР ВКЛАДОК ============ */
+const RENDER={};
+function exHost(tab, list){ const h=$("exHost-"+tab); if(!h) return; h.innerHTML=list.map(exBox).join(""); list.forEach(exRender); }
+
+/* --- Гайд --- */
+const GUIDE_EX=["g:quiz"];
+RENDER.guide=function(){
+  $("guideChecks").innerHTML=[["Part 1",1],["Part 2",2],["Part 3",3]].map(([n,p])=>'<p><b>'+n+'</b></p><ul class="pb">'+CHECK[p].map(c=>'<li>☐ '+esc(c)+'</li>').join("")+'</ul>').join("");
+  exHost("guide", GUIDE_EX);
+};
+
+/* --- Openers --- */
+const OPEN_EX=["o:types","o:best","o:fix","o:gaps","o:p23","o:rapid","o:bank"];
+function favKey(ty,s){ return ty+"|"+s; }
+function isFav(ty,s){ return (STATE.fav||[]).includes(favKey(ty,s)); }
+function favToggle(ty,s,el){ const k=favKey(ty,s), i=STATE.fav.indexOf(k); if(i>=0) STATE.fav.splice(i,1); else STATE.fav.push(k); STATE.favT=Date.now(); save(); if(el) el.classList.toggle("on",i<0); bankRender(); markDone(); }
+function opLine(ty,s,b){ return '<div class="op"><span class="star '+(isFav(ty,s)?"on":"")+'" title="В мой набор" onclick="favToggle('+jsq(ty)+','+jsq(s)+',this)">★</span>'+(b?BDG(b):"")+'<span class="say" onclick="say('+jsq(s.replace(/…/g,""))+')">'+esc(s)+'</span></div>'; }
+RENDER.open=function(){
+  $("openTypes").innerHTML=OPENERS.map(o=>'<div class="card"><h3>'+esc(o.t)+' <span class="muted small">'+esc(o.q)+'</span></h3><p class="small">'+esc(o.how)+'</p><div class="grid3">'+
+    [["c6",6,o.b6],["c7",7,o.b7],["c8",8,o.b8]].map(([c,b,l])=>'<div class="col '+c+'"><h4>'+BDG(b)+'band '+(b===8?"8+":b)+'</h4>'+l.map(s=>opLine(o.id,s)).join("")+'</div>').join("")+
+    '</div><div class="reading small" style="margin-top:8px"><button class="ico" onclick="say('+jsq(o.ex)+')">🔊</button><b>'+esc(o.ex)+'</b><br><button class="ico" onclick="say('+jsq(o.model)+')">🔊</button>'+mk(o.model)+'</div></div>').join("");
+  $("openP2").innerHTML='<h4>Первая фраза</h4>'+OPENERS_P2.map(x=>opLine("p2",x.s,x.b)).join("")+LINKS_P2.map(g=>'<h4>'+esc(g.h)+'</h4>'+g.l.map(s=>opLine("p2",s)).join("")).join("");
+  $("openP3").innerHTML=OPENERS_P3.map(g=>'<h4>'+esc(g.h)+' <span class="muted small">'+esc(g.t)+'</span></h4>'+g.l.map(s=>opLine("p3",s)).join("")).join("");
+  $("openAvoid").innerHTML='<tr><th>✗ Так не надо</th><th>✓ Лучше</th></tr>'+OPENER_AVOID.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td></tr>').join("");
+  exHost("open", OPEN_EX.filter(x=>EX[x]));
+  $("rapidCard").classList.toggle("hidden",!OPEN_EX.includes("o:rapid"));
+  $("bankCard").classList.toggle("hidden",!OPEN_EX.includes("o:bank"));
+  rapidRender(); bankRender();
+};
+function bankRender(){
+  const host=$("bank"); if(!host) return;
+  const types=OPENERS.map(o=>[o.id,o.t]).concat([["p2","Part 2"],["p3","Part 3"]]);
+  let h='<p class="muted">Выбрано: <b>'+STATE.fav.length+'</b>. Цель — по 2–3 на каждый тип. Отмечай ⭐ в таблицах выше.</p>';
+  types.forEach(([ty,t])=>{ const l=STATE.fav.filter(f=>f.indexOf(ty+"|")===0).map(f=>f.slice(ty.length+1)); h+='<div class="sumrow">'+(l.length>=2?"✅":"⬜")+' <b>'+esc(t)+'</b>: '+(l.length?l.map(esc).join(" · "):'<span class="muted">пока нет</span>')+'</div>'; });
+  host.innerHTML=h;
+}
+/* Скорострел */
+function rapidNew(){
+  const pool=[]; ALL_P1.forEach(t=>t.q.forEach(q=>pool.push({q,topic:t.t})));
+  STATE.rapid={n:(STATE.rapid?STATE.rapid.n+1:1), i:0, qs:shuffle(pool).slice(0,10)}; save(); rapidRender();
+}
+let RCD=null;
+function rapidRender(){
+  const host=$("rapid"); if(!host) return;
+  if(!STATE.rapid){ host.innerHTML='<button class="primary" onclick="rapidNew()">▶ Начать раунд</button>'; return; }
+  const R=STATE.rapid, i=R.i, it=R.qs[i], key="rapid:"+R.n+":"+i;
+  let h='<div class="muted">Раунд '+R.n+' · вопрос '+(i+1)+' из '+R.qs.length+' · тема: '+esc(it.topic)+'</div>';
+  h+='<div class="rapidq">'+esc(it.q)+'</div><div class="big" id="rcd"></div>';
+  h+='<div style="text-align:center"><button class="sm" onclick="rapidGo()">🔊 Задать вопрос + отсчёт 3 сек</button></div>';
+  h+=abox(key,it.q,0,{label:"Openers · скорострел"});
+  h+='<div class="arow"><button class="sm" '+(i?"":"disabled")+' onclick="rapidMove(-1)">⬅ Назад</button><button class="sm dark" onclick="rapidMove(1)">'+(i<R.qs.length-1?"Дальше ➡":"Итог раунда")+'</button><button class="sm" onclick="rapidNew()">🎲 Новый раунд</button></div>';
+  h+='<div id="rapidSum"></div>';
+  host.innerHTML=h;
+  if(R.i>=R.qs.length-1) rapidSummary();
+}
+function rapidGo(){ const R=STATE.rapid, it=R.qs[R.i]; clearInterval(RCD); $("rcd").textContent=""; say(it.q,()=>{ let n=3; $("rcd").textContent=n; RCD=setInterval(()=>{ n--; if(n>0) $("rcd").textContent=n; else { clearInterval(RCD); $("rcd").textContent="Говори!"; beep(); } },1000); }); }
+function rapidMove(d){ const R=STATE.rapid; if(d>0 && R.i>=R.qs.length-1){ rapidSummary(); return; } R.i=Math.max(0,Math.min(R.qs.length-1,R.i+d)); save(); rapidRender(); }
+function rapidSummary(){
+  const R=STATE.rapid; let pts=0, tot=0, h='<h4>Итог раунда '+R.n+'</h4>';
+  R.qs.forEach((it,i)=>{ const a=STATE.ans["rapid:"+R.n+":"+i]; const A=a&&a.an; let p=0; if(A){ p=[!!A.op,A.direct,!A.repeat,!!(A.fn.reason||A.fn.example)].filter(Boolean).length; pts+=p; tot+=4; }
+    h+='<div class="sumrow">'+(A?(p>=3?"✅":"⚠️")+" "+p+"/4":"⬜")+' '+esc(it.q)+(A&&A.op?' <span class="muted">— '+esc(A.op.p)+'</span>':'')+'</div>'; });
+  h+='<div class="score">'+(tot?"Баллы: "+pts+" / "+tot:"Пока нет проверенных ответов")+'</div>';
+  const R2=STATE.ex["o:rapid"]=STATE.ex["o:rapid"]||{ans:{},ord:{}}; R2.round=R.n; R2.pts=pts; R2.tot=tot; R2.t=Date.now(); save();
+  const s=$("rapidSum"); if(s) s.innerHTML=h; markDone();
+}
+
+/* --- Part 1 --- */
+RENDER.p1=function(){ p1Pick(); if(STATE.p1 && P1.find(t=>t.id===STATE.p1)) p1Open(STATE.p1); else if(P1.length===1) p1Open(P1[0].id); };
+function topicDone(prefix,list){ return list.some(q=>STATE.ans[prefix+q]&&STATE.ans[prefix+q].an); }
+function p1Pick(){
+  let h=""; ["core","common","fc"].forEach(src=>{ const l=P1.filter(t=>t.src===src); if(!l.length) return;
+    h+='<h4>'+esc(P1_SRC[src])+'</h4><div class="pick">'+l.map(t=>{ const done=t.q.some((_,i)=>STATE.ans["p1:"+t.id+":"+i]&&STATE.ans["p1:"+t.id+":"+i].an); return '<button class="'+(STATE.p1===t.id?"sel ":"")+(done?"done":"")+'" onclick="p1Open(\''+t.id+'\')">'+esc(t.t)+(t.fc&&src!=="fc"?' <span class="flag">прогноз</span>':'')+'</button>'; }).join("")+'</div>'; });
+  $("p1Pick").innerHTML=h;
+}
+function vocCols(v6,v7,v8){
+  const col=(c,b,l)=>'<div class="col '+c+'"><h4>'+BDG(b)+'</h4>'+l.map(x=>'<div class="op"><span class="say" onclick="say('+jsq(x[0])+')"><b>'+esc(x[0])+'</b></span> <span class="muted small">— '+esc(x[1])+'</span></div>').join("")+'</div>';
+  return '<div class="grid3">'+col("c6",6,v6)+col("c7",7,v7)+col("c8",8,v8)+'</div>';
+}
+function modelPair(q,b6,b8){
+  return '<div class="reading small"><b>Q:</b> '+esc(q)+' <button class="ico" onclick="say('+jsq(q)+')">🔊</button></div>'+
+   '<div class="grid3" style="grid-template-columns:1fr 1fr;margin-top:8px"><div class="col c6"><h4>'+BDG(6)+'band 6 <button class="ico" onclick="say('+jsq(b6)+')">🔊</button></h4>'+mk(b6)+'<p class="muted small">Понятно, но простые предложения и базовые слова.</p></div><div class="col c8"><h4>'+BDG(8)+'band 8 <button class="ico" onclick="say('+jsq(b8)+')">🔊</button></h4>'+mk(b8)+'<p class="muted small">Жёлтым — то, что поднимает балл.</p></div></div>';
+}
+function p1Open(id){
+  const t=P1.find(x=>x.id===id); if(!t) return; STATE.p1=id; save(); p1Pick();
+  const vocab=t.v6.concat(t.v7,t.v8).map(x=>x[0]);
+  const model=modelPair(t.mq,t.b6,t.b8);
+  let h='<div class="card"><h2>'+esc(t.t)+' <span class="muted small">· '+esc(t.ru)+'</span>'+(t.fc?' <span class="flag">прогноз</span>':'')+'</h2>';
+  h+='<h3>Слова по бэндам</h3>'+vocCols(t.v6,t.v7,t.v8);
+  h+='<details class="box" style="margin-top:10px"><summary>Образец: band 6 и band 8 <span class="muted small">(открой после своего ответа)</span></summary>'+model+'</details></div>';
+  h+='<div class="card"><h3>Вопросы ('+t.q.length+')</h3><p class="muted">Отвечай по одному: 🔊 послушать вопрос → 🎤 надиктовать или написать → ✅ проверить. 🔴 — запись голоса для учителя.</p>';
+  t.q.forEach((q,i)=>{ h+=abox("p1:"+t.id+":"+i,q,1,{label:"Part 1 · "+t.t,vocab,model:q===t.mq?model:""}); });
+  h+='</div>';
+  $("p1Topic").innerHTML=h;
+}
+
+/* --- Part 2 --- */
+RENDER.p2=function(){
+  $("p2Links").innerHTML='<h4>Первая фраза</h4>'+OPENERS_P2.map(x=>opLine("p2",x.s,x.b)).join("")+LINKS_P2.map(g=>'<h4>'+esc(g.h)+'</h4>'+g.l.map(s=>opLine("p2",s)).join("")).join("");
+  $("p2Cats").innerHTML=Object.keys(P2_CATS).map(c=>{ const l=ALL_P2.filter(x=>x.cat===c); return '<h4>'+esc(P2_CATS[c].t)+' · '+l.length+' карточ.</h4><p class="small">'+esc(P2_CATS[c].tip)+'</p><p class="muted small">'+l.map(x=>esc(x.t.replace(/^Describe /,""))).join(" · ")+'</p>'; }).join("");
+  $("p2Models").innerHTML=Object.keys(P2_MODELS).map(k=>modelHTML(k)).join("");
+  p2Pick(); if(STATE.p2 && P2.find(c=>c.id===STATE.p2)) p2Open(STATE.p2); else if(P2.length===1) p2Open(P2[0].id);
+};
+function modelHTML(k){ const M=P2_MODELS[k]; return '<details class="box"><summary>'+BDG(M.band)+esc(M.t)+'</summary><div class="arow"><button class="sm" onclick="say('+jsq(M.text)+')">🔊 Послушать</button><button class="sm" onclick="speechSynthesis.cancel()">⏹</button><span class="muted small">'+wc(strip(M.text))+' слов</span></div><div class="reading model">'+para(M.text)+'</div><h4>Почему это band '+M.band+'</h4><ul class="pb">'+M.why.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></details>'; }
+function p2Pick(){
+  const f=STATE.p2f||"all";
+  let h='<div class="pick" style="margin-bottom:8px">'+[["all","Все"]].concat(Object.keys(P2_CATS).map(c=>[c,P2_CATS[c].t])).map(([c,t])=>'<button class="'+(f===c?"sel":"")+'" onclick="STATE.p2f=\''+c+'\';save();p2Pick()">'+esc(t)+'</button>').join("")+'</div>';
+  h+='<div class="pick">'+P2.filter(c=>f==="all"||c.cat===f).map(c=>{ const a=STATE.ans["p2:"+c.id]; return '<button class="'+(STATE.p2===c.id?"sel ":"")+(a&&(a.an||a.rec)?"done":"")+'" onclick="p2Open(\''+c.id+'\')" style="text-align:left">'+esc(c.t.replace(/^Describe /,""))+'</button>'; }).join("")+'</div>';
+  $("p2Pick").innerHTML=h;
+}
+function cueHTML(c){ return '<div class="cue"><b>'+esc(c.t)+'</b> <button class="ico" onclick="say('+jsq(c.t+" You should say: "+c.say.join(", "))+')">🔊</button><div style="margin-top:6px">You should say:</div><ul>'+c.say.map(s=>'<li>'+esc(s)+'</li>').join("")+'</ul></div>'; }
+const NOTE_L=["Opener (первая фраза)","Фон: когда, где, кто","Детали (средние пункты)","Чувства и оценка","Вывод","3 сильных слова + 1 структура"];
+function p2Box(key,c,label){
+  const a=STATE.ans[key]||{}, id=kid(key), notes=a.notes||[];
+  let h=cueHTML(c);
+  h+='<div class="card" style="box-shadow:none;border:1px solid var(--line);margin:10px 0"><div class="arow"><button class="sm dark" onclick="p2Prep(\''+key+'\')">⏱ Подготовка 1:00</button><span class="big" id="pt-'+id+'" style="font-size:24px;margin:0 8px"></span></div>';
+  h+='<div class="notes">'+NOTE_L.map((l,i)=>'<div><label>'+esc(l)+'</label><input type="text" id="nt-'+id+'-'+i+'" value="'+esc(notes[i]||"")+'" oninput="p2Note(\''+key+'\')" autocomplete="off"></div>').join("")+'</div>';
+  h+='<p class="muted small" style="margin-top:8px">Потом нажми 🔴 (запись для учителя) или 🎤 (диктовка с автопроверкой) — пойдёт таймер 2:00. Зелёный — можно заканчивать.</p><div class="big" id="sp-'+id+'" style="font-size:24px"></div></div>';
+  h+=abox(key,c.t,2,{noQ:true,label:label,vocab:c.v.map(x=>x[0]),model:(P2_MODELS[c.model||MODEL_BY_CAT[c.cat]]?'<div class="reading model small">'+para(P2_MODELS[c.model||MODEL_BY_CAT[c.cat]].text)+'</div>':"")});
+  return h;
+}
+function p2Note(key){ const a=ansOf(key), id=kid(key); a.notes=NOTE_L.map((_,i)=>$("nt-"+id+"-"+i).value); a.q=a.q||(CTX[key]||{}).q; a.part=2; a.label=a.label||label(key); a.t=Date.now(); save(); }
+function p2Prep(key){
+  const id=kid(key), el=$("pt-"+id); if(P2T[key+":prep"]){ clearInterval(P2T[key+":prep"]); delete P2T[key+":prep"]; el.textContent=""; return; }
+  let s=60; el.textContent=fmt(s); $("nt-"+id+"-0").focus();
+  P2T[key+":prep"]=setInterval(()=>{ s--; el.textContent=fmt(s); if(s<=0){ clearInterval(P2T[key+":prep"]); delete P2T[key+":prep"]; el.textContent="Время! Говори →"; beep(); setTimeout(()=>beep(660),450); } },1000);
+}
+function p2Speak(key,on){
+  const c=CTX[key]; if(!c||c.part!==2) return; const id=kid(key), el=$("sp-"+id); if(!el) return;
+  clearInterval(P2T[key+":sp"]);
+  if(!on){ return; }
+  const t0=Date.now(); el.className="big tm red";
+  P2T[key+":sp"]=setInterval(()=>{ const s=(Date.now()-t0)/1000; el.textContent="🗣 "+fmt(s)+" / 2:00"; el.className="big tm "+(s<60?"red":s<105?"amber":"green"); if(s>=120){ clearInterval(P2T[key+":sp"]); el.textContent="⏹ 2:00 — Thank you."; beep(); } },250);
+}
+function p2Open(id){
+  const c=P2.find(x=>x.id===id); if(!c) return; STATE.p2=id; save(); p2Pick();
+  const th=ALL_P3.find(t=>t.id===c.th), mk2=P2_MODELS[c.model||MODEL_BY_CAT[c.cat]];
+  let h='<div class="card"><div class="muted small">'+esc(P2_CATS[c.cat].t)+'</div>'+p2Box("p2:"+c.id,c,"Part 2 · "+c.t.replace(/^Describe /,""));
+  h+='<details class="box"><summary>💡 О чём можно рассказать</summary><p>'+esc(c.idea)+'</p><p class="muted small">'+esc(P2_CATS[c.cat].tip)+'</p></details>';
+  h+='<details class="box"><summary>📚 Слова к карточке</summary>'+c.v.map(x=>'<span class="chip" onclick="say('+jsq(x[0])+')"><b>'+esc(x[0])+'</b> <small>'+esc(x[1])+'</small></span>').join("")+'</details>';
+  if(mk2) h+=modelHTML(c.model||MODEL_BY_CAT[c.cat]);
+  if(c.model==="helper") h+=modelHTML("helper6");
+  h+='</div><div class="card"><h3>Вопрос после рассказа (rounding-off)</h3>'+abox("p2:"+c.id+":r",P2_ROUND[ALL_P2.indexOf(c)%P2_ROUND.length],1,{label:"Part 2 · rounding-off"})+'</div>';
+  h+='<div class="card"><h3>Part 3 по этой карточке</h3><p class="muted">Экзаменатор продолжит дискуссию на ту же тему. 4–6 предложений: позиция → причина → пример → другая сторона.</p>';
+  c.p3.forEach((q,i)=>{ h+=abox("p2:"+c.id+":p3:"+i,q,3,{label:"Part 3 · "+(th?th.t:""),vocab:th?th.v.map(x=>x[0]):[]}); });
+  if(th) h+='<p class="muted small">Ещё вопросы и образцы — вкладка 3️⃣ Part 3 → «'+esc(th.t)+'».</p>';
+  h+='</div>';
+  $("p2Card").innerHTML=h;
+}
+
+/* --- Part 3 --- */
+RENDER.p3=function(){
+  $("p3Types").innerHTML='<div class="scroll"><table class="tbl"><tr><th>Тип</th><th>Как звучит</th><th>Формула ответа</th><th>Фразы</th></tr>'+P3_TYPES.map(x=>'<tr><td><b>'+esc(x.t)+'</b></td><td>'+esc(x.q)+'</td><td>'+esc(x.f)+'</td><td>'+x.l.map(esc).join("<br>")+'</td></tr>').join("")+'</table></div>';
+  $("p3Open").innerHTML=OPENERS_P3.map(g=>'<h4>'+esc(g.h)+' <span class="muted small">'+esc(g.t)+'</span></h4>'+g.l.map(s=>opLine("p3",s)).join("")).join("");
+  $("p3Pick").innerHTML='<div class="pick">'+P3.map(t=>'<button id="p3b-'+t.id+'" onclick="p3Open(\''+t.id+'\')">'+esc(t.t)+'</button>').join("")+'</div>';
+  if(STATE.p3 && P3.find(t=>t.id===STATE.p3)) p3Open(STATE.p3); else if(P3.length===1) p3Open(P3[0].id);
+};
+function p3Open(id){
+  const t=P3.find(x=>x.id===id); if(!t) return; STATE.p3=id; save();
+  P3.forEach(x=>{ const b=$("p3b-"+x.id); if(b){ b.classList.toggle("sel",x.id===id); b.classList.toggle("done",x.q.some((_,i)=>STATE.ans["p3:"+x.id+":"+i]&&STATE.ans["p3:"+x.id+":"+i].an)); } });
+  const model=modelPair(t.mq,t.b6,t.b8);
+  let h='<div class="card"><h2>'+esc(t.t)+' <span class="muted small">· '+esc(t.ru)+'</span></h2><h3>Слова темы</h3>'+t.v.map(x=>'<span class="chip c7" onclick="say('+jsq(x[0])+')"><b>'+esc(x[0])+'</b> <small>'+esc(x[1])+'</small></span>').join("");
+  h+='<details class="box" style="margin-top:10px"><summary>Образец: band 6 и band 8 <span class="muted small">(открой после своего ответа)</span></summary>'+model+'</details></div>';
+  h+='<div class="card"><h3>Вопросы</h3>';
+  t.q.forEach((q,i)=>{ h+=abox("p3:"+t.id+":"+i,q,3,{label:"Part 3 · "+t.t,vocab:t.v.map(x=>x[0]),model:q===t.mq?model:""}); });
+  h+='</div>'; $("p3Theme").innerHTML=h;
+}
+
+/* --- Лексика --- */
+const VOC_EX=["v:upgrade","v:type","v:colloc","v:idioms","v:linkers"];
+RENDER.voc=function(){
+  let h=""; const cats=[...new Set(UPGRADES.map(u=>u.cat))];
+  cats.forEach(c=>{ h+='<h4>'+esc(c)+'</h4><div class="scroll"><table class="tbl"><tr><th>'+BDG(6)+'</th><th>'+BDG(7)+'</th><th>'+BDG(8)+'</th></tr>'+UPGRADES.filter(u=>u.cat===c).map(u=>'<tr><td><b>'+esc(u.base)+'</b><br><span class="muted small">'+esc(u.ru)+'</span></td><td>'+u.b7.map(x=>'<span class="say" onclick="say('+jsq(x.replace(/\s*\(.*?\)/,""))+')">'+esc(x)+'</span>').join("<br>")+'</td><td>'+u.b8.map(x=>'<span class="say" onclick="say('+jsq(x.replace(/\s*\(.*?\)/,""))+')">'+esc(x)+'</span>').join("<br>")+'<div class="muted small" style="margin-top:4px">'+mk(u.ex)+'</div></td></tr>').join("")+'</table></div>'; });
+  $("vocUp").innerHTML=h;
+  $("vocLink").innerHTML=Object.keys(LINKERS).map(k=>'<div class="sumrow"><b>'+esc(LINKERS[k].ru)+'</b>: '+LINKERS[k].l.map(x=>'<span class="chip" onclick="say('+jsq(x)+')">'+esc(x.trim())+'</span>').join("")+'</div>').join("");
+  $("vocIdi").innerHTML=IDIOMS.map(d=>'<div class="op"><span class="say" onclick="say('+jsq(d[2])+')">🔊</span><div><b>'+esc(d[0])+'</b> — '+esc(d[1])+'<br><span class="muted small">'+esc(d[2])+'</span></div></div>').join("")+'<p class="muted small" style="margin-top:8px">Не надо: '+IDIOMS_AVOID.map(esc).join(" · ")+' — экзаменаторы слышат их постоянно, и они часто не к месту.</p>';
+  exHost("voc", VOC_EX);
+};
+
+/* --- Грамматика --- */
+const GR_EX=["gr:tenses","gr:cond","gr:complex"];
+RENDER.gram=function(){
+  $("gramCards").innerHTML=GRAMMAR.map(g=>'<div class="card"><h3>'+BDG(g.b)+esc(g.t)+'</h3><p class="small">'+esc(g.use)+'</p><ul class="pb">'+g.tpl.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul><div class="reading small"><button class="ico" onclick="say('+jsq(g.ex)+')">🔊</button>'+esc(g.ex)+'</div><p class="muted small">'+esc(g.err)+'</p></div>').join("");
+  exHost("gram", GR_EX);
+};
+
+/* --- Пробный экзамен --- */
+const MOCK=["m:test"];
+function pickN(a,n){ return shuffle(a).slice(0,n); }
+function mockNew(){
+  if(STATE.mock && Object.keys(STATE.ans).some(k=>k.indexOf("mock:")===0) && !confirm("Собрать новый экзамен? Ответы прошлого пробного экзамена останутся в отчёте, если ещё не отправлены.")) return;
+  Object.keys(STATE.ans).forEach(k=>{ if(k.indexOf("mock:")===0 && (STATE.ans[k].t||0)<=(STATE.sentAt||0)) delete STATE.ans[k]; });
+  const core=pickN(ALL_P1.filter(t=>t.src==="core"),1)[0], others=pickN(ALL_P1.filter(t=>t.src!=="core"),2);
+  const p1=[core].concat(others).map(t=>({topic:t.t, qs:[t.q[0]].concat(pickN(t.q.slice(1),3))}));
+  const card=pickN(ALL_P2,1)[0], th=ALL_P3.find(t=>t.id===card.th);
+  const p3=card.p3.concat(th?pickN(th.q.filter(q=>!card.p3.includes(q)),2):[]);
+  STATE.mock={n:(STATE.mock?STATE.mock.n+1:1), p1, card:card.id, p3, t:Date.now()}; save(); mockRender();
+}
+function mockRender(){
+  const host=$("mock"); if(!STATE.mock){ host.innerHTML=""; return; }
+  const M=STATE.mock, card=ALL_P2.find(c=>c.id===M.card), th=ALL_P3.find(t=>t.id===card.th);
+  let h='<div class="card"><h3>Part 1 · 4–5 минут</h3><p class="muted">«Good afternoon. My name is… Can you tell me your full name, please?» Дальше — 3 темы. Отвечай 2–4 предложения.</p>';
+  M.p1.forEach((g,gi)=>{ h+='<h4>Тема '+(gi+1)+': '+esc(g.topic)+'</h4>'; g.qs.forEach((q,i)=>{ h+=abox("mock:"+M.n+":p1:"+gi+":"+i,q,1,{label:"Пробный экзамен "+M.n+" · Part 1 · "+g.topic}); }); });
+  h+='</div><div class="card"><h3>Part 2 · 3–4 минуты</h3><p class="muted">«Now I’m going to give you a topic, and I’d like you to talk about it for one to two minutes. You have one minute to think about what you’re going to say.»</p>'+p2Box("mock:"+M.n+":p2",card,"Пробный экзамен "+M.n+" · Part 2")+'</div>';
+  h+='<div class="card"><h3>Part 3 · 4–5 минут</h3><p class="muted">«We’ve been talking about… I’d like to discuss with you one or two more general questions related to this.»</p>';
+  M.p3.forEach((q,i)=>{ h+=abox("mock:"+M.n+":p3:"+i,q,3,{label:"Пробный экзамен "+M.n+" · Part 3",vocab:th?th.v.map(x=>x[0]):[]}); });
+  h+='<p class="muted">Готово? Вкладка 📨 «Учителю» — отправь ответы и записи.</p></div>';
+  host.innerHTML=h;
+}
+RENDER.mock=function(){ mockRender(); };
+
+/* ============ ОТЧЁТ УЧИТЕЛЮ ============ */
+const PART_N={0:"Openers",1:"Part 1",2:"Part 2",3:"Part 3"};
+function anLine(A,part){
+  if(!A) return "";
+  const f=k=>A.fn&&A.fn[k]?"✓":"✗";
+  let s=(part===0?"":"≈"+A.band+" · ")+"opener: "+(A.op?A.op.p+" (b"+A.op.b+")":"нет")+(A.repeat?" · повтор вопроса":"")+(A.direct?"":" · пустое вступление")+" · причина "+f("reason")+" · пример "+f("example");
+  if(part===3||part===2) s+=" · контраст "+f("contrast");
+  if(part!==0) s+=" · слов band 7+: "+((A.lex||[]).length+(A.dm||[]).length)+((A.lex||[]).length?" ("+A.lex.slice(0,8).join(", ")+")":"")+" · грамматика: "+((A.gr||[]).length?A.gr.join(", "):"—");
+  if(A.mist&&A.mist.length) s+="\n   ⚠ "+A.mist.join("; ");
+  return s;
+}
+function exSummary(id){
+  const st=STATE.ex[id]; if(!st) return null;
+  if(id==="o:rapid") return st.tot?{line:"⚡ Скорострел, раунд "+st.round+": "+st.pts+"/"+st.tot,mist:[]}:null;
+  if(!EX[id]) return null;
+  const {items}=exItems(id), ans=st.ans||{}, keys=Object.keys(ans); if(!keys.length) return null;
+  const ok=keys.filter(k=>ans[k].ok).length, mist=keys.filter(k=>!ans[k].ok).map(k=>{ const it=items[k]; return strip(it.q)+" → "+ans[k].v+" (верно: "+(it.o?it.o[0]:it.a.join(" / "))+")"; });
+  return {line:EX[id].t+": "+ok+"/"+keys.length+(keys.length<items.length?" (сделано "+keys.length+" из "+items.length+")":""), mist};
+}
+function collect(onlyNew){
+  const since=onlyNew?(STATE.sentAt||0):0, out={ex:[],ans:[],fav:null,rec:[]};
+  Object.keys(EX).concat(["o:rapid"]).forEach(id=>{ const st=STATE.ex[id]; if(!st||!((st.t||0)>since)) return; const s=exSummary(id); if(s) out.ex.push(s); });
+  Object.keys(STATE.ans).forEach(k=>{ const a=STATE.ans[k]; if(!a||!((a.t||0)>since)) return; if(!(a.text&&a.text.trim())&&!REC[k]&&!(a.notes&&a.notes.some(Boolean))) return; out.ans.push([k,a]); });
+  out.ans.sort((x,y)=>(x[1].part-y[1].part)||((x[1].t||0)-(y[1].t||0)));
+  Object.keys(REC).forEach(k=>{ if(REC[k].t>since) out.rec.push(k); });
+  if((STATE.favT||0)>since && STATE.fav.length) out.fav=STATE.fav.slice();
+  return out;
+}
+function reportText(C){
+  let t="🎤 <b>IELTS Speaking · гайд и тренажёр</b>"+MP_HW+"\n👤 "+esc(STATE.name||"—")+"\n🕒 "+new Date().toLocaleString("ru-RU")+"\n";
+  if(C.ex.length){ t+="\n<b>📝 Упражнения</b>"; C.ex.forEach(e=>{ t+="\n• "+esc(e.line); e.mist.slice(0,12).forEach(m=>t+="\n   ✗ "+esc(m)); }); t+="\n"; }
+  if(C.ans.length){
+    t+="\n<b>🗣 Ответы</b> ("+C.ans.length+")";
+    C.ans.forEach(([k,a])=>{
+      t+="\n\n<b>"+esc(a.label||PART_N[a.part]||"")+"</b>\nQ: "+esc(a.q||"");
+      if(a.notes&&a.notes.some(Boolean)) t+="\n📝 План: "+esc(a.notes.map((n,i)=>n?NOTE_L[i].split(" ")[0]+": "+n:"").filter(Boolean).join(" | "));
+      if(a.text&&a.text.trim()) t+="\nA ("+wc(a.text)+" сл."+(a.dict?", надиктовано"+(a.dsec>3?", "+Math.round(a.dwords/(a.dsec/60))+" сл/мин":""):"")+"): "+esc(a.text.trim());
+      if(a.an) t+="\n🤖 "+esc(anLine(a.an,a.part));
+      if(a.chk&&a.part!=null&&CHECK[a.part]) t+="\n☑ чек-лист "+a.chk.filter(Boolean).length+"/"+CHECK[a.part].length+(a.chk.some(x=>!x)?": нет — "+esc(CHECK[a.part].filter((_,i)=>!a.chk[i]).join("; ")):"");
+      if(REC[k]) t+="\n🎙 запись "+fmt(REC[k].dur);
+    });
+    t+="\n";
+  }
+  if(C.fav){ t+="\n<b>⭐ Мой набор openers</b> ("+C.fav.length+")"; const by={}; C.fav.forEach(f=>{ const i=f.indexOf("|"), ty=f.slice(0,i); (by[ty]=by[ty]||[]).push(f.slice(i+1)); }); Object.keys(by).forEach(ty=>{ const o=OPENERS.find(x=>x.id===ty); t+="\n• "+esc(o?o.t:ty==="p2"?"Part 2":"Part 3")+": "+esc(by[ty].join(" · ")); }); }
+  return t;
+}
+RENDER.send=sendRender;
+function sendRender(){
+  const C=collect($("sNew").checked);
+  let h='<div class="sumrow">📝 Упражнения: <b>'+C.ex.length+'</b></div><div class="sumrow">🗣 Ответы: <b>'+C.ans.length+'</b>'+(C.ans.length?' <span class="muted">('+[0,1,2,3].map(p=>{ const n=C.ans.filter(x=>x[1].part===p).length; return n?PART_N[p]+": "+n:""; }).filter(Boolean).join(", ")+')</span>':'')+'</div><div class="sumrow">🎙 Записи голоса: <b>'+C.rec.length+'</b>'+(C.rec.length?'':' <span class="muted">(записи хранятся, пока страница открыта)</span>')+'</div><div class="sumrow">⭐ Openers: <b>'+(C.fav?C.fav.length:0)+'</b></div>';
+  if(STATE.sentAt) h+='<p class="muted small">Прошлая отправка: '+new Date(STATE.sentAt).toLocaleString("ru-RU")+'</p>';
+  $("sSum").innerHTML=h;
+}
+function chunks(s,n){ n=n||3800; const out=[]; while(s.length>n){ let i=s.lastIndexOf("\n",n); if(i<n*0.5) i=n; out.push(s.slice(0,i)); s=s.slice(i); } out.push(s); return out; }
+function ext(m){ return /ogg/.test(m)?"ogg":/mp4|aac|m4a/.test(m)?"m4a":"webm"; }
+async function tg(method,body){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/"+method,{method:"POST",body}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+async function sendAll(){
+  if(RECA||DICT){ alert("Сначала останови запись или диктовку."); return; }
+  const C=collect($("sNew").checked);
+  if(!C.ex.length && !C.ans.length && !C.fav && !C.rec.length){ $("sFb").textContent="Пока нечего отправлять: сделай упражнение или ответь на вопрос."; return; }
+  const text=reportText(C), btn=$("sBtn"); btn.disabled=true; $("sFb").textContent="Отправляю…";
+  try{
+    for(const part of chunks(text)) await tg("sendMessage",new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"}));
+    if($("sRec").checked){ let n=0; for(const k of C.rec){ n++; $("sFb").textContent="Отправляю запись "+n+" из "+C.rec.length+"…"; const R=REC[k], a=STATE.ans[k]||{}, fd=new FormData(); fd.append("chat_id",TG_CHAT_ID); fd.append("caption",((STATE.name||"")+" · "+(a.label||"")+"\n"+(a.q||"")).slice(0,1000));
+      if(/ogg/.test(R.mime)){ fd.append("voice",R.blob,"answer.ogg"); await tg("sendVoice",fd); } else { fd.append("document",R.blob,(STATE.name||"student")+"_"+kid(k)+"."+ext(R.mime)); await tg("sendDocument",fd); } } }
+    STATE.sentAt=Date.now(); saveNow(); $("sFb").textContent="✅ Отправлено! Молодец!"; $("sCopy").classList.add("hidden"); sendRender();
+  }catch(e){ $("sFb").textContent="Не получилось отправить ("+e.message+"). Скопируй текст и отправь учителю вручную:"; const b=$("sCopy"); b.value=text.replace(/<\/?b>/g,"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&").replace(/&quot;/g,'"'); b.classList.remove("hidden"); b.select(); }
+  btn.disabled=false;
+}
+
+/* отметки «сделано» на кнопках вкладок */
+function markDone(){
+  const has=pfx=>Object.keys(STATE.ans).some(k=>k.indexOf(pfx)===0&&STATE.ans[k].an);
+  const exd=ids=>ids.some(id=>STATE.ex[id]&&Object.keys(STATE.ex[id].ans||{}).length);
+  const m={guide:exd(GUIDE_EX), open:exd(OPEN_EX)||has("rapid:")||STATE.fav.length>0, p1:has("p1:"), p2:has("p2:"), p3:has("p3:"), voc:exd(VOC_EX), gram:exd(GR_EX), mock:has("mock:")};
+  document.querySelectorAll("#nav button").forEach(b=>{ const d=m[b.dataset.tab]; b.textContent=b.textContent.replace(/ ✓$/,"")+(d?" ✓":""); });
+}
+
+/* ---------- MIRAÉ: задания для домашки (см. js/bridge.js) ----------
+   MIRAE_PARTS — задания тренажёра с ключами: из них преподаватель выбирает отдельные задания в «Задать домашку».
+   Если тренажёр открыт из домашки (?only=…), до первой отрисовки остаются только выбранные задания. */
+window.MIRAE_PARTS=[
+  {g:"Гайд", t:[{k:"g:quiz",n:"Квиз: формат экзамена и критерии"}]},
+  {g:"Openers", t:[{k:"o:types",n:"Какой opener подходит к вопросу"},{k:"o:best",n:"Выбери самый сильный opener"},{k:"o:fix",n:"Найди исправленный вариант"},{k:"o:gaps",n:"Допиши opener"},{k:"o:p23",n:"Openers для Part 2 и Part 3"},{k:"o:rapid",n:"Скорострел: opener за 3 секунды (голосом)"},{k:"o:bank",n:"Мой набор openers (⭐)"}]},
+  {g:"Part 1 · темы", t:P1.map(x=>({k:"p1:"+x.id,n:x.t+" · "+x.ru+(x.src==="fc"?" (прогноз)":"")}))},
+  {g:"Part 2 · карточки", t:P2.map(c=>({k:"p2:"+c.id,n:c.t}))},
+  {g:"Part 3 · темы", t:P3.map(t=>({k:"p3:"+t.id,n:t.t+" · "+t.ru}))},
+  {g:"Лексика по бэндам", t:VOC_EX.map(id=>({k:id,n:EX[id].t}))},
+  {g:"Грамматика для Speaking", t:GR_EX.map(id=>({k:id,n:EX[id].t}))},
+  {g:"Пробный экзамен", t:[{k:"m:test",n:"Пробный экзамен целиком (Part 1–3)"}]}
+];
+if(window.MIRAE_PICK){
+  MIRAE_PICK.keep(GUIDE_EX,x=>x); MIRAE_PICK.keep(OPEN_EX,x=>x);
+  MIRAE_PICK.keep(P1,x=>"p1:"+x.id); MIRAE_PICK.keep(P2,x=>"p2:"+x.id); MIRAE_PICK.keep(P3,x=>"p3:"+x.id);
+  MIRAE_PICK.keep(VOC_EX,x=>x); MIRAE_PICK.keep(GR_EX,x=>x); MIRAE_PICK.keep(MOCK,x=>x);
+  MIRAE_PICK.tabs({guide:GUIDE_EX.length,open:OPEN_EX.length,p1:P1.length,p2:P2.length,p3:P3.length,voc:VOC_EX.length,gram:GR_EX.length,mock:MOCK.length});
+}
+
+/* вход: имя с сайта (мост подставляет логин) или с прошлого раза */
+function autoStart(){ if(/[?&]mirae-parts=/.test(location.search)) return; const n=$("nameInput").value.trim()||lsGet(LS+":last")||""; if(n && !STATE.name){ $("nameInput").value=n; start(); } }
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",autoStart); else autoStart();
+</script>
+</body>
+</html>
