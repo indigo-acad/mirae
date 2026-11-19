@@ -357,8 +357,9 @@ function checkCls(){
 }
 
 /* ---- 2. Learn ---- */
+function lOn(i){ return !window.MIRAE_PICK || MIRAE_PICK.has("t:learn") || MIRAE_PICK.has("b:learn:"+i); }
 function rLearn(){
-  card(`<h2>2 · Think like a film director 🎬</h2>
+  if(lOn(0)) card(`<h2>2 · Think like a film director 🎬</h2>
   <p>In a story you need three "cameras". Each camera = one tense.</p>
   <div class="roles">
     <div class="role pc"><div class="ico">🎥</div><b class="pc">Past Continuous</b>The background. The camera is already filming.
@@ -370,7 +371,7 @@ function rLearn(){
   </div>
   <div class="ru">По-русски у нас одно прошедшее время, а в английском у глагола в истории три роли: фон, событие и «что было ещё раньше».</div>`);
 
-  card(`<h2>⏱ On the timeline</h2>
+  if(lOn(1)) card(`<h2>⏱ On the timeline</h2>
   <svg class="tl" viewBox="0 0 520 200" aria-label="Timeline of narrative tenses">
     <line x1="10" y1="120" x2="500" y2="120" stroke="#161a2b" stroke-width="3"/>
     <polygon points="500,112 516,120 500,128" fill="#161a2b"/>
@@ -386,7 +387,7 @@ function rLearn(){
   </svg>
   <p class="muted">I <b class="pc">was sitting</b> on the bus when it <b class="ps">stopped</b>. Someone <b class="pp">had left</b> a dog outside.</p>`);
 
-  card(`<h2>🔧 Form</h2>
+  if(lOn(2)) card(`<h2>🔧 Form</h2>
   <table class="tbl">
     <tr><th></th><th>+</th><th>−</th><th>?</th></tr>
     <tr><td><span class="chip ps">Past Simple</span></td><td>I <b>called</b> / <b>went</b></td><td>I <b>didn't call</b></td><td><b>Did</b> you <b>call</b>?</td></tr>
@@ -395,7 +396,7 @@ function rLearn(){
   </table>
   <div class="tip">💡 V3 = third form: go → went → <b>gone</b>, see → saw → <b>seen</b>, eat → ate → <b>eaten</b>, leave → left → <b>left</b>.</div>`);
 
-  card(`<h2>🧩 Top combinations</h2>
+  if(lOn(3)) card(`<h2>🧩 Top combinations</h2>
   <div class="vs">
     <div><span class="chip pc">long</span> + <span class="chip ps">short</span> — interrupted action<br>I <b class="pc">was scrolling</b> TikTok <b>when</b> my phone <b class="ps">died</b>.<i>The long action was in progress → the short one interrupted it.</i></div>
     <div><span class="chip pc">long</span> + <span class="chip pc">long</span> — at the same time<br><b>While</b> I <b class="pc">was cooking</b>, my flatmate <b class="pc">was cleaning</b> the bathroom.</div>
@@ -410,12 +411,12 @@ function rLearn(){
   </table>
   <div class="ru">when + Past Simple → Past Simple = «и тогда». when + Past Perfect = «уже успело случиться».</div>`);
 
-  card(`<h2>🚦 Signal words</h2>
+  if(lOn(4)) card(`<h2>🚦 Signal words</h2>
   <p><span class="chip pc">🎥</span></p><div class="signals"><span>while</span><span>as</span><span>at 8 pm yesterday</span><span>all evening</span><span>when (+ short action)</span></div>
   <p><span class="chip ps">⚡</span></p><div class="signals"><span>then</span><span>suddenly</span><span>after that</span><span>as soon as</span><span>finally</span><span>yesterday / last week / ago</span></div>
   <p><span class="chip pp">⏪</span></p><div class="signals"><span>already</span><span>just</span><span>by the time</span><span>before</span><span>never … before</span><span>after (= when it was finished)</span></div>`);
 
-  card(`<h2>⚠️ Watch out</h2>
+  if(lOn(5)) card(`<h2>⚠️ Watch out</h2>
   <div class="warn">❌ I <s>was knowing</s> the answer. → ✅ I <b>knew</b> the answer.<br><span class="muted">State verbs (know, want, like, need, believe, understand, own) usually don't take -ing.</span></div>
   <div class="warn">❌ I <s>had woken up</s>, <s>had had</s> breakfast and <s>had gone</s> to work.<br>✅ I <b>woke up</b>, <b>had</b> breakfast and <b>went</b> to work.<br><span class="muted">Events in order → Past Simple. Use Past Perfect only to jump back in time.</span></div>
   <div class="warn">❌ <s>When</s> I was cooking, he was cleaning. → ✅ <b>While</b> I was cooking…<br><span class="muted"><b>while</b> + long action; <b>when</b> + usually a short action.</span></div>
@@ -606,12 +607,29 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
 
 /* ---------- MIRAÉ: задания для домашки (см. js/bridge.js) ----------
    MIRAE_PARTS — задания тренажёра с ключами для «Задать домашку»; при ?only=… остаются только выбранные. */
+/* Блоки внутри вкладок: ключ "b:<вкладка>:<номер>" (Learn — карточки, Choose/Meaning/Fix it/Join — отдельные вопросы).
+   Старый ключ "t:<вкладка>" по-прежнему означает вкладку целиком. */
+const plain=x=>String(x).replace(/<[^>]+>/g,"").replace(/[\[\]]/g,"").replace(/\s+/g," ").trim();
+const cut=(x,n)=>{ x=plain(x); return x.length>n?x.slice(0,n-1)+"…":x; };
+const BLOCKS={
+  learn:{g:"2 · Learn",n:6,name:i=>["Think like a film director","On the timeline","Form","Top combinations","Signal words","Watch out"][i]},
+  choose:{g:"3 · Choose",arr:CHOOSE,name:(x,i)=>(i+1)+". "+cut(x.q,60)},
+  meaning:{g:"4 · Meaning",arr:MEANING,name:(x,i)=>(i+1)+". "+cut(x.q,60)},
+  fix:{g:"6 · Fix it",arr:FIX,name:(x,i)=>(i+1)+". "+cut(x.s,60)},
+  join:{g:"7 · Join",arr:JOIN,name:(x,i)=>(i+1)+". "+cut(x.a,45)+" ("+x.w+")"}
+};
+Object.keys(BLOCKS).forEach(id=>{ const B=BLOCKS[id]; if(B.arr) B.n=B.arr.length; });
+const bkeys=["book2a","book2b","book135a","book135c"];
 window.MIRAE_PARTS=[
-  {g:"Narrative Tenses",t:TABS.filter(x=>!["book","send"].includes(x.id)).map(x=>({k:"t:"+x.id,n:x.t.replace(/^\S+ · /,"")}))},
-  {g:"Coursebook",t:[{k:"e:book2a",n:"Exercise 2A · Choose the correct word or phrase"},{k:"e:book2b",n:"Exercise 2B · Past Simple, Past Continuous or Past Perfect"},{k:"e:book135a",n:"p. 135 · Ex 1 · Past Simple or Past Continuous"},{k:"e:book135c",n:"p. 135 · Ex 3 · Choose A, B or C"}]}];
-if(window.MIRAE_PICK){ const P=MIRAE_PICK, bk=["book2a","book2b","book135a","book135c"];
-  P.take(TABS,TABS.map((x,i)=>i).filter(i=>{ const x=TABS[i]; return x.id==="send"||(x.id==="book"?bk.some(k=>P.has("e:"+k)):P.has("t:"+x.id)); }));
-  Object.keys(NAMES).forEach(k=>{ if(!(bk.includes(k)?P.has("e:"+k):P.has("t:"+k))) delete NAMES[k]; });
+  {g:"Narrative Tenses",t:TABS.filter(x=>["warm","story","write"].includes(x.id)).map(x=>({k:"t:"+x.id,n:x.t.replace(/^\S+ · /,"")}))}]
+  .concat(Object.keys(BLOCKS).map(id=>{ const B=BLOCKS[id]; return {g:B.g,t:Array.from({length:B.n},(_,i)=>({k:"b:"+id+":"+i,n:B.arr?B.name(B.arr[i],i):B.name(i)}))}; }))
+  .concat([{g:"Coursebook",t:[{k:"e:book2a",n:"Exercise 2A · Choose the correct word or phrase"},{k:"e:book2b",n:"Exercise 2B · Past Simple, Past Continuous or Past Perfect"},{k:"e:book135a",n:"p. 135 · Ex 1 · Past Simple or Past Continuous"},{k:"e:book135c",n:"p. 135 · Ex 3 · Choose A, B or C"}]}]);
+if(window.MIRAE_PICK){ const P=MIRAE_PICK;
+  const bOn=(id,i)=>P.has("t:"+id)||P.has("b:"+id+":"+i);
+  const tabOn=id=>P.has("t:"+id)||(BLOCKS[id]&&Array.from({length:BLOCKS[id].n},(_,i)=>i).some(i=>P.has("b:"+id+":"+i)));
+  P.take(TABS,TABS.map((x,i)=>i).filter(i=>{ const x=TABS[i]; return x.id==="send"||(x.id==="book"?bkeys.some(k=>P.has("e:"+k)):tabOn(x.id)); }));
+  Object.keys(BLOCKS).forEach(id=>{ const B=BLOCKS[id]; if(B.arr) P.take(B.arr,B.arr.map((x,i)=>i).filter(i=>bOn(id,i))); });
+  Object.keys(NAMES).forEach(k=>{ if(!(bkeys.includes(k)?P.has("e:"+k):tabOn(k))) delete NAMES[k]; });
   cur=TABS[0].id; }
 
 $("nav").addEventListener("wheel",e=>{ if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){ $("nav").scrollLeft+=e.deltaY; e.preventDefault(); } },{passive:false});
