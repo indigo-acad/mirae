@@ -72,8 +72,8 @@ function cloze(c){
 var M=KR.mean,GAP='(\u00a0\u00a0\u00a0\u00a0)';
 var CXN={ru:'с русским',ctx:'в контексте',mix:'вперемешку'},PK={def:'Определение',col:'Устойчивое выражение',ex:'Пример',syn:'Синонимы'};
 /* направления: на каком языке значение слова — ru, другой язык (en / ko) или ctx (в контексте). Отмеченные чередуются */
-function gls(){var s=V.settings(),g=(s.gls||{})[lang];if(g&&g.length)return g;var m=(s.ctxm||{})[lang]||'ru';return m==='ctx'?['ctx']:m==='mix'?['ru','ctx']:['ru']}
-function cm(){var g=gls(),c=g.indexOf('ctx')>=0,o=g.some(function(x){return x!=='ctx'});return c&&o?'mix':c?'ctx':'ru'}
+function gls(l){l=l||lang;var s=V.settings(),g=(s.gls||{})[l];if(g&&g.length)return g;var m=(s.ctxm||{})[l]||'ru';return m==='ctx'?['ctx']:m==='mix'?['ru','ctx']:['ru']}
+function cm(l){var g=gls(l),c=g.indexOf('ctx')>=0,o=g.some(function(x){return x!=='ctx'});return c&&o?'mix':c?'ctx':'ru'}
 function gname(g){return g==='ru'?'Русский':g==='ctx'?'В контексте':(KR.LANGS[g]||{}).name||g}
 function glsOpts(){return ['ru'].concat(['ko','en'].filter(function(l){return l!==lang}),wlangs().filter(function(l){return l!==lang&&l!=='ko'&&l!=='en'}),['ctx'])}
 /* значение слова на языке g: русский перевод или перевод/определение на другом языке */
@@ -81,7 +81,7 @@ function glossOf(c,g){if(!g||g==='ru')return trRu(c);var d=(c.d||[]).filter(func
   var a=(info(c)||{})['tr_'+g];return Array.isArray(a)?a[0]||'':(a||'')}
 var GXN={ru:'по-русски',en:'по-английски',ko:'по-корейски',ja:'по-японски',zh:'по-китайски'};
 function rel(a,b){return M.related(a,b,info(a),info(b))}
-function others(c){return deck().filter(function(x){return x.id!==c.id}).map(function(x){return {c:x,I:info(x)}})}
+function others(c){return deck(c).filter(function(x){return x.id!==c.id}).map(function(x){return {c:x,I:info(x)}})}
 /* пропуск слова в тексте: выражение из нескольких слов — целиком, иначе слово по основе */
 function gapIn(text,c){
   var w=c.w.split('/')[0].trim(),i=text.toLowerCase().indexOf(w.toLowerCase());
@@ -102,7 +102,7 @@ function ctxPrompts(c){
 }
 /* в контексте ли это слово сейчас; без подсказок на изучаемом языке — с переводом */
 function pickCx(c){
-  if(S)S.gx=null;var o=shuffle(gls());
+  if(S)S.gx=null;var o=shuffle(gls(c.l));
   for(var i=0;i<o.length;i++){var g=o[i];
     if(g==='ctx'){var ps=ctxPrompts(c);if(ps.length)return ps[Math.floor(Math.random()*ps.length)]}
     else if(glossOf(c,g)){if(g!=='ru'&&S)S.gx=g;return null}}
@@ -159,7 +159,7 @@ function addMeaning(c,v,cx){
 /* Новые слова ученик сначала разбирает в своём блоке (перевод, пример, звук), и только потом они идут в отработку.
    В отработке — упражнения по словам, которые уже в работе: учу сейчас и повторения на сегодня. */
 function drawToday(){
-  var p=V.plan(lang),st=V.stats(lang),G=KR.LANGS[lang],set=V.settings(),now=Date.now();
+  var p=V.plan(DL()),st=V.stats(DL()),G=KR.LANGS[lang],set=V.settings(),now=Date.now();
   var cloud={cloud:['cloud','Словарь сохраняется в облаке'],local:['alert','Словарь пока хранится только на этом устройстве'],offline:['alert','Нет связи: изменения сохранятся на устройстве и отправятся позже']}[V.status];
   var box=function(n,t){return '<div><b>'+n+'</b><span class="muted">'+t+'</span></div>'};
   var busy=S&&(S.mode==='new'||S.mode==='rev')?S.mode:'',nNew=p.fresh.length,inWork=p.learn.length+p.soon.length,rev=p.rev.length;
@@ -174,7 +174,7 @@ function drawToday(){
   else h+='<p class="muted tb-sub">Новых слов нет. Они появятся из уроков, от преподавателя или когда добавишь их ниже.</p>';
   h+='</section><section class="card glass today trev" aria-labelledby="trev-h"><div class="tb-h"><h3 id="trev-h">'+KR.icon('repeat',20)+'Отработка</h3></div>'+
     '<div class="stat">'+box(inWork,'учу сейчас')+box(rev,'повторить')+box(st.total,'всего слов')+'</div>';
-  h+='<p class="muted tb-sub">Значения: '+gls().map(gname).join(' + ')+' · <button type="button" class="linkish" data-x="cx-cfg">сменить</button></p>';
+  h+='<p class="muted tb-sub">'+(MIXL?'Все языки · '+wlangs().map(function(l){return KR.LANGS[l].name+': '+gls(l).map(gname).join(' + ')}).join(' · '):'Значения: '+gls().map(gname).join(' + '))+' · <button type="button" class="linkish" data-x="cx-cfg">сменить</button></p>';
   if(busy==='rev')h+='';
   else if(inWork+rev)h+='<div class="done-row"><span class="muted">Упражнения по словам, которые уже в работе</span><button type="button" class="cta" id="go">Начать отработку'+KR.icon('arrow',18)+'</button></div>';
   else h+='<div class="done-row"><span class="muted">'+(st.total?(p.waiting?'Сейчас отрабатывать нечего. Ближайшее слово вернётся через '+SRS.span(p.nextAt-now)+'.':st.total>p.allNew?'На сегодня отработка закончена. Повторения появятся завтра.':'Отработка начнётся, когда разберёшь новые слова.'):'В словаре пока нет слов: '+G.ru+' раздел.')+'</span></div>';
@@ -186,7 +186,10 @@ function drawToday(){
 }
 
 // ---------- занятие ----------
-function deck(){return V.all(lang)}
+var MIXL=false;   // «Все языки»: корейские и английские слова в одной тренировке
+function DL(){return MIXL?null:lang}
+/* слова для заданий: того же языка, что и слово (в «Все языки» варианты ответа не смешиваем) */
+function deck(c){var cc=c||(S&&S.card);return V.all(DL()).filter(function(x){return !cc||x.l===cc.l})}
 function feasible(c,d){
   var g=V.settings().games,others=d.filter(function(x){return x.id!==c.id&&trOf(x)&&trOf(x)!==trOf(c)}),out=[],n=units(c).length;
   if(g.cards)out.push('cards');
@@ -215,7 +218,7 @@ function choose(c,d){
 function start(mode){
   stopPod();
   S={mode:mode==='new'||mode==='ear'?mode:'rev',done:0,known:0,sincePairs:99,right:0,wrong:0,missed:[]};
-  if(S.mode==='new'){S.queue=V.plan(lang).fresh.map(function(c){return c.id});S.qi=0}
+  if(S.mode==='new'){S.queue=V.plan(DL()).fresh.map(function(c){return c.id});S.qi=0}
   if(S.mode==='ear'){S.queue=earQueue();S.qi=0}
   $('#play').hidden=false;drawToday();nextCard();$('#play').scrollIntoView({block:'start',behavior:KR.calm()?'auto':'smooth'});
 }
@@ -233,23 +236,23 @@ function nextCard(){
     if(S.qi>=S.queue.length)return finishNew();
     S.card=V.get(S.queue[S.qi]);S.game='intro';S.lock=false;return gNew(S.card);
   }
-  var p=V.plan(lang),g=V.settings().games;p.fresh=[];   // в отработке новых слов нет: они в своём блоке
+  var p=V.plan(DL()),g=V.settings().games;p.fresh=[];   // в отработке новых слов нет: они в своём блоке
   var pool=p.learn.concat(p.rev);
   var pp=noRel(FORCE==='pairs'?pool.concat(p.soon):pool).slice(0,5);
   if((g.pairs&&S.sincePairs>=8&&pp.length>=4&&!FORCE)||(FORCE==='pairs'&&pp.length>=4)){S.sincePairs=0;return pairs(pp)}
   var c=SRS.pick(p);
   if(!c)return finish(p);
-  S.sincePairs++;S.card=c;S.pr=pickCx(c);S.cx=!!S.pr;S.game=choose(c,deck());S.lastGame=S.game;S.hint=false;S.retype=false;S.miss=0;S.lock=false;
+  S.sincePairs++;S.card=c;S.pr=pickCx(c);S.cx=!!S.pr;S.game=choose(c,deck(c));S.lastGame=S.game;S.hint=false;S.retype=false;S.miss=0;S.lock=false;
   // диктант фразой: слово уже знакомо и у него есть пример
   var ph=false;if(S.game==='dict'){var e=exOf(c);ph=!!(e&&c.st===2&&(c.ivl||0)>=3&&e.s.length<=70&&EAR.count(e.s)>=2&&Math.random()<.5)}
   ({cards:gCards,intro:gCards,tr:gChoice,mean:gMean,ctx:gChoice,wr:gWrite,build:gBuild,hear:gHear,dict:gDict,say:gSay})[S.game](c,ph);
 }
 function frame(title,body){
-  var p=V.plan(lang),left=S.mode==='new'||S.mode==='ear'?S.queue.length-S.qi:p.learn.length+p.rev.length+p.soon.length;
+  var p=V.plan(DL()),left=S.mode==='new'||S.mode==='ear'?S.queue.length-S.qi:p.learn.length+p.rev.length+p.soon.length;
   $('#play').innerHTML='<div class="play-top"><span class="tag">'+title+'</span><span class="muted">осталось: '+left+'</span><button type="button" class="round" data-x="stop" aria-label="Закончить занятие">'+KR.icon('x',16)+'</button></div>'+body;
 }
 function finish(p){
-  var again=p.waiting?'Ближайшее слово вернётся через '+SRS.span(p.nextAt-Date.now())+'.':'Новые повторения появятся завтра.',nf=V.plan(lang).fresh.length;
+  var again=p.waiting?'Ближайшее слово вернётся через '+SRS.span(p.nextAt-Date.now())+'.':'Новые повторения появятся завтра.',nf=V.plan(DL()).fresh.length;
   S.mode='done';
   $('#play').innerHTML='<div class="fin"><span class="spark">'+KR.icon('spark',34)+'</span><h3>Отработка на сегодня закончена</h3><p class="muted">Упражнений: '+S.done+'. '+again+(nf?' Новых слов на сегодня: '+nf+'.':'')+'</p>'+
     '<div class="fin-acts">'+(nf?'<button type="button" class="btn pri" data-x="to-new">Учить новые слова</button>':'')+'<button type="button"'+(nf?'':' class="btn pri"')+' data-x="stop">Готово</button></div></div>';
@@ -292,7 +295,7 @@ async function dictPull(id,done){
 var DALL=false;
 async function dictAll(b){
   if(DALL)return;DALL=true;if(b)b.disabled=true;
-  var ids=V.all(lang).filter(function(c){return !c.dq}).slice(0,40).map(function(c){return c.id}),n=0,ok=0;
+  var ids=V.all(DL()).filter(function(c){return !c.dq}).slice(0,40).map(function(c){return c.id}),n=0,ok=0;
   var msg=function(t){var m=$('#dallmsg');if(m)m.textContent=t};
   for(var i=0;i<ids.length;i++){msg('Словарь: '+(i+1)+' из '+ids.length+'…');
     try{var r=await dictPull(ids[i]);n++;if(r&&r.found)ok++}catch(e){msg('Словарь не ответил: '+e.message);break}}
@@ -347,7 +350,7 @@ function gCards(c){
 function flip(){var b=$('#back');if(!b||!b.hidden)return;b.hidden=false;$('#showrow').hidden=true;$('#rate').hidden=false;var f=$('#rate button[data-g="3"]');if(f)f.focus()}
 // выбор из четырёх: перевод слова или слово в предложении
 function gChoice(c){
-  var ctx=S.game==='ctx',byw=ctx||S.cx,d=deck().filter(function(x){return x.id!==c.id&&!rel(c,x)&&(byw||trOf(x)&&trOf(x)!==trOf(c))}),pair=c.pair?d.filter(function(x){return x.w===c.pair}):[];
+  var ctx=S.game==='ctx',byw=ctx||S.cx,d=deck(c).filter(function(x){return x.id!==c.id&&!rel(c,x)&&(byw||trOf(x)&&trOf(x)!==trOf(c))}),pair=c.pair?d.filter(function(x){return x.w===c.pair}):[];
   var others=pair.concat(shuffle(d.filter(function(x){return pair.indexOf(x)<0}))).slice(0,3),opts=shuffle([c].concat(others)),cz=ctx?cloze(c):null;
   S.opts=opts;
   frame(ctx?GAME.ctx[0]:S.cx?'Выбери слово':GAME.tr[0],(ctx?'<div class="q-word"><span'+wcls(c)+' lang="'+c.l+'">'+esc(cz.a)+'<b class="gap">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</b>'+esc(cz.b)+'</span></div>'+(c.et&&!S.cx?'<p class="muted q-sub">'+esc(c.et)+'</p>':'')
@@ -390,7 +393,7 @@ function writeCheck(){
 }
 // сборка слова из слогов (корейский) или букв (английский)
 function gBuild(c){
-  var u=units(c),extra=shuffle(deck().filter(function(x){return x.id!==c.id}).map(function(x){return units(x)}).reduce(function(a,b){return a.concat(b)},[]).filter(function(ch){return u.indexOf(ch)<0})).slice(0,Math.min(3,Math.max(1,Math.round(u.length/3))));
+  var u=units(c),extra=shuffle(deck(c).filter(function(x){return x.id!==c.id}).map(function(x){return units(x)}).reduce(function(a,b){return a.concat(b)},[]).filter(function(ch){return u.indexOf(ch)<0})).slice(0,Math.min(3,Math.max(1,Math.round(u.length/3))));
   S.u=u;S.pos=0;S.tiles=shuffle(u.concat(extra));
   frame(GAME.build[0],(S.cx?promptHtml(c):'<div class="q-word q-ru">'+esc(trOf(c))+' '+sayBtn(c.w,c.l)+'</div>')+'<div class="slots'+(c.l==='ko'?' ko':'')+'" id="slots" aria-label="Собранное слово">'+u.map(function(){return '<i></i>'}).join('')+'</div>'+
     '<div class="tiles'+(c.l==='ko'?' ko':'')+'" id="tiles">'+S.tiles.map(function(ch,i){return '<button type="button" data-t="'+i+'" lang="'+c.l+'">'+esc(ch)+'</button>'}).join('')+'</div>'+
@@ -431,7 +434,7 @@ function noRel(cards){var out=[];cards.forEach(function(c){if(!out.some(function
 /* правая колонка: в контексте — короткие определения или синонимы на изучаемом языке, если они есть у всех слов */
 function pairLabel(c,cx){if(!cx)return trOf(c);var I=info(c)||{},d=M.tdefs(c,I).filter(function(x){return x.s.length<=40})[0],sy=M.syns(c,I);return d?d.s:sy.length?'≈ '+sy.slice(0,2).join(', '):''}
 function pairs(cards){
-  var m=cm(),cx=m!=='ru'&&(m==='ctx'||Math.random()<.5)&&cards.every(function(c){return pairLabel(c,true)});
+  var m=cm(cards[0]&&cards[0].l),cx=m!=='ru'&&(m==='ctx'||Math.random()<.5)&&cards.every(function(c){return pairLabel(c,true)});
   S.gx=null;S.game='pairs';S.pc=cards;S.pm={};S.sel=null;S.left=cards.length;S.pcx=cx;S.cx=null;
   var L=shuffle(cards),R=shuffle(cards);
   frame(GAME.pairs[0],'<p class="muted q-sub">Нажми слово, потом '+(cx?'его значение':'его перевод')+'.</p><div class="pairs"><div>'+L.map(function(c){return '<button type="button" data-pw="'+esc(c.id)+'"'+wcls(c)+' lang="'+c.l+'">'+esc(c.w)+'</button>'}).join('')+'</div><div>'+
@@ -449,7 +452,7 @@ function pairTap(b){
 /* Тренировка на слух: 12 слов из тех, что уже в работе (сначала те, что пора повторить, и сложные).
    Ответы сдвигают интервалы, как упражнения уроков (KR.vocab.practice): ошибка — слово вернётся на повторение сегодня. */
 function earQueue(){
-  var all=V.all(lang),ds=SRS.dayStart(Date.now()),prev='',out=[];
+  var all=V.all(DL()),ds=SRS.dayStart(Date.now()),prev='',out=[];
   var pool=all.filter(function(c){return c.st});if(pool.length<4)pool=all.slice();
   var due=function(c){return c.st===1||c.st===3||(c.st===2&&c.due<ds+SRS.DAY)?1:0};
   pool=shuffle(pool).sort(function(a,b){return (due(b)-due(a))||((b.star?1:0)-(a.star?1:0))});
@@ -756,7 +759,7 @@ async function podRun(me){
 }
 /* значение слова в подкасте: в контексте — определение или синонимы на изучаемом языке */
 function podGloss(c){
-  var I=info(c)||{},o=shuffle(gls());
+  var I=info(c)||{},o=shuffle(gls(c.l));
   for(var i=0;i<o.length;i++){var g=o[i];
     if(g==='ctx'){var d=M.tdefs(c,I)[0],sy=M.syns(c,I);if(d)return {s:d.s,l:c.l};if(sy.length)return {s:sy.slice(0,3).join(', '),l:c.l}}
     else{var t=glossOf(c,g);if(t)return {s:t,l:g}}}
@@ -806,9 +809,9 @@ function drawPod(){
 }
 /* подкаст на сегодня: слова в работе, повторения и новые слова дня; если их нет — все изученные, начиная с тех, что скоро повторять */
 function podToday(){
-  var p=V.plan(lang),seen={},ids=[];
+  var p=V.plan(DL()),seen={},ids=[];
   p.learn.concat(p.soon,p.rev,p.fresh).forEach(function(c){if(!seen[c.id]){seen[c.id]=1;ids.push(c.id)}});
-  if(!ids.length)ids=V.all(lang).filter(function(c){return c.st}).sort(function(a,b){return a.due-b.due}).slice(0,30).map(function(c){return c.id});
+  if(!ids.length)ids=V.all(DL()).filter(function(c){return c.st}).sort(function(a,b){return a.due-b.due}).slice(0,30).map(function(c){return c.id});
   return ids;
 }
 
@@ -819,7 +822,7 @@ function badge(c){
   return '<span class="badge warn">учу</span>';
 }
 function drawList(){
-  var all=V.all(lang).sort(function(a,b){return (b.a||0)-(a.a||0)}),G=KR.LANGS[lang];
+  var all=V.all(DL()).sort(function(a,b){return (b.a||0)-(a.a||0)}),G=KR.LANGS[lang];
   var F={all:['Все',function(){return true}],new:['Новые',function(c){return !c.st}],learn:['Учу',function(c){return c.st===1||c.st===3}],known:['Знаю',function(c){return c.st===2}],star:['Сложные',function(c){return c.star}]};
   var h='<div class="card glass"><h3>Добавить слово</h3><form id="addf" class="addw" autocomplete="off"><input class="name'+(lang==='ko'?' ko':'')+'" id="aw" lang="'+lang+'" placeholder="Слово: '+G.name+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false"><input class="name" id="at" placeholder="Перевод или определение" aria-label="Перевод или определение" maxlength="300"><button type="submit" class="btn pri">'+KR.icon('plus',16)+'Добавить</button></form><p class="msg" id="amsg" role="status"></p>'+
     '<p class="hint">Несколько значений — через «;». Подойдёт и определение на любом языке: «a place to live», «사는 곳». Синонимы и устойчивые выражения добавляются в карточке слова (карандаш). Слова попадают сюда из уроков, по выделению в тексте урока и от преподавателя. Если добавить слово, которое уже есть, оно вернётся на повторение раньше.</p></div>'+
@@ -868,7 +871,7 @@ function drawPrefs(){
     SRS.GAMES.map(function(g){return '<label><input type="checkbox" name="g" value="'+g+'"'+(s.games[g]?' checked':'')+'><span><b>'+GAME[g][0]+'</b><small>'+GAME[g][1]+'</small></span></label>'}).join('')+'</div>'+
     '<div class="done-row"><button type="button" data-x="reset">Вернуть как было</button><button type="submit" class="btn pri">Сохранить</button></div><p class="msg" id="pmsg" role="status"></p></form>';
   var cmv=cm(),lvl=lang==='ko'?'2급':'A2',ln=lang==='ko'?'корейском':'английском';
-  var gs=gls(),LN=KR.LANGS[lang].name;
+  var gs=gls(),LN=KR.LANGS[lang].name;if(MIXL)h+='<p class="msg">Сейчас открыты все языки. Направления ниже — для слов «'+LN+'». Для другого языка выбери его кнопкой вверху страницы и настрой там: в «Все языки» каждое слово отрабатывается по настройкам своего языка.</p>';
   h+='<div class="card glass prefs" id="cxcfg"><h3>Как отрабатывать слова · '+LN+'</h3><p class="hint">Отметь, на каком языке давать значение слова. Можно несколько: тогда направления чередуются, например '+LN+' ↔ русский и '+LN+' ↔ '+gname(lang==='en'?'ko':'en')+' вперемешку.</p><div class="opts" role="group" aria-label="Направления перевода">'+
     glsOpts().map(function(g){var on=gs.indexOf(g)>=0;return '<button type="button" data-gl="'+g+'" aria-pressed="'+on+'" class="'+(on?'sel':'')+'">'+(on?'✓ ':'')+(g==='ctx'?'В контексте · с '+lvl:g==='ru'?LN+' ↔ русский':LN+' ↔ '+gname(g))+'</button>'}).join('')+'</div>'+
     '<p class="hint">В обе стороны: в одних заданиях видишь слово и вспоминаешь значение, в других — по значению вспоминаешь слово. Английское или корейское значение берётся из определений слова (карандаш → «Определения и переводы на других языках»; «Заполнить из словаря» добавляет их сам). Если у слова нет значения на выбранном языке, задание будет с русским. «В контексте» — только на '+ln+': определение, выражение или пример с пропуском, синонимы.</p>'+
@@ -898,7 +901,7 @@ function drawPrefs(){
 }
 /* подсказка по уровню слов из базы школы: большинство слов 2급 / A2 и выше, а режим — с русским */
 function lvTip(){
-  if(cm()!=='ru')return '';var lv=V.all(lang).map(function(c){return (info(c)||{}).level}).filter(Boolean),L=KR.W2.LEVELS[lang]||[];
+  if(cm()!=='ru')return '';var lv=V.all(DL()).map(function(c){return (info(c)||{}).level}).filter(Boolean),L=KR.W2.LEVELS[lang]||[];
   var hi=lv.filter(function(x){return L.indexOf(x)>=1}).length;
   return lv.length>=10&&hi>lv.length/2?' Большая часть твоих слов — уровня '+(lang==='ko'?'2급':'A2')+' и выше: попробуй «В контексте».':'';
 }
@@ -957,7 +960,7 @@ function bulkSave(){
   bulkRows.forEach(function(x){
     if(x.err||!x.w||!x.l)return;
     var r=addW(x.l,x.w,x.t,{src:'manual-bulk',ex:x.ex,et:x.ex?x.et:''});
-    if(x.entry){var ce=V.get(r.card.id);if(ce)V.update(enrich(ce,x.entry))}n++;if(!r.added)again++;if(x.l==='ko')ko++;if(x.l!==lang)other++;
+    if(x.entry){var ce=V.get(r.card.id);if(ce)V.update(enrich(ce,x.entry))}n++;if(!r.added)again++;if(x.l==='ko')ko++;if(x.l!==lang&&!MIXL)other++;
   });
   bulkRows=[];drawBulkPreview();$('#bulk-input').value='';
   drawToday();drawList();
@@ -971,14 +974,18 @@ function setTab(t){[].forEach.call(document.querySelectorAll('#tabs button'),fun
 /* языки словаря: открытые курсы и все языки, на которых у ученика есть слова (английские слова у ученицы корейского) */
 function wlangs(){var s={};KR.langs().forEach(function(l){s[l]=1});V.all().forEach(function(c){if(KR.LANGS[c.l])s[c.l]=1});return Object.keys(KR.LANGS).filter(function(l){return s[l]})}
 function wkey(){return 'kr_wlang:'+KR.user()}
-function wlang(){var v=null;try{v=localStorage.getItem(wkey())}catch(e){}return v&&wlangs().indexOf(v)>=0?v:KR.lang()}
+function wraw(){try{return localStorage.getItem(wkey())}catch(e){return null}}
+function wlang(){var v=wraw();if(v==='all'&&wlangs().length>1)return KR.lang();return v&&wlangs().indexOf(v)>=0?v:KR.lang()}
+function wmix(){return wraw()==='all'&&wlangs().length>1}
 function setWLang(l){try{localStorage.setItem(wkey(),l)}catch(e){}sfilt='';shown=60;
-  if(KR.langs().indexOf(l)>=0&&l!==KR.lang())return KR.setLang(l);stopListen();if(S)stop();else drawAll()}
+  if(l!=='all'&&KR.langs().indexOf(l)>=0&&l!==KR.lang())return KR.setLang(l);stopListen();if(S)stop();else drawAll()}
 function langBar(){
   var ls=wlangs();if(ls.length<2)return '';var n={};V.all().forEach(function(c){n[c.l]=(n[c.l]||0)+1});
-  return '<div class="opts wlangs" role="group" aria-label="Язык словаря">'+ls.map(function(l){return '<button type="button" data-wl="'+l+'" lang="'+l+'" aria-pressed="'+(l===lang)+'" class="'+(l===lang?'sel':'')+'">'+esc(KR.LANGS[l].name)+' · '+(n[l]||0)+'</button>'}).join('')+'</div>';
+  var b=function(k,t,on){return '<button type="button" data-wl="'+k+'" aria-pressed="'+on+'" class="'+(on?'sel':'')+'">'+t+'</button>'};
+  return '<div class="opts wlangs" role="group" aria-label="Язык словаря">'+ls.map(function(l){return b(l,'<span lang="'+l+'">'+esc(KR.LANGS[l].name)+'</span> · '+(n[l]||0),!MIXL&&l===lang)}).join('')+
+    b('all','Все языки · '+V.all().length,MIXL)+'</div>';
 }
-function drawAll(){lang=wlang();KR.topbar('words');drawToday();if(!S){drawList();if(!$('#prefs').hidden&&!typing())drawPrefs()}}
+function drawAll(){lang=wlang();MIXL=wmix();KR.topbar('words');drawToday();if(!S){drawList();if(!$('#prefs').hidden&&!typing())drawPrefs()}}
 document.addEventListener('click',function(e){
   var b=e.target.closest('button');if(!b)return;var d=b.dataset;
   if(d.say!==undefined){KR.say(d.say,d.l);return}
@@ -1064,7 +1071,7 @@ document.addEventListener('submit',function(e){
     if(!wl&&KR.W2.langOf(t)){var sw=w;w=t;t=sw;wl=KR.W2.langOf(w)}   // перевод и слово перепутаны местами
     if(!wl){m.textContent='Слово должно быть корейским или английским.';m.className='msg bad';return}
     var r=addW(wl,w,t,{src:'manual'});drawAll();m=$('#amsg');
-    var on=wl!==lang?' Оно в словаре «'+KR.LANGS[wl].name+'»: переключи кнопкой вверху страницы.':'';m.textContent=(r.added?'Добавлено: '+r.card.w+'.':'Это слово уже было в словаре. Оно вернётся на повторение раньше.')+on;m.className='msg ok';$('#aw').focus();return;
+    var on=wl!==lang&&!MIXL?' Оно в словаре «'+KR.LANGS[wl].name+'»: переключи кнопкой вверху страницы.':'';m.textContent=(r.added?'Добавлено: '+r.card.w+'.':'Это слово уже было в словаре. Оно вернётся на повторение раньше.')+on;m.className='msg ok';$('#aw').focus();return;
   }
   if(f.classList.contains('wedit')){var c=V.get(f.dataset.id);if(c){
     var tt=M.splitTr(f.t.value,c.l),dd=M.parseDefs(f.d.value),seen={};dd=dd.concat(tt.d).filter(function(x){var k=x.l+':'+x.s.toLowerCase();if(seen[k])return false;seen[k]=1;return true}).slice(0,12);
@@ -1091,7 +1098,7 @@ document.addEventListener('keydown',function(e){
 });
 // пришли данные из облака: сводку обновляем всегда, а список — только если ученик сейчас ничего не вводит
 function typing(){var a=document.activeElement;return !!a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)}
-V.onchange=function(){if(wlang()!==lang&&!S){drawAll();return}   // слова пришли из облака: язык словаря мог смениться
+V.onchange=function(){if((wlang()!==lang||wmix()!==MIXL)&&!S){drawAll();return}   // слова пришли из облака: язык словаря мог смениться
   drawToday();if(!S&&!typing()&&!editing)drawList()};
 KR.onLang=function(l){try{localStorage.setItem(wkey(),l)}catch(e){}stopListen();if(S)stop();else drawAll()};
 if(window.speechSynthesis)speechSynthesis.onvoiceschanged=function(){if(!$('#prefs').hidden&&!typing())drawPrefs()};
@@ -1099,7 +1106,7 @@ if(KR.require()){KR.topbar('words');drawAll();KR.load().then(function(){
   var l=URLP.get('lang');if(l&&wlangs().indexOf(l)>=0){try{localStorage.setItem(wkey(),l)}catch(e){}if(l!==KR.lang()&&KR.langs().indexOf(l)>=0)KR.setLang(l)}
   drawAll();loadInfo();
   // из кабинета: words.html#new — сразу знакомство с новыми словами, #rev — отработка
-  var hs=location.hash,pl=V.plan(lang);
+  var hs=location.hash,pl=V.plan(DL());
   if(hs==='#new'||hs==='#rev'){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
     if(hs==='#new'&&pl.fresh.length)start('new');else if(hs==='#rev'&&pl.learn.length+pl.soon.length+pl.rev.length)start('rev')}
 })}
