@@ -1068,7 +1068,11 @@ function wkey(){return 'kr_wlang:'+KR.user()}
 /* выбор языка живёт только до закрытия вкладки: при каждом новом входе словарь открывается на «Все языки» */
 function wraw(){try{return sessionStorage.getItem(wkey())}catch(e){return null}}
 /* словарь один: если ученик сам не выбрал язык, а слова есть на нескольких языках, открыты «Все языки» */
-function wlang(){var v=wraw();if((v==='all'||!v)&&wlangs().length>1)return KR.lang();return v&&wlangs().indexOf(v)>=0?v:KR.lang()}
+/* язык раздела сайта (KR.lang) может не совпадать со словами: курсов нет, домашка была на английском, а слова корейские.
+   Тогда открываем язык, на котором слова есть, — иначе список пустой, а переключателя нет (язык слов один) */
+function wlang(){var v=wraw(),ls=wlangs(),k=KR.lang(),ok=function(l){return ls.indexOf(l)>=0};
+  if(v&&v!=='all'&&ok(v))return v;if(ok(k)||!ls.length)return k;
+  var n={};V.all().forEach(function(c){n[c.l]=(n[c.l]||0)+1});return ls.slice().sort(function(a,b){return (n[b]||0)-(n[a]||0)})[0]}
 function wmix(){var v=wraw();return (v==='all'||!v)&&wlangs().length>1}
 function setWLang(l){try{sessionStorage.setItem(wkey(),l)}catch(e){}sfilt='';shown=60;
   if(l!=='all'&&KR.langs().indexOf(l)>=0&&l!==KR.lang())return KR.setLang(l);stopListen();if(S)stop();else drawAll()}

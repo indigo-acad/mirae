@@ -47,13 +47,40 @@ const blocks = (xml: string, name: string) => {
 };
 const first = (xml: string, name: string) => strip(blocks(xml, name)[0] || "");
 const get = (url: string, ms = 8000) => fetch(url, { headers: { "User-Agent": "MIRAE-school/1.0 (vocabulary trainer)" }, signal: AbortSignal.timeout(ms) });
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/* Ограничитель: не больше n запросов к одному словарю одновременно. 한국어기초사전 обрывает соединения,
+   если открыть сразу много (так было со списком из 40 слов: все ответы — обрыв или тайм-аут, и всё ушло в DeepL). */
+function limiter(n: number) {
+  let busy = 0; const q: (() => void)[] = [];
+  return async <T>(f: () => Promise<T>): Promise<T> => {
+    if (busy >= n) await new Promise<void>((r) => q.push(r));
+    busy++;
+    try { return await f(); } finally { busy--; const nx = q.shift(); if (nx) nx(); }
+  };
+}
+const KR_LIM = limiter(2), WIKI_LIM = limiter(2), FREE_LIM = limiter(3);
+/* 한국어기초사전 не отвечает: после 3 сетевых сбоев подряд в этом запросе больше его не ждём */
+let krFails = 0;
+const netErr = (e: unknown) => /timed out|connection|SendRequest|network|reset/i.test(String((e as Error)?.message || e));
+async function krGet(url: string): Promise<Response> {
+  if (krFails >= 3) throw new Error("krdict unavailable");
+  for (let a = 0; ; a++) {
+    try { const r = await KR_LIM(() => get(url, 7000)); krFails = 0; return r; }
+    catch (e) {
+      if (!netErr(e)) throw e;
+      krFails++;
+      if (a >= 1 || krFails >= 3) throw e;
+      await sleep(400);
+    }
+  }
+}
 
 // ---------- 한국어기초사전 ----------
 const POS_KO: Record<string, string> = { "명사": "noun", "동사": "verb", "형용사": "adjective", "부사": "adverb", "대명사": "pronoun",
   "수사": "number", "관형사": "determiner", "감탄사": "interjection", "조사": "particle" };
 async function krdict(key: string, word: string): Promise<Entry | null> {
   const q = new URLSearchParams({ key, q: word, part: "word", sort: "dict", num: "10", translated: "y", trans_lang: "0", advanced: "y", method: "exact" });
-  const r = await get(`https://krdict.korean.go.kr/api/search?${q}`);
+  const r = await krGet(`https://krdict.korean.go.kr/api/search?${q}`);
   if (!r.ok) throw new Error(`krdict ${r.status}`);
   const xml = await r.text();
   if (/<error>/.test(xml)) throw new Error("krdict: " + first(xml, "message"));
@@ -67,7 +94,7 @@ async function krdict(key: string, word: string): Promise<Entry | null> {
   let view = "";
   try {
     const v = new URLSearchParams({ key, method: "target_code", q: code, translated: "y", trans_lang: "0" });
-    const rv = await get(`https://krdict.korean.go.kr/api/view?${v}`);
+    const rv = await krGet(`https://krdict.korean.go.kr/api/view?${v}`);
     if (rv.ok) view = await rv.text();
   } catch (_) { /* без примеров */ }
   if (view && blocks(view, "sense_info").length) {
@@ -98,7 +125,7 @@ async function krdict(key: string, word: string): Promise<Entry | null> {
 
 // ---------- Free Dictionary API (английский) ----------
 async function freeDict(word: string): Promise<Entry | null> {
-  const r = await get(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+  const r = await FREE_LIM(() => get(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`));
   if (r.status === 404) return null;
   if (!r.ok) throw new Error(`dictionaryapi ${r.status}`);
   const data = await r.json();
@@ -128,7 +155,7 @@ async function freeDict(word: string): Promise<Entry | null> {
 
 // ---------- Викисловарь (запасной для обоих языков) ----------
 async function wiktionary(word: string, lang: string): Promise<Entry | null> {
-  const r = await get(`https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(word)}`);
+  const r = await WIKI_LIM(() => get(`https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(word)}`));
   if (r.status === 404) return null;
   if (!r.ok) throw new Error(`wiktionary ${r.status}`);
   const data = await r.json(), list = data[lang] || [];
@@ -185,12 +212,21 @@ Deno.serve(async (req) => {
     });
     if (!auth.ok) return json({ error: "unauthorized", message: "Не удалось проверить вход. Войдите на сайт заново." }, 401);
 
-    if (!batch) return json(await lookup(words[0], langs[0]));
-    // пакет: по 6 слов одновременно, чтобы не перегружать словари
-    const entries: Entry[] = new Array(words.length);
+    if (!batch) { krFails = 0; return json(await lookup(words[0], langs[0])); }
+    // пакет: по 6 слов одновременно (к каждому словарю — не больше 2–3 запросов разом, см. limiter).
+    // Отвечаем не позже чем через 18 с тем, что успели: translate-words ждёт 25 с, и если не дождётся, теряет весь пакет.
+    // Не найденные за это время слова — found: false, их переведёт DeepL, а статью можно добрать кнопкой «Заполнить из словаря».
+    krFails = 0;
+    const entries: (Entry & { message?: string })[] = new Array(words.length);
+    const until = Date.now() + 18000;
+    const late = (i: number) => ({ ...empty(words[i], langs[i]), message: "Словарь не успел ответить." });
     let next = 0;
     await Promise.all(Array.from({ length: Math.min(6, words.length) }, async () => {
-      while (next < words.length) { const i = next++; entries[i] = await lookup(words[i], langs[i]); }
+      while (next < words.length) {
+        const i = next++, left = until - Date.now();
+        if (left <= 0) { entries[i] = late(i); continue; }
+        entries[i] = await Promise.race([lookup(words[i], langs[i]), sleep(left).then(() => late(i))]);
+      }
     }));
     return json({ entries });
   } catch (e) {
