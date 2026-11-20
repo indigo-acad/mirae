@@ -24,6 +24,7 @@ var SPEC=null,QS=[],I=0,RES=[],locked=false,T0=0,tick=null,HWC=null,CH={},DONE={
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
 function norm(s){return String(s==null?"":s).normalize("NFC").toLowerCase().replace(/[’']/g,"").replace(/[\s.,!?…«»"()\-–—]/g,"")}
 var isKo=function(s){return /[ㄱ-ㆎ가-힣]/.test(s)};
+var wl=function(w){return w&&w.l||(isKo(w&&w.w)?"ko":SPEC&&SPEC.lang||"ko")};   // язык слова: в тесте могут быть слова разных языков
 var wcls=function(s){return isKo(s)?' class="ko" lang="ko"':""};
 
 async function loadSpec(){
@@ -50,7 +51,8 @@ function blank(f){
 function makeQ(w,k,pool){
   if((k==="tr"||k==="rev")&&pool.length<2)k="wr";
   if(k==="ctx"&&!canCtx(w))k=pool.length>=2?"tr":"wr";
-  var others=shuffle(pool.filter(function(x){return x.w!==w.w&&(k!=="tr"||(x.t&&x.t!==w.t))})).slice(0,3);
+  var ok=function(x){return x.w!==w.w&&(k!=="tr"||(x.t&&x.t!==w.t))},same=pool.filter(function(x){return ok(x)&&wl(x)===wl(w)});
+  var others=shuffle(same.length?same:pool.filter(ok)).slice(0,3);   // варианты — из слов того же языка
   if(k==="tr")return {k:k,w:w,ans:w.t,opts:shuffle([w.t].concat(others.map(function(x){return x.t})))};
   if(k==="rev")return {k:k,w:w,ans:w.w,opts:shuffle([w.w].concat(others.map(function(x){return x.w})))};
   if(k==="ctx"){var f=w.f||w.w,i=w.ex.indexOf(f);return {k:k,w:w,ans:f,before:w.ex.slice(0,i),after:w.ex.slice(i+f.length)}}
@@ -144,14 +146,15 @@ function sendRow(w,ok){
    сделанный позже (в «Повторить ошибки»), заменяет «авто». Возвращает текст для итога. */
 async function applyWords(){
   var lang=SPEC.lang||"ko",by={};
+  var LW={};QS.forEach(function(q){LW[q.w.w]=wl(q.w)});
   QS.forEach(function(q,i){var w=q.w.w,ok=!!(RES[i]&&RES[i].ok);by[w]=by[w]===false?false:ok});
   var todo=Object.keys(by).filter(function(w){var ch=CH[w]||"auto";return !DONE[w]||(ch!=="auto"&&DONE[w]!==ch)});
   if(!todo.length)return SUM;
   var now=Date.now(),cards={},out=[],n={today:0,tom:0,back:0,rev:0,none:0,miss:0};
   if(teacherDev()){var list=await KR.api("teacher_vocab",{p_student:SPEC.who});(list||[]).forEach(function(c){if(c&&c.id)cards[c.id]=c})}
-  else KR.vocab.all(lang).forEach(function(c){cards[c.id]=c});
+  else ["ko","en"].forEach(function(lg){KR.vocab.all(lg).forEach(function(c){cards[c.id]=c})});
   todo.forEach(function(w){
-    var c=cards[SRS.id(lang,w)],ch=CH[w]||"auto";DONE[w]=ch;
+    var c=cards[SRS.id(LW[w]||lang,w)],ch=CH[w]||"auto";DONE[w]=ch;
     if(!c){n.miss++;return}
     if(ch!=="auto"){out.push({c:SRS.send(c,ch,null,now),ch:ch});n[ch]++;return}
     var x=SRS.practice(c,by[w],null,now);if(!x){n.none++;return}
@@ -195,7 +198,7 @@ function finish(){
 }
 // самостоятельно: интервалы слов ученика и результат домашки
 function saveSelf(ok,bad){
-  if(KR.vocab&&!(KR.ctx&&KR.ctx.teacher)){var res={};QS.forEach(function(q,i){var c=KR.vocab.find(SPEC.lang||"ko",q.w.w);if(c)res[c.id]=res[c.id]===false?false:!!(RES[i]&&RES[i].ok)});
+  if(KR.vocab&&!(KR.ctx&&KR.ctx.teacher)){var res={};QS.forEach(function(q,i){var c=KR.vocab.find(wl(q.w),q.w.w);if(c)res[c.id]=res[c.id]===false?false:!!(RES[i]&&RES[i].ok)});
     try{var pr=KR.vocab.practice(res),pt=[];if(pr.back.length)pt.push("вернутся на повторение сегодня: "+pr.back.length);if(pr.done.length)pt.push("засчитано как повторение: "+pr.done.length);
       SUM=pt.length?"В словаре: "+pt.join(" · ")+".":""}catch(e){}}
   if(!HWC)return;

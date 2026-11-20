@@ -25,7 +25,7 @@ var wsets=null,SETMAP={};   // словари преподавателя (supaba
 var wp={id:null,words:null};   // слова выбранного словаря: ученику можно дать весь словарь или отмеченные слова
 var hws=null;   // домашка ученика (supabase/homework.sql); null — файла на сервере ещё нет
 var stw={};     // журнал занятий словами по дням (state.wl, пишет js/vocab.js): новые слова и повторения
-var tg={src:'week',lang:'ko',l:'',n:15,k:{tr:1,rev:1,ctx:1,wr:1},min:10};   // тест на начало урока: откуда слова, сколько, какие вопросы
+var tg={src:'week',lang:'all',l:'',n:15,k:{tr:1,rev:1,ctx:1,wr:1},min:10};   // тест на начало урока: откуда слова, сколько, какие вопросы
 var hwf={lang:'ko',l:'',sel:{},it:{},th:{},mats:{},mp:{},open:false};   // форма «Задать домашку»: язык, урок в списке, отмеченные упражнения, отдельные задания в них, теория, материалы, отдельные задания тренажёров
 function isOwner(){return !!(KR.ctx&&KR.ctx.owner)}
 function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.className='msg '+(ok?'ok':'bad')}}
@@ -486,7 +486,7 @@ function tgWords(src){
   src=src||tg.src;
   if(src==='lesson'){var L=window.LESSONS[tg.l];return L?KR.lessonWords(L).map(function(w){return Object.assign({l:L.lang||'ko'},w)}):[]}
   var now=Date.now(),W=7*SRS.DAY,day=SRS.dayStart(now)+SRS.DAY;
-  var list=(voc||[]).filter(function(c){return c.l===tg.lang&&c.w&&c.t});
+  var list=(voc||[]).filter(function(c){return (tg.lang==='all'||c.l===tg.lang)&&c.w&&c.t});
   if(src==='week')list=list.filter(function(c){return (c.fr&&c.fr>=now-W)||(c.lr&&c.lr>=now-W)});
   else if(src==='due')list=list.filter(function(c){return c.st&&(c.st===2?c.due<day:c.due<=now)});
   return list.map(function(c){return {w:c.w,t:c.t,ex:c.ex||'',et:c.et||'',f:c.f||'',l:c.l}});
@@ -499,7 +499,7 @@ function tgCard(){
   var h='<div class="card" id="tgc"><h3>'+KR.icon('pencil',20)+' Тест на начало урока</h3><p class="muted">Соберите тест по словам ученика или урока. «С учителем» — вопросы по одному на экране, ответ проверяется сразу, ошибки обсуждаете вместе. «Самостоятельно» — ученик проходит тест сам, результат придёт в домашку.</p>'+
     '<div class="opts tg-src" role="group" aria-label="Откуда слова">'+TG_SRC.map(function(x){return '<button type="button" data-tgsrc="'+x[0]+'" class="'+(tg.src===x[0]?'sel':'')+'" aria-pressed="'+(tg.src===x[0])+'">'+x[1]+cnt(x[0])+'</button>'}).join('')+'</div>';
   if(tg.src==='lesson')h+='<label class="field" for="tgl">Урок</label><select id="tgl">'+ls.map(function(x){return '<option value="'+esc(x[0])+'"'+(x[0]===tg.l?' selected':'')+'>'+esc(x[1])+'</option>'}).join('')+'</select>';
-  else h+='<div class="seg hwt-lang" role="group" aria-label="Язык слов">'+[['ko','Корейский'],['en','Английский']].map(function(x){return '<button type="button" data-tglang="'+x[0]+'" class="'+(tg.lang===x[0]?'on':'')+'" aria-pressed="'+(tg.lang===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>';
+  else h+='<div class="seg hwt-lang" role="group" aria-label="Язык слов">'+[['all','Все языки'],['ko','Корейский'],['en','Английский']].map(function(x){return '<button type="button" data-tglang="'+x[0]+'" class="'+(tg.lang===x[0]?'on':'')+'" aria-pressed="'+(tg.lang===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>';
   h+='<p class="muted tg-prev">'+(ws.length?'Слов: '+ws.length+' · '+ws.slice(0,8).map(function(w){return '<span'+(w.l==='ko'?' class="ko" lang="ko"':'')+'>'+esc(w.w)+'</span>'}).join(', ')+(ws.length>8?' …':'')
     :tg.src==='week'?'За неделю ученик не начинал и не повторял слова этого языка.':tg.src==='due'?'Сейчас нечего повторять.':tg.src==='lesson'?'В этом уроке нет блока «Слова».':'В словаре ученика нет слов этого языка.')+'</p>';
   h+='<div class="wt-kinds">'+TG_K.map(function(x){return '<label><input type="checkbox" data-tgk="'+x[0]+'"'+(tg.k[x[0]]?' checked':'')+'> '+x[1]+'</label>'}).join('')+'</div>'+
@@ -514,7 +514,7 @@ function tgKinds(){var k=Object.keys(tg.k).filter(function(x){return tg.k[x]});r
 function tgTitle(){var x=TG_SRC.filter(function(y){return y[0]===tg.src})[0][1];return tg.src==='lesson'?'Слова урока · '+((window.LESSONS[tg.l]||{}).title||''):x}
 function tgPick(n){   // слова для теста: недавние и трудные — в первую очередь не нужны, берём случайные, но не больше n
   var ws=tgWords(),a=ws.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}
-  return a.slice(0,Math.min(n,40)).map(function(w){return {w:String(w.w).slice(0,120),t:String(w.t).slice(0,200),ex:String(w.ex||'').slice(0,260),et:String(w.et||'').slice(0,260),f:String(w.f||'').slice(0,60)}});
+  return a.slice(0,Math.min(n,40)).map(function(w){return {l:w.l||'',w:String(w.w).slice(0,120),t:String(w.t).slice(0,200),ex:String(w.ex||'').slice(0,260),et:String(w.et||'').slice(0,260),f:String(w.f||'').slice(0,60)}});
 }
 document.addEventListener('change',function(e){var t=e.target;if(!t.closest||!t.closest('#tgc'))return;
   if(t.dataset.tgk){tg.k[t.dataset.tgk]=t.checked?1:0}
@@ -527,9 +527,10 @@ document.addEventListener('click',async function(e){
   if(b.dataset.tgsrc){tg.src=b.dataset.tgsrc;return tgRedraw()}
   if(b.dataset.tglang){tg.lang=b.dataset.tglang;return tgRedraw()}
   var lang=tg.src==='lesson'?((window.LESSONS[tg.l]||{}).lang||'ko'):tg.lang;
+  if(lang==='all'){var ko=tgWords().filter(function(w){return w.l==='ko'}).length;lang=ko*2>=tgWords().length?'ko':'en'}
   if(b.id==='tgclass'){
     var all=tgWords(),id=Date.now().toString(36);
-    var spec={title:tgTitle(),who:cur,lang:lang,words:all.map(function(w){return {w:w.w,t:w.t,ex:w.ex||'',et:w.et||'',f:w.f||''}}),kinds:tgKinds(),n:tg.n,min:0,back:'teacher.html',backT:'ученики'};
+    var spec={title:tgTitle(),who:cur,lang:lang,words:all.map(function(w){return {l:w.l||'',w:w.w,t:w.t,ex:w.ex||'',et:w.et||'',f:w.f||''}}),kinds:tgKinds(),n:tg.n,min:0,back:'teacher.html',backT:'ученики'};
     try{Object.keys(localStorage).forEach(function(k){if(/^kr_wtest:/.test(k)&&k!=='kr_wtest:'+id)localStorage.removeItem(k)});localStorage.setItem('kr_wtest:'+id,JSON.stringify(spec))}catch(x){}
     window.open('test.html?mode=class&id='+id,'_blank');return;
   }
