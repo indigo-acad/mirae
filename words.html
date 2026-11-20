@@ -317,12 +317,14 @@ function gNew(c){
     (I.image?'<img class="flash-img" src="'+esc(I.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
     '<div class="flash-w">'+word(c)+' '+sayBtn(c.w,c.l)+micBtn(c.w,c.l)+'</div>'+
     (ipa?'<div class="flash-ipa" lang="'+(c.l==='ko'?'ko':'en')+'">'+esc(ipa)+'</div>':'')+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+
-    '<div class="flash-t">'+esc(trOf(c)||'перевод не указан')+'</div>'+newMore(c)+
-    (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+(c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>':'')+
+    (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+'</div>':'')+
+    // перевод не виден сразу: сначала попробовать догадаться, потом открыть
+    '<div id="nback"'+(S.nopen===c.id?'':' hidden')+'><div class="flash-t">'+esc(trOf(c)||'перевод не указан')+'</div>'+newMore(c)+(c.ex&&c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>'+
+    (S.nopen===c.id?'':'<div class="done-row" id="nshowrow"><span class="muted">Догадайся, что значит слово, и открой</span><button type="button" class="btn pri" data-x="nshow">Показать перевод</button></div>')+
     '<div class="muted new-src">'+esc(src)+'</div></div>'+
     '<div class="new-acts"><button type="button" data-x="knew">Уже знаю</button><button type="button" class="btn pri" data-x="learn">Запомнить'+KR.icon('arrow',16)+'</button></div>'+
     '<p class="muted new-hint">«Запомнить»: слово придёт в отработку через '+SRS.label(c,3,set,now)+'. «Уже знаю»: вернётся на проверку через '+SRS.label(c,4,set,now)+'.</p>');
-  var b=$('[data-x="learn"]');if(b)b.focus({preventScroll:true});
+  var b=$('[data-x="nshow"]')||$('[data-x="learn"]');if(b)b.focus({preventScroll:true});
   if(KR.canSay())KR.say(c.w,c.l);
   if(!c.dq){var tk=S.tok;dictPull(c.id,function(n,r){if(r&&r.found&&S&&S.mode==='new'&&S.tok===tk&&!S.lock){S.card=n;if($('.newcard'))gNewRedraw(n)}}).catch(function(){})}
 }
@@ -1115,6 +1117,7 @@ document.addEventListener('click',function(e){
   if(d.tab)return setTab(d.tab);
   if(d.x==='stop')return stop();
   if(d.x==='flip')return flip();
+  if(d.x==='nshow'){if(S)S.nopen=S.card&&S.card.id;var nb=$('#nback'),nr=$('#nshowrow');if(nb)nb.hidden=false;if(nr)nr.remove();var lb=$('[data-x="learn"]');if(lb)lb.focus({preventScroll:true});return}
   if(d.x==='next')return nextCard();
   if(d.x==='hint'){S.hint=true;var c=S.card;$('#fb').innerHTML='<div class="muted">Начинается на: <b'+wcls(c)+'>'+esc(units(c)[0])+'…</b></div>';$('#win').focus();return}
   if(d.g&&S&&S.card){var r=$('#rate');if(r)[].forEach.call(r.children,function(x){x.disabled=true});return grade(+d.g,true)}
