@@ -1020,7 +1020,7 @@ function drawBulkPreview(){
   box.innerHTML='<div class="wl">'+bulkRows.map(function(x,i){
     var had=!x.err&&V.find(x.l,x.w),tag=x.err?'<span class="badge warn">'+esc(x.err)+'</span>':
       '<span class="badge">'+(LNAME[x.l]||'?')+'</span>'+(x.src==='base'?'<span class="badge ok" title="Перевод из базы слов школы">база</span>':x.src==='dict+deepl'?'<span class="badge" title="Перевод DeepL: проверь. Определения и примеры — из словаря">словарь + DeepL</span>':x.src==='dict'?'<span class="badge ok" title="Из словаря'+(x.entry&&x.entry.srcName?': '+esc(x.entry.srcName):'')+'">словарь</span>':x.src==='deepl'?'<span class="badge" title="Автоперевод DeepL: проверь">DeepL</span>':'')+
-      (had?'<span class="badge warn" title="Слово уже есть в словаре: вернётся на повторение раньше">уже есть</span>':'');
+      (had?(x.l!==lang&&!MIXL&&KR.LANGS[x.l]?'<button type="button" class="badge warn" data-wl="'+x.l+'" title="Слово уже есть в словаре «'+esc(KR.LANGS[x.l].name)+'»: вернётся на повторение раньше. Нажми, чтобы открыть этот словарь">уже есть · '+esc(KR.LANGS[x.l].name)+'</button>':'<span class="badge warn" title="Слово уже есть в словаре: вернётся на повторение раньше">уже есть</span>'):'');
     return '<div class="wrow bulk-row'+(x.err?' off':'')+'"><div class="mid"><input class="name'+(x.l==='ko'?' ko':'')+'" data-bw="'+i+'" lang="'+(x.l||'')+'" value="'+esc(x.w)+'" aria-label="Слово '+(i+1)+'"'+(x.err==='повтор'?' disabled':'')+'>'+
       '<input class="name" data-bt="'+i+'" value="'+esc(x.t)+'" placeholder="Перевод (можно оставить пустым)" aria-label="Перевод '+(i+1)+'"'+(x.err==='повтор'?' disabled':'')+'>'+
       (x.ex?'<div class="muted"'+(x.l==='ko'?' lang="ko"':'')+'>'+esc(x.ex)+(x.et?' · '+esc(x.et):'')+'</div>':'')+'</div><div class="bulk-tags">'+tag+'</div></div>';
@@ -1056,7 +1056,7 @@ function bulkSave(){
   bulkRows=[];drawBulkPreview();$('#bulk-input').value='';
   drawToday();drawList();
   var msg=$('#bulk-msg');
-  msg.textContent='Добавлено в словарь: '+n+(again?' (уже были и вернутся раньше: '+again+')':'')+'.'+(other?' Слова на другом языке ('+other+') — переключи словарь кнопкой «'+KR.LANGS[lang==='ko'?'en':'ko'].name+'» вверху страницы.':'');
+  msg.innerHTML=esc('Добавлено в словарь: '+n+(again?' (уже были и вернутся раньше: '+again+')':'')+'.')+(other?' Слова на другом языке ('+other+') сейчас не видны в списке. <button type="button" class="linkish" data-wl="all">Показать все языки</button>':'');
   msg.className='msg ok';
 }
 
@@ -1065,10 +1065,12 @@ function setTab(t){[].forEach.call(document.querySelectorAll('#tabs button'),fun
 /* языки словаря: открытые курсы и все языки, на которых у ученика есть слова (английские слова у ученицы корейского) */
 function wlangs(){var s={};KR.langs().forEach(function(l){s[l]=1});V.all().forEach(function(c){if(KR.LANGS[c.l])s[c.l]=1});return Object.keys(KR.LANGS).filter(function(l){return s[l]})}
 function wkey(){return 'kr_wlang:'+KR.user()}
-function wraw(){try{return localStorage.getItem(wkey())}catch(e){return null}}
-function wlang(){var v=wraw();if(v==='all'&&wlangs().length>1)return KR.lang();return v&&wlangs().indexOf(v)>=0?v:KR.lang()}
-function wmix(){return wraw()==='all'&&wlangs().length>1}
-function setWLang(l){try{localStorage.setItem(wkey(),l)}catch(e){}sfilt='';shown=60;
+/* выбор языка живёт только до закрытия вкладки: при каждом новом входе словарь открывается на «Все языки» */
+function wraw(){try{return sessionStorage.getItem(wkey())}catch(e){return null}}
+/* словарь один: если ученик сам не выбрал язык, а слова есть на нескольких языках, открыты «Все языки» */
+function wlang(){var v=wraw();if((v==='all'||!v)&&wlangs().length>1)return KR.lang();return v&&wlangs().indexOf(v)>=0?v:KR.lang()}
+function wmix(){var v=wraw();return (v==='all'||!v)&&wlangs().length>1}
+function setWLang(l){try{sessionStorage.setItem(wkey(),l)}catch(e){}sfilt='';shown=60;
   if(l!=='all'&&KR.langs().indexOf(l)>=0&&l!==KR.lang())return KR.setLang(l);stopListen();if(S)stop();else drawAll()}
 function langBar(){
   var ls=wlangs();if(ls.length<2)return '';var n={};V.all().forEach(function(c){n[c.l]=(n[c.l]||0)+1});
@@ -1196,10 +1198,10 @@ document.addEventListener('keydown',function(e){
 function typing(){var a=document.activeElement;return !!a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)}
 V.onchange=function(){if((wlang()!==lang||wmix()!==MIXL)&&!S){drawAll();return}   // слова пришли из облака: язык словаря мог смениться
   drawToday();if(!S&&!typing()&&!editing)drawList()};
-KR.onLang=function(l){try{localStorage.setItem(wkey(),l)}catch(e){}stopListen();if(S)stop();else drawAll()};
+KR.onLang=function(l){try{sessionStorage.setItem(wkey(),l)}catch(e){}stopListen();if(S)stop();else drawAll()};
 if(window.speechSynthesis)speechSynthesis.onvoiceschanged=function(){if(!$('#prefs').hidden&&!typing())drawPrefs()};
 if(KR.require()){KR.topbar('words');drawAll();KR.load().then(function(){
-  var l=URLP.get('lang');if(l&&wlangs().indexOf(l)>=0){try{localStorage.setItem(wkey(),l)}catch(e){}if(l!==KR.lang()&&KR.langs().indexOf(l)>=0)KR.setLang(l)}
+  var l=URLP.get('lang');if(l&&wlangs().indexOf(l)>=0){try{sessionStorage.setItem(wkey(),l)}catch(e){}if(l!==KR.lang()&&KR.langs().indexOf(l)>=0)KR.setLang(l)}
   drawAll();loadInfo();
   // из кабинета: words.html#new — сразу знакомство с новыми словами, #rev — отработка
   var hs=location.hash,pl=V.plan(DL());
