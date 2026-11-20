@@ -29,6 +29,8 @@ var tg={src:'week',lang:'ko',l:'',n:15,k:{tr:1,rev:1,ctx:1,wr:1},min:10};   // �
 var hwf={lang:'ko',l:'',sel:{},it:{},th:{},mats:{},mp:{},open:false};   // форма «Задать домашку»: язык, урок в списке, отмеченные упражнения, отдельные задания в них, теория, материалы, отдельные задания тренажёров
 function isOwner(){return !!(KR.ctx&&KR.ctx.owner)}
 function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.className='msg '+(ok?'ok':'bad')}}
+// сообщение у формы домашки: верхнее #msg на телефоне не видно, и кажется, что кнопка «ничего не делает»
+function hmsg(t,ok){msg(t,ok);var e=$('#hwmsg');if(!e)return;e.textContent=t;e.className='msg '+(ok?'ok':'bad');if(e.scrollIntoView)e.scrollIntoView({block:'nearest',behavior:'smooth'})}
 function vmsg(t,ok){var e=$('#vmsg');if(!e)return msg(t,ok);e.textContent=t;e.className='msg '+(ok?'ok':'bad');if(e.scrollIntoView)e.scrollIntoView({block:'nearest',behavior:'smooth'})}
 function genPin(){var a=new Uint32Array(1);crypto.getRandomValues(a);return String(100000+a[0]%900000)}
 function loginFrom(email,login){var l=(login||'').trim()||String(email||'').split('@')[0];return l.toLowerCase().replace(/[^a-z0-9а-яё._-]/g,'').slice(0,40)}
@@ -470,7 +472,7 @@ function hwCardT(){
     '<div class="hwt-chk"><input class="name" id="hwc-'+r.id+'" maxlength="2000" placeholder="Комментарий ученику (по желанию)"><button type="button" class="pri" data-hwchk="'+r.id+'">Проверено</button></div></div>'}).join('');
   if(act.length)h+='<p class="hwt-h"><b>Задана, ждёт ученика</b></p>'+act.map(function(r){return '<div class="hwt-row"><div class="line" style="justify-content:space-between;align-items:center;gap:8px"><div><b>'+esc(r.title)+'</b><div class="muted">'+(r.due?'срок '+fmtDay(r.due):'срок не задан')+' · задана '+fmtDate(r.created)+(r.note?' · '+esc(r.note):'')+'</div><div class="muted hwt-items">'+hwItemsText(r)+'</div></div><button type="button" data-hwdel="'+r.id+'">Убрать</button></div></div>'}).join('');
   if(!act.length&&!sub.length)h+='<p class="muted">Сейчас домашки нет. Задайте её: ученик увидит её в кабинете, сделает и сдаст, а результаты придут сюда.</p>';
-  h+=hwForm();
+  h+=hwForm()+'<p id="hwmsg" class="msg" role="status" aria-live="polite"></p>';
   if(chk.length)h+='<details class="hwt-old"><summary>Проверенные · '+chk.length+'</summary>'+chk.map(function(r){return '<div class="hwt-row"><div class="line" style="justify-content:space-between;align-items:center;gap:8px"><div><b>'+esc(r.title)+'</b><div class="muted">проверена '+fmtDate(r.checked)+(r.comment?' · «'+esc(r.comment)+'»':'')+'</div></div><span class="badge ok">'+esc(hwScore(r)||'проверена')+'</span></div><details class="hwt-res"><summary>Ответы</summary>'+hwResultHtml(r)+'</details></div>'}).join('')+'</details>';
   return h+'</div>';
 }
@@ -562,11 +564,11 @@ document.addEventListener('click',async function(e){
   var b=e.target.closest('button');if(!b||!cur)return;
   if(b.dataset.hwlang){hwf.lang=b.dataset.hwlang;var c=$('#hwt');if(c){c.outerHTML=hwCardT();hwSummary()}return}
   if(b.id==='hwgo'){
-    var pk=hwPicked();if(!pk.items.length){msg('Отметьте хотя бы одно упражнение, задание или тренажёр');return}
+    var pk=hwPicked();if(!pk.items.length){hmsg('Отметьте хотя бы одно упражнение, задание или тренажёр');return}
     var hw={title:($('#hwti').value||'').trim()||hwAutoTitle(pk),lang:hwf.lang,items:pk.items,theory:pk.theory,due:$('#hwdue').value||null,note:($('#hwnote').value||'').trim()};
     b.disabled=true;
-    try{await KR.api('teacher_hw_save',{p_student:cur,p_hw:hw});hwf={lang:hwf.lang,l:hwf.l,sel:{},it:{},th:{},mats:{},mp:{},open:false};await hwReload();msg('Домашка задана: «'+hw.title+'». Ученик увидит её в кабинете.',true)}
-    catch(x){b.disabled=false;msg(/no_student/.test(x.message||'')?'Этого ученика ведёт другой преподаватель':/no_material/.test(x.message||'')?'Тренажёр не найден в каталоге на сервере — обновите страницу':'Не получилось задать домашку')}
+    try{await KR.api('teacher_hw_save',{p_student:cur,p_hw:hw});hwf={lang:hwf.lang,l:hwf.l,sel:{},it:{},th:{},mats:{},mp:{},open:false};await hwReload();hmsg('Домашка задана: «'+hw.title+'». Ученик увидит её в кабинете.',true)}
+    catch(x){b.disabled=false;hmsg(/no_student/.test(x.message||'')?'Этого ученика ведёт другой преподаватель':/no_material/.test(x.message||'')?'Тренажёр не найден в каталоге на сервере — обновите страницу':'Не получилось задать домашку')}
     return;
   }
   if(b.dataset.hwdel){if(!confirm('Убрать эту домашку у ученика? Его ответы по ней пропадут.'))return;
