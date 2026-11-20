@@ -322,7 +322,7 @@ function gNew(c){
     (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+'</div>':'')+
     // перевод не виден сразу: сначала попробовать догадаться, потом открыть
     '<div id="nback"'+(S.nopen===c.id?'':' hidden')+'><div class="flash-t">'+esc(trOf(c)||'перевод не указан')+'</div>'+newMore(c)+(c.ex&&c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>'+
-    (S.nopen===c.id?'':'<div class="done-row" id="nshowrow"><span class="muted">Догадайся, что значит слово, и открой</span><button type="button" class="btn pri" data-x="nshow">Показать перевод</button></div>')+
+    (S.nopen===c.id?'':'<div class="done-row" id="nshowrow"><span></span><button type="button" class="btn pri" data-x="nshow">Показать перевод</button></div>')+
     '<div class="muted new-src">'+esc(src)+'</div></div>'+
     '<div class="new-acts"><button type="button" data-x="knew">Уже знаю</button><button type="button" class="btn pri" data-x="learn">Запомнить'+KR.icon('arrow',16)+'</button></div>'+
     '<p class="muted new-hint">«Запомнить»: слово придёт в отработку через '+SRS.label(c,3,set,now)+'. «Уже знаю»: вернётся на проверку через '+SRS.label(c,4,set,now)+'.</p>');
