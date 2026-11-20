@@ -381,6 +381,14 @@ window.MATERIALS=[
   "level": "1B"
  },
  {
+  "id": "ko-skz-holiday",
+  "section": "korean",
+  "kind": "quest",
+  "title": "SKZ CODE · Holiday House (видео-уроки)",
+  "path": "materials/korean/ko-skz-holiday/",
+  "level": "2급"
+ },
+ {
   "id": "ko-listening-grandpa",
   "section": "korean",
   "kind": "trainer",
