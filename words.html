@@ -1198,10 +1198,10 @@ document.addEventListener('keydown',function(e){
 function typing(){var a=document.activeElement;return !!a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)}
 V.onchange=function(){if((wlang()!==lang||wmix()!==MIXL)&&!S){drawAll();return}   // слова пришли из облака: язык словаря мог смениться
   drawToday();if(!S&&!typing()&&!editing)drawList()};
-KR.onLang=function(l){try{localStorage.setItem(wkey(),l)}catch(e){}stopListen();if(S)stop();else drawAll()};
+KR.onLang=function(l){try{sessionStorage.setItem(wkey(),l)}catch(e){}stopListen();if(S)stop();else drawAll()};
 if(window.speechSynthesis)speechSynthesis.onvoiceschanged=function(){if(!$('#prefs').hidden&&!typing())drawPrefs()};
 if(KR.require()){KR.topbar('words');drawAll();KR.load().then(function(){
-  var l=URLP.get('lang');if(l&&wlangs().indexOf(l)>=0){try{localStorage.setItem(wkey(),l)}catch(e){}if(l!==KR.lang()&&KR.langs().indexOf(l)>=0)KR.setLang(l)}
+  var l=URLP.get('lang');if(l&&wlangs().indexOf(l)>=0){try{sessionStorage.setItem(wkey(),l)}catch(e){}if(l!==KR.lang()&&KR.langs().indexOf(l)>=0)KR.setLang(l)}
   drawAll();loadInfo();
   // из кабинета: words.html#new — сразу знакомство с новыми словами, #rev — отработка
   var hs=location.hash,pl=V.plan(DL());
