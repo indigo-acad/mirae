@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SKZ CODE · Holiday House · 2급 비디오 수업</title>
+<style>
+:root{--bg:#10162b;--bg2:#1f2a4a;--card:#fbfaf6;--ink:#1f2333;--muted:#6f7488;--acc:#d4473f;--acc2:#ffc9a8;--ok:#178a4f;--okbg:#dcf5e6;--bad:#c0392b;--badbg:#fde3e0;--line:#e6e2da;--sel:#ffe9dc}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg2)) fixed;color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;min-height:100vh}
+.wrap{max-width:680px;margin:0 auto;padding:14px 12px 50px}
+.hidden{display:none!important}
+.card{background:var(--card);border-radius:18px;padding:18px 16px;margin-top:12px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+h1{color:#fff;font-size:28px;margin:30px 0 2px} .sub{color:var(--acc2);margin:0 0 6px}
+.muted{color:var(--muted);font-size:14px}
+button{font:inherit;cursor:pointer;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:11px 12px}
+.main{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:700;width:100%;margin-top:14px}
+.main:disabled{opacity:.45;cursor:default}
+input,textarea{font:inherit;width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;margin-top:8px;background:#fff}
+textarea{min-height:120px;resize:vertical}
+.lessons{display:grid;gap:10px;margin-top:10px}
+.lessons button{text-align:left;display:flex;gap:12px;align-items:center}
+.lessons .e{font-size:30px}.lessons b{display:block}
+.lessons .st{margin-left:auto;font-size:14px;color:var(--ok);font-weight:700}
+.top{display:flex;justify-content:space-between;align-items:center;color:#dfe3f3;font-size:14px;gap:8px;margin-top:30px}
+.score{font-weight:700;color:var(--acc2)}
+.bar{height:6px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden;margin:8px 0 0}
+.bar>i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.ep{color:#fff;text-align:center;padding:24px 10px 6px}
+.ep .no{color:var(--acc2);font-size:15px;letter-spacing:2px}
+.ep .tt{font-size:30px;font-weight:800;margin:6px 0}
+.narr{font-style:italic;color:#555a6b;border-left:3px solid var(--acc2);padding:2px 0 2px 10px;margin-bottom:12px;font-size:15px}
+.line{display:flex;gap:10px;align-items:flex-start;margin:8px 0}
+.ava{width:40px;height:40px;border-radius:50%;background:var(--sel);display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+.bub{background:#f1eee8;border-radius:4px 14px 14px 14px;padding:8px 12px;font-size:18px}
+.bub .who{font-size:12px;color:var(--acc);font-weight:700;display:block}
+.gap{display:inline-block;min-width:60px;border-bottom:2px solid var(--acc);color:var(--acc);font-weight:700;text-align:center}
+.q{font-weight:600;margin:12px 0 4px;font-size:15px;color:#3d4152}
+.opts{display:grid;gap:8px;margin-top:8px}
+.opts button{text-align:left;font-size:17px}
+button.ok{background:var(--okbg)!important;border-color:var(--ok)!important}
+button.bad{background:var(--badbg)!important;border-color:var(--bad)!important}
+.fb{margin-top:12px;padding:10px 12px;border-radius:12px;font-size:15px}
+.fb.good{background:var(--okbg)} .fb.wrong{background:var(--badbg)}
+.base{display:inline-block;background:#f1eee8;border-radius:8px;padding:2px 8px;font-size:15px;margin-top:6px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.col{display:grid;gap:8px;align-content:start}
+.col button{text-align:left;min-height:46px;font-size:15px}
+.col button.ko{font-size:17px}
+.col button.sel{background:var(--sel);border-color:var(--acc)}
+.col button.gone{opacity:.3;pointer-events:none;background:var(--okbg);border-color:var(--ok)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips button{font-size:17px;padding:9px 12px}
+.ansline{min-height:56px;border:2px dashed var(--line);border-radius:12px;padding:6px;display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ansline button{background:var(--sel);border-color:var(--acc);font-size:17px;padding:7px 10px}
+.vid{position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000;margin-top:10px}
+.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.novid{background:#f1eee8;border-radius:12px;padding:16px;margin-top:10px;font-size:15px}
+.ticks{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ticks button{font-size:16px;padding:8px 12px}
+.ticks button.on{background:var(--sel);border-color:var(--acc)}
+.row{border-top:1px solid var(--line);padding:7px 0;font-size:15px}
+.end{text-align:center;color:#fff;padding:20px 8px}
+.end .big{font-size:52px} .end .tt{font-size:26px;font-weight:800;margin:4px 0}
+</style>
+</head>
+<body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+
+<div id="start">
+  <h1>🏡 Holiday House</h1>
+  <p class="sub">SKZ CODE Ep.89로 배우는 한국어 · 2급 · 4과</p>
+  <div class="card">
+    <div>스트레이 키즈 멤버들이 휴가 집에서 같이 지내요. 방을 나누고, 요리하고, 게임하고, 밤에 이야기해요. 영상을 보고 그 장면의 한국어를 연습해요!</div>
+    <div class="muted" style="margin-top:6px">Участники Stray Kids вместе живут в доме на каникулах: делят комнаты, готовят, играют, разговаривают вечером. Смотрим отрывок и отрабатываем язык этих сцен. 4 урока по ≈15 минут.</div>
+    <div style="margin-top:14px">이름</div>
+    <input id="nameInput" placeholder="이름" autocomplete="off" onkeydown="if(event.key==='Enter')$('pinInput').focus()">
+    <div style="margin-top:12px">비밀번호 (숫자 4자리)</div>
+    <input id="pinInput" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off" style="max-width:160px" onkeydown="if(event.key==='Enter')login()">
+    <div class="muted" style="margin-top:4px">처음이면 비밀번호를 새로 만들고 꼭 기억하세요. · Первый раз — придумайте PIN и запомните его.</div>
+    <div id="loginFb" style="margin-top:8px;color:var(--bad);font-size:15px"></div>
+    <button class="main" id="loginBtn" onclick="login()">들어가기 ▶</button>
+  </div>
+</div>
+
+<div id="menu" class="hidden">
+  <h1>🏡 Holiday House</h1>
+  <p class="sub" id="hello"></p>
+  <div class="card"><div class="muted">수업을 고르세요 · Выберите урок</div><div class="lessons" id="lessonList"></div></div>
+</div>
+
+<div id="play" class="hidden">
+  <div class="top"><span id="epInfo"></span><span><span id="cloud" style="margin-right:8px"></span><span class="score" id="score"></span></span></div>
+  <div class="bar"><i id="prog"></i></div>
+  <div id="stage"></div>
+</div>
+
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const KEY="skz_holiday_2geup_v1";
+const TG_TOKEN="9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU", TG_CHAT_ID="347625701";
+const SB_URL="https://nusfkwtmnbhnbnckhrfk.supabase.co", SB_KEY="sb_publishable_UmWyFo7ciEc-m9x1ZIfkNw_yeQQAgf8";
+
+/* ===== ВИДЕО: SKZ CODE Ep.89 Holiday House #1 (youtu.be/MI6_aH1JT7s). Таймкоды в секундах. ===== */
+const VIDEOS={
+  1:{id:"MI6_aH1JT7s",start:24,end:80},
+  2:{id:"MI6_aH1JT7s",start:88,end:170},
+  3:{id:"MI6_aH1JT7s",start:1100,end:1192},
+  4:{id:"MI6_aH1JT7s",start:1258,end:1458}
+};
+
+const AVA={A:"🐺",B:"🐰",C:"🐥",IN:"🦊",PD:"🎬",ME:"🙋"};
+const WHO={A:"멤버",B:"멤버",C:"멤버",IN:"아이엔",PD:"제작진"};
+/* Типы: match, video (просмотр + отметить услышанные слова, без оценки), mc, type, order, write (без оценки).
+   Реплики в заданиях — из субтитров выпуска (иногда упрощены). */
+const EPS=[
+{no:1,e:"🍊",tt:"연말이다!",ru:"Конец года: мандарины, водоросли и диван",gram:"-다고 하다 · -아/어 보다",time:"0:24–1:20",
+ narr:"스트레이 키즈가 휴가 집에 왔어요. 연말이에요! 멤버들은 귤을 먹으면서 이야기해요. 김하고 귤을 같이 먹으면 무슨 맛이 날까요?",
+ tasks:[
+  {t:"match",q:"영상 전에 단어를 배워요. 뜻을 연결하세요.",pairs:[["연말","конец года"],["귤","мандарин"],["김","сушёные водоросли"],["연어 초밥","суши с лососем"],["맛이 나다","иметь вкус, на вкус как"],["소파 밑","под диваном, у дивана"]]},
+  {t:"video",q:"영상을 보세요 (0:24–1:20). 들은 말을 누르세요. · Смотрите и отмечайте, что услышали.",words:["예쁘다","연말이다","김","귤","연어 초밥","진짜로?","해 봐야 돼","소파"]},
+  {t:"mc",q:"김하고 귤을 같이 먹으면 무슨 맛이 난다고 해요?",opts:["연어 초밥 맛","김치 맛","케이크 맛","라면 맛"],a:0,ex:"«김이랑 귤이랑 먹으면 연어 초밥 맛 난다고 하더라» — говорят, что на вкус как суши с лососем."},
+  {t:"mc",q:"멤버들은 무엇이 «한국인 특»이라고 해요?",opts:["소파 밑에 앉는 것","귤을 많이 먹는 것","김치를 먹는 것","모자를 쓰는 것"],a:0,ex:"«이게 한국인 특 아니야? 소파 밑에 앉는 거» — сидеть на полу, прислонившись к дивану. 특 = 특징, «фишка»."},
+  {t:"mc",lines:[["A","김이랑 귤이랑 먹으면 연어 초밥 맛이 ___."]],q:"다른 사람에게 들은 말을 전해요.",opts:["난다고 해","나고 싶어","날게","나 줘"],a:0,ex:"동-ㄴ/는다고 하다: передаём чужие слова, «говорят, что…». 나다 → 난다고 해요."},
+  {t:"type",lines:[["B","진짜? 그럼 우리도 해 ___ 돼!"]],base:"하다 + -아/어 보다 + -아/어야 되다",ans:["봐야"],ex:"해 보다 — попробовать; 해 봐야 돼 — надо попробовать (реплика из выпуска)."},
+  {t:"mc",lines:[["C","나는 외국인인가 봐. 난 소파가 ___."]],q:"알맞은 것을 고르세요.",opts:["좋아","좋아해","좋게","좋은"],a:0,ex:"«난 소파가 좋아» — мне нравится диван. N이/가 좋다 (прилагательное) = N을/를 좋아하다 (глагол)."},
+  {t:"write",q:"여러분 나라에서는 연말에 무엇을 해요? 무엇을 먹어요? 2~3문장으로 쓰세요. -다고 하다 또는 -아/어 보다를 써 보세요."}
+ ]},
+{no:2,e:"🕵️",tt:"비밀 미션",ru:"Секретная миссия I.N",gram:"-지 않고 · -지 마세요 · -(으)면 -아/어야 되다",time:"1:28–2:50",
+ narr:"아이엔은 오늘 이상해요. 왜 그럴까요? 사실 아이엔에게만 비밀 미션이 있었어요! 그리고 멤버들은 오랜만에 요리를 하려고 해요.",
+ tasks:[
+  {t:"match",q:"단어를 연결하세요.",pairs:[["비밀","секрет, секретный"],["들키다","попасться, быть замеченным"],["수행하다","выполнять"],["실패하다","провалиться, не суметь"],["설거지","мытьё посуды"],["오랜만에","впервые за долгое время"]]},
+  {t:"video",q:"영상을 보세요 (1:28–2:50). 들은 말을 누르세요.",words:["비밀 미션","들키지 않고","시키지 마세요","실패하면","설거지","요리 합시다","게임","콘텐츠"]},
+  {t:"mc",q:"아이엔이 미션에 실패하면 어떻게 돼요?",opts:["설거지를 다 해야 돼요","요리를 못 해요","집에 가야 돼요","노래를 해야 돼요"],a:0,ex:"«제가 실패하면 제가 설거지 다 해야 되는 거죠?» — если провалю, мне мыть всю посуду, да?"},
+  {t:"mc",lines:[["PD","형들한테 ___ 비밀 미션을 수행하세요."]],q:"알맞은 것을 고르세요.",opts:["들키지 않고","들키고 싶어서","들키면서","들킬게요"],a:0,ex:"동-지 않고: не делая чего-то, «так, чтобы не…». 들키지 않고 — не попавшись."},
+  {t:"type",lines:[["IN","저한테 그런 거 ___. 그런 거 못 해요."]],base:"시키다 + -지 마세요",ans:["시키지 마세요","시키지마세요"],ex:"동-지 마세요: не делайте. «Не заставляйте меня такое делать»."},
+  {t:"mc",lines:[["IN","제가 실패하면 제가 설거지 다 ___ 되는 거죠?"]],q:"해야 하는 일이에요.",opts:["해야","하면","하고","할게"],a:0,ex:"-(으)면 … -아/어야 되다: если…, то придётся. 실패하면 설거지해야 돼요."},
+  {t:"order",q:"멤버의 말이에요. 문장을 만드세요.",chips:["오랜만에","요리","합시다"],ans:["오랜만에 요리 합시다","오랜만에 요리합시다"],ex:"동-(으)ㅂ시다: «давайте…» (вежливо-официально). 요리합시다."},
+  {t:"write",q:"여러분에게 비밀 미션이 있어요! 친구들한테 들키지 않고 무엇을 할 거예요? 실패하면 무엇을 해야 돼요? 2~3문장."}
+ ]},
+{no:3,e:"📜",tt:"속담 퀴즈",ru:"Викторина с пословицами",gram:"속담 · -아/어야 · -(으)ㄴ/는 줄 모르다",time:"18:20–19:52",
+ narr:"멤버들이 상식 퀴즈 연습을 해요. 한 사람이 속담의 앞부분을 말하면 다음 사람이 뒷부분을 말해요. 모르면 웃기게 말하기!",
+ tasks:[
+  {t:"match",q:"속담 앞부분과 뒷부분을 연결하세요. (영상 속 속담!)",pairs:[["등잔 밑이","어둡다"],["낮말은 새가 듣고","밤말은 쥐가 듣는다"],["금강산도","식후경"],["방귀 뀐 놈이","성낸다"],["닭 쫓던 개","지붕 쳐다본다"],["엎친 데","덮친 격"]]},
+  {t:"video",q:"영상을 보세요 (18:20–19:52). 맞게 말한 속담을 누르세요.",words:["도토리 키 재기","등잔 밑이 어둡다","하룻강아지 범 무서운 줄 모른다","금강산도 식후경","엎친 데 덮친 격","윗물이 맑아야 아랫물이 맑다"]},
+  {t:"mc",q:"«금강산도 식후경»에서 필릭스는 뭐라고 대답했어요? 😄",opts:["디저트","식후경","맛있다","산이다"],a:0,ex:"Правильно 식후경: «даже горы Кымгансан — после еды» = сначала поесть. Феликс ответил «디저트» — и все решили, что это тоже логично."},
+  {t:"mc",q:"«등잔 밑이 어둡다»는 무슨 뜻이에요?",opts:["가까이 있는 것을 잘 모른다","밤에는 불을 켜야 한다","어두운 곳은 무섭다","등잔이 비싸다"],a:0,ex:"«Под светильником темно» — самое близкое труднее всего заметить (≈ «под носом не видишь»)."},
+  {t:"mc",q:"«낮말은 새가 듣고 밤말은 쥐가 듣는다»는 언제 써요?",opts:["말을 조심하라고 할 때","새를 좋아할 때","밤에 잠이 안 올 때","쥐가 무서울 때"],a:0,ex:"«Днём слова слышат птицы, ночью — мыши» = у стен есть уши, следи за словами. Хан пошутил: «밤말은 한지성이 듣는다»."},
+  {t:"type",lines:[["C","윗물이 ___ 아랫물이 맑다."]],base:"맑다 + -아/어야",ans:["맑아야"],ex:"-아/어야: только если… Бан Чан ответил «하늘이 맑다» 😄, а правильно — 아랫물이 맑다 (пример сверху)."},
+  {t:"mc",lines:[["A","하룻강아지 범 무서운 ___ 모른다."]],q:"알맞은 것을 고르세요.",opts:["줄","것을","데","수"],a:0,ex:"-(으)ㄴ/는 줄 모르다: не знать, что… «Однодневный щенок не знает, что тигр страшен» — молодо-зелено."},
+  {t:"write",q:"여러분 나라 속담 하나를 한국어로 설명해 보세요. 비슷한 한국 속담이 있어요? (예: 등잔 밑이 어둡다)"}
+ ]},
+{no:4,e:"🍊",tt:"귤 까기 & 역할 뽑기",ru:"Чистим мандарины и тянем роли",gram:"-(으)면 · -아/어 놓다 · -(으)ㄹ게요 · N씩",time:"20:58–24:18",
+ narr:"마지막 게임! 30초 안에 여덟 명이 귤 20개를 까야 해요. 귤이 터지면 실패예요. 그다음에 누가 무엇을 만들지 뽑아요.",
+ tasks:[
+  {t:"match",q:"단어를 연결하세요.",pairs:[["까다","чистить (кожуру)"],["터지다","лопнуть"],["재료","ингредиенты"],["미리","заранее"],["뽑다","тянуть (жребий)"],["자존심","самолюбие, гордость"]]},
+  {t:"video",q:"영상을 보세요 (20:58–24:18). 들은 말을 누르세요.",words:["30초","두 개씩","미리 해 놔","터지면 실패","쉬워","왜 터졌지?","자존심","뽑을게요"]},
+  {t:"mc",q:"게임 결과는 어땠어요?",opts:["실패했지만 재료를 받았어요","성공해서 재료를 받았어요","실패해서 아무것도 못 받았어요","게임을 안 했어요"],a:0,ex:"Посчитали 18 мандаринов + лопнувшие → провал, но им всё равно отдали продукты: «자존심 괜찮아요?» — «저희 자존심 없어요» 😄"},
+  {t:"mc",lines:[["A","귤이 ___ 실패니까 조심해!"]],q:"조건을 말해요.",opts:["터지면","터져서","터지고","터질게"],a:0,ex:"동-(으)면: если. 터지면 실패 — если лопнет, проигрыш."},
+  {t:"type",lines:[["B","각자 두 개___ 잡고 빨리 까!"]],base:"N + 씩 (каждому по…)",ans:["씩"],ex:"N씩: по N на каждого. 두 개씩 — по две штуки."},
+  {t:"mc",lines:[["C","시간이 없어. 미리 해 ___!"]],q:"준비해 두라고 해요.",opts:["놔","봐","줘","가"],a:0,ex:"동-아/어 놓다: сделать заранее (и оставить так). 미리 해 놔 — сделай заранее."},
+  {t:"type",lines:[["A","뽑을래요? 자, 저부터 ___."]],base:"뽑다 + -(으)ㄹ게요",ans:["뽑을게요"],ex:"-(으)ㄹ게요: «я сделаю» (беру на себя). Реплика из выпуска."},
+  {t:"write",q:"여러분이 친구 8명과 파티를 해요. 역할을 나눠 보세요: 누가 요리하고, 누가 케이크를 만들고, 누가 꾸며요? 저는 ~(으)ㄹ게요를 써서 3문장으로 쓰세요."}
+ ]}
+];
+
+/* ---------- состояние ---------- */
+let S=null, PIN="", CL=0;
+const scored=ep=>ep.tasks.filter(t=>t.t!=="write"&&t.t!=="video").length;
+async function rpc(fn,args){ const r=await fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"},body:JSON.stringify(args)});
+  const t=await r.text(); if(!r.ok){ let m=t; try{m=JSON.parse(t).message}catch(e){} throw new Error(m); } return t?JSON.parse(t):null; }
+let cloudT=null;
+function cloudMark(s){ const c=$("cloud"); if(c) c.textContent=s; }
+function blank(n){ return {name:n,L:{1:null,2:null,3:null,4:null}}; }
+function fresh(){ return {ti:0,log:[],texts:{},heard:{},t0:Date.now(),done:false,sent:false}; }
+function save(){
+  try{ localStorage.setItem(KEY+"_"+S.name.toLowerCase(),JSON.stringify(S)); localStorage.setItem(KEY+"_last",JSON.stringify({name:S.name,pin:PIN})); }catch(e){}
+  if(!PIN) return; clearTimeout(cloudT); cloudMark("☁️…");
+  cloudT=setTimeout(async()=>{ try{ await rpc("save_progress",{p_site:KEY,p_name:S.name,p_pin:PIN,p_state:S}); cloudMark("☁️✓"); }catch(e){ cloudMark("⚠️"); } },800);
+}
+function localState(n){ try{ return JSON.parse(localStorage.getItem(KEY+"_"+n.toLowerCase())||"null"); }catch(e){ return null; } }
+(function(){ try{ const l=JSON.parse(localStorage.getItem(KEY+"_last")||"null"); if(l){ $("nameInput").value=l.name||""; $("pinInput").value=l.pin||""; } }catch(e){} })();
+const weight=s=>s&&s.L?Object.values(s.L).reduce((a,x)=>a+(x?(x.done?100:x.log.length):0),0):-1;
+
+async function login(){
+  const n=$("nameInput").value.trim(), pin=$("pinInput").value.trim(), fb=$("loginFb");
+  if(!n){ $("nameInput").focus(); return; }
+  if(!/^\d{4,8}$/.test(pin)){ fb.textContent="비밀번호를 숫자 4자리로 입력하세요."; return; }
+  fb.style.color="var(--muted)"; fb.textContent="불러오는 중…"; $("loginBtn").disabled=true;
+  let remote=null;
+  try{ remote=await rpc("load_progress",{p_site:KEY,p_name:n,p_pin:pin}); PIN=pin; fb.textContent=""; }
+  catch(e){
+    $("loginBtn").disabled=false; fb.style.color="var(--bad)";
+    if(/wrong_pin/.test(e.message)){ fb.textContent="이 이름의 비밀번호가 맞지 않아요."; return; }
+    fb.textContent="서버에 연결할 수 없어요. 지금은 이 기기에만 저장돼요."; PIN="";
+    await new Promise(r=>setTimeout(r,1500));
+  }
+  $("loginBtn").disabled=false;
+  const loc=localState(n);
+  S=weight(remote)>=weight(loc)&&remote&&remote.L?remote:(loc&&loc.L?loc:blank(n));
+  S.name=n; save(); menu();
+}
+function menu(){
+  ["start","play"].forEach(i=>$(i).classList.add("hidden")); $("menu").classList.remove("hidden");
+  $("hello").textContent=S.name+" 씨, 안녕하세요! 👋";
+  $("lessonList").innerHTML=EPS.map(ep=>{ const x=S.L[ep.no];
+    const st=x&&x.done?`✅ ${x.log.filter(l=>l.ok).length}/${scored(ep)}`:(x&&x.log.length?"…":"");
+    return `<button onclick="openL(${ep.no})"><span class="e">${ep.e}</span><span><b>${ep.no}과 · ${ep.tt}</b><span class="muted">${ep.ru} · ${ep.gram}</span></span><span class="st">${st}</span></button>`; }).join("");
+  window.scrollTo(0,0);
+}
+function openL(no){
+  CL=no; let x=S.L[no];
+  if(x&&x.done&&!confirm("이 수업을 다시 할까요? · Пройти урок заново?")){ return; }
+  if(!x||x.done){ S.L[no]=fresh(); save(); }
+  $("menu").classList.add("hidden"); $("play").classList.remove("hidden");
+  if(S.L[no].ti===0&&!S.L[no].log.length) intro(); else task();
+}
+const ep=()=>EPS[CL-1], cur=()=>S.L[CL];
+function hud(){
+  const e=ep(), x=cur();
+  $("epInfo").innerHTML=`<a href="#" onclick="menu();return false" style="color:var(--acc2)">☰</a> ${e.no}과 · ${e.tt}`;
+  $("score").textContent=`★ ${x.log.filter(l=>l.ok).length}/${scored(e)}`;
+  $("prog").style.width=Math.round(x.ti/e.tasks.length*100)+"%";
+}
+function intro(){
+  const e=ep(); hud();
+  $("stage").innerHTML=`<div class="ep"><div class="no">${e.no}과 · 약 15분 · 🎬 ${e.time}</div><div class="tt">${e.e} ${e.tt}</div><div style="color:#dfe3f3">${e.ru}</div></div>
+   <div class="card"><div class="narr">${esc(e.narr)}</div><div class="muted">문법 · Грамматика: <b>${esc(e.gram)}</b></div>
+   <div class="muted" style="margin-top:6px">단어 → 영상 → 문법 → 쓰기 · Слова → видео → грамматика → письмо</div>
+   <button class="main" onclick="task()">시작 ▶</button></div>`;
+  window.scrollTo(0,0);
+}
+function linesHTML(lines){
+  return (lines||[]).map(([w,t])=>{ const txt=esc(t).replace(/___/g,'<span class="gap">&nbsp;?&nbsp;</span>');
+    return `<div class="line"><div class="ava">${AVA[w]}</div><div class="bub"><span class="who">${WHO[w]||""}</span>${txt}</div></div>`; }).join("");
+}
+function videoHTML(){
+  const v=VIDEOS[CL];
+  if(v&&v.id){ let p=[]; if(v.start) p.push("start="+v.start); if(v.end) p.push("end="+v.end); p.push("rel=0");
+    return `<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${esc(v.id)}?${p.join("&")}" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
+    <div class="muted" style="margin-top:6px">한국어 자막을 켜고 보세요 (⚙️ → 자막). Можно посмотреть 2 раза: сначала без субтитров, потом с корейскими.</div>`; }
+  return `<div class="novid">🎬 Отрывок для этого урока учитель добавит позже. Пока можно найти выпуск на YouTube: <a target="_blank" href="https://www.youtube.com/results?search_query=SKZ+CODE+Holiday+House">SKZ CODE · Holiday House</a></div>`;
+}
+let CUR=null;
+function task(){
+  const e=ep(), x=cur(), t=e.tasks[x.ti]; CUR={t}; hud();
+  let h=`<div class="card"><div class="muted">${x.ti+1} / ${e.tasks.length}</div>${linesHTML(t.lines)}`;
+  if(t.q) h+=`<div class="q">${t.q}</div>`;
+  if(t.t==="mc"){
+    h+=`<div class="opts">${shuffle(t.opts.map((o,i)=>i)).map(i=>`<button data-i="${i}" onclick="pickMC(this)">${esc(t.opts[i])}</button>`).join("")}</div>`;
+  } else if(t.t==="type"){
+    h+=`<div class="base">💡 ${esc(t.base)}</div><input id="typeIn" autocomplete="off" placeholder="한국어로 쓰세요" onkeydown="if(event.key==='Enter')checkType()"><button class="main" id="chk" onclick="checkType()">확인</button>`;
+  } else if(t.t==="match"){
+    const L=shuffle(t.pairs.map((p,i)=>i)), R=shuffle(t.pairs.map((p,i)=>i));
+    h+=`<div class="cols"><div class="col">${L.map(i=>`<button class="ko" data-s="L" data-i="${i}" onclick="pickM(this)">${esc(t.pairs[i][0])}</button>`).join("")}</div>
+        <div class="col">${R.map(i=>`<button data-s="R" data-i="${i}" onclick="pickM(this)">${esc(t.pairs[i][1])}</button>`).join("")}</div></div>`;
+    CUR.left=t.pairs.length; CUR.pick=null; CUR.wrong=[];
+  } else if(t.t==="order"){
+    CUR.built=[];
+    h+=`<div class="ansline" id="ansLine"></div><div class="chips" id="chips">${shuffle(t.chips.map((c,i)=>i)).map(i=>`<button data-i="${i}" onclick="addChip(this)">${esc(t.chips[i])}</button>`).join("")}</div>
+        <button class="main" id="chk" onclick="checkOrder()" disabled>확인</button>`;
+  } else if(t.t==="video"){
+    const hd=x.heard[x.ti]||[];
+    h+=videoHTML()+`<div class="ticks">${t.words.map((w,i)=>`<button class="${hd.includes(w)?"on":""}" onclick="tick(this)">${esc(w)}</button>`).join("")}</div>
+        <button class="main" onclick="doneVideo()">다 봤어요 ▶</button>`;
+  } else if(t.t==="write"){
+    const v=x.texts[x.ti]||"";
+    h+=`<textarea id="wr" placeholder="한국어로 쓰세요…" oninput="cur().texts[cur().ti]=this.value;$('chk').disabled=this.value.trim().length<8;clearTimeout(window._wt);window._wt=setTimeout(save,1500)">${esc(v)}</textarea>
+        <button class="main" id="chk" onclick="next()" ${v.trim().length>=8?"":"disabled"}>다음 ▶</button>`;
+  }
+  h+=`<div id="fb"></div></div>`;
+  $("stage").innerHTML=h; window.scrollTo(0,0);
+}
+function tick(b){ b.classList.toggle("on"); const x=cur(); x.heard[x.ti]=[...document.querySelectorAll(".ticks button.on")].map(z=>z.textContent); save(); }
+function doneVideo(){ next(); }
+function fillGap(txt){ const g=document.querySelector(".gap"); if(g) g.textContent=txt; }
+function feedback(ok, extra){
+  const t=CUR.t, ex=t.ex?`<div style="margin-top:4px">${esc(t.ex)}</div>`:"";
+  $("fb").innerHTML=`<div class="fb ${ok?"good":"wrong"}"><b>${ok?"★ 정답! "+["대박!","완벽해요!","좋아요!","최고!"][Math.floor(Math.random()*4)]:"아쉬워요…"}</b>${extra||""}${ex}</div><button class="main" onclick="next()">다음 ▶</button>`;
+}
+function record(ok, ans, right){ const x=cur(); x.log.push({ti:x.ti,ok,ans,right}); save(); hud(); }
+function pickMC(b){
+  const t=CUR.t, i=+b.dataset.i, ok=i===t.a;
+  document.querySelectorAll(".opts button").forEach(z=>{ z.disabled=true; if(+z.dataset.i===t.a) z.classList.add("ok"); });
+  if(!ok) b.classList.add("bad"); fillGap(t.opts[t.a]);
+  record(ok, t.opts[i], t.opts[t.a]); feedback(ok, ok?"":`<div>정답: <b>${esc(t.opts[t.a])}</b></div>`);
+}
+const norm=s=>s.normalize("NFC").replace(/[.?!…,~]/g,"").replace(/\s+/g," ").trim();
+const nosp=s=>norm(s).replace(/\s/g,"");
+function checkType(){
+  const t=CUR.t, v=$("typeIn").value; if(!v.trim()) return;
+  const ok=t.ans.some(a=>nosp(a)===nosp(v));
+  $("typeIn").disabled=true; $("chk").remove();
+  $("typeIn").style.background=ok?"var(--okbg)":"var(--badbg)";
+  fillGap(ok?norm(v):t.ans[0]); record(ok, norm(v), t.ans[0]);
+  feedback(ok, ok?"":`<div>정답: <b>${esc(t.ans[0])}</b></div>`);
+}
+function pickM(b){
+  const t=CUR.t;
+  if(!CUR.pick||CUR.pick.dataset.s===b.dataset.s){ document.querySelectorAll(`.col button[data-s="${b.dataset.s}"]`).forEach(z=>z.classList.remove("sel")); b.classList.add("sel"); CUR.pick=b; return; }
+  const a=CUR.pick; CUR.pick=null; a.classList.remove("sel");
+  if(a.dataset.i===b.dataset.i){ a.classList.add("gone"); b.classList.add("gone"); CUR.left--;
+    if(!CUR.left){ const ok=!CUR.wrong.length; record(ok, ok?"все пары верно":"ошибки: "+CUR.wrong.join("; "), ""); feedback(ok, ok?"":`<div>틀린 연결: ${esc(CUR.wrong.join("; "))}</div>`); }
+  } else { a.classList.add("bad"); b.classList.add("bad");
+    const L=a.dataset.s==="L"?a:b, R=a.dataset.s==="L"?b:a, w=t.pairs[+L.dataset.i][0]+" ≠ "+t.pairs[+R.dataset.i][1];
+    if(!CUR.wrong.includes(w)) CUR.wrong.push(w); setTimeout(()=>{a.classList.remove("bad");b.classList.remove("bad");},500); }
+}
+function addChip(b){ CUR.built.push(+b.dataset.i); b.classList.add("hidden"); drawOrder(); }
+function delChip(k){ const i=CUR.built.splice(k,1)[0]; document.querySelector(`#chips button[data-i="${i}"]`).classList.remove("hidden"); drawOrder(); }
+function drawOrder(){ const t=CUR.t; $("ansLine").innerHTML=CUR.built.map((i,k)=>`<button onclick="delChip(${k})">${esc(t.chips[i])}</button>`).join(""); $("chk").disabled=CUR.built.length!==t.chips.length; }
+function checkOrder(){
+  const t=CUR.t, v=CUR.built.map(i=>t.chips[i]).join(" "), ok=t.ans.some(a=>nosp(a)===nosp(v));
+  $("chk").remove(); document.querySelectorAll("#ansLine button,#chips button").forEach(z=>z.disabled=true);
+  document.querySelectorAll("#ansLine button").forEach(z=>z.classList.add(ok?"ok":"bad"));
+  record(ok, v, t.ans[0]); feedback(ok, ok?"":`<div>정답: <b>${esc(t.ans[0])}</b></div>`);
+}
+function next(){
+  const e=ep(), x=cur();
+  if(x.ti<e.tasks.length-1){ x.ti++; save(); task(); return; }
+  x.done=true; x.t1=Date.now(); save(); finale();
+}
+const fmt=ms=>{const s=Math.round(ms/1000);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};
+function finale(){
+  const e=ep(), x=cur(), ok=x.log.filter(l=>l.ok).length, tot=scored(e), pct=Math.round(ok/tot*100);
+  $("prog").style.width="100%";
+  $("stage").innerHTML=`<div class="end"><div class="big">${pct>=80?"🏆":pct>=50?"👏":"💪"}</div><div class="tt">${e.no}과 끝!</div><div>★ ${ok} / ${tot}</div></div>
+   <div class="card">${x.log.some(l=>!l.ok)?`<b>다시 볼 부분</b>`+x.log.filter(l=>!l.ok).map(l=>{const t=e.tasks[l.ti];return `<div class="row">${t.t==="match"?"단어 연결":`<b>${esc(l.right)}</b>`}${t.ex?`<div class="muted">${esc(t.ex)}</div>`:""}</div>`;}).join(""):"<div>모두 정답이에요! 🎉</div>"}
+   <div id="sendFb" class="muted" style="margin-top:12px"></div><textarea id="copyBox" class="hidden" readonly></textarea>
+   <button class="main" id="sendBtn" onclick="sendResults()">선생님께 보내기</button>
+   <button style="width:100%;margin-top:10px" onclick="menu()">☰ 수업 목록</button></div>`;
+  window.scrollTo(0,0);
+  if(!x.sent) sendResults();
+}
+function buildReport(){
+  const e=ep(), x=cur(), d=new Date(), dt=d.toLocaleDateString("ru-RU")+" "+d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
+  const ok=x.log.filter(l=>l.ok).length, tot=scored(e);
+  let r=`🎬 <b>SKZ CODE · Holiday House · ${e.no}과 ${esc(e.tt)}</b>\n👤 ${esc(S.name)}\n📅 ${dt} · ⏱ ${fmt((x.t1||Date.now())-x.t0)}\n✅ <b>${ok}/${tot}</b>\n`;
+  e.tasks.forEach((t,i)=>{
+    if(t.t==="video"){ r+=`\n🎧 ${i+1}. Услышала: ${esc((x.heard[i]||[]).join(", ")||"—")}`; return; }
+    if(t.t==="write"){ r+=`\n✍️ ${i+1}. ${esc((x.texts[i]||"—").trim())}`; return; }
+    const l=x.log.find(z=>z.ti===i); if(!l) return;
+    const ctx=t.t==="match"?"слова":t.t==="order"?"порядок слов":((t.lines||[]).map(z=>z[1]).find(z=>z.includes("___"))||"");
+    r+=`\n${i+1}. ${l.ok?"✅":"❌"} ${esc(ctx)} → ${esc(l.ans)}${!l.ok&&l.right?` (надо: ${esc(l.right)})`:""}`;
+  });
+  return r;
+}
+async function sendResults(){
+  const x=cur(), R=buildReport(), fb=$("sendFb"), btn=$("sendBtn"); btn.disabled=true; fb.textContent="보내는 중…";
+  try{ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:R.slice(0,4000),parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description||"error");
+    fb.textContent="✅ 선생님께 보냈어요!"; x.sent=true; save();
+  }catch(e){ fb.textContent="보내지 못했어요. 아래 내용을 복사해서 선생님께 보내 주세요:"; const b=$("copyBox"); b.value=R.replace(/<[^>]+>/g,"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&").replace(/&quot;/g,'"'); b.classList.remove("hidden"); }
+  btn.disabled=false;
+}
+</script>
+</body>
+</html>
