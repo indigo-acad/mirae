@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Библиотека · MIRAÉ</title>
+<meta name="theme-color" content="#0B1535">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+.lib-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lib-bar input[type=search]{flex:1 1 220px;min-width:0}
+.lib-bar select{flex:0 1 auto}
+.lib-kinds{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.lib-kinds button{font-size:.85rem;padding:4px 10px}
+.lib-kinds button[aria-pressed=true]{background:var(--gold,#D4AF7C);color:#0B1535}
+.lib-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start}
+.lib-item h3{margin:0 0 4px;font-size:1.05rem}
+.lib-meta{display:flex;flex-wrap:wrap;gap:6px;font-size:.8rem}
+.lib-meta .chip{padding:2px 8px}
+.lib-acts{display:flex;gap:4px}
+.lib-prev{grid-column:1/-1;font-size:.92rem;border-top:1px solid rgba(0,0,0,.08);padding-top:8px}
+.lib-prev ol{margin:4px 0 0 18px;padding:0}
+.lib-tray{position:sticky;bottom:12px;z-index:5;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.lib-form{display:grid;gap:8px;margin-top:10px}
+.lib-form input,.lib-form select{width:100%}
+.lib-more{text-align:center;margin:14px 0}
+.icb.fav[aria-pressed=true]{color:#D4AF7C}
+.lib-lesson .lib-meta{margin:4px 0 8px}
+@media (max-width:640px){.lib-item{grid-template-columns:auto 1fr}.lib-acts{grid-column:1/-1;justify-content:flex-end}}
+</style>
+</head>
+<body>
+<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script><script src="js/library.js"></script>
+<div id="topbar"></div>
+<header class="band slim"><div class="in"><a href="teacher.html"><span data-ic="back" data-s="14"></span>ученики</a><h1>Библиотека</h1><p>Упражнения и теория из всех уроков: найти, отметить ♡, собрать свой урок и задать его домашкой.</p></div></header>
+<main id="app"><div class="card glass"><p class="muted">Загрузка…</p></div></main>
+<script>
+(function(){
+const $=s=>document.querySelector(s),esc=KR.esc,ic=KR.icon,lib=KR.lib;
+const app=$("#app");
+const S={tab:"blocks",f:{lang:"",level:"",topic:"",q:"",kind:[],fav:false,mine:false,limit:40,offset:0},items:[],total:0,facets:null,sel:new Map(),open:{},lessons:null,students:null};
+
+function plural(n,a,b,c){return n%10===1&&n%100!==11?a:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?b:c}
+function err(e){return lib.missing(e)?"На сервере ещё нет библиотеки: выполните в Supabase файл supabase/library.sql.":/not_author/.test(e&&e.message||"")?"Это может изменить только автор или владелец школы.":"Не получилось. Проверьте интернет и попробуйте ещё раз."}
+
+// короткий предпросмотр блока: что внутри, без проверки ответов
+function preview(b){
+  const L=x=>esc(String(x==null?"":x));
+  if(b.type==="fill")return `<p class="muted">${L(b.instr)}</p><ol>${(b.items||[]).map(it=>`<li><span class="ko">${L(it.q)}</span> → <b class="ko">${L([].concat(it.a)[0])}</b></li>`).join("")}</ol>`;
+  if(b.type==="choice")return `<p class="muted">${L(b.instr)}</p><ol>${(b.items||[]).map(it=>`<li><span class="ko">${L(it.q||it.say||"")}</span> → <b class="ko">${L(it.a)}</b></li>`).join("")}</ol>`;
+  if(b.type==="build")return `<p class="muted">${L(b.instr)}</p><ol>${(b.items||[]).map(it=>`<li class="ko">${L(it.p||it.say||"")} → <b>${L(it.a)}</b></li>`).join("")}</ol>`;
+  if(b.type==="talk")return `<p class="muted">${L(b.instr)}</p><ol>${(b.prompts||[]).map(p=>`<li class="ko">${L(p)}</li>`).join("")}</ol>`;
+  if(b.type==="dialogue")return (b.lines||[]).map(l=>`<div class="ko"><b>${l[0]}</b> ${L(l[1])}</div>`).join("");
+  if(b.type==="words"||b.type==="examples")return `<ol>${(b.items||[]).map(w=>`<li><span class="ko">${L(w[0])}</span> — ${L(w[1])}</li>`).join("")}</ol>`;
+  if(b.type==="text")return `<div>${b.html||""}</div>`;
+  if(b.type==="table")return `<p class="muted">Таблица: ${(b.rows||[]).length} строк</p>`;
+  return `<p class="muted">Блок «${L(b.type)}»</p>`;
+}
+function count(b){const a=b.items||b.prompts||b.lines||b.rows;return Array.isArray(a)?a.length:0}
+
+function draw(){
+  const tabs=`<div class="seg" role="tablist" aria-label="Библиотека">`+
+    [["blocks","cards","Блоки"],["lessons","book","Мои уроки"]].map(([k,i,t])=>`<button type="button" role="tab" data-tab="${k}" aria-selected="${S.tab===k}">${ic(i,16)} ${t}</button>`).join("")+`</div>`;
+  app.innerHTML=tabs+(S.tab==="blocks"?blocksView():lessonsView());
+}
+
+function blocksView(){
+  const fc=S.facets||{levels:[],topics:[],kinds:{},total:0},f=S.f;
+  const opt=(v,t,cur)=>`<option value="${esc(v)}"${v===cur?" selected":""}>${esc(t)}</option>`;
+  let h=`<div class="card glass"><div class="lib-bar">`+
+    `<input type="search" id="q" placeholder="Поиск: слово, грамматика, тема" value="${esc(f.q)}" aria-label="Поиск">`+
+    `<select id="flang" aria-label="Язык">${opt("","Все языки",f.lang)}${opt("ko","한국어",f.lang)}${opt("en","English",f.lang)}</select>`+
+    `<select id="flevel" aria-label="Уровень">${opt("","Все уровни",f.level)}${fc.levels.map(l=>opt(l,l,f.level)).join("")}</select>`+
+    `<select id="ftopic" aria-label="Тема">${opt("","Все темы",f.topic)}${fc.topics.map(l=>opt(l,l,f.topic)).join("")}</select>`+
+    `<button type="button" class="icb fav" id="ffav" aria-pressed="${f.fav}" title="Только избранное">${ic("star",18)}</button>`+
+    `</div><div class="lib-kinds" role="group" aria-label="Тип">`+
+    Object.keys(lib.KINDS).filter(k=>fc.kinds[k]).map(k=>`<button type="button" data-kind="${k}" aria-pressed="${f.kind.indexOf(k)>=0}">${esc(lib.KINDS[k])} <small>${fc.kinds[k]}</small></button>`).join("")+
+    `</div><p class="muted" style="margin:10px 0 0">${S.total} ${plural(S.total,"блок","блока","блоков")} из ${fc.total} · <button type="button" class="linkish" id="import">${ic("repeat",14)} Собрать из уроков сайта</button> <span id="impmsg" role="status"></span></p></div>`;
+  if(!fc.total)h+=`<div class="card glass"><h3>${ic("cards",20)} Библиотека пока пустая</h3><p class="muted">Нажмите «Собрать из уроков сайта»: все упражнения и блоки теории из уроков попадут сюда с уровнем, темой и источником. Повторный сбор обновляет блоки и не трогает ваши теги.</p></div>`;
+  h+=S.items.map(item).join("");
+  if(S.items.length<S.total)h+=`<p class="lib-more"><button type="button" class="btn" id="more">Показать ещё</button></p>`;
+  if(S.sel.size)h+=tray();
+  return h;
+}
+function item(x){
+  const b=x.block||{},n=count(b),on=S.sel.has(x.id);
+  return `<div class="card lib-item" data-id="${x.id}">`+
+    `<input type="checkbox" data-sel="${x.id}"${on?" checked":""} aria-label="Выбрать блок">`+
+    `<div><h3>${esc(x.title||lib.KINDS[x.kind]||x.kind)}</h3><div class="lib-meta">`+
+      `<span class="chip">${esc(lib.KINDS[x.kind]||x.kind)}${n?" · "+n:""}</span>`+(x.level?`<span class="chip">${esc(x.level)}</span>`:"")+
+      (x.topic?`<span class="chip ko">${esc(x.topic)}</span>`:"")+(x.tags||[]).map(t=>`<span class="chip muted">${esc(t)}</span>`).join("")+
+      (x.source?`<span class="muted">${esc(x.source)}</span>`:`<span class="muted">свой блок · ${esc(x.author||"")}</span>`)+
+    `</div></div>`+
+    `<div class="lib-acts"><button type="button" class="icb fav" data-fav="${x.id}" aria-pressed="${!!x.fav}" title="В избранное">${ic("star",18)}</button>`+
+    `<button type="button" class="icb" data-tags="${x.id}" title="Тема и теги">${ic("pencil",17)}</button>`+
+    `<button type="button" class="icb" data-open="${x.id}" aria-expanded="${!!S.open[x.id]}" title="Показать">${ic("search",17)}</button></div>`+
+    (S.open[x.id]?`<div class="lib-prev">${preview(b)}</div>`:"")+
+    `</div>`;
+}
+function tray(){
+  const own=(S.lessons||[]).filter(l=>l.author===KR.user());
+  return `<div class="card glass lib-tray" id="tray"><b>Выбрано: ${S.sel.size}</b><span>`+
+    `<button type="button" data-clear>Снять выбор</button> `+
+    (own.length?`<select id="addto" aria-label="Добавить в урок"><option value="">Добавить в урок…</option>${own.map(l=>`<option value="${l.id}">${esc(l.title)}</option>`).join("")}</select> `:"")+
+    `<button type="button" class="btn pri" id="mk">${ic("plus",16)} Собрать урок</button></span>`+
+    `<div class="lib-form" id="mkform" hidden style="flex-basis:100%">`+
+      `<input id="mkt" placeholder="Название урока, например: -지요? · повторение" maxlength="200">`+
+      `<input id="mks" placeholder="Подзаголовок (по желанию)" maxlength="300">`+
+      `<div class="done-row"><span class="msg" id="mkmsg" role="status"></span><button type="button" class="btn pri" id="mksave">Сохранить урок${ic("arrow",16)}</button></div>`+
+    `</div></div>`;
+}
+
+function lessonsView(){
+  if(S.lessons===null)return `<div class="card glass"><p class="muted">Загрузка…</p></div>`;
+  if(!S.lessons.length)return `<div class="card glass"><h3>${ic("book",20)} Уроков из библиотеки пока нет</h3><p class="muted">Во вкладке «Блоки» отметьте галочками упражнения и теорию и нажмите «Собрать урок». Урок хранит ссылки на блоки: поправили блок — он обновится во всех уроках.</p></div>`;
+  return S.lessons.map(l=>`<div class="card lib-lesson" data-lid="${l.id}"><h3>${esc(l.title)}</h3>`+
+    `<div class="lib-meta"><span class="chip">${l.lang==="en"?"English":"한국어"}</span>${l.level?`<span class="chip">${esc(l.level)}</span>`:""}<span class="chip">${l.n} ${plural(l.n,"блок","блока","блоков")}</span><span class="muted">${esc(l.author||"")} · ${new Date(l.updated).toLocaleDateString("ru-RU",{day:"numeric",month:"long"})}</span></div>`+
+    (l.subtitle?`<p class="muted">${esc(l.subtitle)}</p>`:"")+
+    `<div class="done-row"><span><a class="btn" href="lesson.html?l=lib-${l.id}" target="_blank" rel="noopener">${ic("arrow",16)} Открыть</a> `+
+    (l.author===KR.user()||KR.ctx.owner?`<button type="button" data-ldel="${l.id}">${ic("trash",15)} Удалить</button>`:"")+`</span>`+
+    `<button type="button" class="btn pri" data-assign="${l.id}">${ic("send",16)} Задать ученику</button></div>`+
+    `<div class="lib-form" id="as-${l.id}" hidden></div></div>`).join("");
+}
+function assignForm(id){
+  const box=document.getElementById("as-"+id);if(!box)return;
+  if(!box.hidden){box.hidden=true;return}
+  const st=(S.students||[]).map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join("");
+  box.innerHTML=`<select id="asst-${id}" aria-label="Ученик"><option value="">Ученик…</option>${st}</select>`+
+    `<label class="muted">Срок <input type="date" id="asdue-${id}"></label>`+
+    `<input id="asnote-${id}" placeholder="Комментарий ученику (по желанию)" maxlength="1000">`+
+    `<div class="done-row"><span class="msg" id="asmsg-${id}" role="status"></span><button type="button" class="btn pri" data-asgo="${id}">Задать домашку${ic("arrow",16)}</button></div>`;
+  box.hidden=false;
+}
+
+async function search(more){
+  S.f.offset=more?S.items.length:0;
+  try{const r=await lib.search(S.f);S.total=r.total||0;S.items=more?S.items.concat(r.items||[]):(r.items||[]);
+    S.items.forEach(x=>{if(S.sel.has(x.id))S.sel.set(x.id,x)})}
+  catch(e){app.innerHTML=`<div class="card glass"><p class="msg bad">${esc(err(e))}</p></div>`;return false}
+  draw();return true;
+}
+async function facets(){try{S.facets=await lib.facets(S.f.lang)}catch(e){S.facets=null}}
+async function lessons(){try{S.lessons=await lib.lessons()||[]}catch(e){S.lessons=[]}}
+
+async function doImport(){
+  const m=$("#impmsg"),b=$("#import");if(b)b.disabled=true;
+  try{const r=await lib.importSite((d,t)=>{if(m)m.textContent=`${d} из ${t}…`});
+    await facets();await search();
+    const mm=$("#impmsg");if(mm)mm.textContent=`Готово: новых ${r.added}, обновлено ${r.updated}, всего в уроках ${r.total}.`}
+  catch(e){if(m){m.textContent=err(e);m.className="msg bad"}if(b)b.disabled=false}
+}
+async function editTags(id){
+  const x=S.items.find(i=>i.id===id);if(!x)return;
+  const topic=prompt("Тема (грамматика или лексика), например -지요?",x.topic||"");if(topic===null)return;
+  const tags=prompt("Теги через запятую, например: TOPIK 빈칸, повторение, 2724",(x.tags||[]).join(", "));if(tags===null)return;
+  const lv=prompt("Уровень, например 1급, 2급, A2, Band 4–5",x.level||"");if(lv===null)return;
+  try{const r=await lib.save({id:x.id,lang:x.lang,level:lv.trim().slice(0,20),topic:topic.trim().slice(0,80),
+      tags:tags.split(",").map(t=>t.trim().slice(0,60)).filter(Boolean).slice(0,20),block:x.block});
+    Object.assign(x,r);await facets();draw()}
+  catch(e){alert(err(e))}
+}
+async function makeLesson(){
+  const t=$("#mkt").value.trim(),m=$("#mkmsg");if(!t){m.textContent="Впишите название урока.";m.className="msg bad";return}
+  const blocks=[...S.sel.values()],langs=[...new Set(blocks.map(b=>b.lang))],lv=[...new Set(blocks.map(b=>b.level).filter(Boolean))];
+  try{const r=await lib.saveLesson({title:t,subtitle:$("#mks").value.trim(),lang:langs[0]||"ko",level:lv.length===1?lv[0]:"",
+      topic:"",sections:lib.sectionsFor(blocks)});
+    S.sel.clear();await lessons();S.tab="lessons";draw();
+    const card=document.querySelector(`[data-lid="${r.id}"]`);if(card)card.scrollIntoView({block:"center"})}
+  catch(e){m.textContent=err(e);m.className="msg bad"}
+}
+// добавить выбранные блоки в конец своего урока
+async function addTo(lid){
+  const l=(S.lessons||[]).find(x=>String(x.id)===String(lid));if(!l)return;
+  const add=lib.sectionsFor([...S.sel.values()]),secs=JSON.parse(JSON.stringify(l.sections||[]));
+  add.forEach(a=>{const s=secs.find(x=>x.id===a.id);if(s)a.b.forEach(id=>{if(s.b.indexOf(id)<0)s.b.push(id)});else secs.push(a)});
+  try{await lib.saveLesson({id:l.id,title:l.title,subtitle:l.subtitle,lang:l.lang,level:l.level,topic:l.topic,sections:secs});
+    S.sel.clear();await lessons();S.tab="lessons";draw()}
+  catch(e){alert(err(e))}
+}
+async function assign(id){
+  const l=(S.lessons||[]).find(x=>String(x.id)===String(id)),m=document.getElementById("asmsg-"+id),who=document.getElementById("asst-"+id).value;
+  if(!who){m.textContent="Выберите ученика.";m.className="msg bad";return}
+  try{await lib.assign(who,l,document.getElementById("asdue-"+id).value,document.getElementById("asnote-"+id).value.trim());
+    m.textContent=`Задано: ${who}. Ученик увидит урок в кабинете, в домашке.`;m.className="msg ok"}
+  catch(e){m.textContent=lib.missing(e)?"На сервере нет домашки: выполните supabase/homework.sql.":err(e);m.className="msg bad"}
+}
+
+let qt=0;
+app.addEventListener("input",e=>{if(e.target.id==="q"){clearTimeout(qt);qt=setTimeout(()=>{S.f.q=e.target.value;search().then(()=>{const q=$("#q");if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}})},350)}});
+app.addEventListener("change",async e=>{
+  const t=e.target;
+  if(t.id==="flang"){S.f.lang=t.value;S.f.level="";S.f.topic="";S.f.kind=[];await facets();return search()}
+  if(t.id==="flevel"){S.f.level=t.value;return search()}
+  if(t.id==="ftopic"){S.f.topic=t.value;return search()}
+  if(t.id==="addto"&&t.value)return addTo(t.value);
+  if(t.dataset.sel){const id=+t.dataset.sel,x=S.items.find(i=>i.id===id);if(t.checked&&x)S.sel.set(id,x);else S.sel.delete(id);const keep=scrollY;draw();scrollTo(0,keep)}
+});
+app.addEventListener("click",async e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.tab){S.tab=b.dataset.tab;if(S.tab==="lessons"&&S.lessons===null){draw();await lessons()}return draw()}
+  if(b.id==="import")return doImport();
+  if(b.id==="more")return search(true);
+  if(b.id==="ffav"){S.f.fav=!S.f.fav;return search()}
+  if(b.dataset.kind){const k=b.dataset.kind,i=S.f.kind.indexOf(k);if(i<0)S.f.kind.push(k);else S.f.kind.splice(i,1);return search()}
+  if(b.dataset.open){const id=b.dataset.open;S.open[id]=!S.open[id];const keep=scrollY;draw();return scrollTo(0,keep)}
+  if(b.dataset.fav){const id=+b.dataset.fav,x=S.items.find(i=>i.id===id);if(!x)return;x.fav=!x.fav;b.setAttribute("aria-pressed",x.fav);
+    try{await lib.fav(id,x.fav)}catch(er){x.fav=!x.fav;b.setAttribute("aria-pressed",x.fav)}return}
+  if(b.dataset.tags)return editTags(+b.dataset.tags);
+  if(b.dataset.clear!==undefined){S.sel.clear();return draw()}
+  if(b.id==="mk"){const f=$("#mkform");f.hidden=!f.hidden;if(!f.hidden)$("#mkt").focus();return}
+  if(b.id==="mksave")return makeLesson();
+  if(b.dataset.assign){if(S.students===null){try{S.students=await lib.students()||[]}catch(er){S.students=[]}}return assignForm(b.dataset.assign)}
+  if(b.dataset.asgo)return assign(b.dataset.asgo);
+  if(b.dataset.ldel){if(!confirm("Удалить урок из библиотеки? Блоки останутся в библиотеке."))return;
+    try{await lib.removeLesson(+b.dataset.ldel);await lessons();draw()}catch(er){alert(err(er))}}
+});
+
+(async function boot(){
+  if(!KR.require())return;
+  KR.topbar("library");
+  const ctx=await KR.load();
+  if(!ctx.teacher){app.innerHTML=`<div class="card glass"><h3>Библиотека — для преподавателей</h3><p class="muted">Уроки и упражнения ученик получает от преподавателя в кабинете.</p><a class="btn pri" href="cabinet.html">В кабинет</a></div>`;return}
+  S.f.lang=KR.lang()||"";S.lessons=null;S.students=null;
+  await facets();
+  if(await search())lessons().then(()=>{if(S.sel.size)draw()});
+})();
+})();
+</script>
+</body>
+</html>
