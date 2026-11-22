@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS 4–5 · Lesson 2 · Comparing charts · MIRAÉ</title>
+<meta name="theme-color" content="#0B1535">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#161a2b;--muted:#636a80;--line:#e6e8f0;--ok:#18935a;--okbg:#e6f7ee;--bad:#d23f3f;--badbg:#fdecec;
+    --indigo:#0B1535;--indigo2:#1E2A56;--gold:#D4AF7C;--ivory:#F8F7F2;--silver:#C0C6D4;--pc:#2f6fe4;--pcbg:#e8f0ff;--ps:#e8622c;--psbg:#fff0e8}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(180deg,var(--indigo),var(--indigo2));background-attachment:fixed;color:var(--ink);line-height:1.55;font-size:16.5px}
+  .wrap{max-width:860px;margin:0 auto;padding:16px 14px 90px}
+  .hero{background:url(../../../img/scene-en.svg) bottom/100% 110px no-repeat;margin:0 -14px 10px;padding:40px 18px 120px;color:#fff}
+  .hero .tag{display:inline-block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(212,175,124,.5);color:var(--gold);padding:3px 10px;border-radius:99px}
+  .hero h1{margin:8px 0 4px;font-family:"Cormorant Garamond",serif;font-weight:600;color:var(--gold);font-size:clamp(34px,8vw,50px);line-height:1.1}
+  .hero p,.who{margin:0;color:var(--silver)} .who{font-size:14px;margin-top:8px}
+  .card{background:var(--ivory);color:#1a2040;border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 2px 14px #0003}
+  .card h2{margin:0 0 6px;font-family:"Cormorant Garamond",serif;font-weight:600;font-size:29px;color:var(--indigo);line-height:1.15}
+  h3{margin:14px 0 6px;font-size:18px}
+  .muted{color:var(--muted);font-size:14.5px}
+  button{font:inherit;border:0;border-radius:12px;padding:10px 16px;cursor:pointer;background:#eceef4;color:var(--ink);margin:4px 4px 4px 0;transition:transform .08s}
+  button:active{transform:scale(.97)} button.primary{background:var(--indigo);color:var(--gold)} button.sm{font-size:14px;padding:6px 12px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text],textarea{font:inherit;padding:10px 12px;border:1.5px solid #cdd1dc;border-radius:11px;width:100%;background:#fff}
+  input.gap{width:140px;padding:3px 8px;border:0;border-bottom:2px solid #8a91a6;border-radius:0;background:#fff;text-align:center;font-size:16px}
+  input.wide{width:100%;max-width:520px;text-align:left;margin-top:6px}
+  input.ok{border-color:var(--ok)!important;background:var(--okbg)!important} input.bad{border-color:var(--bad)!important;background:var(--badbg)!important}
+  .fix{color:var(--ok);font-weight:700;font-size:14px;margin-left:6px}
+  nav{display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;padding:8px 0;z-index:5;scrollbar-width:none;backdrop-filter:blur(6px)}
+  nav::-webkit-scrollbar{display:none}
+  nav button{margin:0;font-size:14.5px;white-space:nowrap;background:transparent;color:var(--gold);border:1px solid rgba(212,175,124,.45);border-radius:99px}
+  nav button.active{background:var(--gold);color:var(--indigo)}
+  nav .done:after{content:" ✓";color:#8fe0b0} nav button.active.done:after{color:var(--indigo)}
+  .bar{height:7px;background:rgba(255,255,255,.12);border-radius:5px;overflow:hidden;margin:2px 0 4px} .bar div{height:100%;background:var(--gold);width:0;transition:width .4s}
+  .hidden{display:none!important}
+  .ru{background:#fbf7e6;border-left:4px solid #e6c34a;border-radius:10px;padding:8px 12px;margin:10px 0;font-size:15px}
+  .tip{background:var(--okbg);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:15px}
+  .warn{background:var(--badbg);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:15px}
+  .step{display:inline-block;background:var(--indigo);color:var(--gold);border-radius:99px;padding:2px 12px;font-size:13px;font-weight:700;letter-spacing:.04em;margin-bottom:6px}
+  table.tbl{width:100%;border-collapse:collapse;font-size:15.5px;margin:8px 0}
+  table.tbl th,table.tbl td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+  table.tbl th{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .formula{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0;font-weight:700}
+  .formula span{background:var(--indigo);color:var(--gold);border-radius:10px;padding:7px 12px;font-size:15px}
+  .formula span.ing{background:var(--pc);color:#fff}
+  .signals{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0} .signals span{background:#ece8da;border-radius:99px;padding:3px 11px;font-size:14px}
+  .vs{display:grid;gap:8px;margin:10px 0} .vs div{background:#fff;border-radius:12px;padding:10px 12px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+  .two>div{border-radius:14px;padding:12px}
+  .two .a{background:var(--psbg)} .two .b{background:var(--pcbg)}
+  .two b.h{display:block;font-size:17px;margin-bottom:4px}
+  u{text-decoration:none;border-bottom:2px solid var(--gold)}
+  .ps{color:var(--ps);font-weight:700} .pc{color:var(--pc);font-weight:700}
+  .q{padding:12px 0;border-bottom:1px dashed var(--line)}
+  .q .s{font-size:17px}
+  .q .n{display:inline-block;min-width:26px;height:26px;line-height:26px;text-align:center;border-radius:8px;background:var(--indigo);color:var(--gold);font-size:13px;font-weight:700;margin-right:6px;padding:0 4px}
+  .opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .opts button{margin:0;background:#fff;border:1.5px solid #ddd8c6}
+  .opts button.ok{background:var(--okbg);outline:2px solid var(--ok)} .opts button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  .opts button.on{background:var(--indigo);color:var(--gold);border-color:var(--indigo)}
+  .why{font-size:14.5px;margin-top:6px;color:#37405a;background:#fff;border-radius:10px;padding:6px 10px}
+  .blank{display:inline-block;min-width:60px;border-bottom:2px solid #9aa0b3;text-align:center;font-weight:700}
+  .gaptext{font-size:17px;line-height:2.2}
+  .gaptext p{margin:0 0 8px}
+  .score{font-size:18px;font-weight:700;margin-top:12px}
+  .actions{margin-top:12px}
+  .pill{display:inline-block;background:#efe9da;border-radius:99px;padding:2px 10px;font-size:14px;margin:2px 0}
+  .built{display:inline-flex;flex-wrap:wrap;gap:4px;min-height:38px;align-items:center;border-bottom:2px dashed #c9c5b3;padding:2px 4px;border-radius:6px}
+  .built.good{background:var(--okbg)} .built.wrong{background:var(--badbg)}
+  .pool{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .tok{margin:0;padding:7px 12px;background:#fff;border:1.5px solid #d6d2c2;border-radius:10px;font-size:15.5px}
+  .tok.on{background:var(--indigo);color:var(--gold);border-color:var(--indigo)}
+  .story{background:#fffdf6;border:1px solid #eee5c7;border-radius:14px;padding:14px 16px;font-family:Georgia,serif;font-size:17px;line-height:1.75}
+  .story h4{margin:0 0 8px;text-align:center;font-size:20px} .story p{margin:6px 0}
+  .story .v{background:#efe6ff;color:#5b2fb8;border-radius:5px;padding:0 3px;font-weight:600}
+  .words{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin:8px 0}
+  .words div{background:#fff;border-radius:12px;padding:8px 10px;display:flex;gap:8px;align-items:center}
+  .words b{display:block} .words span{font-size:14px;color:var(--muted)}
+  .words button{margin:0;padding:6px 9px;background:#f0ece0;flex:none}
+  .emo{font-size:30px;margin-right:6px;vertical-align:middle}
+  .player{background:#fff;border-radius:14px;padding:12px;margin:10px 0}
+  .player audio{width:100%}
+  .minitip{background:#fde9f3;border-left:4px solid #d63c8f;border-radius:10px;padding:8px 12px;margin:8px 0;font-size:14.5px}
+  .minitip b{color:#b0246f}
+  .cls{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:8px 0;border-bottom:1px dashed var(--line)}
+  .cls .v{min-width:190px;font-weight:700}
+  .cls button{font-size:14px;padding:6px 10px;margin:0;background:#fff;border:1.5px solid #ddd8c6}
+  .cls button.ok{background:var(--okbg);outline:2px solid var(--ok)} .cls button.bad{background:var(--badbg);outline:2px solid var(--bad)}
+  table.res{width:100%;border-collapse:collapse;font-size:15.5px} table.res td{padding:8px 4px;border-bottom:1px solid var(--line)}
+  .feedback{min-height:24px;margin-top:8px;font-weight:600}
+  .sub{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 4px}
+  .sendstat{position:fixed;right:10px;bottom:10px;z-index:9999;background:#0B1535;color:#D4AF7C;border-radius:999px;padding:6px 14px;font:600 13px system-ui;opacity:0;transition:opacity .4s;pointer-events:none}.sendstat.on{opacity:.93}
+  .chart{background:#fff;border-radius:14px;padding:12px;margin:10px 0}
+  .chart .ct{text-align:center;font-weight:700;font-family:Georgia,serif;font-size:17px;margin-bottom:4px}
+  .pies{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+  .legend{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;font-size:14px;margin-top:6px}
+  .legend i{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:5px;vertical-align:-2px;border:1px solid #0001}
+  @media(max-width:620px){.two{grid-template-columns:1fr}input.gap{width:118px}.cls .v{min-width:100%}}
+</style>
+</head>
+<body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap"><div id="sendStat" class="sendstat"></div>
+
+<div class="hero">
+  <span class="tag">IELTS · Band 4–5 · Lesson 2 · Writing Task 1</span>
+  <h1>Comparing charts</h1>
+  <p>Chart words · Two pie charts · Language of comparing · Line graph + bar chart · Write your answer</p>
+  <div class="who hidden" id="whoLine"></div>
+</div>
+
+<div id="login" class="card">
+  <h2>👋 Hi! What's your name?</h2>
+  <p class="muted">Напишите имя — результаты увидит преподаватель.</p>
+  <input type="text" id="nameInput" placeholder="Your name">
+  <div class="actions"><button class="primary" onclick="start()">Start →</button></div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="bar"><div id="pbar"></div></div>
+  <nav id="nav"></nav>
+  <div id="pane"></div>
+</div>
+</div>
+
+<script>
+const TG_TOKEN   = "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU";
+const TG_CHAT_ID = "347625701";
+const KEY = "ielts45_l2_charts_v1";
+const TITLE = "IELTS 4–5 · Lesson 2 · Comparing charts (Writing Task 1)";
+const $ = id => document.getElementById(id);
+let STATE = {name:"", res:{}, done:{}};
+let liveTm=null;
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){}
+  if(window.MIRAE&&STATE.name){ clearTimeout(liveTm); liveTm=setTimeout(saveLive,2500); } }
+function load(){ try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.name) STATE=Object.assign(STATE,s);}catch(e){} }
+function saveLive(){ if(!window.MIRAE||!STATE.name) return; MIRAE.live(plain(buildReport())); const st=$("sendStat"); st.textContent="✓ Результаты сохраняются, преподаватель их видит"; st.className="sendstat on"; setTimeout(()=>st.className="sendstat",4000); }
+function plain(t){ return t.replace(/<\/?b>/g,"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&"); }
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function norm(s){
+  s=" "+String(s).toLowerCase().replace(/[’‘`]/g,"'").replace(/[.,!?;:"—–-]/g," ")+" ";
+  s=s.replace(/n't /g," not ").replace(/ can not /g," cannot ").replace(/ i'm /g," i am ").replace(/ (we|they|you)'re /g," $1 are ").replace(/ (he|she|it|what|where|who|that)'s /g," $1 is ");
+  return s.replace(/\s+/g," ").trim();
+}
+function match(val,answers){ const v=norm(val); return answers.some(a=>norm(a)===v); }
+function say(t){ try{ const u=new SpeechSynthesisUtterance(t); u.lang="en-GB"; u.rate=.85;
+  const v=speechSynthesis.getVoices().find(v=>/en-GB/i.test(v.lang)); if(v) u.voice=v; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} }
+
+/* ======================= CONTENT ======================= */
+
+/* ---------- CHART DATA ---------- */
+const PIE_YOUNG=[47,50,3], PIE_TEEN=[35,61,4];
+const PIE_LBL=["Very happy","Fairly happy","Unhappy"], PIE_COL=["#4b3f7a","#a996d8","#e2dbf3"];
+const AGES_BAR=["15–24","25–34","35–44","45–54","55–64","65–74","75+"];
+const HEALTH=[12,20,24,32,42,46,45], MONEY=[55,52,38,36,22,18,6];
+const AGES_LINE=["15–20","21–30","31–40","41–50","51–60","61–70"];
+const MALE=[5.5,5.2,5.1,5.0,5.2,5.6], FEMALE=[5.3,5.2,5.1,5.0,5.2,5.6];
+
+function pieSVG(title,v){
+  const cx=110,cy=105,r=85; let a=-Math.PI/2, s="";
+  v.forEach((p,i)=>{ const b=a+2*Math.PI*p/100, big=p>50?1:0;
+    s+=`<path d="M${cx},${cy} L${cx+r*Math.cos(a)},${cy+r*Math.sin(a)} A${r},${r} 0 ${big} 1 ${cx+r*Math.cos(b)},${cy+r*Math.sin(b)} Z" fill="${PIE_COL[i]}" stroke="#fff" stroke-width="2"/>`;
+    const m=(a+b)/2, small=p<8, rr=small?r+13:r*.58;
+    s+=`<text x="${cx+rr*Math.cos(m)}" y="${cy+rr*Math.sin(m)+5}" text-anchor="middle" font-size="15" font-weight="700" fill="${small||i===2?"#333":i===1?"#1a1440":"#fff"}">${p}%</text>`;
+    a=b; });
+  return `<svg viewBox="0 0 220 232" style="max-width:250px;width:100%"><text x="110" y="12" text-anchor="middle" font-size="13" font-weight="700" fill="#1a2040">${title}</text><g transform="translate(0,28)">${s}</g></svg>`;
+}
+function pieLegend(){ return `<div class="legend">${PIE_LBL.map((l,i)=>`<span><i style="background:${PIE_COL[i]}"></i>${l}</span>`).join("")}</div>`; }
+function piesHTML(){ return `<div class="chart"><div class="pies">${pieSVG("Parents with very young children",PIE_YOUNG)}${pieSVG("Parents with teenage children",PIE_TEEN)}</div>${pieLegend()}</div>`; }
+
+function barSVG(){
+  const W=640,H=310,L=48,B=250,T=20,max=60,gw=(W-L-10)/7, y=v=>B-(B-T)*v/max; let s="";
+  for(let v=0;v<=60;v+=10) s+=`<line x1="${L}" x2="${W-6}" y1="${y(v)}" y2="${y(v)}" stroke="#e3e5ee"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="16" fill="#666">${v}%</text>`;
+  AGES_BAR.forEach((g,i)=>{ const x=L+i*gw+gw*.15, bw=gw*.33;
+    s+=`<rect x="${x}" y="${y(HEALTH[i])}" width="${bw}" height="${B-y(HEALTH[i])}" fill="#2f8fc8"/><rect x="${x+bw}" y="${y(MONEY[i])}" width="${bw}" height="${B-y(MONEY[i])}" fill="#c4458f"/>`;
+    s+=`<text x="${x+bw}" y="${B+22}" text-anchor="middle" font-size="17" font-weight="600" fill="#333">${g}</text>`; });
+  s+=`<text x="${L+(W-L)/2}" y="${B+48}" text-anchor="middle" font-size="17" fill="#333">age</text>`;
+  return `<div class="chart"><div class="ct">What would make you happiest?</div><svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>
+  <div class="legend"><span><i style="background:#2f8fc8"></i>health</span><span><i style="background:#c4458f"></i>money</span><span class="muted" style="font-size:12px">Source: British Household Panel Survey</span></div></div>`;
+}
+function lineSVG(){
+  const W=640,H=310,L=48,B=250,T=20,lo=4.9,hi=5.7,gw=(W-L-60)/5, y=v=>B-(B-T)*(v-lo)/(hi-lo), x=i=>L+20+i*gw; let s="";
+  for(let k=0;k<=8;k++){ const v=lo+k*.1; s+=`<line x1="${L}" x2="${W-6}" y1="${y(v)}" y2="${y(v)}" stroke="#e3e5ee"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="16" fill="#666">${v.toFixed(1)}</text>`; }
+  AGES_LINE.forEach((g,i)=>s+=`<text x="${x(i)}" y="${B+22}" text-anchor="middle" font-size="17" font-weight="600" fill="#333">${g}</text>`);
+  s+=`<polyline points="${FEMALE.map((v,i)=>x(i)+","+y(v)).join(" ")}" fill="none" stroke="#c4458f" stroke-width="3"/>`;
+  s+=`<polyline points="${MALE.map((v,i)=>x(i)+","+y(v)).join(" ")}" fill="none" stroke="#2f6fe4" stroke-width="3" stroke-dasharray="${"0"}"/>`;
+  s+=`<text x="${L+6}" y="${T+14}" font-size="16" fill="#666">score on a 1–7 scale</text><text x="${L+(W-L)/2}" y="${B+48}" text-anchor="middle" font-size="17" fill="#333">Age</text>`;
+  return `<div class="chart"><div class="ct">How satisfied are you with your life?</div><svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>
+  <div class="legend"><span><i style="background:#2f6fe4"></i>male</span><span><i style="background:#c4458f"></i>female</span><span class="muted" style="font-size:12px">Source: British Household Panel Survey</span></div></div>`;
+}
+
+/* ---------- 1. CHARTS & WORDS ---------- */
+const VOC=[
+ ["pie chart","круговая диаграмма"],["bar chart","столбчатая диаграмма"],["line graph","линейный график"],["table","таблица"],
+ ["percentage","процент (доля в %)"],["proportion","доля, часть"],["figure","цифра, показатель"],["category","категория"],
+ ["age group","возрастная группа"],["survey","опрос"],["respondents / people asked","опрошенные"],["score","балл, оценка"],
+ ["overview","общий вывод (главное)"],["compare","сравнивать"],["similar","похожий"],["difference","разница"],
+ ["while / whereas","тогда как, а"],["compared with","по сравнению с"],["however","однако"],["overall","в целом"]
+];
+const C_TYPE=[
+ {q:"A circle divided into parts. It shows <b>parts of 100%</b>.",o:["pie chart","bar chart","line graph"],a:0},
+ {q:"Rectangles (columns) of different heights. Good for <b>comparing groups</b>.",o:["line graph","bar chart","table"],a:1},
+ {q:"A line that goes up and down. It shows <b>a change</b> (over time or age).",o:["pie chart","table","line graph"],a:2},
+ {q:"Numbers in rows and columns.",o:["table","pie chart","bar chart"],a:0},
+ {q:"«What would make you happiest?» — health vs money for 7 age groups. What is it?",o:["pie chart","bar chart","line graph"],a:1},
+ {q:"«How satisfied are you with your life?» — scores for men and women from 15 to 70. What is it?",o:["pie chart","bar chart","line graph"],a:2}
+];
+const C_MEAN=[0,4,5,6,8,9,12,13,14,16,17,19].map((k,i)=>{
+  const ok=VOC[k][1], o=[ok,VOC[(k+7)%VOC.length][1],VOC[(k+13)%VOC.length][1]];
+  const r=i%3, opts=r===0?o:r===1?[o[1],o[0],o[2]]:[o[1],o[2],o[0]];
+  return {q:`<b>${VOC[k][0]}</b> = ?`,o:opts,a:opts.indexOf(ok)};
+});
+const C_NUM=[
+ {q:"<b>47%</b> = ?",o:["almost half","just over half","a quarter"],a:0,why:"47 — чуть меньше 50 → almost / nearly half."},
+ {q:"<b>50%</b> = ?",o:["a third","exactly half","the majority"],a:1,why:"50 = half."},
+ {q:"<b>35%</b> = ?",o:["just over a third","about a quarter","almost half"],a:0,why:"⅓ ≈ 33% → 35% чуть больше → just over a third."},
+ {q:"<b>61%</b> = ?",o:["less than half","about three fifths","three quarters"],a:1,why:"⅗ = 60% → about three fifths / just over 60%."},
+ {q:"<b>3%</b> = ?",o:["a large number","a very small proportion","about a third"],a:1,why:"3% — очень мало → a very small proportion / only 3%."},
+ {q:"<b>25%</b> = ?",o:["a quarter","a third","a half"],a:0,why:"¼ = 25%."},
+ {q:"<b>76%</b> = ?",o:["about a quarter","just over half","about three quarters"],a:2,why:"¾ = 75%."},
+ {q:"<b>55%</b> = ?",o:["just over half","almost half","a fifth"],a:0,why:"Чуть больше 50 → just over half / more than half."}
+];
+
+/* ---------- 2. PIE CHARTS (BOOK) ---------- */
+const P_TITLE=[{q:"Which is the best title for the two pie charts?",o:["A Happiness of parents before and after having children","B Happiness of parents compared with happiness of children","C Happiness of parents with children of different ages"],a:2,
+ why:"Обе диаграммы — про счастье <b>родителей</b>; разница — возраст детей (very young / teenage). Про «до детей» и про счастье самих детей здесь ничего нет."}];
+const YN=["Yes","No"];
+const P_DIFF=[
+ {q:"A the categories in the charts",a:1,why:"Категории одинаковые: very happy, fairly happy, unhappy → No."},
+ {q:"B the percentages of very happy people",a:0,why:"47% → 35%: разница 12% — большая → Yes."},
+ {q:"C the percentages of fairly happy people",a:0,why:"50% → 61%: разница 11% → Yes."},
+ {q:"D the percentages of unhappy people",a:1,why:"3% и 4% — почти одинаково → No (это скорее сходство)."},
+ {q:"E the ages of children",a:0,why:"Именно этим диаграммы и различаются: very young vs teenage → Yes."},
+ {q:"F the totals of very happy and fairly happy people",a:1,why:"47+50 = 97%, 35+61 = 96% — почти одинаково → No."}
+].map(x=>({q:x.q,o:YN,a:x.a,why:x.why}));
+const P_OVER=[{q:"Which of the following overviews is the best?",o:[
+ "A The main conclusion from the pie charts is that parents with very young children were happy but parents with older children were not.",
+ "B In general, parents got happier as their children got older.",
+ "C To sum up, parents with teenage children were less happy than parents with very young children, but very few of them were unhappy."],a:2,
+ why:"A — неверно: 96% родителей подростков тоже счастливы. B — наоборот: very happy стало меньше. C — главная разница + главное сходство (unhappy очень мало) ✅."}];
+const P_TF=[
+ {q:"Almost half of parents with very young children are very happy.",a:0,why:"47% ≈ almost half → TRUE."},
+ {q:"Most parents of teenagers are fairly happy.",a:0,why:"61% — большинство (most = больше половины) → TRUE."},
+ {q:"Parents of teenagers are more often very happy.",a:1,why:"35% < 47% → наоборот, реже → FALSE."},
+ {q:"The percentage of unhappy parents is very low in both groups.",a:0,why:"3% и 4% → TRUE."},
+ {q:"Parents of teenagers spend less time with their children.",a:2,why:"Про время на диаграммах ничего нет → в Task 1 так писать НЕЛЬЗЯ (никаких выдумок и причин)."}
+].map(x=>({q:x.q,o:["TRUE","FALSE","NOT IN THE CHART"],a:x.a,why:x.why}));
+
+/* ---------- 3. COMPARING LANGUAGE ---------- */
+const CMP_CHOOSE=[
+ {q:"61% is ___ than 50%.",o:["higher","more high","highest"],a:0,why:"Короткое прилагательное + -er: high → higher, low → lower."},
+ {q:"___ parents of teenagers are very happy.",o:["Less","Fewer","Lower"],a:1,why:"parents можно посчитать → fewer. (less — для неисчисляемого: less money.)"},
+ {q:"The percentage of very happy parents ___ lower for teenagers.",o:["is","are","have"],a:0,why:"The percentage — одно → is (даже если дальше «parents»)."},
+ {q:"47% of parents of young children are very happy, ___ 35% of parents of teenagers.",o:["than","compared with","as"],a:1,why:"Число, compared with + другое число."},
+ {q:"Young people choose money, ___ older people choose health.",o:["whereas","because","so"],a:0,why:"whereas / while = «а, тогда как» — сравниваем две разные группы."},
+ {q:"The percentage of unhappy parents is ___ in both groups (3% and 4%).",o:["very different","similar","the highest"],a:1,why:"3 и 4 — почти одинаково → similar / almost the same."},
+ {q:"52% is about ___ 25%.",o:["twice as high as","two times higher as","double than"],a:0,why:"twice as high as = в два раза выше."},
+ {q:"The ___ figure for health is 46%, in the 65–74 age group.",o:["higher","highest","most high"],a:1,why:"Самый высокий из всех → the highest."},
+ {q:"Health is ___ popular than money among people over 55.",o:["more","most","much"],a:0,why:"Длинное слово (popular, important) → more popular than."},
+ {q:"The percentage of people who choose money ___ with age.",o:["falling","is fall","falls"],a:2,why:"Present Simple: the percentage (it) → falls."}
+];
+const CMP_GAP=`<p>1. The proportion of very happy parents is {higher} for parents of very young children (47%) than for parents of teenagers (35%).</p>
+<p>2. In contrast, {more} parents of teenagers are fairly happy: 61% {compared} with 50%.</p>
+<p>3. {Fewer} parents of teenagers are very happy.</p>
+<p>4. 47% are very happy, {while|whereas} only 35% of parents of teenagers feel this way.</p>
+<p>5. The figures for unhappy parents are very {similar}: 3% and 4%.</p>
+<p>6. The {lowest} figure in both charts is for unhappy parents.</p>`;
+const CMP_BANK=["higher","more","compared","Fewer","while","similar","lowest"];
+const CMP_ORDER=[
+ {w:["The","percentage","of","unhappy","parents","is","very","low","in","both","groups"],a:["The percentage of unhappy parents is very low in both groups."]},
+ {w:["Almost","half","of","parents","with","very","young","children","are","very","happy"],a:["Almost half of parents with very young children are very happy."]},
+ {w:["Most","parents","of","teenagers","are","fairly","happy"],a:["Most parents of teenagers are fairly happy."]},
+ {w:["Young","people","choose","money,","whereas","older","people","choose","health"],a:["Young people choose money, whereas older people choose health."]}
+];
+
+/* ---------- 4. BAR + LINE ---------- */
+const BL_READ=[
+ {q:"Which age group chooses <b>money</b> most often?",o:["15–24","25–34","75+"],a:0,why:"15–24: about 55% — самый высокий розовый столбик."},
+ {q:"In which age group is <b>health</b> first more popular than money?",o:["45–54","55–64","65–74"],a:1,why:"45–54: 32 vs 36 (деньги ещё чуть больше). 55–64: 42 vs 22 — здоровье впереди."},
+ {q:"In the 45–54 group, health and money are…",o:["very different","almost the same","both above 50%"],a:1,why:"32% и 36% — разница маленькая → almost the same / similar."},
+ {q:"About what percentage of people aged 75+ choose money?",o:["6%","16%","45%"],a:0,why:"Очень маленький розовый столбик — около 6%."},
+ {q:"Which age group is the <b>least</b> satisfied with life?",o:["15–20","41–50","61–70"],a:1,why:"Самая низкая точка графика — 5.0 в 41–50."},
+ {q:"Which age group is the <b>most</b> satisfied?",o:["15–20","31–40","61–70"],a:2,why:"5.6 в 61–70 — самая высокая точка."},
+ {q:"Where are men and women <b>different</b>?",o:["15–20","41–50","61–70"],a:0,why:"Только в 15–20: men 5.5, women 5.3. Дальше линии совпадают."},
+ {q:"What happens to satisfaction after 50?",o:["it falls","it rises","it stays the same"],a:1,why:"5.0 → 5.2 → 5.6 — растёт (rises)."}
+];
+const BL_TREND=`<p>1. Life satisfaction {falls|decreases|drops} from 5.5 to 5.0 between the ages of 15–20 and 41–50. <span class="muted">(↘)</span></p>
+<p>2. It {reaches} its lowest point (5.0) at the age of 41–50.</p>
+<p>3. After 50, satisfaction {rises|increases|grows} sharply to 5.6. <span class="muted">(↗)</span></p>
+<p>4. It reaches a {peak} of 5.6 at the age of 61–70.</p>
+<p>5. The percentage of people who choose money {falls|decreases|drops} from 55% to only 6%. <span class="muted">(↘)</span></p>
+<p>6. The figure for health {rises|increases|grows} from 12% to about 45%. <span class="muted">(↗)</span></p>
+<p>7. For men and women, the scores are almost the {same} after the age of 20.</p>`;
+const BL_INTRO=[{q:"Which is the best <b>first sentence</b> (introduction)?",o:[
+ "A The graph below and the chart on the next page show the answers people gave about the extent to which they are satisfied with their lives.",
+ "B The line graph shows how satisfied people of different ages are with their lives, and the bar chart shows whether they think health or money would make them happiest.",
+ "C I think money is more important than health for young people."],a:1,
+ why:"A — переписано из задания (за копию баллы не дают). C — своё мнение, в Task 1 его нет. B — пересказ своими словами ✅."},
+ {q:"Which word can replace <b>shows</b> in the introduction?",o:["illustrates","thinks","says me"],a:0,why:"The chart shows / illustrates / compares / gives information about…"},
+ {q:"<b>«people of different ages»</b> — another way to say it:",o:["people in different age groups","people with old age","different people's ages"],a:0,why:"in different age groups / aged 15 to 70."}];
+const BL_OVER=[{q:"Which is the best <b>overview</b>?",o:[
+ "A Overall, 55% of people aged 15–24 choose money and 12% choose health.",
+ "B Overall, people in their forties are the least satisfied with life, and young people choose money, whereas older people choose health.",
+ "C Overall, people are happy because they have money and health."],a:1,
+ why:"A — это деталь с цифрами, а overview — без цифр, только главное. C — причина, которой нет на графиках. B — главная тенденция обоих графиков ✅."},
+ {q:"Where do you write the overview?",o:["after the introduction (2nd sentence/paragraph)","only at the very end","you don't need it"],a:0,
+  why:"Для Band 5–6 самый надёжный план: Introduction → Overview → Body 1 → Body 2. Без overview оценка за Task Achievement обычно не выше 5."},
+ {q:"Should you use numbers in the overview?",o:["Yes, a lot","No — numbers go in the body paragraphs"],a:1,why:"Overview = главное без цифр; цифры — в Body 1 и Body 2."}];
+const BL_MODEL=`<p>The line graph {shows|illustrates} how satisfied people of different ages are with their lives, and the bar chart shows whether they think health or money would make them happiest.</p>
+<p>{Overall}, people in their forties are the {least} satisfied with life. Young people choose money, {whereas|while} older people choose health.</p>
+<p>According to the line graph, life satisfaction is fairly high at the age of 15–20: 5.5 for men and 5.3 for women. It then {falls|decreases|drops} steadily and reaches its {lowest} point, 5.0, at 41–50. After that, it rises again and reaches a {peak} of 5.6 at 61–70. Men and women have {almost} the same scores, except in the youngest group.</p>
+<p>The bar chart shows a similar pattern. More than {half} of people aged 15–24 (55%) say money would make them happiest, {compared} with only 12% who choose health. As people get older, the figure for money falls, while the figure for health {rises|increases|grows}. In the 55–64 age group, health (42%) is more popular {than} money (22%). Among people over 75, only 6% choose money, whereas 45% choose health.</p>`;
+const BL_BANK=["shows","Overall","least","whereas","falls","lowest","peak","almost","half","compared","rises","than"];
+
+/* ---------- 5. WRITE ---------- */
+const W_FRAME=`<p><b>Introduction</b><br>The two pie charts {show|compare|illustrate} how happy parents are when their children are very young and when they are teenagers.</p>
+<p><b>Overview</b><br>{Overall}, most parents in both groups are happy, but parents of very young children are more often very happy.</p>
+<p><b>Body 1 — very happy</b><br>Almost {half} of parents with very young children (47%) are very happy, compared {with|to} just over a {third} of parents with teenagers (35%).</p>
+<p><b>Body 2 — fairly happy &amp; unhappy</b><br>However, the proportion of fairly happy parents is {higher} for parents of teenagers: 61%, {whereas|while} the figure for parents of young children is 50%. Only a very small proportion of parents in both groups are {unhappy}: 3% and 4%.</p>`;
+const W_PHRASES=["The two charts show / compare…","Overall, …","Almost half / just over a third of…","… compared with …","However, …","…, whereas / while …","The figure for … is …","The proportion of … is higher / lower for …","Only a very small proportion of …","… are almost the same / very similar."];
+const W_CHECK=["Introduction: пересказала задание своими словами (не скопировала)","Overview: написала Overall… — главное, без цифр","Сравнила группы: higher / lower / more / fewer / compared with / whereas","Дала цифры в Body-абзацах","Не писала своё мнение и причины","Present Simple: the percentage <b>is</b>, the figure <b>falls</b>","150+ слов"];
+
+
+/* ---------- names for the report & homework picker ---------- */
+const NAMES={
+ c_type:"Chart types",c_mean:"Words: meaning",c_num:"Numbers → words (almost half…)",
+ p_title:"Book ex 1: title",p_diff:"Book ex 2: main differences",p_over:"Book ex 3: best overview",p_tf:"Pie charts: true or false?",
+ cmp_choose:"Comparing: choose",cmp_gap:"Comparing: gaps",cmp_order:"Comparing: word order",
+ bl_read:"Bar + line: read the charts",bl_trend:"Trends: rise / fall / peak",bl_intro:"Introduction (paraphrase)",bl_over:"Overview",bl_model:"Model answer: gaps",
+ w_frame:"Writing frame: pie charts",w_free:"My essay: pie charts ✍️"
+};
+let TABS=[
+ {id:"charts",t:"1 · Charts & words",ex:["c_type","c_mean","c_num"]},
+ {id:"pie",t:"2 · Pie charts",ex:["p_title","p_diff","p_over","p_tf"]},
+ {id:"cmp",t:"3 · Comparing",ex:["cmp_choose","cmp_gap","cmp_order"]},
+ {id:"bl",t:"4 · Bar + line graph",ex:["bl_read","bl_trend","bl_intro","bl_over","bl_model"]},
+ {id:"write",t:"5 · ✍️ Write",ex:["w_frame","w_free"]},
+ {id:"send",t:"🚀 Send",ex:[]}
+];
+
+/* MIRAÉ: задания для домашки (каждое упражнение — отдельное задание) */
+window.MIRAE_PARTS=TABS.filter(t=>t.ex.length).map(t=>({g:t.t.replace(/^\S+ · /,""),t:t.ex.map(e=>({k:"e:"+e,n:NAMES[e]}))}));
+const PICK=window.MIRAE_PICK||null;
+if(PICK){ PICK.used=true; TABS.forEach(t=>t.ex=t.ex.filter(e=>PICK.has("e:"+e))); TABS=TABS.filter(t=>t.id==="send"||t.ex.length); }
+const show=e=>!PICK||PICK.has("e:"+e);
+const ALL_EX=()=>TABS.reduce((a,t)=>a.concat(t.ex),[]);
+
+/* ======================= ENGINE ======================= */
+let cur=TABS[0].id;
+function start(){
+  const n=$("nameInput").value.trim(); if(!n){$("nameInput").focus();return;}
+  if(STATE.name && STATE.name!==n){ STATE={name:n,res:{},done:{}}; }
+  STATE.name=n; save();
+  $("login").classList.add("hidden"); $("app").classList.remove("hidden");
+  $("whoLine").textContent="Student: "+n; $("whoLine").classList.remove("hidden");
+  go(cur);
+}
+function tabDone(t){ return t.ex.length&&t.ex.every(e=>STATE.res[e]); }
+function renderNav(){
+  $("nav").innerHTML=TABS.map(t=>`<button id="nb-${t.id}" class="${t.id===cur?"active":""} ${tabDone(t)?"done":""}" onclick="go('${t.id}')">${t.t}</button>`).join("");
+  const all=ALL_EX(); $("pbar").style.width=(all.length?Math.round(100*all.filter(e=>STATE.res[e]).length/all.length):0)+"%";
+  const a=$("nb-"+cur); if(a&&a.scrollIntoView) a.scrollIntoView({inline:"center",block:"nearest"});
+}
+function go(id){
+  cur=id; renderNav(); window.scrollTo({top:0,behavior:"smooth"});
+  $("pane").innerHTML="";
+  ({charts:rCharts,pie:rPie,cmp:rCmp,bl:rBL,write:rWrite,send:rSend})[id]();
+  const i=TABS.findIndex(t=>t.id===id), T=TABS[i];
+  if(T.ex.length) $("pane").insertAdjacentHTML("beforeend",`<div class="actions" style="text-align:left"><button class="sm" onclick="redo('${id}')">🔁 Сделать раздел заново</button></div>`);
+  if(i<TABS.length-1) $("pane").insertAdjacentHTML("beforeend",`<div class="actions" style="text-align:right"><button class="primary" style="background:var(--gold);color:var(--indigo)" onclick="go('${TABS[i+1].id}')">Next: ${TABS[i+1].t.replace(/^\S+ · /,"")} →</button></div>`);
+}
+function redo(id){ if(!confirm("Начать этот раздел заново? Прежние ответы сотрутся.")) return; TABS.find(t=>t.id===id).ex.forEach(e=>delete STATE.res[e]); save(); go(id); }
+function card(html){ $("pane").insertAdjacentHTML("beforeend",`<div class="card">${html}</div>`); return $("pane").lastElementChild; }
+function setRes(id,ok,total,wrong){ STATE.res[id]={score:ok,total,wrong}; save(); renderNav(); }
+function prev(id){ const r=STATE.res[id]; return r?`<div class="muted">Last result: <b>${r.score} / ${r.total}</b></div>`:""; }
+
+/* --- MCQ --- */
+const MCQ={};
+function mcq(id,items,host){
+  const html=`${prev(id)}${items.map((it,i)=>`<div class="q" id="${id}-q${i}"><div class="s"><span class="n">${i+1}</span>${it.q.replace("___",'<span class="blank">___</span>')}</div>
+    <div class="opts">${it.o.map((o,j)=>`<button onclick="answerMcq('${id}',${i},${j})">${o}</button>`).join("")}</div><div class="why hidden"></div></div>`).join("")}
+  <div class="score" id="${id}-score"></div>`;
+  host.insertAdjacentHTML("beforeend",html);
+  MCQ[id]={items,ans:{}};
+}
+function answerMcq(id,i,j){
+  const M=MCQ[id]; if(M.ans[i]!==undefined) return;
+  M.ans[i]=j; const it=M.items[i]; const box=$(`${id}-q${i}`); const bs=box.querySelectorAll(".opts button");
+  bs[it.a].classList.add("ok"); if(j!==it.a) bs[j].classList.add("bad");
+  const w=box.querySelector(".why"); w.innerHTML=(j===it.a?"✅ ":"❌ ")+(it.why||(j===it.a?"Right!":"Answer: "+it.o[it.a])); w.classList.remove("hidden");
+  if(Object.keys(M.ans).length===M.items.length){
+    const ok=M.items.filter((x,k)=>M.ans[k]===x.a).length;
+    $(`${id}-score`).textContent=`Score: ${ok} / ${M.items.length}`+(ok===M.items.length?" 🔥":"");
+    setRes(id,ok,M.items.length,M.items.map((x,k)=>M.ans[k]!==x.a?`${x.q.replace(/<[^>]+>/g,"")} → "${x.o[M.ans[k]].replace(/<[^>]+>/g,"")}" (✓ ${x.o[x.a].replace(/<[^>]+>/g,"")})`:null).filter(Boolean));
+  }
+}
+/* --- gaps: {answer|alt} --- */
+const GAPS={};
+function gaps(id,text,host,wide){
+  let k=0; GAPS[id]=[];
+  const t=text.replace(/\{([^}]+)\}/g,(m,a)=>{ const ans=a.split("|"); GAPS[id].push(ans);
+    const w=wide?"":` style="width:${Math.max(90,Math.min(260,ans[0].length*11+30))}px"`;
+    return `<input class="gap${wide?" wide":""}" id="${id}-g${k++}"${w} autocomplete="off" autocapitalize="off" spellcheck="false">`; });
+  host.insertAdjacentHTML("beforeend",`${prev(id)}<div class="gaptext">${t}</div>
+  <div class="actions"><button class="primary" onclick="checkGaps('${id}')">Check</button><button id="${id}-show" class="hidden" onclick="document.querySelectorAll('[id^=${id}-g]+.fix').forEach(x=>x.classList.remove('hidden'))">Show answers</button></div>
+  <div class="score" id="${id}-score"></div>`);
+}
+function checkGaps(id){
+  const A=GAPS[id]; let ok=0; const wrong=[];
+  A.forEach((ans,i)=>{ const inp=$(`${id}-g${i}`); const old=inp.nextElementSibling; if(old&&old.classList.contains("fix")) old.remove();
+    inp.classList.remove("ok","bad");
+    if(match(inp.value,ans)){ok++;inp.classList.add("ok");}
+    else{inp.classList.add("bad");inp.insertAdjacentHTML("afterend",`<span class="fix hidden">${esc(ans[0])}</span>`);wrong.push(`${i+1}) "${inp.value||"—"}" (✓ ${ans[0]})`);} });
+  $(`${id}-score`).textContent=`Score: ${ok} / ${A.length}`+(ok===A.length?" 🔥":" · исправьте красные и нажмите Check ещё раз");
+  $(`${id}-show`).classList.remove("hidden");
+  if(!GAPS[id].done){ GAPS[id].done=1; setRes(id,ok,A.length,wrong); }   // засчитывается первая проверка; исправлять можно сколько угодно
+}
+/* --- word order --- */
+const ORD={};
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function order(id,items,host){
+  host.insertAdjacentHTML("beforeend",`${prev(id)}${items.map((o,i)=>`<div class="q"><div class="s"><span class="n">${i+1}</span><span class="built" id="${id}b${i}"></span></div><div class="pool" id="${id}p${i}"></div><div class="why hidden" id="${id}w${i}"></div></div>`).join("")}
+  <div class="actions"><button class="primary" onclick="checkOrder('${id}')">Check</button></div><div class="score" id="${id}-score"></div>`);
+  ORD[id]={items,st:items.map(o=>({pool:shuffle(o.w.map((w,k)=>({w,k}))),built:[]}))};
+  items.forEach((o,i)=>drawOrd(id,i));
+}
+function drawOrd(id,i){
+  const O=ORD[id].st[i];
+  $(id+"b"+i).innerHTML=O.built.length?O.built.map((t,j)=>`<button class="tok on" onclick="ordMove('${id}',${i},${j},0)">${t.w}</button>`).join(""):'<span class="muted">…</span>';
+  $(id+"p"+i).innerHTML=O.pool.map((t,j)=>`<button class="tok" onclick="ordMove('${id}',${i},${j},1)">${t.w}</button>`).join("");
+}
+function ordMove(id,i,j,pick){ const O=ORD[id].st[i]; if(pick) O.built.push(O.pool.splice(j,1)[0]); else O.pool.push(O.built.splice(j,1)[0]); drawOrd(id,i); }
+function sentence(O){ let s=O.built.map(t=>t.w).join(" ").replace(/ \?$/,"?"); if(!/[?.]$/.test(s)) s+="."; return s.charAt(0).toUpperCase()+s.slice(1); }
+function checkOrder(id){
+  const D=ORD[id]; const left=D.items.map((o,i)=>D.st[i].pool.length?i+1:0).filter(Boolean);
+  if(left.length){ $(id+"-score").textContent="Сначала соберите все предложения: "+left.join(", "); return; }
+  let ok=0; const wrong=[];
+  D.items.forEach((o,i)=>{ const s=sentence(D.st[i]); const good=match(s,o.a); const w=$(id+"w"+i);
+    $(id+"b"+i).className="built "+(good?"good":"wrong");
+    if(good) ok++; else wrong.push(`"${s}" (✓ ${o.a[0]})`);
+    w.innerHTML=good?"✅ "+o.a[0]:"❌ "+o.a[0]; w.classList.remove("hidden"); });
+  $(id+"-score").textContent=`Score: ${ok} / ${D.items.length}`+(ok===D.items.length?" 🔥":"");
+  setRes(id,ok,D.items.length,wrong);
+}
+
+/* ======================= TABS ======================= */
+/* --- free writing --- */
+function wc(s){ return (s.trim().match(/\S+/g)||[]).length; }
+function writeBox(id,host,min){
+  const old=(STATE.drafts||{})[id]||"";
+  host.insertAdjacentHTML("beforeend",`${prev(id)}<textarea id="${id}-t" style="min-height:260px;line-height:1.6" placeholder="Write here…" oninput="wcount('${id}',${min})">${esc(old)}</textarea>
+  <div class="muted" id="${id}-wc"></div>
+  <div class="actions"><button class="primary" onclick="saveWrite('${id}',${min})">Save &amp; show the teacher ✅</button></div><div class="feedback" id="${id}-fb"></div>`);
+  wcount(id,min);
+}
+function wcount(id,min){ const t=$(id+"-t").value, n=wc(t); $(id+"-wc").innerHTML=`Words: <b>${n}</b> / ${min}`+(n>=min?" ✅":"");
+  STATE.drafts=STATE.drafts||{}; STATE.drafts[id]=t; try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){} }
+function saveWrite(id,min){ const t=$(id+"-t").value.trim(), n=wc(t); if(n<20){ $(id+"-fb").textContent="Напишите хотя бы несколько предложений 🙂"; return; }
+  setRes(id,n>=min?1:0,1,["("+n+" words) "+t]); $(id+"-fb").textContent=n>=min?"✅ Saved! Преподаватель увидит текст.":"Saved, но пока меньше "+min+" слов — можно дописать и сохранить ещё раз."; }
+
+/* ---- 1. Charts & words ---- */
+function rCharts(){
+  card(`<h2>1 · Charts &amp; words</h2>
+  <p>In IELTS Writing Task 1 you describe a chart in <b>150+ words</b> and <b>20 minutes</b>. Very often there are <b>two charts</b>, and you must <b>compare</b> them.</p>
+  <div class="ru">Задание всегда одно и то же: <i>«Summarise the information by selecting and reporting the main features, and make comparisons where relevant.»</i><br>
+  = Опишите <b>главное</b> (не каждую цифру!) и <b>сравните</b>. Своё мнение и причины — <b>не нужны</b>.</div>
+  <div class="sub">Types of charts</div>
+  <div class="two"><div class="a" style="background:#f2eefb"><b class="h">🥧 pie chart</b>части целого (100%)</div><div class="b" style="background:#eaf4fb"><b class="h">📊 bar chart</b>сравнение групп</div>
+  <div class="a" style="background:#fdeef5"><b class="h">📈 line graph</b>изменение (по годам, по возрасту)</div><div class="b" style="background:#f1f1f1"><b class="h">▦ table</b>цифры в таблице</div></div>
+  <div class="sub">Key words</div>
+  <div class="words">${VOC.map(x=>`<div><button onclick="say('${x[0].replace(/ \/.*$/,"")}')">🔊</button><div><b>${x[0]}</b><span>${x[1]}</span></div></div>`).join("")}</div>`);
+  if(show("c_type")) mcq("c_type",C_TYPE,card(`<div class="step">A</div><h2>What type of chart is it?</h2>`));
+  if(show("c_mean")) mcq("c_mean",C_MEAN,card(`<div class="step">B</div><h2>What does it mean?</h2>`));
+  if(show("c_num")){ card(`<div class="step">Шаг</div><h2>Numbers → words 🔢</h2>
+    <p>Хороший ответ не повторяет только «47%, 35%, 61%». Цифры можно назвать <b>словами</b> — это даёт баллы за лексику.</p>
+    <table class="tbl"><tr><th>%</th><th>Как сказать</th></tr>
+    <tr><td>75%</td><td>three quarters</td></tr><tr><td>60%</td><td>three fifths</td></tr><tr><td>50%</td><td>half</td></tr>
+    <tr><td>33%</td><td>a third</td></tr><tr><td>25%</td><td>a quarter</td></tr><tr><td>20%</td><td>a fifth</td></tr></table>
+    <div class="signals"><span>almost / nearly half = 47–49%</span><span>just over half = 51–55%</span><span>about / around a third</span><span>the majority = больше 50%</span><span>a very small proportion = 1–5%</span></div>`);
+    mcq("c_num",C_NUM,card(`<div class="step">C</div><h2>Say it in words</h2>`)); }
+}
+
+/* ---- 2. Pie charts ---- */
+function rPie(){
+  card(`<h2>2 · Two pie charts: compare</h2>
+  <p class="muted">Coursebook, Writing Task 1, ex 1–3 (Relationships).</p>${piesHTML()}
+  <div class="ru">Перед тем как писать — 3 вопроса:<br>1) <b>Что</b> сравниваем? (какие группы)<br>2) Где самая <b>большая разница</b>?<br>3) Что <b>похоже</b>?</div>`);
+  if(show("p_title")) mcq("p_title",P_TITLE,card(`<div class="step">Ex 1</div><h2>Which is the best title?</h2>`));
+  if(show("p_diff")) mcq("p_diff",P_DIFF,card(`<div class="step">Ex 2</div><h2>Main differences: Yes or No?</h2><p class="muted">Which of the following are main differences between the two charts? <b>Main</b> = большая, важная разница.</p>`));
+  if(show("p_over")) mcq("p_over",P_OVER,card(`<div class="step">Ex 3</div><h2>Which overview is the best?</h2>
+    <div class="tip" style="font-size:14.5px">💡 <b>Overview</b> — 1–2 предложения о самом главном: главная разница + главное сходство. Без мелких цифр. Это самая важная часть Task 1!</div>`));
+  if(show("p_tf")) mcq("p_tf",P_TF,card(`<div class="step">Check</div><h2>True, false or not in the chart?</h2><p class="muted">Пишем только то, что видно на диаграмме.</p>`));
+}
+
+/* ---- 3. Comparing ---- */
+function rCmp(){
+  card(`<h2>3 · The language of comparing ⚖️</h2>
+  <table class="tbl"><tr><th>Что</th><th>Как</th></tr>
+  <tr><td>больше / меньше (цифра)</td><td>61% is <b>higher than</b> 50%. · 35% is <b>lower than</b> 47%.</td></tr>
+  <tr><td>больше / меньше (людей)</td><td><b>More</b> parents… · <b>Fewer</b> parents… <span class="muted">(people — считаем → fewer)</span></td></tr>
+  <tr><td>самый</td><td><b>the highest</b> figure · <b>the lowest</b> figure · <b>the most</b> popular · <b>the least</b> satisfied</td></tr>
+  <tr><td>длинные слова</td><td><b>more popular than</b> · <b>more important than</b></td></tr>
+  <tr><td>в 2 раза</td><td><b>twice as high as</b> · <b>twice as many</b> people <b>as</b>…</td></tr>
+  <tr><td>одинаково</td><td>almost <b>the same</b> · very <b>similar</b> · in both groups</td></tr></table>
+  <div class="sub">Linking words for comparing</div>
+  <div class="vs"><div>47% are very happy, <b>compared with</b> 35%.</div>
+  <div>Young people choose money, <b>whereas / while</b> older people choose health. <span class="muted">(внутри одного предложения, с запятой)</span></div>
+  <div>Most parents are happy. <b>However</b>, fewer parents of teenagers are very happy. <span class="muted">(начало нового предложения)</span></div>
+  <div><b>In contrast</b>, more parents of teenagers are fairly happy.</div></div>
+  <div class="warn">⚠️ <b>The percentage / the figure / the proportion</b> — это одно → <b>is</b>, <b>falls</b>, <b>rises</b>. ❌ <s>The percentage of parents are…</s> ✅ The percentage of parents <b>is</b>…</div>`);
+  if(show("cmp_choose")) mcq("cmp_choose",CMP_CHOOSE,card(`<div class="step">A</div><h2>Choose the correct word</h2>`));
+  if(show("cmp_gap")) gaps("cmp_gap",CMP_GAP,card(`<div class="step">B</div><h2>Compare the pie charts</h2>${piesHTML()}<p class="muted">Word bank: ${CMP_BANK.map(b=>`<span class="pill">${b}</span>`).join(" ")}</p>`));
+  if(show("cmp_order")) order("cmp_order",CMP_ORDER,card(`<div class="step">C</div><h2>Put the words in order</h2><p class="muted">Нажимайте на слова по порядку. Нажмите на слово в предложении, чтобы убрать его.</p>`));
+}
+
+/* ---- 4. Bar + line ---- */
+function rBL(){
+  card(`<h2>4 · Two different charts: a line graph + a bar chart</h2>
+  <div class="story" style="font-family:Inter,sans-serif;font-size:15.5px"><i>The graph below and the chart show the answers people gave about the extent to which they are satisfied with their lives and what they think would make them happiest.<br>
+  Summarise the information by selecting and reporting the main features, and make comparisons where relevant.</i></div>
+  ${lineSVG()}${barSVG()}
+  <div class="ru">Когда диаграммы <b>разные</b>: опишите каждую в своём абзаце (Body 1 — line graph, Body 2 — bar chart), а в overview свяжите их.</div>`);
+  if(show("bl_read")) mcq("bl_read",BL_READ,card(`<div class="step">Шаг 1</div><h2>Read the charts first 👀</h2><p class="muted">Сначала просто поймите, что на графиках.</p>`));
+  if(show("bl_trend")){ card(`<div class="step">Шаг 2</div><h2>Describing a line: up, down, top, bottom 📈</h2>
+    <table class="tbl"><tr><th></th><th>Глагол</th><th>Существительное</th></tr>
+    <tr><td>↗</td><td>rise · increase · grow</td><td>a rise · an increase</td></tr>
+    <tr><td>↘</td><td>fall · decrease · drop</td><td>a fall · a decrease</td></tr>
+    <tr><td>⬆️ top</td><td colspan="2">reach a peak (of 5.6) · is the highest</td></tr>
+    <tr><td>⬇️ bottom</td><td colspan="2">reach its lowest point (5.0) · is the lowest</td></tr>
+    <tr><td>→</td><td colspan="2">stay the same · remain stable</td></tr></table>
+    <p>Как: <b>sharply</b> (резко) · <b>steadily</b> (постепенно) · <b>slightly</b> (немного)</p>
+    <div class="tip">💡 Здесь по оси — <b>возраст</b>, а не годы, поэтому пишем в <b>Present Simple</b>: <i>satisfaction falls…, it rises…</i> Если по оси годы в прошлом (2010, 2015…) — Past Simple: <i>it fell, it rose</i>.</div>`);
+    gaps("bl_trend",BL_TREND,card(`<div class="step">Тренируем</div><h2>Complete the sentences</h2><p class="muted">Present Simple: falls / rises / reaches…</p>`)); }
+  if(show("bl_intro")) mcq("bl_intro",BL_INTRO,card(`<div class="step">Шаг 3</div><h2>Introduction: say it in your own words</h2>
+    <div class="formula"><span>The line graph / bar chart</span> + <span>shows / illustrates</span> + <span class="ing">what? who? when?</span></div>`));
+  if(show("bl_over")) mcq("bl_over",BL_OVER,card(`<div class="step">Шаг 4</div><h2>Overview: the big picture</h2>
+    <div class="formula"><span>Overall,</span> + <span class="ing">главная тенденция 1</span> + <span>and / whereas</span> + <span class="ing">главная тенденция 2</span></div>`));
+  if(show("bl_model")) gaps("bl_model",BL_MODEL,card(`<div class="step">Шаг 5</div><h2>Model answer (≈ 190 words)</h2>
+    <p class="muted">Вставьте слова. Посмотрите на план: Introduction → Overview → Body 1 (line graph) → Body 2 (bar chart).</p>
+    <p class="muted">Word bank: ${BL_BANK.map(b=>`<span class="pill">${b}</span>`).join(" ")}</p>`),false);
+}
+
+/* ---- 5. Write ---- */
+function rWrite(){
+  card(`<h2>5 · ✍️ Now you write</h2>
+  <p>Опишите <b>две круговые диаграммы</b> (parents with very young / teenage children). Сначала — по шаблону, потом — сами.</p>${piesHTML()}
+  <div class="formula"><span>1 Introduction</span> → <span>2 Overview</span> → <span class="ing">3 Body 1</span> → <span class="ing">4 Body 2</span></div>`);
+  if(show("w_frame")) gaps("w_frame",W_FRAME,card(`<div class="step">A · с помощью</div><h2>Writing frame</h2><p class="muted">Заполните пропуски. Это скелет вашего ответа.</p>`));
+  if(show("w_free")){ const c=card(`<div class="step">B · сами</div><h2>Write your answer (150+ words)</h2>
+    <p class="muted">Можно опираться на шаблон, но меняйте слова. Время — 20 минут ⏱️. Текст сохраняется сам, пока вы пишете.</p>
+    <div class="sub">Useful phrases</div><div class="signals">${W_PHRASES.map(p=>`<span>${p}</span>`).join("")}</div>
+    <div class="sub">Checklist ✅</div><div class="vs">${W_CHECK.map(c=>`<div>☐ ${c}</div>`).join("")}</div>`);
+    writeBox("w_free",c,150); }
+}
+
+/* ---- Send ---- */
+function rSend(){
+  const rows=ALL_EX().map(k=>{ const r=STATE.res[k]; return `<tr><td>${NAMES[k]}</td><td style="text-align:right">${r?`<b>${r.score} / ${r.total}</b>`:'<span class="muted">not done</span>'}</td></tr>`; }).join("");
+  card(`<h2>🚀 Send to your teacher</h2>
+  <table class="res">${rows}</table>
+  <div class="actions"><button class="primary" id="sendBtn" onclick="sendResults()">Send results 📩</button>
+  <button class="sm" onclick="if(confirm('Start again from zero?')){STATE={name:STATE.name,res:{},done:{}};save();go(TABS[0].id)}">Reset</button></div>
+  <div class="feedback" id="sendFb"></div><textarea id="copyBox" class="hidden" readonly style="min-height:200px"></textarea>`);
+}
+function buildReport(){
+  let t=`📊 <b>${TITLE}</b>\n👤 <b>${esc(STATE.name)}</b>\n🕒 ${new Date().toLocaleString("ru-RU")}\n`; let tot=0,max=0;
+  ALL_EX().forEach(k=>{ const r=STATE.res[k]; if(!r){t+=`\n▫️ ${NAMES[k]}: —`;return;}
+    tot+=r.score; max+=r.total; t+=`\n${r.score===r.total?"✅":"🔸"} <b>${NAMES[k]}: ${r.score}/${r.total}</b>`; r.wrong.forEach(w=>t+=`\n   • ${esc(w)}`); });
+  t+=`\n\n<b>Total: ${tot}/${max}</b>`;
+  return t;
+}
+function chunks(text){ const out=[]; let c=""; text.split("\n").forEach(l=>{ if((c+"\n"+l).length>3800){out.push(c);c=l;} else c=c?c+"\n"+l:l; }); if(c)out.push(c); return out; }
+async function sendResults(){
+  const text=buildReport(); $("sendBtn").disabled=true; $("sendFb").textContent="Sending…";
+  try{ for(const part of chunks(text)){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:part,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); }
+    $("sendFb").textContent="✅ Sent! Well done!"; $("sendBtn").disabled=false; }
+  catch(e){ $("sendBtn").disabled=false; $("sendFb").textContent="Couldn't send ("+e.message+"). Copy the text and send it to your teacher:"; const b=$("copyBox"); b.value=plain(text); b.classList.remove("hidden"); b.select(); }
+}
+
+load(); if(STATE.name) $("nameInput").value=STATE.name;
+$("nameInput").addEventListener("keydown",e=>{ if(e.key==="Enter") start(); });
+if(window.MIRAE&&MIRAE.user){ $("nameInput").value=MIRAE.user; start(); }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden"){ clearTimeout(liveTm); saveLive(); } });
+addEventListener("pagehide",()=>saveLive());
+</script>
+</body>
+</html>
