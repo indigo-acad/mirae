@@ -13,6 +13,15 @@ window.MATERIALS=[
   "level": "band 4–5"
  },
  {
+  "id": "en-ielts45-l2-charts",
+  "section": "english",
+  "kind": "lesson",
+  "course": "ielts45",
+  "title": "IELTS 4–5 · Урок 2 · Comparing charts (Writing Task 1)",
+  "path": "materials/english/en-ielts45-l2-charts/",
+  "level": "band 4–5"
+ },
+ {
   "id": "en-ielts-unit1-places",
   "section": "english",
   "kind": "trainer",
