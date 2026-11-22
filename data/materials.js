@@ -333,6 +333,30 @@ window.MATERIALS=[
   "level": "3급"
  },
  {
+  "id": "ko-g2724-3-lesson",
+  "section": "korean",
+  "kind": "trainer",
+  "title": "Группа 2724 · урок 3 · слова, ошибки проверки и игры",
+  "path": "materials/korean/ko-g2724-3-lesson/",
+  "level": "3급"
+ },
+ {
+  "id": "ko-g2724-3-quiz",
+  "section": "korean",
+  "kind": "trainer",
+  "title": "Группа 2724 · урок 3 · проверка на начало урока",
+  "path": "materials/korean/ko-g2724-3-quiz/",
+  "level": "3급"
+ },
+ {
+  "id": "ko-g2724-3-class",
+  "section": "korean",
+  "kind": "class",
+  "title": "Группа 2724 · урок 3 (для урока)",
+  "path": "materials/korean/ko-g2724-3-class/",
+  "level": "3급"
+ },
+ {
   "id": "ko-g2724-class",
   "section": "korean",
   "kind": "class",
