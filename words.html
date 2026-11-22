@@ -44,6 +44,16 @@ var GAME={cards:['Карточки','вспомни перевод и оцени
   build:['Собери слово','из слогов или букв'],pairs:['Найди пару','соедини слова и переводы'],
   hear:['Что прозвучало','слово звучит, выбери, как оно пишется: 달, 탈 или 딸'],dict:['Диктант','слово или фраза звучит, впиши по клеточкам'],
   say:['Скажи слово','по переводу, вслух в микрофон'],cnt:['Сколько слов','послушай фразу и посчитай слова']};
+GAME.rcards=['Обратная карточка','видишь перевод, вспомни слово и оцени себя сам'];
+/* Тип карточек, как в Anki: выбирается перед тренировкой (отработка и «по выбору»). mix — как раньше, игры из настроек */
+var CT={mix:['Вперемешку','игры, отмеченные в настройках'],basic:['Слово → перевод','карточка: вспомни перевод, открой, оцени'],
+  rev:['Перевод → слово','обратная карточка: по переводу вспомни слово'],both:['В обе стороны','слово то прямой, то обратной карточкой'],
+  type:['Ввести ответ','печатаешь слово по переводу или перевод по слову'],cloze:['Пропуск в предложении','слова без примера придут обычной карточкой']};
+function ctype(){var v='';try{v=localStorage.getItem('kr_ct')||''}catch(e){}return CT[v]?v:'mix'}
+function setCt(k){try{localStorage.setItem('kr_ct',k)}catch(e){}drawToday();var b=$('[data-ct="'+k+'"]');if(b)b.focus()}
+function ctBox(){var cur=ctype();
+  return '<div class="tct"><p class="muted tb-sub">Тип карточек: <b>'+CT[cur][0]+'</b> · '+CT[cur][1]+'</p><div class="opts tf-sc" role="group" aria-label="Тип карточек">'+
+    Object.keys(CT).map(function(k){var on=k===cur;return '<button type="button" data-ct="'+k+'" aria-pressed="'+on+'" class="'+(on?'sel':'')+'">'+(on?'✓ ':'')+CT[k][0]+'</button>'}).join('')+'</div></div>'}
 var EAR=KR.ear;
 var RATE=[[1,'Снова'],[2,'Трудно'],[3,'Хорошо'],[4,'Легко']];
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
@@ -179,6 +189,7 @@ function drawToday(){
   h+='</section><section class="card glass today trev" aria-labelledby="trev-h"><div class="tb-h"><h3 id="trev-h">'+KR.icon('repeat',20)+'Отработка</h3></div>'+
     '<div class="stat">'+box(inWork,'учу сейчас')+box(rev,'повторить')+box(st.total,'всего слов')+'</div>';
   h+='<p class="muted tb-sub">'+(MIXL?'Все языки · '+wlangs().map(function(l){return KR.LANGS[l].name+': '+gls(l).map(gname).join(' + ')}).join(' · '):'Значения: '+gls().map(gname).join(' + '))+' · <button type="button" class="linkish" data-x="cx-cfg">сменить</button></p>';
+  if(st.total>p.allNew&&busy!=='rev')h+=ctBox();
   if(busy==='rev')h+='';
   else if(inWork+rev)h+='<div class="done-row"><span class="muted">Упражнения по словам, которые уже в работе</span><button type="button" class="cta" id="go">Начать отработку'+KR.icon('arrow',18)+'</button></div>';
   else h+='<div class="done-row"><span class="muted">'+(st.total?(p.waiting?'Сейчас отрабатывать нечего. Ближайшее слово вернётся через '+SRS.span(p.nextAt-now)+'.':st.total>p.allNew?'На сегодня отработка закончена. Повторения появятся завтра.':'Отработка начнётся, когда разберёшь новые слова.'):'В словаре пока нет слов: '+G.ru+' раздел.')+'</span></div>';
@@ -234,8 +245,8 @@ function DL(){return MIXL?null:lang}
 /* слова для заданий: того же языка, что и слово (в «Все языки» варианты ответа не смешиваем) */
 function deck(c){var cc=c||(S&&S.card);return V.all(DL()).filter(function(x){return !cc||x.l===cc.l})}
 function feasible(c,d){
-  var g=V.settings().games,others=d.filter(function(x){return x.id!==c.id&&trOf(x)&&trOf(x)!==trOf(c)}),out=[],n=units(c).length;
-  if(g.cards)out.push('cards');
+  var g=ctype()==='mix'||FORCE?V.settings().games:SRS.DEF.games,others=d.filter(function(x){return x.id!==c.id&&trOf(x)&&trOf(x)!==trOf(c)}),out=[],n=units(c).length;
+  if(g.cards)out.push('cards','rcards');
   var unrel=d.filter(function(x){return x.id!==c.id&&!rel(c,x)});
   if(g.tr&&(S&&S.cx?unrel.length>=3:trOf(c)&&others.filter(function(x){return !rel(c,x)}).length>=3))out.push('tr');
   if(g.mean&&meanTargets(c).length)out.push('mean');
@@ -251,6 +262,15 @@ function choose(c,d){
   var f=feasible(c,d);
   if(FORCE&&(f.indexOf(FORCE)>=0))return FORCE;
   if(!c.st)return f.indexOf('cards')>=0?'cards':'intro';                 // новое слово сначала показываем
+  var ct=ctype();
+  if(ct!=='mix'){
+    if(ct==='basic')return 'cards';
+    if(ct==='rev')return 'rcards';
+    if(ct==='both'){S.flipN=(S.flipN||0)+1;return S.flipN%2?'cards':'rcards'}
+    if(ct==='type'){var ty=['wr','mean'].filter(function(g){return f.indexOf(g)>=0});
+      if(ty.length>1&&ty.indexOf(S.lastGame)>=0)ty=ty.filter(function(g){return g!==S.lastGame});return ty.length?ty[Math.floor(Math.random()*ty.length)]:'cards'}
+    if(ct==='cloze')return f.indexOf('ctx')>=0?'ctx':'cards';
+  }
   // сначала узнавание (в том числе на слух), потом вспоминание: написать, сказать вслух, записать на слух
   var pref=(c.st===1||c.st===3)?['tr','hear','mean','ctx','build','dict','cards','wr']:(c.ivl||0)<7?['ctx','mean','dict','tr','say','hear','build','wr','cards']:['wr','say','mean','dict','build','ctx','tr','cards'];
   var av=pref.filter(function(g){return f.indexOf(g)>=0&&g!==S.lastGame});
@@ -280,7 +300,7 @@ function nextCard(){
     if(S.qi>=S.queue.length)return finishFree();
     var fc=V.get(S.queue[S.qi]);S.card=fc;S.pr=pickCx(fc);S.cx=!!S.pr;S.game=choose(fc,deck(fc));S.lastGame=S.game;S.retype=false;S.miss=0;S.lock=false;
     var fph=false;if(S.game==='dict'){var fe=exOf(fc);fph=!!(fe&&fc.st===2&&(fc.ivl||0)>=3&&fe.s.length<=70&&EAR.count(fe.s)>=2&&Math.random()<.5)}
-    return ({cards:gCards,intro:gCards,tr:gChoice,mean:gMean,ctx:gChoice,wr:gWrite,build:gBuild,hear:gHear,dict:gDict,say:gSay})[S.game](fc,fph);
+    return ({cards:gCards,intro:gCards,rcards:gCards,tr:gChoice,mean:gMean,ctx:gChoice,wr:gWrite,build:gBuild,hear:gHear,dict:gDict,say:gSay})[S.game](fc,fph);
   }
   if(S.mode==='new'){
     while(S.qi<S.queue.length){var c0=V.get(S.queue[S.qi]);if(c0&&!c0.st)break;S.qi++}   // слово могли удалить или разобрать на другом устройстве
@@ -290,13 +310,13 @@ function nextCard(){
   var p=V.plan(DL()),g=V.settings().games;p.fresh=[];   // в отработке новых слов нет: они в своём блоке
   var pool=p.learn.concat(p.rev);
   var pp=noRel(FORCE==='pairs'?pool.concat(p.soon):pool).slice(0,5);
-  if((g.pairs&&S.sincePairs>=8&&pp.length>=4&&!FORCE)||(FORCE==='pairs'&&pp.length>=4)){S.sincePairs=0;return pairs(pp)}
+  if((g.pairs&&ctype()==='mix'&&S.sincePairs>=8&&pp.length>=4&&!FORCE)||(FORCE==='pairs'&&pp.length>=4)){S.sincePairs=0;return pairs(pp)}
   var c=SRS.pick(p);
   if(!c)return finish(p);
   S.sincePairs++;S.card=c;S.pr=pickCx(c);S.cx=!!S.pr;S.game=choose(c,deck(c));S.lastGame=S.game;S.hint=false;S.retype=false;S.miss=0;S.lock=false;
   // диктант фразой: слово уже знакомо и у него есть пример
   var ph=false;if(S.game==='dict'){var e=exOf(c);ph=!!(e&&c.st===2&&(c.ivl||0)>=3&&e.s.length<=70&&EAR.count(e.s)>=2&&Math.random()<.5)}
-  ({cards:gCards,intro:gCards,tr:gChoice,mean:gMean,ctx:gChoice,wr:gWrite,build:gBuild,hear:gHear,dict:gDict,say:gSay})[S.game](c,ph);
+  ({cards:gCards,intro:gCards,rcards:gCards,tr:gChoice,mean:gMean,ctx:gChoice,wr:gWrite,build:gBuild,hear:gHear,dict:gDict,say:gSay})[S.game](c,ph);
 }
 function frame(title,body){
   var p=V.plan(DL()),left=S.mode==='new'||S.mode==='ear'||S.mode==='free'?S.queue.length-S.qi:p.learn.length+p.rev.length+p.soon.length;
@@ -391,6 +411,14 @@ function more(c){   // пример после ответа
 function gCards(c){
   var intro=S.game==='intro',now=Date.now(),set=V.settings();
   var I=info(c)||{},ipa=(c.l==='en'?(KR.accent()==='us'?I.ipa_us||I.ipa_uk:I.ipa_uk||I.ipa_us):'')||c.ipa||'';
+  var rv=S.game==='rcards';
+  if(rv)return frame(GAME.rcards[0],'<div class="flash" id="flash">'+promptHtml(c)+
+    '<div class="flash-back" id="back" hidden><div class="flash-w">'+word(c)+' '+sayBtn(c.w,c.l)+micBtn(c.w,c.l)+'</div>'+
+    (ipa?'<div class="flash-ipa" lang="'+(c.l==='ko'?'ko':'en')+'">'+esc(ipa)+'</div>':'')+(I.image?'<img class="flash-img" src="'+esc(I.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
+    (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+'</div>':'')+'</div></div>'+
+    '<div id="fb" class="q-fb"></div>'+
+    '<div class="done-row" id="showrow"><span class="muted">Вспомни слово, лучше вслух, потом открой</span><button type="button" class="btn pri" data-x="flip">Показать слово</button></div>'+
+    rateRow(c,false,set,now));
   frame(c.st?GAME.cards[0]:'Новое слово','<div class="flash" id="flash"><div class="flash-w">'+word(c)+' '+sayBtn(c.w,c.l)+micBtn(c.w,c.l)+'</div>'+
     (ipa?'<div class="flash-ipa" lang="'+(c.l==='ko'?'ko':'en')+'">'+esc(ipa)+'</div>':'')+
     (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+'</div>':'')+
@@ -398,11 +426,15 @@ function gCards(c){
     '<div class="flash-t">'+(S.cx?glH(c):esc(trOf(c)||'перевод не указан'))+'</div>'+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+(c.et&&!S.cx?'<div class="muted">'+esc(c.et)+'</div>':'')+meaningsHtml(c,S.cx)+'</div></div>'+
     '<div id="fb" class="q-fb"></div>'+
     '<div class="done-row" id="showrow"><span class="muted">'+(S.cx?'Вспомни, что значит слово, и объясни его своими словами':c.st?'Вспомни перевод, потом открой':'Прочитай, послушай и открой перевод')+'</span><button type="button" class="btn pri" data-x="flip">'+(S.cx?'Показать значение':'Показать перевод')+'</button></div>'+
-    '<div class="rate" id="rate" hidden>'+(intro?'<button type="button" class="btn pri" data-g="3">Дальше'+KR.icon('arrow',16)+'</button>':(S.mode==='free'&&!SRS.isDue(c,now)?'<button type="button" data-g="1"><b>Не помню</b><small>вернётся сегодня</small></button><button type="button" data-g="3"><b>Помню</b><small>по плану: через '+SRS.span(Math.max(0,c.due-now))+'</small></button>'
-      :RATE.map(function(r){return '<button type="button" data-g="'+r[0]+'"><b>'+r[1]+'</b><small>'+SRS.label(c,r[0],set,now)+'</small></button>'}).join('')))+'</div>');
+    rateRow(c,intro,set,now));
   if(c.l&&KR.canSay())KR.say(c.w,c.l);
 }
-function flip(){var b=$('#back');if(!b||!b.hidden)return;b.hidden=false;$('#showrow').hidden=true;$('#rate').hidden=false;var f=$('#rate button[data-g="3"]');if(f)f.focus()}
+function rateRow(c,intro,set,now){
+  return '<div class="rate" id="rate" hidden>'+(intro?'<button type="button" class="btn pri" data-g="3">Дальше'+KR.icon('arrow',16)+'</button>':(S.mode==='free'&&!SRS.isDue(c,now)?'<button type="button" data-g="1"><b>Не помню</b><small>вернётся сегодня</small></button><button type="button" data-g="3"><b>Помню</b><small>по плану: через '+SRS.span(Math.max(0,c.due-now))+'</small></button>'
+      :RATE.map(function(r){return '<button type="button" data-g="'+r[0]+'"><b>'+r[1]+'</b><small>'+SRS.label(c,r[0],set,now)+'</small></button>'}).join('')))+'</div>';
+}
+function flip(){var b=$('#back');if(!b||!b.hidden)return;b.hidden=false;$('#showrow').hidden=true;$('#rate').hidden=false;var f=$('#rate button[data-g="3"]');if(f)f.focus();
+  if(S&&S.game==='rcards'&&S.card&&KR.canSay())KR.say(S.card.w,S.card.l)}
 // выбор из четырёх: перевод слова или слово в предложении
 function gChoice(c){
   var ctx=S.game==='ctx',byw=ctx||S.cx,d=deck(c).filter(function(x){return x.id!==c.id&&!rel(c,x)&&(byw||trOf(x)&&trOf(x)!==trOf(c))}),pair=c.pair?d.filter(function(x){return x.w===c.pair}):[];
@@ -1091,6 +1123,7 @@ document.addEventListener('click',function(e){
   var b=e.target.closest('button');if(!b)return;var d=b.dataset;
   if(d.say!==undefined){KR.say(d.say,d.l);return}
   if(d.wl)return setWLang(d.wl);
+  if(d.ct)return setCt(d.ct);
   if(b.id==='go'||d.x==='to-rev'){stopListen();return start('rev')}
   if(b.id==='gonew'||d.x==='to-new'){stopListen();return start('new')}
   if(d.x==='learn')return learnNew(3);
