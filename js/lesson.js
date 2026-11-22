@@ -9,7 +9,7 @@ const Q=new URLSearchParams(location.search);
 const HWID=Q.get("hw");   // домашка от преподавателя: lesson.html?hw=<номер>
 let id=Q.get("l")||"l12-jiyo";
 let L=HWID?null:(window.LESSONS||{})[id];
-if(!HWID&&!L){document.body.innerHTML="<p style='padding:20px'>Урок не найден.</p>";return}
+if(!HWID&&!L&&!/^lib-\d+$/.test(id)){document.body.innerHTML="<p style='padding:20px'>Урок не найден.</p>";return}
 if(!user){location.href="auth.html";return}
 let KEY="",P={};
 function save(){try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}
@@ -72,7 +72,7 @@ function firstPart(){
 function render(){
   document.title=L.hw?"Домашка · "+L.title:L.course+" · "+L.title;
   PART=SPLIT?firstPart():"theory";
-  const back=L.hw?"cabinet.html":L.back||"course.html",backT=L.hw?"кабинет":L.back?"доп. упражнения":"курс";
+  const back=L.hw?"cabinet.html":L.lib?"library.html":L.back||"course.html",backT=L.hw?"кабинет":L.lib?"библиотека":L.back?"доп. упражнения":"курс";
   let h=`<div id="topbar"></div><header class="band slim"><div class="in"><a href="${back}">${ic("back",14)}${backT}</a><small>${esc(L.course)} · ${esc(user)}</small><h1${L.hw?"":' class="ko"'}>${esc(L.title)}</h1><p>${esc(L.subtitle||"")}</p></div></header><main>
   <div class="card glass"><b>${L.hw?"Сделано":"Прогресс урока"}</b> <span id="pct" class="muted"></span><div class="bar"><div id="barfill"></div></div></div>`;
   if(L.hw)h+=hwTop();
@@ -98,6 +98,7 @@ function render(){
 }
 // тест по словам урока (test.html): ученик проверяет себя, преподаватель проводит его на уроке
 function testCard(){
+  if(L.lib)return "";   // test.html пока знает только уроки сайта
   const n=window.KR&&KR.lessonWords?KR.lessonWords(L).length:0;if(n<2)return "";
   const t=window.KR&&KR.ctx&&KR.ctx.teacher,q=encodeURIComponent(id);
   return `<div class="card glass wt-card"><h3>${ic("abc",20)} Тест по словам урока</h3><p class="muted">${n} ${plural(n,"слово","слова","слов")}: перевод, слово по переводу, слово в предложении, написание.${t?" «С учителем» — вопросы по одному на экране, ответы обсуждаете вместе.":""}</p>`+
@@ -197,6 +198,7 @@ function wordsNote(){
 }
 /* Внизу отработки: «Хочешь ещё?» — доп. упражнения или игры. Домашку здесь не показываем: её задаёт преподаватель. */
 function extra(){
+  if(L.lib)return "";   // урок из библиотеки: доп. упражнений к нему нет
   if(L.back)return `<div class="card glass"><a class="btn pri" href="${L.back}">${ic("back",16)}К списку отработок</a></div>`;
   if(L.games)return `<div class="card"><h3>Хочешь ещё?</h3><p class="muted">Закрепи буквы в играх: бинго, звуковая охота, конструктор слогов, найди ошибку и Reading Challenge по всему алфавиту.</p><a class="btn pri" href="${L.games}">${ic("spark",16)}Игры хангыля</a></div>`;
   const cl=window.COURSE?COURSE.lessons.concat((window.COURSE2||{lessons:[]}).lessons).find(l=>l.id===id):null;const pno=cl?cl.no:"all";
@@ -460,12 +462,16 @@ async function boot(){
     await KR.load();
     const list=await KR.homework(),rec=list&&list.find(x=>String(x.id)===String(HWID));
     if(!rec||rec.status!=="active")return hwGone(rec,list);
+    // уроки из библиотеки (lib-<номер>) приходят с сервера: js/library.js
+    if(KR.lib)await KR.lib.ensure((rec.items||[]).map(i=>i.l).concat((rec.theory||[]).map(t=>t.l)));
     const hl=hwLesson(rec);setup(hl.id,hl);render();return;
   }
   if(window.KR){
     const ctx=await KR.load();
+    if(!L&&KR.lib){await KR.lib.ensure([id]);L=(window.LESSONS||{})[id]}   // урок из библиотеки: lesson.html?l=lib-<номер>
+    if(!L){document.body.innerHTML="<p style='padding:20px'>Урок не найден.</p>";return}
     const mid=(L.back?"practice-":"lesson-")+id;
-    if(!KR.can(mid)){
+    if(!L.lib&&!KR.can(mid)){
       document.body.innerHTML='<div id="topbar"></div><main style="padding-top:30px"><div class="card glass"><h3>Этот материал не назначен</h3><p class="muted">'+(ctx.ok?'Попроси преподавателя открыть доступ к этому уроку.':'Нет связи с сервером, задания не загружены.')+'</p><a class="btn pri" href="cabinet.html">В личный кабинет</a></div></main>';
       KR.topbar("course");if(KR.assistant)KR.assistant.sync();return;
     }
