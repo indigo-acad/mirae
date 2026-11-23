@@ -58,9 +58,9 @@ begin
         if jsonb_typeof(b) <> 'object' or length(coalesce(b->>'w', '')) not between 1 and 120 or length(coalesce(b->>'t', '')) not between 1 and 200
            or length(coalesce(b->>'ex', '') || coalesce(b->>'et', '') || coalesce(b->>'f', '')) > 600 then raise exception 'bad_input'; end if;
       end loop;
-      if jsonb_typeof(it->'wt'->'k') is distinct from 'array' or jsonb_array_length(it->'wt'->'k') not between 1 and 4 then raise exception 'bad_input'; end if;
+      if jsonb_typeof(it->'wt'->'k') is distinct from 'array' or jsonb_array_length(it->'wt'->'k') not between 1 and 12 then raise exception 'bad_input'; end if;
       for k in select jsonb_array_elements_text(it->'wt'->'k') loop
-        if k not in ('tr', 'rev', 'ctx', 'wr') then raise exception 'bad_input'; end if;
+        if k not in ('tr', 'rev', 'tf', 'mch', 'ctc', 'ctx', 'wr', 'fl', 'bld', 'aud', 'dic', 'say') then raise exception 'bad_input'; end if;
       end loop;
       n := n + 1;
     elsif coalesce(it->>'l', '') ~ '^[a-z0-9-]{1,60}$' and jsonb_typeof(it->'b') = 'array' and jsonb_array_length(it->'b') between 1 and 40 then
