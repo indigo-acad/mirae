@@ -80,6 +80,8 @@ button.bad{background:var(--badbg)!important;border-color:var(--bad)!important}
     <div class="muted" style="margin-top:4px">처음이면 비밀번호를 새로 만들고 꼭 기억하세요. · Первый раз — придумайте PIN и запомните его.</div>
     <div id="loginFb" style="margin-top:8px;color:var(--bad);font-size:15px"></div>
     <button class="main" id="loginBtn" onclick="login()">들어가기 ▶</button>
+    <button style="width:100%;margin-top:10px" onclick="guest()">Без входа ▶</button>
+    <div class="muted" style="margin-top:4px;text-align:center">Без входа прогресс сохранится только на этом устройстве. · 로그인 없이 시작</div>
   </div>
 </div>
 
@@ -106,10 +108,10 @@ const SB_URL="https://nusfkwtmnbhnbnckhrfk.supabase.co", SB_KEY="sb_publishable_
 
 /* ===== ВИДЕО: SKZ CODE Ep.89 Holiday House #1 (youtu.be/MI6_aH1JT7s). Таймкоды в секундах. ===== */
 const VIDEOS={
-  1:{id:"MI6_aH1JT7s",start:24,end:80},
-  2:{id:"MI6_aH1JT7s",start:88,end:170},
-  3:{id:"MI6_aH1JT7s",start:1100,end:1192},
-  4:{id:"MI6_aH1JT7s",start:1258,end:1458}
+  1:{id:"MI6_aH1JT7s",start:24,end:80,file:"skz-holiday-l1.mp4",cover:true},
+  2:{id:"MI6_aH1JT7s",start:88,end:170,file:"skz-holiday-l2.mp4",cover:true},
+  3:{id:"MI6_aH1JT7s",start:1100,end:1192,file:"skz-holiday-l3.mp4",cover:true},
+  4:{id:"MI6_aH1JT7s",start:1258,end:1458,file:"skz-holiday-l4.mp4",cover:true}
 };
 
 const AVA={A:"🐺",B:"🐰",C:"🐥",IN:"🦊",PD:"🎬",ME:"🙋"};
@@ -167,6 +169,22 @@ const EPS=[
  ]}
 ];
 
+/* ---------- вход без регистрации ----------
+   Кнопка «Без входа» или ссылка с ?l=<номер урока> (например …/?l=2): урок открывается сразу, без имени и PIN.
+   Прогресс гостя хранится только на этом устройстве; результаты всё равно уходят учителю (с пометкой «без входа»). */
+let GUEST=false;
+const QS=(()=>{ try{ return new URLSearchParams(location.search); }catch(e){ return new URLSearchParams(""); } })();
+function afterEnter(){
+  const l=+QS.get("l"), e=EPS.find(x=>x.no===l&&!x.soon&&x.tasks&&x.tasks.length);
+  if(e){ S.L[l]=S.L[l]&&!S.L[l].done?S.L[l]:fresh(); save(); $("start").classList.add("hidden"); openL(l); } else menu();
+}
+function guest(){
+  const n=$("nameInput").value.trim()||"Гость"; PIN=""; GUEST=true;
+  const loc=localState(n); S=loc&&loc.L?loc:blank(n); S.name=n;
+  EPS.forEach(e=>{ if(!(e.no in S.L)) S.L[e.no]=null; }); save(); cloudMark("📱"); afterEnter();
+}
+document.addEventListener("DOMContentLoaded",()=>{ if((QS.has("l")||QS.has("guest"))&&!$("pinInput").value) guest(); });
+
 /* ---------- состояние ---------- */
 let S=null, PIN="", CL=0;
 const scored=ep=>ep.tasks.filter(t=>t.t!=="write"&&t.t!=="video").length;
@@ -201,7 +219,7 @@ async function login(){
   $("loginBtn").disabled=false;
   const loc=localState(n);
   S=weight(remote)>=weight(loc)&&remote&&remote.L?remote:(loc&&loc.L?loc:blank(n));
-  S.name=n; save(); menu();
+  S.name=n; save(); GUEST=false; afterEnter();
 }
 function menu(){
   ["start","play"].forEach(i=>$(i).classList.add("hidden")); $("menu").classList.remove("hidden");
@@ -338,7 +356,7 @@ function finale(){
 function buildReport(){
   const e=ep(), x=cur(), d=new Date(), dt=d.toLocaleDateString("ru-RU")+" "+d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
   const ok=x.log.filter(l=>l.ok).length, tot=scored(e);
-  let r=`🎬 <b>SKZ CODE · Holiday House · ${e.no}과 ${esc(e.tt)}</b>\n👤 ${esc(S.name)}\n📅 ${dt} · ⏱ ${fmt((x.t1||Date.now())-x.t0)}\n✅ <b>${ok}/${tot}</b>\n`;
+  let r=`🎬 <b>SKZ CODE · Holiday House · ${e.no}과 ${esc(e.tt)}</b>\n👤 ${esc(S.name)}${GUEST?" (без входа)":""}\n📅 ${dt} · ⏱ ${fmt((x.t1||Date.now())-x.t0)}\n✅ <b>${ok}/${tot}</b>\n`;
   e.tasks.forEach((t,i)=>{
     if(t.t==="video"){ r+=`\n🎧 ${i+1}. Услышала: ${esc((x.heard[i]||[]).join(", ")||"—")}`; return; }
     if(t.t==="write"){ r+=`\n✍️ ${i+1}. ${esc((x.texts[i]||"—").trim())}`; return; }
