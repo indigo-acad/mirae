@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Материал · MIRAÉ</title>
+<meta name="theme-color" content="#0B1535">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+#mwrap{max-width:760px;margin:0 auto;padding:0 12px 40px}
+#mframe{display:block;width:100%;min-height:70vh;border:0;border-radius:22px;background:#141019;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+</style>
+</head>
+<body>
+<div id="topbar"></div>
+<header class="band"><div class="in"><small id="kind">Материал</small><h1 id="ttl"></h1><p id="sub"></p></div></header>
+<main id="mwrap"></main>
+<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/home-cards.js"></script><script src="js/assistant.js"></script>
+<script>
+/* Материал внутри сайта: material.html?id=<id из data/materials.js>[&l=…&hw=…&only=…].
+   Шапка и вход — сайта; сам материал — в рамке ниже. Открывается только вошедшим ученикам, которым преподаватель
+   назначил этот материал (KR.can), и преподавателю. Остальные параметры адреса передаются материалу как есть.
+   Материал, которому нужен такой режим, при открытии напрямую сам перенаправляет сюда (см. ko-suchwita). */
+(function(){
+  var Q=new URLSearchParams(location.search),id=Q.get('id')||'',esc=KR.esc;
+  var m=(window.MATERIALS||[]).filter(function(x){return x.id===id})[0];
+  var box=document.getElementById('mwrap');
+  function card(t,p,btn){box.innerHTML='<div class="card glass"><h3>'+t+'</h3><p class="muted">'+p+'</p>'+(btn||'')+'</div>'}
+  document.getElementById('ttl').textContent=m?m.title:'Материал не найден';
+  if(m){document.title=m.title+' · MIRAÉ';document.getElementById('kind').textContent=((window.KINDS||{})[m.kind]||'Материал')+(m.level?' · '+m.level:'');}
+  if(!KR.require())return;
+  KR.topbar('');
+  if(!m){card('Материал не найден','Проверьте ссылку или откройте материалы из личного кабинета.','<a class="btn" href="cabinet.html">В кабинет</a>');return}
+  box.innerHTML='<p class="muted">Загрузка…</p>';
+  KR.load().then(function(){
+    KR.topbar('');
+    if(!KR.can(id)){
+      card('Этот курс пока закрыт','Его открывает преподаватель. Когда доступ появится, курс будет в личном кабинете в разделе «Назначено преподавателем».','<a class="btn" href="cabinet.html">В кабинет</a>');return;
+    }
+    Q.delete('id');Q.set('embed','1');
+    var src=m.path+(m.path.indexOf('?')<0?'?':'&')+Q.toString();
+    box.innerHTML='<iframe id="mframe" title="'+esc(m.title)+'" src="'+esc(src)+'" allow="autoplay; fullscreen; picture-in-picture"></iframe>';
+    var fr=document.getElementById('mframe'),last=0;
+    function fit(){try{var d=fr.contentDocument;if(!d||!d.body)return;var h=Math.max(d.body.scrollHeight,d.documentElement.scrollHeight);if(Math.abs(h-last)>2){last=h;fr.style.height=h+'px'}}catch(e){}}
+    fr.addEventListener('load',function(){fit();try{new ResizeObserver(fit).observe(fr.contentDocument.body)}catch(e){}});
+    setInterval(fit,700);
+  });
+})();
+</script>
+</body>
+</html>
