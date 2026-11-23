@@ -49,7 +49,8 @@ let blocks=[];          // все блоки страницы по порядк�
    преподаватель. Доп. упражнения (L.back) и домашка (L.hw) показываются одним списком. */
 const partOf=s=>window.KR&&KR.part?KR.part(s):"theory";
 let SECS=[],SPLIT=false,PART="theory";
-const EXT=["fill","choice","build"];   // упражнения с проверкой
+const EXT=["fill","choice","build","match","order"];   // упражнения с проверкой (кнопка «Проверить»)
+const OWN=EXT.concat(["write","speak"]);   // блоки со своей строкой внизу (без «Отметить пройденным»)
 function setup(lid,lesson){
   id=lid;L=lesson;KEY="kr_progress:"+user+":"+id;
   P={};try{P=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
@@ -213,7 +214,7 @@ function extra(){
 const doneLabel=d=>d?ic("check",16)+" Пройдено":"Отметить пройденным";
 function doneRow(b){
   if(b._ro)return "";   // теория внутри домашки: только почитать
-  const interactive=["fill","choice","build"].includes(b.type);
+  const interactive=EXT.includes(b.type);
   const d=P[b._key]&&P[b._key].done;
   if(interactive)return `<div class="done-row"><span class="score" id="sc-${b._key}"></span><button data-check="${b._key}" class="pri">Проверить</button></div>`;
   return `<div class="done-row"><span class="muted"></span><button data-done="${b._key}">${doneLabel(d)}</button></div>`;
@@ -258,6 +259,28 @@ function block(b){
       return `<div class="ex build" data-i="${i}"><div class="q">${it.say?sayBtn(it.say).replace('class="say"','class="say big"')+" ":""}<span class="ko">${esc(it.p||"")}</span></div>
       <div class="bk-row"><output class="built ko" id="bt-${b._key}-${i}" aria-live="polite">${esc(compose(v))}</output><span class="fb" id="fb-${b._key}-${i}"></span></div>
       <div class="kb ko" data-b="${b._key}" data-i="${i}">${b.keys.map(k=>`<button data-k="${esc(k)}">${esc(k)}</button>`).join("")}<button data-k="⌫" class="kb-del" aria-label="Стереть букву">${ic("back",15)}</button></div></div>`}).join("")+doneRow(b);
+  }else if(b.type==="match"){   // сопоставление: слово ↔ определение (оба по-корейски). items: [{l,r}], в P.v[i] — номер выбранной правой карточки
+    const v=(P[b._key]&&P[b._key].v)||{},R=b.items.map((x,j)=>j).sort((x,y)=>((x*7+3)%b.items.length)-((y*7+3)%b.items.length));
+    h+=`<p class="muted">${esc(b.instr||"Нажми слово слева, потом подходящее объяснение справа.")}</p><div class="mt" data-mt="${b._key}"><div class="mt-col">`+
+      b.items.map((it,i)=>`<button type="button" class="mt-l" data-ml="${i}"><b class="ko">${esc(it.l)}</b><span class="mt-to ko" id="mt-${b._key}-${i}">${v[i]!=null&&b.items[v[i]]?"→ "+esc(b.items[v[i]].r):""}</span><span class="fb" id="fb-${b._key}-${i}"></span></button>`).join("")+
+      `</div><div class="mt-col">`+R.map(j=>`<button type="button" class="mt-r ko" data-mr="${j}">${esc(b.items[j].r)}</button>`).join("")+`</div></div>`+doneRow(b);
+  }else if(b.type==="order"){   // собрать предложение из частей: items: [{p (подсказка), w: [части], a: ответ}]
+    h+=`<p class="muted">${esc(b.instr||"Нажимай части по порядку. ⌫ — убрать последнюю.")}</p>`+b.items.map((it,i)=>{
+      const v=(P[b._key]&&P[b._key].v&&P[b._key].v[i])||"",ch=it.w.map((w,j)=>j).sort((x,y)=>((x*5+i+1)%it.w.length)-((y*5+i+1)%it.w.length));
+      return `<div class="ex od" data-i="${i}">${it.p?`<div class="q">${esc(it.p)}</div>`:""}<div class="bk-row"><output class="built ko" id="od-${b._key}-${i}">${esc(v.split("|").filter(Boolean).join(" "))}</output><span class="fb" id="fb-${b._key}-${i}"></span></div>
+        <div class="kb od-kb ko" data-ob="${b._key}" data-i="${i}">${ch.map(j=>`<button type="button" data-ow="${esc(it.w[j])}">${esc(it.w[j])}</button>`).join("")}<button type="button" data-ow="⌫" class="kb-del" aria-label="Убрать последнюю часть">${ic("back",15)}</button></div></div>`}).join("")+doneRow(b);
+  }else if(b.type==="write"){   // письменный ответ: prompts — вопросы, model — образцы ответов (показываются после сохранения)
+    const v=(P[b._key]&&P[b._key].v)||{},sv=!!(P[b._key]&&P[b._key].done);
+    h+=`<p class="muted">${esc(b.instr||"Напиши ответы полными предложениями.")}</p>`+b.prompts.map((p,i)=>`<div class="ex wr"><label class="q ko" for="wr-${b._key}-${i}">${esc(p)}</label><textarea class="wr-in ko" id="wr-${b._key}-${i}" data-wb="${b._key}" data-i="${i}" rows="${b.rows||2}" placeholder="${esc(b.ph||"한국어로 쓰세요…")}" spellcheck="false">${esc(v[i]||"")}</textarea>${b.model&&b.model[i]?`<details class="wr-model"${sv?"":" hidden"}><summary>Образец ответа</summary><p class="ko">${esc(b.model[i])}</p></details>`:""}</div>`).join("")+
+      `<div class="done-row"><span class="muted" id="sc-${b._key}"></span><button type="button" class="pri" data-wsave="${b._key}">${sv?"Сохранено ✓":"Сохранить ответы"}</button></div>`;
+  }else if(b.type==="speak"){   // чтение вслух с проверкой произношения (js/ear.js): lines [[кто, текст, перевод?]], roles — выбор роли
+    const p=P[b._key]||{},v=p.v||{},role=p.role||"",can=window.KR&&KR.ear&&KR.ear.canHear();
+    h+=`<p class="muted">${esc(b.instr||"Послушай реплику, нажми микрофон и прочитай её вслух.")}</p>`+
+      (b.roles?`<div class="seg sp-roles" role="group" aria-label="Роль">${b.roles.map(r=>`<button type="button" data-spr="${b._key}" data-r="${esc(r)}" aria-pressed="${role===r}" class="${role===r?"on":""}">Я — ${esc(r)}</button>`).join("")}<button type="button" data-spr="${b._key}" data-r="" aria-pressed="${!role}" class="${role?"":"on"}">Все реплики</button></div>`:"")+
+      (can?"":`<p class="note">Проверка произношения работает в Chrome, Edge и Safari с микрофоном. Здесь можно послушать и прочитать вслух самостоятельно.</p>`)+
+      b.lines.map((l,i)=>{const mine=!role||l[0]===role,r=v[i];
+        return `<div class="line sp${mine?"":" sp-other"}"><span class="sp ko">${esc(l[0])}</span><div><div class="kolg ko">${esc(l[1])} ${sayBtn(l[1])}${mine&&can?`<button type="button" class="say mic" data-spm="${b._key}" data-i="${i}" title="Прочитать вслух" aria-label="Прочитать вслух">${ic("mic",16)}</button>`:""}</div>${l[2]?`<div class="ru">${esc(l[2])}</div>`:""}<div class="micfb ${r?r.c:""}" id="sp-${b._key}-${i}" aria-live="polite">${r?esc(r.m):""}</div></div></div>`}).join("")+
+      `<div class="done-row"><span class="score" id="sc-${b._key}"></span><button data-done="${b._key}">${doneLabel(!!p.done)}</button></div>`;
   }else if(b.type==="talk"){
     h+=`<p class="muted">${esc(b.instr)}</p>`+b.prompts.map(p=>`<div class="line"><div class="kolg ko">${esc(p)} ${sayBtn(p)}</div></div>`).join("");
   }else if(b.type==="wtest"){   // тест по словам внутри домашки: проходится на test.html, результат пишется сюда
@@ -275,7 +298,7 @@ function block(b){
       `<div class="done-row"><a class="btn" href="${esc(href)}" target="_blank" rel="noopener">${ic("arrow",16)} Открыть</a><button data-done="${b._key}">${doneLabel(P[b._key]&&P[b._key].done)}</button></div>`;
     return h+"</div>";
   }
-  if(!["fill","choice","build"].includes(b.type))h+=doneRow(b);
+  if(!OWN.includes(b.type))h+=doneRow(b);
   return h+"</div>";
 }
 function getItems(b){return b.items}
@@ -307,6 +330,9 @@ function check(key){
   b.items.forEach((it,i)=>{
     let good=false;
     if(b.type==="fill"){const inp=document.querySelector(`input[data-b="${key}"][data-i="${i}"]`);v[i]=inp.value;good=it.a.some(a=>norm(a)===norm(inp.value));inp.className="ans ko "+(good?"ok":"bad")}
+    else if(b.type==="match"){good=String(v[i])===String(i);const o=document.getElementById(`mt-${key}-${i}`);if(o)o.className="mt-to ko "+(good?"ok":"bad");
+      const fb=document.getElementById(`fb-${key}-${i}`);if(fb){fb.textContent=good?"✓":"✗ "+it.r;fb.className="fb "+(good?"ok":"bad")}if(good)ok++;else wr.push(i);return}
+    else if(b.type==="order"){good=norm(String(v[i]||"").split("|").join(""))===norm(Array.isArray(it.a)?it.a[0]:it.a)||(Array.isArray(it.a)&&it.a.some(a=>norm(a)===norm(String(v[i]||"").split("|").join(""))));const o=document.getElementById(`od-${key}-${i}`);if(o)o.className="built ko "+(good?"ok":"bad")}
     else if(b.type==="build"){good=compose(v[i]||"")===it.a;const o=document.getElementById(`bt-${key}-${i}`);if(o)o.className="built ko "+(good?"ok":"bad")}
     else{const g=document.querySelector(`.opts[data-b="${key}"][data-i="${i}"]`);const sel=v[i];good=sel===it.a;g.querySelectorAll("button").forEach(bt=>{bt.classList.remove("ok","bad");if(bt.dataset.o===sel)bt.classList.add(good?"ok":"bad")})}
     const fb=document.getElementById(`fb-${key}-${i}`);
@@ -339,6 +365,25 @@ function refresh(){
   SECS.forEach(s=>{const a=document.querySelector(`[data-sec="${s.id}"]`);if(a)a.classList.toggle("done",s.blocks.every(closed))});
   if(L.hw)hwState(n);
 }
+/* чтение вслух: распознаём фразу (js/ear.js) и сравниваем с текстом реплики по буквам-чамо */
+async function speakLine(t){
+  const k=t.dataset.spm,i=+t.dataset.i,b=blocks.find(x=>x._key===k),line=b&&b.lines[i];if(!line||t.classList.contains("on"))return;
+  const fb=document.getElementById(`sp-${k}-${i}`),E=KR.ear;if(window.KR&&KR.hush)KR.hush();
+  t.classList.add("on");if(fb){fb.className="micfb";fb.textContent="Слушаю… прочитай реплику"}
+  let r=null;
+  try{const alts=await E.recognize("ko",{max:Math.min(20000,4000+line[1].length*250)}),h=E.heard(alts,line[1],"ko");
+    const sc=Math.round(h.score*100),c=sc>=85?"ok":sc>=65?"":"bad";
+    r={s:sc,c,m:(sc>=85?"Отлично! ":sc>=65?"Почти. ":"Ещё раз. ")+"Совпадение "+sc+"% · услышали: «"+(h.best||alts[0])+"»"};
+    if(sc<65)setTimeout(()=>say(line[1]),400);
+  }catch(e){if(fb){fb.className="micfb bad";fb.textContent=E.errText(e)}}
+  t.classList.remove("on");if(!r)return;
+  if(fb){fb.className="micfb "+r.c;fb.textContent=r.m}
+  const p=P[k]=P[k]||{};p.v=p.v||{};const was=p.v[i];if(!was||r.s>=was.s)p.v[i]=r;p.t=Date.now();
+  const mine=b.lines.map((l,j)=>j).filter(j=>!p.role||b.lines[j][0]===p.role),got=mine.filter(j=>p.v[j]);
+  const sc=document.getElementById("sc-"+k);if(sc)sc.textContent=`Прочитано ${got.length} из ${mine.length} · в среднем ${got.length?Math.round(got.reduce((a,j)=>a+p.v[j].s,0)/got.length):0}%`;
+  if(got.length===mine.length&&!p.done){p.done=true;refresh()}
+  save();
+}
 function wire(){
   document.body.addEventListener("click",e=>{
     const t=e.target.closest("button");if(!t)return;
@@ -355,9 +400,27 @@ function wire(){
       const f=document.getElementById(`fb-${k}-${i}`);if(f){f.textContent="";f.className="fb"}
       if(t.dataset.k!=="⌫"&&/[가-힣]$/.test(compose(v)))say(compose(v).slice(-1));
       save();return}
+    if(t.dataset.ml!==undefined){const g=t.closest("[data-mt]");g.querySelectorAll(".mt-l").forEach(x=>x.classList.toggle("sel",x===t));g.dataset.sel=t.dataset.ml;return}
+    if(t.dataset.mr!==undefined){const g=t.closest("[data-mt]"),k=g.dataset.mt,i=g.dataset.sel;if(i==null||i===""){t.classList.add("bad");setTimeout(()=>t.classList.remove("bad"),400);return}
+      const b=blocks.find(x=>x._key===k);P[k]=P[k]||{};P[k].v=P[k].v||{};Object.keys(P[k].v).forEach(x=>{if(String(P[k].v[x])===t.dataset.mr){P[k].v[x]=null;const o=document.getElementById(`mt-${k}-${x}`);if(o){o.textContent="";o.className="mt-to ko"}}});
+      P[k].v[i]=+t.dataset.mr;P[k].t=Date.now();const o=document.getElementById(`mt-${k}-${i}`);if(o){o.textContent="→ "+b.items[+t.dataset.mr].r;o.className="mt-to ko"}
+      const f=document.getElementById(`fb-${k}-${i}`);if(f){f.textContent="";f.className="fb"}
+      g.querySelectorAll(".mt-l").forEach(x=>x.classList.remove("sel"));g.dataset.sel="";save();return}
+    if(t.dataset.ow!==undefined){const g=t.parentElement,k=g.dataset.ob,i=g.dataset.i;P[k]=P[k]||{};P[k].v=P[k].v||{};const a=String(P[k].v[i]||"").split("|").filter(Boolean);
+      if(t.dataset.ow==="⌫")a.pop();else a.push(t.dataset.ow);P[k].v[i]=a.join("|");P[k].t=Date.now();
+      const o=document.getElementById(`od-${k}-${i}`);if(o){o.textContent=a.join(" ");o.className="built ko"}const f=document.getElementById(`fb-${k}-${i}`);if(f){f.textContent="";f.className="fb"}save();return}
+    if(t.dataset.wsave){const k=t.dataset.wsave,b=blocks.find(x=>x._key===k),v=(P[k]=P[k]||{}).v=P[k].v||{};
+      b.prompts.forEach((x,i)=>{const e=document.getElementById(`wr-${k}-${i}`);if(e)v[i]=e.value});
+      const n=b.prompts.filter((x,i)=>String(v[i]||"").trim().length>=2).length,sc=document.getElementById("sc-"+k);
+      if(n<b.prompts.length){if(sc)sc.textContent=`Ответь на все вопросы: заполнено ${n} из ${b.prompts.length}`;save();return}
+      P[k].done=true;P[k].t=Date.now();t.textContent="Сохранено ✓";if(sc)sc.textContent="";
+      document.querySelectorAll(`#b-${k} .wr-model`).forEach(d=>d.hidden=false);save();return refresh()}
+    if(t.dataset.spr!==undefined){const k=t.dataset.spr;P[k]=P[k]||{};P[k].role=t.dataset.r;save();const c=document.getElementById("b-"+k),b=blocks.find(x=>x._key===k);if(c){c.outerHTML=block(b);refresh()}return}
+    if(t.dataset.spm!==undefined)return speakLine(t);
     if(t.dataset.done){const k=t.dataset.done;P[k]=P[k]||{};P[k].done=!P[k].done;P[k].t=Date.now();save();return refresh()}
     if(t.dataset.o!==undefined){const g=t.parentElement,k=g.dataset.b;P[k]=P[k]||{};P[k].v=P[k].v||{};P[k].v[g.dataset.i]=t.dataset.o;P[k].t=Date.now();g.querySelectorAll("button").forEach(x=>x.classList.remove("sel","ok","bad"));t.classList.add("sel");save()}
   });
+  document.body.addEventListener("input",e=>{const w=e.target;if(w.dataset&&w.dataset.wb){const k=w.dataset.wb;P[k]=P[k]||{};P[k].v=P[k].v||{};P[k].v[w.dataset.i]=w.value;P[k].t=Date.now();clearTimeout(window._wrT);window._wrT=setTimeout(save,800)}});
   document.body.addEventListener("input",e=>{const i=e.target;if(i.classList.contains("ans")){const k=i.dataset.b;P[k]=P[k]||{};P[k].v=P[k].v||{};P[k].v[i.dataset.i]=i.value;P[k].t=Date.now();i.className="ans ko";save()}});
   // ссылка на раздел другой части урока (#grammar из домашки или из закладки): открыть нужную часть
   window.addEventListener("hashchange",()=>{const s=SECS.find(x=>x.id===location.hash.slice(1));if(s&&SPLIT&&partOf(s)!==PART){setPart(partOf(s));const e=document.getElementById(s.id);if(e)e.scrollIntoView()}});
@@ -411,7 +474,7 @@ function hwLesson(rec){
 /* Преподаватель может задать не всё упражнение, а отдельные задания (it.i: {"<раздел>-<номер>": [номера]}):
    в домашке остаются только они, по порядку. Номера из урока — в b.subIdx (уходят в результат). */
 function hwPick(b,idx){
-  const key=Array.isArray(b.items)&&["fill","choice","build"].includes(b.type)?"items":b.type==="talk"&&Array.isArray(b.prompts)?"prompts":"";
+  const key=Array.isArray(b.items)&&EXT.includes(b.type)?"items":(b.type==="talk"||b.type==="write")&&Array.isArray(b.prompts)?"prompts":"";
   if(!key||!Array.isArray(idx))return b;
   const ok=[...new Set(idx)].filter(x=>Number.isInteger(x)&&x>=0&&x<b[key].length).sort((a,c)=>a-c);
   if(!ok.length||ok.length===b[key].length)return b;
@@ -453,10 +516,12 @@ function hwResult(){
     if(b.src){x.l=b.src;x.b=b.srcKey;if(b.subIdx){x.i=b.subIdx;x.of=b.subOf}}
     if(b.type==="mat"){x.m=b.m.id;if(b.p&&b.p.length)x.p=b.p.length;const r=window.KR&&KR.matInfo(b.m.id).rep;if(r&&r.t>=L.hw.created)x.rep=String(r.x||"").slice(0,8000)}
     if(b.type==="wtest"){x.score=p.score||0;x.total=p.total||(b.wt.w||[]).length;x.tries=p.tries||0;x.wrong=p.wrong||[];if(p.sec)x.sec=p.sec;score+=x.score;max+=x.total}
+    if(b.type==="write"){x.texts=b.prompts.map((q,i)=>({q:String(q).slice(0,200),a:String((p.v||{})[i]||"").slice(0,2000)}))}
+    if(b.type==="speak"){const v=p.v||{},ks=Object.keys(v);x.read=ks.length;x.avg=ks.length?Math.round(ks.reduce((a,j)=>a+(v[j].s||0),0)/ks.length):0}
     if(EXT.includes(b.type)){
       x.score=p.score||0;x.total=b.items.length;x.tries=p.tries||0;score+=x.score;max+=x.total;
       const last=p.hist&&p.hist[p.hist.length-1];
-      x.wrong=(last?last.w:[]).slice(0,30).map(w=>{const it=b.items[w[0]]||{};return {q:String(it.q||it.p||it.say||"").slice(0,200),g:String(w[1]==null?"":w[1]).slice(0,100),a:String(Array.isArray(it.a)?it.a[0]:it.a).slice(0,100)}});
+      x.wrong=(last?last.w:[]).slice(0,30).map(w=>{const it=b.items[w[0]]||{};return {q:String(it.q||it.p||it.l||it.say||"").slice(0,200),g:String(w[1]==null?"":w[1]).slice(0,100),a:String(Array.isArray(it.a)?it.a[0]:it.a).slice(0,100)}});
     }
     return x;
   });

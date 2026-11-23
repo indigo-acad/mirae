@@ -1125,3 +1125,29 @@ dialog.wexp h3{margin:0}
 .wt-kinds.tg-k label small{opacity:.7}
 .tg-mixrow select{width:auto;margin:0;display:inline-block}
 .tg-mix>span{align-self:center;margin-right:2px}
+
+/* новые блоки урока: сопоставление, сборка предложения, письменный ответ, чтение вслух */
+.mt{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.mt-col{display:grid;gap:8px;align-content:start}
+.mt button{text-align:left;border-radius:14px;padding:9px 12px;font-size:15.5px;line-height:1.35;white-space:normal}
+.mt-l{display:flex;flex-direction:column;gap:2px}
+.mt-l b{font-size:17px}
+.mt-l.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(212,175,124,.35)}
+.mt-to{font-size:13.5px;color:var(--fg-2)}
+.mt-to.ok{color:var(--ok-fg)}.mt-to.bad{color:var(--bad-fg)}
+.mt .fb{font-size:13px}
+@media (max-width:520px){.mt{grid-template-columns:1fr}.mt-col+.mt-col{border-top:1px dashed var(--rule);padding-top:10px}}
+.od .built{font-size:18px;min-height:46px;min-width:100%;justify-content:start;place-items:center start;padding:8px 12px;text-align:left}
+.od .built.bad{border:1.5px solid var(--bad-fg)}
+.od-kb button{font-size:16px;height:auto;min-height:40px;padding:6px 12px}
+.wr .q{display:block;margin-bottom:6px}
+.wr-in{width:100%;font:inherit;font-size:17px;line-height:1.5;padding:10px 12px;border-radius:14px;border:1.5px solid var(--field-line);background:var(--field);color:var(--ink);resize:vertical}
+.wr-model{margin-top:6px;font-size:15px}
+.wr-model summary{cursor:pointer;color:var(--accent)}
+.sp-roles{margin:6px 0 10px;flex-wrap:wrap}
+.line.sp-other{opacity:.62}
+.say.mic.on{background:var(--gold);color:#0B1535}
+.hwt-sec{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin:14px 0 2px;padding-top:8px;border-top:1px solid var(--rule)}
+.hwt-sec .linkish{display:inline-flex;align-items:center;gap:4px}
+.line.sp>.sp{white-space:nowrap;min-width:3.4em}
+.sp-roles button{flex:1 1 auto;white-space:nowrap}

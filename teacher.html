@@ -306,16 +306,24 @@ document.addEventListener('toggle',function(e){if(e.target.id==='wpk'&&e.target.
    Преподаватель выбирает задания: упражнения из отработки уроков целиком или отдельные задания в них (ученик делает их заново), «Домашнее задание» из урока,
    тренажёры и тесты; по желанию — разделы теории, которые ученик откроет кнопкой «Посмотреть теорию»; срок и комментарий.
    Сданная домашка приходит сюда с баллами и ошибками; «Проверено» с комментарием ученик увидит в кабинете. */
-var TYPE_RU={fill:'вписать',choice:'выбрать',build:'собрать',talk:'поговорить'};
+var TYPE_RU={fill:'вписать',choice:'выбрать',build:'собрать',talk:'поговорить',match:'сопоставить',order:'собрать предложение',write:'написать ответ',speak:'прочитать вслух'};
 function plural(n,f1,f2,f5){return n%10===1&&n%100!==11?f1:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?f2:f5}
 function lessLabel(l){var x=LESS.filter(function(y){return y[0]===l})[0],L=window.LESSONS[l];return x?x[1]:L?L.course+' · '+L.title:l}
+/* слова урока (KR.lessonWords) — в словарь ученика, как «Добавить слова» на этой странице; возвращает текст для сообщения */
+async function lessonWordsTo(lid){
+  var L=window.LESSONS&&window.LESSONS[lid];if(!L||!cur)return '';
+  var lang=L.lang||'ko',now=Date.now(),ws=KR.lessonWords(L).slice(0,300).map(function(x,i){return SRS.make(lang,x.w,x.t,{src:'teacher'},now+i)});
+  if(!ws.length)return '';
+  try{var r=await KR.api('teacher_vocab_add',{p_student:cur,p_words:ws});return ' · слов урока в словарь: '+(r&&r.added||0)+(r&&r.bumped?' (уже были: '+r.bumped+')':'')}
+  catch(x){return ' · слова урока в словарь не добавились'}
+}
 function hwLessons(){return LESS.filter(function(x){var L=window.LESSONS[x[0]];return L&&(L.lang||'ko')===hwf.lang})}
 // английские уроки — отдельные страницы (kind «lesson»), их можно задать как материал; корейские уроки идут через урок с заданиями
 function hwMats(){return MATERIALS.filter(function(m){return m.kind!=='practice'&&(m.kind!=='lesson'||m.section==='english')&&KR.langOf(m.id)===hwf.lang})}
 /* Отдельные задания внутри упражнения: у «вписать», «выбрать», «собрать» — вопросы (items), у «поговорить» — реплики (prompts).
    Отмеченное упражнение целиком: hwf.sel[k]. Если отмечена только часть заданий — их номера в hwf.it[k];
    в домашку они уходят полем i: {"<раздел>-<номер>": [номера заданий]} рядом со списком упражнений b. */
-function hwSubs(b){return ['fill','choice','build'].indexOf(b.type)>=0&&Array.isArray(b.items)?b.items:b.type==='talk'&&Array.isArray(b.prompts)?b.prompts:null}
+function hwSubs(b){return ['fill','choice','build','match','order'].indexOf(b.type)>=0&&Array.isArray(b.items)?b.items:(b.type==='talk'||b.type==='write')&&Array.isArray(b.prompts)?b.prompts:null}
 function hwBlockOf(l,k){var L=window.LESSONS[l];if(!L)return null;var j=k.lastIndexOf('-'),s=L.sections.filter(function(x){return x.id===k.slice(0,j)})[0];return s?{s:s,b:s.blocks[+k.slice(j+1)]}:null}
 function hwSubN(k){var i=k.indexOf('|'),x=hwBlockOf(k.slice(0,i),k.slice(i+1)),a=x&&x.b&&hwSubs(x.b);return a?a.length:0}
 // выбранные задания упражнения: массив номеров или null, если упражнение отмечено целиком
@@ -414,6 +422,18 @@ function hwBlocks(){
   var l=hwf.l,L=window.LESSONS[l];if(!L)return '<p class="muted">Уроков с заданиями для этого языка пока нет. Уроки-страницы, тренажёры и тесты выберите в списке «Материалы» ниже.</p>';
   var ex='',th='';
   L.sections.forEach(function(s){var pt=KR.part(s);
+    if(L.stages){   // урок со ступенями: задания «на занятии» и «на дом» по разделам, теория — ссылкой
+      var hs=s.blocks.filter(function(b){return b.at}),hm=s.blocks.some(function(b){return b.at==='home'});
+      if(s.blocks.some(function(b){return !b.at})){var tk=l+'|'+s.id;th+='<label class="line hwt-pick"><input type="checkbox" data-hwt="'+esc(tk)+'"'+(hwf.th[tk]?' checked':'')+'><span>'+esc(s.title)+'</span></label>'}
+      if(!hs.length)return;
+      ex+='<div class="hwt-sec"><b>'+esc(s.title)+'</b>'+(hm?' <button type="button" class="linkish" data-hwhome="'+esc(l+'|'+s.id)+'">'+KR.icon('home',14)+' отметить всё «на дом»</button>':'')+'</div>';
+      s.blocks.forEach(function(b,i){if(!b.at)return;var k=l+'|'+s.id+'-'+i,subs=hwSubs(b);
+        ex+='<div class="hwt-blk"><label class="line hwt-pick"><input type="checkbox" data-hwb="'+esc(k)+'"'+(hwf.sel[k]?' checked':'')+'><span>'+esc(b.title||s.title)+'<span class="muted"> · '+(b.at==='home'?'🏠 на дом':'👥 на занятии')+' · '+(TYPE_RU[b.type]||b.type)+'</span></span></label>';
+        if(subs&&subs.length>1)ex+='<details class="hwt-subs"'+(hwPart(k)?' open':'')+'><summary class="muted"><span class="hwt-cnt"></span></summary>'+
+          subs.map(function(x,j){return '<label class="line hwt-pick hwt-sub"><input type="checkbox" data-hwi="'+esc(k)+'" data-ix="'+j+'"><span><span class="muted">'+(j+1)+'.</span> '+hwSubText(b,x,j)+'</span></label>'}).join('')+'</details>';
+        ex+='</div>'});
+      return;
+    }
     if(pt==='theory'){var k=l+'|'+s.id;th+='<label class="line hwt-pick"><input type="checkbox" data-hwt="'+esc(k)+'"'+(hwf.th[k]?' checked':'')+'><span>'+esc(s.title)+'</span></label>';return}
     s.blocks.forEach(function(b,i){var k=l+'|'+s.id+'-'+i,subs=hwSubs(b);
       ex+='<div class="hwt-blk"><label class="line hwt-pick"><input type="checkbox" data-hwb="'+esc(k)+'"'+(hwf.sel[k]?' checked':'')+'><span>'+esc(b.title||s.title)+'<span class="muted"> · '+(pt==='hw'?'задание на дом из урока':(TYPE_RU[b.type]||b.type))+'</span></span></label>';
@@ -436,6 +456,7 @@ function hwForm(){
     (mats.length?'<details class="hwt-mats"'+(Object.keys(hwf.mats).some(function(k){return hwf.mats[k]})?' open':'')+'><summary>Материалы · '+mats.length+'</summary>'+mats.map(hwMatRow).join('')+'</details>':'')+
     '<input id="hwti" class="name" maxlength="200" placeholder="Название (по желанию)">'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="hwdue" type="date" class="name" style="flex:1;min-width:150px;margin:0" aria-label="Срок"><input id="hwnote" class="name" maxlength="1000" placeholder="Комментарий для ученика (по желанию)" style="flex:2;min-width:180px;margin:0"></div>'+
+    '<label class="line hwt-pick"><input type="checkbox" id="hwvoc"><span>Внести слова урока в словарь ученика <span class="muted">(придут на страницу «Слова» как новые)</span></span></label>'+
     '<div class="done-row"><span class="muted" id="hwsum"></span><button type="button" class="pri" id="hwgo">Задать домашку</button></div></div></details>';
 }
 function hwItemsText(r){
@@ -647,12 +668,15 @@ document.addEventListener('submit',async function(e){
 });
 document.addEventListener('click',async function(e){
   var b=e.target.closest('button');if(!b||!cur)return;
+  if(b.dataset.hwhome){var hk=b.dataset.hwhome,hl=hk.split('|')[0],hsid=hk.split('|')[1],HL=window.LESSONS[hl],hs=HL&&HL.sections.filter(function(x){return x.id===hsid})[0];
+    if(hs)hs.blocks.forEach(function(x,i){if(x.at==='home'){var k=hl+'|'+hsid+'-'+i;hwf.sel[k]=true;delete hwf.it[k]}});var bx=$('#hwblk');if(bx)bx.innerHTML=hwBlocks();hwSummary();return}
   if(b.dataset.hwlang){hwf.lang=b.dataset.hwlang;var c=$('#hwt');if(c){c.outerHTML=hwCardT();hwSummary()}return}
   if(b.id==='hwgo'){
     var pk=hwPicked();if(!pk.items.length){hmsg('Отметьте хотя бы одно упражнение, задание или тренажёр');return}
     var hw={title:($('#hwti').value||'').trim()||hwAutoTitle(pk),lang:hwf.lang,items:pk.items,theory:pk.theory,due:$('#hwdue').value||null,note:($('#hwnote').value||'').trim()};
     b.disabled=true;
-    try{await KR.api('teacher_hw_save',{p_student:cur,p_hw:hw});hwf={lang:hwf.lang,l:hwf.l,sel:{},it:{},th:{},mats:{},mp:{},open:false};await hwReload();hmsg('Домашка задана: «'+hw.title+'». Ученик увидит её в кабинете.',true)}
+    var hv=$('#hwvoc'),wv='';if(hv&&hv.checked){var hls=[];(pk.items||[]).forEach(function(x){if(x.l&&hls.indexOf(x.l)<0)hls.push(x.l)});if(!hls.length&&hwf.l)hls.push(hwf.l);for(var hi=0;hi<hls.length;hi++)wv+=await lessonWordsTo(hls[hi])}
+    try{await KR.api('teacher_hw_save',{p_student:cur,p_hw:hw});hwf={lang:hwf.lang,l:hwf.l,sel:{},it:{},th:{},mats:{},mp:{},open:false};await hwReload();hmsg('Домашка задана: «'+hw.title+'». Ученик увидит её в кабинете.'+wv,true)}
     catch(x){b.disabled=false;hmsg(/no_student/.test(x.message||'')?'Этого ученика ведёт другой преподаватель':/no_material/.test(x.message||'')?'Тренажёр не найден в каталоге на сервере — обновите страницу':'Не получилось задать домашку')}
     return;
   }
@@ -680,7 +704,7 @@ async function drawStudent(){
   h+='<div class="card"><h3>Назначить материалы</h3><div class="opts" id="flt"><button data-f="all" class="'+(filt==='all'?'sel':'')+'">Все</button>'+Object.keys(SECTIONS).map(function(k){return '<button data-f="'+k+'" class="'+(filt===k?'sel':'')+'">'+esc(SECTIONS[k])+'</button>'}).join('')+'</div><div style="margin-top:8px;max-height:340px;overflow:auto">';
   MATERIALS.filter(function(m){return !have[m.id]&&(filt==='all'||m.section===filt)}).forEach(function(m){
     h+='<label class="line" style="align-items:center;cursor:pointer"><input type="checkbox" data-m="'+esc(m.id)+'" '+(sel[m.id]?'checked':'')+'><span style="flex:1">'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>'});
-  h+='</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><input id="due" type="date" class="name" style="flex:1;min-width:150px;margin:0"><input id="note" class="name" placeholder="Комментарий (по желанию)" style="flex:2;min-width:180px;margin:0"></div><div class="done-row"><span class="muted" id="cnt"></span><button class="pri" id="go">Назначить выбранные</button></div></div>';
+  h+='</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><input id="due" type="date" class="name" style="flex:1;min-width:150px;margin:0"><input id="note" class="name" placeholder="Комментарий (по желанию)" style="flex:2;min-width:180px;margin:0"></div><label class="line" style="margin-top:8px"><input type="checkbox" id="asgvoc"><span>Внести слова назначенных уроков в словарь ученика</span></label><div class="done-row"><span class="muted" id="cnt"></span><button class="pri" id="go">Назначить выбранные</button></div></div>';
   $('#stud').innerHTML=h;count();hwSummary();
 }
 function count(){var n=Object.keys(sel).filter(function(k){return sel[k]}).length;var e=$('#cnt');if(e)e.textContent=n?('Выбрано: '+n):''}
@@ -769,7 +793,10 @@ document.addEventListener('click',async function(e){
   else if(b.id==='go'){
     var ids=Object.keys(sel).filter(function(k){return sel[k]});if(!ids.length){msg('Выбери хотя бы один материал');return}
     var due=$('#due').value||null,note=$('#note').value||'';b.disabled=true;
-    try{for(var i=0;i<ids.length;i++)await KR.api('teacher_assign',{p_student:cur,p_material:ids[i],p_due:due,p_note:note});sel={};students=await KR.api('teacher_students')||students;draw();msg('Назначено: '+ids.length,true)}
+    var av=$('#asgvoc'),avw=av&&av.checked;
+    try{for(var i=0;i<ids.length;i++)await KR.api('teacher_assign',{p_student:cur,p_material:ids[i],p_due:due,p_note:note});
+      var wsum='';if(avw)for(var j=0;j<ids.length;j++){var lid=ids[j].replace(/^lesson-/,'');if(ids[j].indexOf('lesson-')===0&&window.LESSONS&&window.LESSONS[lid])wsum+=await lessonWordsTo(lid)}
+      sel={};students=await KR.api('teacher_students')||students;draw();msg('Назначено: '+ids.length+wsum,true)}
     catch(x){msg('Не получилось назначить. Проверь, что SQL выполнен.');b.disabled=false}
   }
 });

@@ -510,6 +510,14 @@ window.MATERIALS=[
   "level": "1급"
  },
  {
+  "id": "lesson-sw5-l4",
+  "section": "course",
+  "kind": "lesson",
+  "title": "3급 · видео · 슈취타 EP.5 · 4 · 신청곡과 시그니처",
+  "path": "lesson.html?l=sw5-l4",
+  "level": "3급"
+ },
+ {
   "id": "lesson-l11-adaju",
   "section": "course",
   "kind": "lesson",
