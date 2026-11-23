@@ -438,14 +438,6 @@ window.MATERIALS=[
   "level": "2급"
  },
  {
-  "id": "ko-suchwita",
-  "section": "korean",
-  "kind": "quest",
-  "title": "슈취타 EP.5 · SUGA with 타블로 (видео-уроки)",
-  "path": "materials/korean/ko-suchwita/",
-  "level": "TOPIK 3–4"
- },
- {
   "id": "ko-listening-grandpa",
   "section": "korean",
   "kind": "trainer",

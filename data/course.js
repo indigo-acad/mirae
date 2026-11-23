@@ -22,7 +22,8 @@ window.COURSE2 = {
 window.COURSE4 = {
   id: "snu3", title: "서울대 한국어+ · 3급", subtitle: "Основной курс",
   lessons: [
-    { no: "피동", tag: "Грамматика · 피동", title: "피동 + -아/어 있다 + -아/어지다", id: "l3-pidong" }
+    { no: "피동", tag: "Грамматика · 피동", title: "피동 + -아/어 있다 + -아/어지다", id: "l3-pidong" },
+    { no: "🎬", tag: "Видео · 슈취타 EP.5 · 4", title: "신청곡과 시그니처", id: "sw5-l4", scene: "Шуга и Табло вспоминают, как появились «신청곡» и «새벽에» — и как в треке потерялся тег «슈가!»." }
   ]
 };
 window.PRACTICE_TOPICS = [

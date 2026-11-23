@@ -199,6 +199,7 @@ function wordsNote(){
 /* Внизу отработки: «Хочешь ещё?» — доп. упражнения или игры. Домашку здесь не показываем: её задаёт преподаватель. */
 function extra(){
   if(L.lib)return "";   // урок из библиотеки: доп. упражнений к нему нет
+  if(L.noExtra)return "";   // урок без доп. упражнений (например, видео-урок)
   if(L.back)return `<div class="card glass"><a class="btn pri" href="${L.back}">${ic("back",16)}К списку отработок</a></div>`;
   if(L.games)return `<div class="card"><h3>Хочешь ещё?</h3><p class="muted">Закрепи буквы в играх: бинго, звуковая охота, конструктор слогов, найди ошибку и Reading Challenge по всему алфавиту.</p><a class="btn pri" href="${L.games}">${ic("spark",16)}Игры хангыля</a></div>`;
   const cl=window.COURSE?COURSE.lessons.concat((window.COURSE2||{lessons:[]}).lessons).find(l=>l.id===id):null;const pno=cl?cl.no:"all";
@@ -221,6 +222,10 @@ function block(b){
     h+=`<div class="words">`+b.items.map(w=>`<div class="w"><span><b class="ko">${esc(w[0])}</b> ${sayBtn(w[0])}</span><span class="ru">${esc(w[1])}</span>${VOC?`<button class="icb" data-wstar="${esc(w[0])}" data-wt="${esc(w[1])}" aria-pressed="false" aria-label="Отметить слово: оно вернётся на повторение раньше">${ic("star",17)}</button>`:""}</div>`).join("")+`</div>`;
     if(VOC)h+=`<p class="note vnote"></p>`;   // текст ставит wordsNote(): в словаре слова урока или нет
   }else if(b.type==="text"){h+=b.html}
+  else if(b.type==="video"){   // видео: общий плеер сайта (js/player.js), b.v = {file, alt, yt:{id,start,end}, cover, time}
+    if(b.task)h+=`<p class="muted">${esc(b.task)}</p>`;
+    h+=window.MIRAE_PLAYER?MIRAE_PLAYER.html(b.v||{}):`<p class="muted">Плеер не загрузился — обнови страницу.</p>`;
+  }
   else if(b.type==="examples"){
     if(b.note)h+=`<p class="muted">${esc(b.note)}</p>`;
     h+=b.items.map(l=>`<div class="line"><div><div class="kolg ko">${esc(l[0])} ${sayBtn(l[0])}</div><div class="ru">${esc(l[1])}</div></div></div>`).join("");
