@@ -116,14 +116,17 @@ const TG_TOKEN="9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU", TG_CHAT_ID="347
 const SB_URL="https://nusfkwtmnbhnbnckhrfk.supabase.co", SB_KEY="sb_publishable_UmWyFo7ciEc-m9x1ZIfkNw_yeQQAgf8";
 const SHOW="슈취타 EP.5 · 타블로";
 
-/* ===== ВИДЕО. Вставьте id ролика с YouTube (часть ссылки после watch?v= или youtu.be/). Таймкоды в секундах.
+/* ===== ВИДЕО. alt — запасной плеер для учеников в России (VK Видео / Rutube):
+   вставьте ссылку встраивания из «Поделиться → Код для вставки» (только адрес из src="…").
+   Если alt заполнен, он показывается первым, а YouTube доступен кнопкой.
+   Вставьте id ролика с YouTube (часть ссылки после watch?v= или youtu.be/). Таймкоды в секундах.
    Если id пустой, вместо плеера показывается ссылка на поиск выпуска. ===== */
 const VIDEO_ID="rejl6KNXbgo"; /* youtu.be/rejl6KNXbgo — BANGTANTV, 23.02.2023 */
 const VIDEOS={
   1:{id:VIDEO_ID,start:10,end:253},
   2:{id:VIDEO_ID,start:257,end:565},
   3:{id:VIDEO_ID,start:579,end:863},
-  4:{id:VIDEO_ID,start:863,end:1200}
+  4:{id:VIDEO_ID,start:863,end:1200,alt:""}
 };
 
 const AVA={SG:"🐱",TB:"🎤",ME:"🙋"};
@@ -258,12 +261,18 @@ function linesHTML(lines){
   return (lines||[]).map(([w,t])=>{ const txt=esc(t).replace(/___/g,'<span class="gap">&nbsp;?&nbsp;</span>');
     return `<div class="line"><div class="ava">${AVA[w]}</div><div class="bub">${WHO[w]?`<span class="who">${WHO[w]}</span>`:""}${txt}</div></div>`; }).join("");
 }
+let VSRC=null;
+function ytSrc(v){ let p=[]; if(v.start) p.push("start="+v.start); if(v.end) p.push("end="+v.end); p.push("rel=0"); return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.id)}?${p.join("&")}`; }
+let VMODE=null;
+function swapVid(){ VSRC=VMODE==="alt"?"yt":"alt"; const b=document.querySelector(".vidbox"); if(b) b.outerHTML=videoHTML(); }
 function videoHTML(){
-  const v=VIDEOS[CL];
-  if(v&&v.id){ let p=[]; if(v.start) p.push("start="+v.start); if(v.end) p.push("end="+v.end); p.push("rel=0");
-    return `<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${esc(v.id)}?${p.join("&")}" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
-    <div class="muted" style="margin-top:6px">Первый раз — без субтитров, второй — с корейскими (⚙️ → 자막).</div>`; }
-  return `<div class="novid">🎬 Откройте выпуск на YouTube (канал BANGTANTV) и смотрите отрывок <b>${ep().time}</b>: <a target="_blank" href="https://www.youtube.com/results?search_query=%5B%EC%8A%88%EC%B7%A8%ED%83%80%5D+EP.5+SUGA+with+%ED%83%80%EB%B8%94%EB%A1%9C">[슈취타] EP.5 SUGA with 타블로</a></div>`;
+  const v=VIDEOS[CL]||{}; const hasAlt=!!v.alt, hasYt=!!v.id;
+  if(!hasAlt&&!hasYt) return `<div class="vidbox novid">🎬 Отрывок <b>${ep().time}</b> учитель добавит позже.</div>`;
+  const mode=VSRC&&((VSRC==="alt"&&hasAlt)||(VSRC==="yt"&&hasYt))?VSRC:(hasAlt?"alt":"yt");
+  VMODE=mode; const src=mode==="alt"?v.alt:ytSrc(v);
+  const sw=hasAlt&&hasYt?`<button style="margin-top:8px;font-size:14px;padding:7px 10px" onclick="swapVid()">${mode==="alt"?"▶ Открыть на YouTube":"▶ Запасной плеер (VK / Rutube)"}</button>`:"";
+  return `<div class="vidbox"><div class="vid"><iframe src="${esc(src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; screen-wake-lock" allowfullscreen></iframe></div>
+    <div class="muted" style="margin-top:6px">${mode==="yt"?"Отрывок "+esc(ep().time)+". Если видео не грузится — нажмите кнопку ниже.":"Отрывок "+esc(ep().time)+"."}</div>${sw}</div>`;
 }
 let CUR=null;
 function task(){
