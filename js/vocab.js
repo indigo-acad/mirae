@@ -86,6 +86,16 @@ var V={
   /* Ученик не хочет слова этого урока в словаре: больше не спрашиваем (решение синхронизируется с другими устройствами). */
   skipLesson:function(lessonId){D.auto[lessonId]="no";D.st=Date.now();D.sd=1;save();push()},
   update:function(c){c=Object.assign({},c,{u:Date.now()});put(c);return c},
+  /* Исправить написание слова. id карточки зависит от написания (SRS.id), поэтому карточка переезжает под новый id,
+     а расписание, звёздочка, заметка и история остаются. Возвращает новую карточку, null — слова нет,
+     {exists: карточка} — слово с таким написанием уже есть в словаре. */
+  rename:function(id,word){
+    var c=D.w[id];word=String(word==null?"":word).normalize("NFC").trim().replace(/\s+/g," ");if(!c||!word)return null;
+    var nid=SRS.id(c.l,word);if(nid!==id&&D.w[nid])return {exists:D.w[nid]};
+    var n=Object.assign({},c,{id:nid,w:word,u:Date.now()});if(n.f&&n.ex&&n.ex.indexOf(n.f)<0)delete n.f;
+    if(nid!==id){delete D.w[id];delete D.d[id];D.x[id]=1}
+    put(n);return n;
+  },
   star:function(id){var c=D.w[id];if(!c)return null;c=Object.assign({},c,{u:Date.now()});if(c.star)delete c.star;else{c.star=1;c=SRS.bump(c,Date.now())}put(c);return c},
   remove:function(id){delete D.w[id];delete D.d[id];D.x[id]=1;save();push()},
   answer:function(id,grade){
@@ -168,6 +178,19 @@ var V={
   sync:sync,
   reload:function(){load();return V}
 };
+/* Слова из материалов (папка materials/, кнопка «В словарь» от js/bridge.js) ждут в localStorage «kr_vinbox:<ученик>»,
+   пока ученик не откроет страницу сайта со словарём. Добавляются как слова урока: уже знакомое слово не трогаем. */
+function inbox(){
+  var k="kr_vinbox:"+KR.user(),a=[];try{a=JSON.parse(localStorage.getItem(k)||"[]")||[]}catch(e){}
+  if(!Array.isArray(a)||!a.length)return 0;
+  var now=Date.now(),n=0;
+  a.forEach(function(it,i){if(!it||!it.w||(it.l!=="ko"&&it.l!=="en"))return;var id=SRS.id(it.l,it.w);if(D.w[id])return;
+    var x={ex:it.ex,et:it.et,src:it.src||"material"};if(Array.isArray(it.d))x.d=it.d;
+    D.w[id]=SRS.make(it.l,it.w,it.t||"",x,now+i);D.d[id]=1;delete D.x[id];n++});
+  try{localStorage.removeItem(k)}catch(e){}
+  if(n)save();return n;
+}
+V.inbox=function(){var n=inbox();if(n){push();changed()}return n};
 KR.vocab=V;
-if(KR.user()){load();sync()}
+if(KR.user()){load();inbox();sync()}
 })();

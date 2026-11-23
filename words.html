@@ -28,7 +28,7 @@
   <section id="stats" hidden></section>
   <section id="prefs" hidden></section>
 </main>
-<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/words2.js"></script><script src="js/meaning.js"></script><script src="js/dict.js"></script><script src="js/ear.js"></script><script src="js/assistant.js"></script>
+<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/wexport.js"></script><script src="js/vocab.js"></script><script src="js/words2.js"></script><script src="js/meaning.js"></script><script src="js/dict.js"></script><script src="js/ear.js"></script><script src="js/assistant.js"></script>
 <script>
 /* Тренажёр слов. Расписание как в Anki (js/srs.js), игры взяты из тренажёра группы 2724:
    карточки, выбор перевода на слух, слово в предложении, письмо, сборка слова, поиск пары.
@@ -788,7 +788,7 @@ function saveNote(){
 // ---------- подкаст из слов: слово, пауза на ответ, перевод, пример, повтори за диктором ----------
 /* Пауза — время вспомнить и сказать ответ вслух, пока диктор его не назвал. pause 0 — ждём, пока ученик нажмёт «Дальше».
    Настройки — на этом устройстве (вкладка «Настройки» → «Подкаст»). */
-var LISTROWS=[],POD=null,LOCK=null;
+var LISTROWS=[],EXPROWS=[],POD=null,LOCK=null;
 var PAUSES=[2,3,5,8,12,0];
 function podCfg(){
   var d={pause:5,dir:'w2t',ex:1,echo:1,rep:1,slow:0},x=null;
@@ -934,12 +934,14 @@ function drawList(){
     h+='<div class="card glass" id="wlist"><div class="opts">'+Object.keys(F).map(function(k){var n=all.filter(F[k][1]).length;return '<button type="button" data-f="'+k+'" class="'+(filt===k?'sel':'')+'" aria-pressed="'+(filt===k)+'">'+F[k][0]+' · '+n+'</button>'}).join('')+'</div>'+
       '<input class="name" id="q" type="search" placeholder="Найти слово или перевод" aria-label="Поиск по словарю" value="'+esc(q)+'">'+selects(all);
     var qq=SRS.norm(q),rows=all.filter(F[filt][1]).filter(passV2).filter(function(c){return !qq||SRS.norm(c.w).indexOf(qq)>=0||SRS.norm(trOf(c)+' '+((info(c)||{}).tr_ru||[]).join(' ')+' '+(c.d||[]).map(function(x){return x.s}).join(' ')+' '+(c.syn||[]).join(' ')).indexOf(qq)>=0});
-    LISTROWS=rows.slice(0,200).map(function(c){return c.id});
+    LISTROWS=rows.slice(0,200).map(function(c){return c.id});EXPROWS=rows;
+    if(rows.length&&KR.wexport)h+='<div class="done-row wexp-row"><span class="muted">'+(rows.length<all.length?'В списке '+rows.length+' из '+all.length+' (по фильтру)':'Все слова: '+all.length)+'</span><button type="button" data-x="export">'+KR.icon('abc',15)+' Скачать или скопировать</button></div>';
     if(rows.length&&KR.canSay())h+='<div class="listen" id="listen">'+listenBar()+'</div>';
     var nodq=all.filter(function(c){return !c.dq}).length;
     if(KR.cloud.on&&nodq)h+='<div class="done-row"><span class="muted" id="dallmsg" role="status">Слов без статьи из словаря: '+nodq+'</span><button type="button" data-x="dict-all">'+KR.icon('book',15)+' Заполнить из словаря</button></div>';
     h+=rows.length?'<div class="wl">'+rows.slice(0,shown).map(function(c){
-      if(editing===c.id)return '<form class="wrow wedit" data-id="'+esc(c.id)+'"><div class="mid"><b>'+word(c)+'</b>'+
+      if(editing===c.id)return '<form class="wrow wedit" data-id="'+esc(c.id)+'"><div class="mid">'+
+        '<span class="field">Слово</span><input class="name'+(c.l==='ko'?' ko':'')+'" name="w" lang="'+c.l+'" value="'+esc(c.w)+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false" required>'+
         '<span class="field">Переводы по-русски</span><input class="name" name="t" value="'+esc(c.t)+'" placeholder="Несколько переводов — через «;»" aria-label="Переводы по-русски" maxlength="300">'+
         '<span class="field">Определения и переводы на других языках</span><textarea class="name" name="d" rows="3" aria-label="Определения, по одному в строке" placeholder="'+(c.l==='ko'?'사람이 머무는 곳\nen: a place to stay':'a place where you live\nko: 사는 곳\nja: 住まい')+'">'+esc(M.fmtDefs(c.d))+'</textarea>'+
         '<p class="hint">По одному в строке. Язык узнаётся по буквам; немецкий, французский и другие на латинице — напиши в начале «de:», «fr:».</p>'+
@@ -1192,6 +1194,7 @@ document.addEventListener('click',function(e){
   if(d.x==='cancel'){editing=null;return drawList()}
   if(d.del){if(confirm('Удалить слово из словаря? Его история повторений тоже удалится.')){V.remove(d.del);editing=null;drawAll()}return}
   if(d.x==='more'){shown+=60;return drawList()}
+  if(d.x==='export'){var et=MIXL?'Мои слова':'Мои слова · '+KR.LANGS[lang].name;return KR.wexport.open(EXPROWS.map(function(c){return {l:c.l,w:c.w,t:trRu(c),ex:c.ex,et:c.et}}),{title:et,file:'moi-slova'+(MIXL?'':'-'+lang)})}
   if(d.x==='reset')return savePrefs(true);
   if(d.x==='voice')return KR.say(lang==='ko'?'안녕하세요! 같이 공부해요.':'Hello! Let’s learn together.',lang);
   if(d.accent){KR.setAccent(d.accent);drawPrefs();return KR.say('Hello! Let’s learn together.','en')}
@@ -1214,6 +1217,11 @@ document.addEventListener('submit',function(e){
     var on=wl!==lang&&!MIXL?' Оно в словаре «'+KR.LANGS[wl].name+'»: переключи кнопкой вверху страницы.':'';m.textContent=(r.added?'Добавлено: '+r.card.w+'.':'Это слово уже было в словаре. Оно вернётся на повторение раньше.')+on;m.className='msg ok';$('#aw').focus();return;
   }
   if(f.classList.contains('wedit')){var c=V.get(f.dataset.id);if(c){
+    var nw=f.w.value.normalize('NFC').trim().replace(/\s+/g,' ');
+    if(!nw){f.w.focus();return}
+    if(nw!==c.w){if(KR.W2&&KR.W2.langOf&&KR.W2.langOf(nw)&&KR.W2.langOf(nw)!==c.l){alert('Слово должно остаться '+(c.l==='ko'?'корейским':'английским')+'. Если это слово другого языка, добавь его заново.');return}
+      var rn=V.rename(c.id,nw);if(rn&&rn.exists){alert('Слово «'+rn.exists.w+'» уже есть в словаре. Удали лишнюю карточку или исправь написание по-другому.');return}
+      if(rn){if(S_DF[c.id]){S_DF[rn.id]=S_DF[c.id];delete S_DF[c.id]}c=rn}}
     var tt=M.splitTr(f.t.value,c.l),dd=M.parseDefs(f.d.value),seen={};dd=dd.concat(tt.d).filter(function(x){var k=x.l+':'+x.s.toLowerCase();if(seen[k])return false;seen[k]=1;return true}).slice(0,12);
     var arr=function(o,k,v){if(v.length)o[k]=v;else delete o[k]};
     c=Object.assign({},c,{t:tt.t,ex:f.ex.value.trim(),et:f.et.value.trim()});arr(c,'d',dd);arr(c,'syn',M.parseSyn(f.syn.value));arr(c,'col',M.parseCols(f.col.value));
@@ -1249,6 +1257,7 @@ if(KR.require()){KR.topbar('words');drawAll();KR.load().then(function(){
   var hs=location.hash,pl=V.plan(DL());
   if(hs==='#new'||hs==='#rev'){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
     if(hs==='#new'&&pl.fresh.length)start('new');else if(hs==='#rev'&&pl.learn.length+pl.soon.length+pl.rev.length)start('rev')}
+  if(hs==='#export'){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}var xb=document.querySelector('[data-x="export"]');if(xb)xb.click()}
 })}
 </script>
 </body>
