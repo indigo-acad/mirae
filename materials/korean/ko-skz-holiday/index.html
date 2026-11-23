@@ -64,7 +64,7 @@ button.bad{background:var(--badbg)!important;border-color:var(--bad)!important}
 .end .big{font-size:52px} .end .tt{font-size:26px;font-weight:800;margin:4px 0}
 </style>
 </head>
-<body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<body><!--mirae-inject--><script src="../../../js/bridge.js"></script><script src="../../../js/player.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
 <div class="wrap">
 
 <div id="start">
@@ -238,11 +238,12 @@ function linesHTML(lines){
     return `<div class="line"><div class="ava">${AVA[w]}</div><div class="bub"><span class="who">${WHO[w]||""}</span>${txt}</div></div>`; }).join("");
 }
 function videoHTML(){
-  const v=VIDEOS[CL];
-  if(v&&v.id){ let p=[]; if(v.start) p.push("start="+v.start); if(v.end) p.push("end="+v.end); p.push("rel=0");
-    return `<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${esc(v.id)}?${p.join("&")}" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
-    <div class="muted" style="margin-top:6px">한국어 자막을 켜고 보세요 (⚙️ → 자막). Можно посмотреть 2 раза: сначала без субтитров, потом с корейскими.</div>`; }
-  return `<div class="novid">🎬 Отрывок для этого урока учитель добавит позже. Пока можно найти выпуск на YouTube: <a target="_blank" href="https://www.youtube.com/results?search_query=SKZ+CODE+Holiday+House">SKZ CODE · Holiday House</a></div>`;
+  const v=VIDEOS[CL]||{}, ts=t=>Math.floor(t/60)+":"+String(t%60).padStart(2,"0");
+  /* Общий плеер сайта (js/player.js). Чтобы ролик открывался в России без VPN, положите mp4 в media/video/
+     и добавьте в VIDEOS поле file: "имя.mp4" (и cover: true, если субтитры вшиты). */
+  return MIRAE_PLAYER.html({file:v.file,alt:v.alt,cover:v.cover,yt:v.id?{id:v.id,start:v.start,end:v.end}:null,
+    time:v.start?ts(v.start)+"–"+ts(v.end):"",
+    hint:v.file?undefined:"Включите корейские субтитры (⚙️ → 자막). Можно посмотреть 2 раза: сначала без субтитров, потом с корейскими."});
 }
 let CUR=null;
 function task(){
