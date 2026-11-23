@@ -286,6 +286,22 @@ window.MATERIALS=[
   "level": "1A–2A"
  },
  {
+  "id": "ko-2a6-quest",
+  "section": "korean",
+  "kind": "quest",
+  "title": "유키의 바쁜 토요일 · квест-проверка 2A 4–6과 (집안일, 마다, -(으)ㄹ게요, -기 전에, -(으)ㄴ 후에)",
+  "path": "materials/korean/ko-2a6-quest/",
+  "level": "2A"
+ },
+ {
+  "id": "ko-2a-review2",
+  "section": "korean",
+  "kind": "class",
+  "title": "복습 2 · 2A 4–6과 + TOPIK II + 쓰기 51–52 (с подсказками)",
+  "path": "materials/korean/ko-2a-review2/",
+  "level": "2A"
+ },
+ {
   "id": "ko-grammar-randomizer",
   "section": "korean",
   "kind": "game",

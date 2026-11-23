@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>복습 2 · 서울대 한국어+ 2A (4–6과) + TOPIK II</title>
+<style>
+:root{--bg:#f5f6f0;--card:#fff;--ink:#22301f;--muted:#6b7560;--g:#6f9a37;--gd:#557a26;--gl:#eef5df;--line:#e0e6d3;--ok:#2e7d4f;--okbg:#e3f3e8;--bad:#c0392b;--badbg:#fbe5e2;--warm:#e3a23b;--wl:#fff6e3}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:14px 12px 70px}
+.hero{background:var(--g);color:#fff;border-radius:22px;padding:20px;margin-top:32px}
+.hero h1{margin:0;font-size:25px}.hero p{margin:6px 0 0;opacity:.95;font-size:15px}
+.tabs{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:10px 0 8px;margin-top:6px}
+.tabs button{flex:none;border-radius:999px;padding:7px 13px;font-size:14px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font:inherit;font-size:14px}
+.tabs button.on{background:var(--g);color:#fff;border-color:var(--g);font-weight:700}
+.tabs button .sc{font-size:12px;opacity:.85;margin-left:4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:12px}
+h2{font-size:21px;margin:4px 0 6px}
+h3{font-size:17px;margin:14px 0 6px;color:var(--gd)}
+.muted{color:var(--muted);font-size:14px}
+.lead{background:var(--wl);border:1.5px dashed #e8c77c;border-radius:12px;padding:10px 13px;font-size:15px;margin:8px 0}
+.rule{background:var(--gl);border-radius:12px;padding:10px 13px;font-size:15px;margin:8px 0}
+.passage{background:#fafaf5;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;font-size:17px;white-space:pre-line}
+.box{border:2px solid var(--ink);border-radius:8px;padding:8px 12px;margin:6px 0;white-space:pre-line;text-align:center;font-weight:600}
+button{font:inherit;cursor:pointer;border-radius:11px;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:9px 12px}
+.btn{background:var(--g);color:#fff;border-color:var(--g);font-weight:700}
+.btn2{background:var(--gl);color:var(--gd);border-color:var(--gl);font-weight:600}
+.item{border-top:1px solid var(--line);padding:12px 0}
+.item:first-of-type{border-top:0}
+.qn{font-weight:700;color:var(--gd);margin-right:6px}
+.q{font-size:18px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+.opts.one{grid-template-columns:1fr}
+.opts button{text-align:left;font-size:16.5px}
+.opts button.ok{background:var(--okbg);border-color:var(--ok)}
+.opts button.bad{background:var(--badbg);border-color:var(--bad)}
+.ex{margin-top:7px;font-size:14.5px;color:var(--muted);background:#f7f8f3;border-radius:9px;padding:7px 10px}
+input.t,textarea{font:inherit;border:1.5px solid #cbd3bd;border-radius:10px;padding:8px 10px;background:#fff;width:100%}
+input.slot{font:inherit;font-size:16px;border:0;border-bottom:2px solid var(--g);background:#f8fbf2;padding:2px 6px;min-width:90px;width:auto;border-radius:6px 6px 0 0}
+input.t.ok,input.slot.ok{border-color:var(--ok);background:var(--okbg)}
+input.t.bad,input.slot.bad{border-color:var(--bad);background:var(--badbg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{border-radius:999px;padding:5px 11px;font-size:15px;background:#f1f4ea;border:1.5px solid var(--line);cursor:pointer}
+.chip.used{opacity:.3;pointer-events:none}
+.line{min-height:44px;border:1.5px dashed #b9c7a0;border-radius:12px;padding:6px;display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;background:#fbfdf7}
+.line.ok{border-color:var(--ok);background:var(--okbg)}.line.bad{border-color:var(--bad);background:var(--badbg)}
+.hide{display:none}
+.say{border:0;background:none;padding:0 4px;font-size:18px}
+.scard{border:1.5px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+.scard .gt{display:inline-block;background:var(--g);color:#fff;border-radius:9px;padding:3px 10px;font-weight:700;font-size:15px}
+.sq{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
+.frame{font-size:16px;background:#f7f9f1;border-radius:9px;padding:7px 10px;margin-top:6px}
+.model{font-size:16px;background:var(--okbg);border-radius:9px;padding:7px 10px;margin-top:6px}
+.scene{font-size:44px;line-height:1}
+.kw{font-size:14px;color:var(--muted)}
+.chk label{display:inline-flex;gap:5px;align-items:center;margin:3px 10px 3px 0;font-size:15px}
+.cnt{font-weight:700}
+.big{font-size:40px;font-weight:800;color:var(--g)}
+table.nt{border-collapse:collapse;width:100%;font-size:15px;margin:6px 0}
+table.nt td,table.nt th{border:1.5px solid #9aa58a;padding:5px 8px;text-align:left}
+@media(max-width:540px){.opts{grid-template-columns:1fr}}
+</style>
+</head>
+<body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+  <div class="hero">
+    <h1>📚 복습 2 · 4–6과</h1>
+    <p>서울대 한국어+ 2A · 쇼핑 · 우체국과 은행 · 집안일<br>Повторение с подсказками для 말하기 и 쓰기 + задания в формате TOPIK II и 쓰기 51–52</p>
+  </div>
+  <div class="card">
+    <div class="muted">Как тебя зовут?</div>
+    <input class="t" id="nameInput" placeholder="Имя" autocomplete="off" style="margin-top:6px">
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div id="sec"></div>
+</div>
+<script>
+/*DATA-START*/
+const GRAMMARS=["-는/(으)ㄴ/인 것 같다","명보다","-(으)ㄴ 명","명(으)로","-는데요/(으)ㄴ데요/인데요","-(으)ㄹ 거예요 (догадка)","‘르’ 불규칙","-(으)면 되다","명마다","-(으)ㄹ게요","-기 전에","-(으)ㄴ 후에"];
+
+/* ---------- 발음 ---------- */
+const PRON_RULES=[
+ {t:"1. Двойной 받침 ㄼ",x:"Перед гласной читаем оба: ㄹ остаётся, ㅂ переходит в следующий слог. Перед согласной — только ㄹ, а ㄱ, ㄷ, ㅅ, ㅈ после него становятся напряжёнными.",ex:["짧아요 [짤바요]","넓어요 [널버요]","얇고 [얄꼬]","짧지 않아요 [짤찌 아나요]"]},
+ {t:"2. Интонация вопроса",x:"Есть вопросительное слово (어디, 언제, 뭐, 얼마) — конец вопроса ↘ понижаем. Вопрос «да/нет» — ↗ повышаем.",ex:["우체국이 어디에 있어요? ↘","소포를 언제 보낼 거예요? ↘","소포 보낼 거예요? ↗"]},
+ {t:"3. -(으)ㄹ + ㄱ → [ㄲ]",x:"После окончания -(으)ㄹ звук ㄱ читается напряжённо. Пишем 게요, 거예요 — читаем [께요], [꺼예요].",ex:["제가 버릴게요 [버릴께요]","청소기를 돌릴게요 [돌릴께요]","모레 도착할 거예요 [도차칼꺼예요]"]}
+];
+const PRON=[
+ {q:"얇고 читается как…",o:["[얄꼬]","[얍꼬]","[얄고]","[야꼬]"],a:0,n:"Перед согласной читаем ㄹ, а ㄱ → ㄲ."},
+ {q:"넓어요 читается как…",o:["[널버요]","[너버요]","[널어요]","[넙어요]"],a:0,n:"Перед гласной ㅂ переходит в следующий слог."},
+ {q:"«우체국이 어디에 있어요?» — конец вопроса…",o:["↘ понижаем","↗ повышаем"],a:0,n:"Есть 어디 — понижаем."},
+ {q:"«택배를 오늘 보낼 거예요?» — конец вопроса…",o:["↘ понижаем","↗ повышаем"],a:1,n:"Вопрос да/нет — повышаем."},
+ {q:"버릴게요 читается как…",o:["[버릴께요]","[버릴게요]","[버리께요]","[버릴깨요]"],a:0,n:"-(으)ㄹ + ㄱ → ㄲ."},
+ {q:"좋아할 거예요 читается как…",o:["[조아할꺼예요]","[조아할거예요]","[좋아할거에요]","[조아하꺼예요]"],a:0,n:"ㅎ между гласными не читается, а ㄱ после -ㄹ → ㄲ."}
+];
+
+/* ---------- 어휘 ---------- */
+const VOCAB=[
+ {lead:"Выбери слово с тем же смыслом, что подчёркнутое.",q:"가: 은행에 왜 가요?\n나: 통장에서 돈을 좀 <u>찾으려고</u> 가요.",o:["입금하려고","출금하려고","환전하려고","송금하려고"],a:1,n:"돈을 찾다 = 출금하다 (снимать). 입금 — вносить, 환전 — обмен валюты, 송금 — перевод."},
+ {q:"가: 어떻게 오셨어요?\n나: 바지가 작아서 큰 사이즈로 <u>바꾸고</u> 싶은데요.",o:["교환하고","환불하고","주문하고","포장하고"],a:0,n:"바꾸다 (товар) = 교환하다. 환불 — вернуть деньги."},
+ {q:"가: 이 원피스 어때요?\n나: 저는 <u>단순한</u> 디자인이 좋아요.",o:["화려한","간단한","밝은","짧은"],a:1,n:"단순하다 ≈ 간단하다 — простой."},
+ {lead:"Выбери слово с ПРОТИВОПОЛОЖНЫМ смыслом.",q:"가: 이 구두는 굽이 너무 <u>높아요</u>.\n나: 그럼 굽이 ( ) 구두는 어때요?",o:["낮은","단순한","어두운","짧은"],a:0,n:"굽이 높다 ↔ 굽이 낮다."},
+ {q:"가: 이 코트는 색깔이 너무 <u>어두운</u> 것 같아요.\n나: 그럼 ( ) 색은 어때요?",o:["밝은","화려한","얇은","가벼운"],a:0,n:"어둡다 ↔ 밝다."},
+ {q:"가: 통장에 돈을 <u>넣었어요</u>? (입금)\n나: 아니요, 어제 돈을 다 ( ).",o:["찾았어요","보냈어요","바꿨어요","눌렀어요"],a:0,n:"넣다 (입금) ↔ 찾다 (출금)."},
+ {lead:"Выбери подходящее слово.",q:"은행에 들어가면 먼저 번호표를 ( ).",o:["뽑아요","붙여요","눌러요","써요"],a:0,n:"번호표를 뽑다 — взять талончик."},
+ {q:"편지를 보내기 전에 봉투에 우표를 ( ).",o:["붙여요","뽑아요","포장해요","서명해요"],a:0,n:"우표를 붙이다 — наклеить марку."},
+ {q:"ATM에서 돈을 찾을 때 비밀번호를 ( ).",o:["눌러요","붙여요","뽑아요","넣어요"],a:0,n:"비밀번호를 누르다 — ввести ПИН-код."},
+ {q:"통장을 만들려면 ( )이/가 필요해요. 여권을 주세요.",o:["신분증","우표","번호표","장바구니"],a:0,n:"신분증 — удостоверение личности."},
+ {q:"지금 사지 않을 물건은 ( )에 넣어 두세요.",o:["장바구니","신청서","봉투","옷장"],a:0,n:"장바구니 — корзина в интернет-магазине."},
+ {q:"2만 원 이상 사면 ( )이/가 무료예요.",o:["배송비","할인","환불","요금"],a:0,n:"배송비 — стоимость доставки."},
+ {q:"밥을 다 먹었어요. 이제 ( ).",o:["설거지해요","빨래해요","다림질해요","걸레질해요"],a:0,n:"После еды — моем посуду."},
+ {q:"옷이 바닥에 많아요. 옷을 옷장에 ( ).",o:["정리해요","버려요","빨아요","닦아요"],a:0,n:"정리하다 — разложить по местам."}
+];
+
+/* ---------- 문법 ---------- */
+const GRAM_MCQ=[
+ {q:"가: 와, 이 케이크 맛있어요!\n나: 제가 어제 ( ) 케이크예요.",o:["만든","만드는","만들","만들고"],a:0,n:"Прошлое перед существительным: 만들다 → 만든."},
+ {q:"가: 기차로 갈까요?\n나: 주말이라서 기차가 비행기( ) 더 비쌀 거예요.",o:["보다","마다","로","부터"],a:0,n:"Сравнение — 보다."},
+ {q:"이 가방은 좀 ( ) 것 같아요.",o:["무거운","무겁는","무겁은","무거는"],a:0,n:"Прилагательное + -(으)ㄴ 것 같다; ㅂ → 우: 무거운."},
+ {q:"직원: 뭘 찾으세요?\n손님: 운동화를 좀 ( ).",o:["사고 싶은데요","사고 싶는데요","사고 싶을게요","사고 싶을까요"],a:0,n:"싶다 ведёт себя как прилагательное → -(으)ㄴ데요."},
+ {q:"가: 체크카드를 잃어버렸어요.\n나: 은행에 가서 다시 ( ).",o:["만들면 돼요","만들게요","만들 줄 알아요","만들기 전에"],a:0,n:"Совет «достаточно…» — -(으)면 되다. 만들게요 — это я обещаю."},
+ {q:"한국 문화와 러시아 문화는 많이 ( ).",o:["달라요","다르어요","달러요","다라요"],a:0,n:"르 불규칙: 다르다 → 달라요."},
+ {q:"밥을 ( ) 약을 드세요.",o:["먹은 후에","먹기 후에","먹은 전에","먹기 마다"],a:0,n:"после — -(으)ㄴ 후에."},
+ {q:"이 공항버스는 30분( ) 있어요.",o:["마다","보다","으로","동안"],a:0,n:"каждые 30 минут — 30분마다."},
+ {q:"가: 이따가 연락 주세요.\n나: 네, 집에 도착하면 ( ).",o:["전화할게요","전화할까요","전화할 것 같아요","전화하면 돼요"],a:0,n:"Обещание собеседнику — -(으)ㄹ게요."},
+ {q:"서울에서 부산까지 KTX( ) 가면 2시간 반 걸려요.",o:["로","으로","에서","마다"],a:0,n:"KTX [케이티엑스] — на гласную → 로."}
+];
+const GRAM_FIX=[
+ {s:"이 바지는 저한테 좀 <u>크는 것 같아요</u>.",a:["큰 것 같아요"],n:"크다 — прилагательное: 큰 것 같아요."},
+ {s:"민수 씨는 내일 학교에 안 <u>올게요</u>.",a:["올 거예요","올 거에요"],n:"Про другого — не 게요: 안 올 거예요."},
+ {s:"저녁을 <u>먹기 후에</u> 산책해요.",a:["먹은 후에","먹고 나서"],n:"후에 ← -(으)ㄴ: 먹은 후에."},
+ {s:"저는 보통 <u>볼펜로</u> 써요.",a:["볼펜으로"],n:"На согласную (кроме ㄹ) — 으로."},
+ {s:"제 동생은 노래를 잘 <u>부르어요</u>.",a:["불러요"],n:"르 불규칙: 부르다 → 불러요."},
+ {s:"어제 <u>산는</u> 옷이 마음에 들어요.",a:["산"],n:"Прошлое перед существительным: 사다 → 산."},
+ {s:"저는 <u>주말마다에</u> 청소해요.",a:["주말마다"],n:"После 마다 частица 에 не нужна."}
+];
+const GRAM_BUILD=[
+ {q:"가: 언제 청소할 거예요?",g:"-(으)ㄴ 후에",w:["수업이","끝난","후에","청소할 거예요."],x:["끝나기"]},
+ {q:"가: 지금 뭐 해요? 시간 있어요?",g:"-는데요",w:["지금","빨래를","하는데요."],x:["한데요."]},
+ {q:"가: 이 옷 어때요?",g:"-(으)ㄴ 것 같다",w:["색깔이","좀","어두운","것 같아요."],x:["어둡는"]},
+ {q:"가: 학교에 어떻게 와요?",g:"(으)로",w:["저는","지하철로","와요."],x:["지하철으로"]},
+ {q:"가: 설거지 좀 해 주세요.",g:"-(으)ㄹ게요",w:["네,","제가","지금","할게요."],x:["할까요?"]},
+ {q:"가: 빨래를 얼마나 자주 해요?",g:"명마다",w:["일요일마다","빨래를","해요."],x:["일요일보다"]},
+ {q:"가: 언제 손을 씻어요?",g:"-기 전에",w:["밥을","먹기","전에","손을 씻어요."],x:["먹은"]},
+ {q:"가: 택배를 오늘 보내면 언제 도착해요?",g:"-(으)ㄹ 거예요",w:["아마","모레쯤","도착할 거예요."],x:["도착할게요."]}
+];
+
+/* ---------- 말하기 ---------- */
+const SPEAK=[
+ {g:"-는/(으)ㄴ/인 것 같다",rule:"Глагол + -는 것 같다, прилагательное + -(으)ㄴ, существительное + 인 것 같다. «Мне кажется…»",qs:[
+  {q:"오늘 선생님 기분이 어떤 것 같아요?",ru:"Как вам кажется, какое сегодня настроение у учителя?",f:"선생님은 오늘 기분이 ___ 것 같아요. 왜냐하면 ___.",c:["좋은","피곤한","바쁜","웃고 있어서","목소리가 밝아서"],m:"선생님은 오늘 기분이 좋은 것 같아요. 계속 웃고 있어서요."},
+  {q:"요즘 러시아에서 옷 가격이 어때요?",ru:"Какие сейчас цены на одежду в России?",f:"요즘 옷 가격이 ___ 것 같아요. ___보다 ___.",c:["비싼","싼","작년보다","더 올랐어요","인터넷이 더 싸요"],m:"요즘 옷 가격이 비싼 것 같아요. 작년보다 더 올랐어요."}]},
+ {g:"명보다",rule:"A보다 B가 더 … — «B больше …, чем A».",qs:[
+  {q:"인터넷 쇼핑하고 가게 쇼핑 중에서 뭐가 더 좋아요?",ru:"Что лучше: покупки в интернете или в магазине?",f:"저는 ___보다 ___이/가 더 좋아요. ___ 때문에요 / ___아서요.",c:["가게 쇼핑","인터넷 쇼핑","편해서요","싸서요","직접 입어 볼 수 있어서요"],m:"저는 인터넷 쇼핑보다 가게 쇼핑이 더 좋아요. 직접 입어 볼 수 있어서요."},
+  {q:"설거지하는 것하고 빨래하는 것 중에서 뭐가 더 싫어요?",ru:"Что вы больше не любите: мыть посуду или стирать?",f:"저는 ___보다 ___이/가 더 싫어요.",c:["설거지","빨래","다림질","시간이 오래 걸려서요","손이 아파서요"],m:"저는 빨래보다 설거지가 더 싫어요. 날마다 해야 해서요."}]},
+ {g:"-(으)ㄴ 명",rule:"Прошлое перед существительным: 산 옷, 먹은 음식, 본 영화.",qs:[
+  {q:"최근에 산 물건 중에서 뭐가 제일 마음에 들어요?",ru:"Что из недавно купленного вам больше всего нравится?",f:"지난주에 산 ___이/가 제일 마음에 들어요. ___.",c:["운동화","가방","화장품","편해요","디자인이 예뻐요"],m:"지난주에 산 운동화가 제일 마음에 들어요. 정말 편해요."},
+  {q:"지난 생일에 받은 선물이 뭐예요?",ru:"Какой подарок вы получили на прошлый день рождения?",f:"지난 생일에 받은 선물은 ___이에요/예요. ___이/가 줬어요.",c:["꽃","책","목걸이","친구","어머니"],m:"지난 생일에 받은 선물은 책이에요. 친구가 줬어요."}]},
+ {g:"명(으)로",rule:"Чем? На чём? Как? — 메시지로, 비행기로, 카드로 (после гласной и ㄹ — 로).",qs:[
+  {q:"고향에 있는 가족하고 어떻게 연락해요?",ru:"Как вы связываетесь с семьёй?",f:"보통 ___(으)로 연락해요. ___마다 ___.",c:["전화","메시지","영상 통화","주말마다","날마다"],m:"보통 영상 통화로 연락해요. 주말마다 해요."},
+  {q:"친구한테 선물을 보내면 어떻게 보낼 거예요?",ru:"Если отправлять другу подарок, как отправите?",f:"___(으)로 보낼 거예요. ___아서/어서요.",c:["비행기","배","택배","빨라서요","싸서요"],m:"비행기로 보낼 거예요. 배보다 빨라서요."}]},
+ {g:"-는데요 / -(으)ㄴ데요 / 인데요",rule:"Мягкий ответ, пояснение. Ролевая игра: ты — покупатель.",qs:[
+  {q:"(직원) 어서 오세요. 뭘 찾으세요?",ru:"(продавец) Добро пожаловать. Что ищете?",f:"___을/를 사고 싶은데요. / ___을/를 좀 보는데요.",c:["티셔츠","운동화","가방","선물할 거"],m:"친구한테 선물할 가방을 사고 싶은데요."},
+  {q:"(직원) 이 옷 어떠세요? 사이즈가 맞으세요?",ru:"(продавец) Как вам? Размер подходит?",f:"좀 ___는데요/ㄴ데요. 더 ___ 거 있어요?",c:["큰데요","작은데요","긴데요","작은","큰"],m:"좀 큰데요. 더 작은 거 있어요?"}]},
+ {g:"-(으)ㄹ 거예요 (догадка)",rule:"«Наверное, будет…» — о том, что мы не знаем точно.",qs:[
+  {q:"택배를 오늘 보내면 언제 도착할까요?",ru:"Если отправить посылку сегодня, когда она придёт?",f:"아마 ___ 도착할 거예요.",c:["내일","모레","이틀 후에","일주일쯤 후에"],m:"아마 모레쯤 도착할 거예요."},
+  {q:"이 선물을 받으면 친구가 어떨까요?",ru:"Каким будет друг, если получит этот подарок?",f:"친구가 아주 ___(으)ㄹ 거예요.",c:["좋아할","기뻐할","놀랄"],m:"친구가 아주 좋아할 거예요."}]},
+ {g:"‘르’ 불규칙",rule:"르 + 아/어 → ㄹ라/ㄹ러: 다르다 → 달라요, 부르다 → 불러요, 빠르다 → 빨라요, 모르다 → 몰라요.",qs:[
+  {q:"한국 문화하고 고향 문화가 같아요?",ru:"Культура Кореи и вашей родины одинаковые?",f:"아니요, 많이 달라요. 한국에서는 ___는데 러시아에서는 ___.",c:["젓가락으로 먹는데","신발을 벗는데","숟가락으로 먹어요"],m:"아니요, 좀 달라요. 한국 사람들은 젓가락으로 먹는데 러시아 사람들은 포크로 먹어요."},
+  {q:"노래방에서 무슨 노래를 불러요?",ru:"Какие песни поёте в караоке?",f:"저는 보통 ___ 노래를 불러요.",c:["케이팝","러시아","옛날"],m:"저는 보통 케이팝 노래를 불러요."}]},
+ {g:"-(으)면 되다",rule:"Совет «достаточно / нужно просто…».",qs:[
+  {q:"체크카드를 잃어버렸어요. 어떻게 하지요?",ru:"Я потерял(а) дебетовую карту. Что делать?",f:"___에 전화하면 돼요. / 다시 ___면 돼요.",c:["은행","만들","신분증을 가지고 가"],m:"은행에 전화하면 돼요. 그리고 다시 만들면 돼요."},
+  {q:"선물 받은 옷인데 사이즈가 커요. 어떻게 하지요?",ru:"Подаренная одежда велика. Что делать?",f:"가게에 가서 ___면 돼요.",c:["교환하","작은 사이즈로 바꾸"],m:"가게에 가서 작은 사이즈로 교환하면 돼요."}]},
+ {g:"명마다",rule:"«каждый»: 날마다, 주말마다, 아침마다, 10분마다.",qs:[
+  {q:"세탁기를 얼마나 자주 돌려요?",ru:"Как часто запускаете стиралку?",f:"___마다 돌려요.",c:["주말","이틀","사흘","날"],m:"저는 이틀마다 세탁기를 돌려요."},
+  {q:"집 근처 버스는 얼마나 자주 와요?",ru:"Как часто ходит автобус у вашего дома?",f:"___분마다 와요.",c:["5","10","15","20"],m:"10분마다 와요."}]},
+ {g:"-(으)ㄹ게요",rule:"«Я сделаю!» — решаю сейчас, ради собеседника.",qs:[
+  {q:"청소하는 것 좀 도와주세요.",ru:"Помогите, пожалуйста, с уборкой.",f:"네, 제가 ___(으)ㄹ게요.",c:["청소기를 돌릴게요","창문을 닦을게요","쓰레기를 버릴게요"],m:"네, 제가 청소기를 돌릴게요."},
+  {q:"언제까지 돈을 보내 줄 수 있어요?",ru:"До какого числа сможете перевести деньги?",f:"___까지 보낼게요.",c:["내일","금요일","이번 주"],m:"금요일까지 보낼게요."}]},
+ {g:"-기 전에",rule:"«перед тем как»: 자기 전에, 먹기 전에.",qs:[
+  {q:"자기 전에 보통 뭐 해요?",ru:"Что обычно делаете перед сном?",f:"자기 전에 ___고 ___.",c:["샤워하","이를 닦","일기를 써요","휴대폰을 봐요"],m:"자기 전에 샤워하고 이를 닦아요."},
+  {q:"여행 가기 전에 뭘 준비해요?",ru:"Что готовите перед поездкой?",f:"여행 가기 전에 ___.",c:["짐을 싸요","숙소를 예약해요","표를 예매해요"],m:"여행 가기 전에 숙소를 예약하고 짐을 싸요."}]},
+ {g:"-(으)ㄴ 후에",rule:"«после того как»: 먹은 후에, 끝난 후에, 들은 후에.",qs:[
+  {q:"오늘 수업이 끝난 후에 뭐 할 거예요?",ru:"Что будете делать после урока?",f:"수업이 끝난 후에 ___(으)ㄹ 거예요.",c:["장을 볼","낮잠을 잘","복습할","친구를 만날"],m:"수업이 끝난 후에 장을 볼 거예요."},
+  {q:"청소기를 먼저 돌려요, 방을 먼저 정리해요?",ru:"Сначала пылесосите или сначала наводите порядок?",f:"방을 ___ 후에 ___.",c:["정리한","청소기를 돌려요","걸레질해요"],m:"방을 정리한 후에 청소기를 돌려요."}]}
+];
+
+/* ---------- 그림 이야기 (6 кадров) ---------- */
+const STORY=[
+ {e:"📺👕",d:"Минсу смотрит дораму. Актёр в серой футболке с птичкой. Минсу тоже хочет такую.",kw:"드라마 — дорама · 배우 — актёр · 회색 — серый · 갖고 싶다 — хотеть иметь",g:"-(으)ㄴ 명, -는 것 같다",st:"민수 씨가 드라마를 보는데…",m:"민수 씨가 집에서 드라마를 봐요. 배우가 입은 회색 티셔츠가 정말 멋있는 것 같아요. 민수 씨도 그 티셔츠를 갖고 싶어요."},
+ {e:"🏬😍",d:"На следующий день Минсу в магазине. На манекене та же футболка, все вокруг в восторге.",kw:"다음 날 — на следующий день · 마네킹 · 인기가 많다 — популярный",g:"-(으)러 가다, -는 것 같다",st:"다음 날 민수 씨는 티셔츠를 사러…",m:"다음 날 민수 씨는 티셔츠를 사러 옷 가게에 갔어요. 가게에 같은 티셔츠가 있어요. 사람들이 모두 좋아하는 것 같아요. 인기가 정말 많아요."},
+ {e:"🤍🩶",d:"Минсу держит белую и серую. Серая нравится больше.",kw:"하얀색 — белый · 회색 — серый · 마음에 들다 — нравиться",g:"명보다",st:"민수 씨는 하얀색보다…",m:"민수 씨는 하얀색 티셔츠와 회색 티셔츠를 봤어요. 하얀색보다 회색이 더 마음에 들었어요."},
+ {e:"🙋‍♂️🙅‍♀️",d:"Минсу просит серую, продавец: серой нет (раскупили).",kw:"직원 — продавец · 다 팔리다 — раскупить · 없다",g:"-(으)ㄴ데요, -(으)ㄹ 거예요",st:"민수: 회색 티셔츠를 사고 싶은데요. / 직원: …",m:"민수: 회색 티셔츠를 사고 싶은데요.\n직원: 죄송해요. 회색은 지금 없는데요. 하얀색도 손님한테 잘 어울릴 거예요."},
+ {e:"💳🤍",d:"Минсу берёт белую и платит картой.",kw:"카드 — карта · 계산하다 — платить, рассчитываться",g:"(으)로, -(으)ㄹ게요",st:"민수: 그럼 하얀색으로…",m:"민수: 그럼 하얀색으로 살게요. 카드로 계산할게요."},
+ {e:"😂👕👕",d:"В выходные Минсу встречает друга — а тот в такой же футболке! Оба смеются.",kw:"똑같다 — точно такой же · 웃다 — смеяться",g:"-(으)ㄴ 명, -(으)ㄴ 후에",st:"주말에 민수 씨는 새로 산 티셔츠를 입고…",m:"주말에 민수 씨는 새로 산 티셔츠를 입고 친구를 만났어요. 그런데 친구도 똑같은 티셔츠를 입고 있었어요! 두 사람은 같이 사진을 찍은 후에 많이 웃었어요."}
+];
+
+/* ---------- 읽기 (свои тексты в форматах учебника) ---------- */
+const READ=[
+ {lead:"[1–2] Прочитай и выбери то, что НЕ соответствует.",p:`<table class="nt"><tr><th></th><th>오늘 할 일</th></tr>
+<tr><td>✔ 08:00</td><td>빨래하기</td></tr><tr><td>✔ 10:00</td><td>장 보기 (마트)</td></tr><tr><td>✔ 12:00</td><td>점심 — 지민</td></tr>
+<tr><td>☐ 15:00</td><td>우체국 — 소포 보내기</td></tr><tr><td>☐ 17:00</td><td>청소</td></tr><tr><td>☐ 19:00</td><td>친구들 저녁 초대</td></tr></table>`,html:1,
+  o:["이 사람은 점심을 먹기 전에 장을 봤습니다.","이 사람은 장을 본 후에 빨래를 했습니다.","이 사람은 청소하기 전에 우체국에 갈 것입니다.","오늘 저녁에 친구들이 이 사람 집에 올 것입니다."],a:1,n:"Сначала стирка (8:00), потом магазин (10:00) — значит 빨래를 한 후에 장을 봤어요."},
+ {p:`<b>무선 청소기</b>
+<s>300,000원</s> → <b>50% 150,000원</b>
+배송비 무료 · 배송 기간 3~5일
+색깔: 흰색 (12개) / 검은색 (0개)`,
+  o:["이 청소기는 할인해서 150,000원입니다.","검은색 청소기는 살 수 없습니다.","이 청소기를 사면 배송비를 내야 합니다.","청소기는 일주일 안에 도착할 것입니다."],a:2,n:"배송비 무료 — доставка бесплатная."},
+ {lead:"[3] Прочитай переписку и выбери то, что соответствует.",p:`유키: 지수 씨, 지금 집에 있어요?
+지수: 아니요, 마트에서 장을 보는데요. 왜요?
+유키: 세탁기를 돌렸는데 제가 지금 나가야 해요. 집에 오면 빨래를 건조기에 좀 넣어 줄 수 있어요?
+지수: 네, 30분 후에 도착할 거예요. 제가 할게요!`,
+  o:["지수는 지금 집에 있습니다.","유키는 마트에서 장을 보고 있습니다.","지수가 빨래를 건조기에 넣을 것입니다.","유키는 30분 후에 집에 돌아갑니다."],a:2,n:"제가 할게요 — Чису пообещала положить бельё в сушилку."},
+ {lead:"[4–5] Выбери правильный порядок.",p:`(가) 은행에서 통장을 만드는 방법을 알려 드릴게요.
+(나) 그리고 신청서를 쓰고 신분증과 같이 내세요.
+(다) 먼저 은행에 들어가서 번호표를 뽑으세요.
+(라) 마지막으로 비밀번호를 누르면 돼요.`,
+  o:["(가)-(나)-(다)-(라)","(가)-(다)-(나)-(라)","(다)-(가)-(나)-(라)","(다)-(나)-(가)-(라)"],a:1,n:"먼저 → 그리고 → 마지막으로."},
+ {p:`(가) 그다음에 플라스틱, 캔, 유리를 따로 버립니다.
+(나) 저는 일요일마다 쓰레기를 버립니다.
+(다) 쓰레기를 다 버린 후에 손을 씻습니다.
+(라) 먼저 음식물 쓰레기를 음식물 쓰레기통에 버립니다.`,
+  o:["(나)-(라)-(가)-(다)","(나)-(가)-(라)-(다)","(라)-(나)-(가)-(다)","(라)-(가)-(나)-(다)"],a:0,n:"Тема → 먼저 → 그다음에 → 다 버린 후에."},
+ {lead:"[6] Выбери главную мысль.",p:`저는 어제 인터넷으로 원피스를 샀습니다. 그런데 사진보다 색깔이 어둡고 길이도 짧았습니다. 그래서 내일 환불할 겁니다. 다음에는 옷을 사기 전에 가게에 가서 직접 입어 볼 겁니다.`,
+  o:["인터넷 쇼핑은 싸서 좋습니다.","옷은 직접 입어 본 후에 사는 것이 좋습니다.","어두운색 원피스가 예쁩니다.","환불은 아주 어렵습니다."],a:1,n:"Вывод в последнем предложении: сначала примерить, потом покупать."},
+ {lead:"[7] Выбери подходящие слова для ( ㉠ ) и ( ㉡ ).",p:`저는 청소를 별로 좋아하지 않습니다. ( ㉠ ) 방이 더러우면 공부를 할 수 없습니다. ( ㉡ ) 주말마다 방을 청소합니다.`,
+  o:["㉠ 그래서 – ㉡ 하지만","㉠ 하지만 – ㉡ 그래서","㉠ 그리고 – ㉡ 하지만","㉠ 그러면 – ㉡ 그리고"],a:1,n:"Не люблю, НО… ПОЭТОМУ убираю."},
+ {lead:"[8] Выбери слово для ( ).",p:`요즘은 은행에 가지 않아도 됩니다. 휴대폰으로 (        ) 수 있어서 아주 편합니다.`,
+  o:["돈을 보낼","번호표를 뽑을","우표를 붙일","소포를 포장할"],a:0,n:"С телефона можно перевести деньги."},
+ {lead:"[9–10] Прочитай текст и ответь на вопросы.",p:`지난 주말에 고향에 계신 어머니께 소포를 보냈습니다. ( ㉠ ) 어머니가 한국 화장품을 좋아하셔서 화장품을 샀습니다. ( ㉡ ) 우체국에서 상자에 화장품을 넣고 주소를 썼습니다. ( ㉢ ) 비행기로 보내면 일주일쯤 걸립니다. ( ㉣ ) 저는 빨리 보내고 싶어서 비행기로 보냈습니다.`,
+  sub:"Куда лучше всего вставить предложение?",box:"배로 보내면 싸지만 한 달쯤 걸립니다.",
+  o:["㉠","㉡","㉢","㉣"],a:3,n:"Сначала про самолёт (неделя), потом про корабль (дёшево, но месяц), потом решение — самолётом."},
+ {ref:8,sub:"Выбери то, что соответствует тексту.",o:["어머니는 한국에 사십니다.","이 사람은 소포를 배로 보냈습니다.","이 사람은 화장품을 선물로 샀습니다.","소포는 한 달 후에 도착할 것입니다."],a:2,n:"어머니가 한국 화장품을 좋아하셔서 화장품을 샀습니다."}
+];
+
+/* ---------- 쓰기 200–300자 ---------- */
+const WRITE_FRAMES=[
+ {t:"[1]",ru:"Где и когда ты покупал(а)? Выбери вариант или напиши свой.",c:["저는 작년 여름에 한국에 여행을 가서 쇼핑을 해 봤어요.","저는 아직 한국에 못 가 봤어요. 그래서 한국 인터넷 쇼핑몰에서 쇼핑을 해 봤어요."]},
+ {t:"[2]에서 [3] 샀어요.",ru:"Где? Что?",c:[["명동","백화점","동대문 시장","올리브영","인터넷 쇼핑몰"],["화장품을","티셔츠를","운동화를","가방을","과자를"]]},
+ {t:"거기는 [4] 것 같아요.",ru:"Какое там место? (-(으)ㄴ 것 같다)",c:[["사람이 아주 많은","물건이 다양한","가격이 싼","직원들이 친절한"]]},
+ {t:"[5]",ru:"Сравни (보다).",c:[["러시아보다 가격이 쌌어요.","생각보다 조금 비쌌어요.","다른 가게보다 디자인이 다양했어요."]]},
+ {t:"제가 산 [6] [7]",ru:"Какая вещь? (-(으)ㄴ 명)",c:[["화장품은","티셔츠는","운동화는","가방은"],["품질이 정말 좋았어요.","사이즈가 잘 맞았어요.","색깔이 저한테 잘 어울렸어요.","조금 작았지만 괜찮았어요."]]},
+ {t:"[8] 후에 [9]",ru:"Что было потом? (-(으)ㄴ 후에)",c:[["집에 돌아온","그 물건을 산","선물을 포장한"],["친구들에게 선물로 줬어요.","날마다 썼어요.","사진을 찍어서 SNS에 올렸어요."]]},
+ {t:"다음에는 [10]",ru:"План на следующий раз (-(으)ㄹ 거예요 / -기 전에).",c:[["사기 전에 꼭 입어 볼 거예요.","동대문 시장에도 가 볼 거예요.","또 거기에서 쇼핑할 거예요."]]}
+];
+const WRITE_MODEL="저는 작년 여름에 한국에 여행을 가서 쇼핑을 해 봤어요. 명동에서 화장품하고 티셔츠를 샀어요. 명동은 가게마다 사람이 아주 많았어요. 그리고 러시아보다 화장품 가격이 싼 것 같았어요. 제가 산 화장품은 품질이 정말 좋아서 지금도 날마다 써요. 티셔츠는 사기 전에 입어 봤는데 사이즈가 잘 맞았어요. 집에 돌아온 후에 친구들에게 화장품을 선물로 줬어요. 친구들이 아주 좋아했어요. 다음에 한국에 가면 동대문 시장에도 가 볼 거예요.";
+const DETECT=[["것 같",/것\s*같/],["보다",/보다/],["(으)로",/[가-힣](으로|로)\s/],["-는데/-(으)ㄴ데",/데(요)?[ .,]|는데|은데|인데/],["-(으)ㄹ 거예요",/거예요|거에요/],["마다",/마다/],["-(으)ㄹ게요",/게요/],["-기 전에",/기\s*전에/],["-(으)ㄴ 후에",/후에/],["-(으)면 되다",/면\s*돼|면\s*됩/]];
+
+/* ---------- TOPIK II ---------- */
+const TOPIK=[
+ {lead:"[1–2] Выбери то, что подходит в ( ). (TOPIK II, 1–2)",q:"친구가 오기 (        ) 방을 청소했다.",o:["전에","후에","마다","동안"],a:0,n:"Друг ещё не пришёл → 오기 전에."},
+ {q:"요즘은 길이 막혀서 버스(        ) 지하철이 더 빠르다.",o:["로","보다","마다","처럼"],a:1,n:"Сравнение — 보다."},
+ {lead:"[3–4] Выбери близкое по смыслу подчёркнутому. (TOPIK II, 3–4)",q:"밥을 <u>먹고 나서</u> 약을 드세요.",o:["먹기 전에","먹은 후에","먹으면서","먹으려고"],a:1,n:"-고 나서 = -(으)ㄴ 후에."},
+ {q:"저는 <u>날마다</u> 일기를 씁니다.",o:["가끔","매일","주말에","자주"],a:1,n:"날마다 = 매일."},
+ {lead:"[5–8] О чём это? (TOPIK II, 5–8)",box:"깨끗한 빨래, 조용한 소리\n밤에도 걱정 없이 돌리세요!",o:["세탁기","냉장고","청소기","에어컨"],a:0,n:"빨래, 돌리다 → стиральная машина."},
+ {box:"소포 · 택배 보내기\n우표 · 상자 판매\n평일 09:00~18:00",o:["은행","우체국","편의점","백화점"],a:1,n:"소포, 우표 → почта."},
+ {box:"• 음식물 쓰레기는 물을 빼고 버리세요.\n• 재활용품은 씻어서 버리세요.",o:["쓰레기 버리는 방법","요리하는 방법","청소하는 순서","물건 사는 방법"],a:0,n:"Это правила выброса мусора."},
+ {lead:"[9] Выбери то, что соответствует объявлению. (TOPIK II, 9–12)",p:`<b>♻️ 행복아파트 분리수거 안내</b>
+<table class="nt"><tr><td>재활용 쓰레기</td><td>화·목·일요일 저녁 6시 ~ 밤 10시</td></tr><tr><td>음식물 쓰레기</td><td>매일</td></tr><tr><td>문의</td><td>관리사무소 (02-123-4567)</td></tr></table>`,html:1,
+  o:["음식물 쓰레기는 일요일에만 버릴 수 있다.","재활용 쓰레기는 아침에 버리면 된다.","재활용 쓰레기는 일주일에 세 번 버릴 수 있다.","궁금한 것은 경비실에 물어보면 된다."],a:2,n:"화·목·일 — три раза в неделю."},
+ {lead:"[13] Выбери правильный порядок. (TOPIK II, 13–15)",p:`(가) 그래서 환불을 신청하기로 했다.
+(나) 지난주에 인터넷으로 바지를 주문했다.
+(다) 그런데 바지가 도착해서 입어 봤는데 너무 컸다.
+(라) 환불을 신청한 후에 바지를 상자에 넣어서 보냈다.`,
+  o:["(나)-(다)-(가)-(라)","(나)-(가)-(다)-(라)","(다)-(나)-(라)-(가)","(다)-(가)-(나)-(라)"],a:0,n:"Заказ → оказались велики → решил вернуть → отправил."},
+ {lead:"[16] Выбери то, что подходит в ( ). (TOPIK II, 16–18)",p:`식기세척기를 쓰면 설거지가 아주 편하다. 하지만 그릇을 넣기 전에 (                    ). 그렇지 않으면 기계가 고장 날 수 있다.`,
+  o:["음식물을 먼저 버려야 한다","세탁기를 돌리면 된다","그릇을 새로 사야 한다","전기를 끄면 안 된다"],a:0,n:"Перед тем как ставить посуду — сначала выбросить остатки еды."}
+];
+
+/* ---------- 쓰기 51–52 ---------- */
+const GAPS=[
+ {n:"51",title:"Сообщение соседке",type:"51",p:`지수 씨, 저 유키예요.
+오늘 저녁 6시에 친구들이 우리 집에 와요.
+그런데 집이 너무 더러워요. 오후에 같이 ( ㉠ )?
+저는 거실을 청소할게요. 지수 씨는 부엌을 정리해 주세요.
+그리고 친구들이 ( ㉡ ) 장도 봐야 해요. 4시에 같이 마트에 가요!`,
+  steps:["Кто пишет и зачем? Юки зовёт соседку вместе убраться.","Смотри на знаки: после ㉠ стоит «?», а дальше «Я уберу гостиную, а ты — кухню». Значит, в ㉠ — ПРЕДЛОЖЕНИЕ сделать вместе: -(으)ㄹ까요?","㉡: гости придут в 6, а магазин — в 4. Это ДО прихода гостей → -기 전에.","Пиши в том же стиле, что и текст: -아요/어요."],
+  b:[{id:"㉠",k:[/청소/,/까요|해요|줄 수 있|할래요|어때/],m:"청소할까요",bl:["청소하다","-(으)ㄹ까요?"]},{id:"㉡",k:[/오기\s*전에/],m:"오기 전에",bl:["오다","-기 전에"]}]},
+ {n:"51",title:"Объявление в доме",type:"51",p:`<음식물 쓰레기 버리는 날 안내>
+우리 아파트는 음식물 쓰레기를 아무 때나 ( ㉠ ).
+월요일, 수요일, 금요일 저녁에만 버릴 수 있습니다.
+음식물 쓰레기는 물이 많으면 냄새가 납니다.
+그러니까 버리기 전에 꼭 ( ㉡ ).
+— 관리사무소 —`,
+  gl:"아무 때나 — когда угодно · 냄새가 나다 — пахнуть · 빼다 — убрать, слить (воду)",
+  steps:["Это объявление → официальный стиль: -ㅂ/습니다, просьба -(으)십시오 / -아/어 주십시오.","㉠: «когда угодно … — только в пн, ср, пт». Значит, когда угодно НЕЛЬЗЯ: 버릴 수 없습니다.","㉡: «если много воды — пахнет», поэтому перед тем как выбросить, надо … убрать воду: 물을 빼다 + просьба."],
+  b:[{id:"㉠",k:[/버릴\s*수\s*없|버리면\s*안\s*됩|버리지\s*마/],m:"버릴 수 없습니다",bl:["버리다","-(으)ㄹ 수 없습니다"]},{id:"㉡",k:[/물/,/빼|버리/],m:"물을 빼 주십시오",bl:["물을 빼다","-아/어 주십시오"]}]},
+ {n:"52",title:"Интернет-покупки",type:"52",p:`사람들은 보통 물건을 살 때 가게에 직접 가거나 ( ㉠ ). 인터넷 쇼핑은 가게에 가지 않아도 되고 가격도 싸서 편하다. 하지만 물건을 직접 볼 수 없어서 사이즈가 안 맞거나 색깔이 다를 수 있다. 그래서 인터넷으로 옷을 ( ㉡ ) 사이즈를 꼭 확인해야 한다.`,
+  gl:"살 때 — когда покупают · 직접 — сам, лично · 가지 않아도 되다 — можно не ходить · 확인하다 — проверять",
+  steps:["52 пишется в стиле -다 (한다체): 산다, 주문한다, 좋다.","㉠: «-거나» = «или». Или идут в магазин сами, или … (о чём весь текст дальше?) → покупают через интернет.","㉡: «обязательно проверить размер» — когда? ДО покупки → -기 전에."],
+  b:[{id:"㉠",k:[/인터넷/,/산다|주문한다|쇼핑(을)?\s*한다|구매한다/],m:"인터넷으로 산다",bl:["인터넷으로","사다 → 산다"]},{id:"㉡",k:[/(사|주문하|구매하)기\s*전에/],m:"사기 전에",bl:["사다","-기 전에"]}]},
+ {n:"52",title:"Посудомойка",type:"52",p:`집안일 중에서 많은 사람들이 ( ㉠ ) 일은 설거지이다. 설거지는 날마다 해야 하고 시간도 많이 걸린다. 그래서 요즘은 식기세척기를 사는 사람이 많아졌다. 식기세척기를 ( ㉡ ) 설거지 시간이 많이 줄어든다.`,
+  gl:"많아지다 — становиться больше · 줄어들다 — сокращаться",
+  steps:["Стиль -다.","㉠: перед 일 (дело) нужно определение. Дальше объясняют, почему посуда — это тяжело. Значит: самое нелюбимое дело → 제일 싫어하는.","㉡: «время сократится» — при каком условии? ЕСЛИ пользоваться → -(으)면."],
+  b:[{id:"㉠",k:[/싫어하는|힘들어하는/],m:"제일 싫어하는",bl:["제일","싫어하다 → -는"]},{id:"㉡",k:[/(사용하|쓰|이용하)면/],m:"사용하면",bl:["사용하다","-(으)면"]}]}
+];
+/*DATA-END*/
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const rich=s=>esc(s).replace(/&lt;(\/?)u&gt;/g,"<$1u>").replace(/\n/g,"<br>");
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const norm=s=>String(s).replace(/[\s.,!?~]/g,"");
+let voice=null;
+function pickVoice(){try{const v=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang));voice=v.find(x=>/Natural|Neural|Online|Google|Yuna|SunHi/i.test(x.name))||v[0]||null;}catch(e){}}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function say(t){try{t=String(t).replace(/<[^>]+>/g,"").replace(/\[.*?\]|[↘↗]|\(\s*\)|_+/g," ");speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="ko-KR";if(voice)u.voice=voice;u.rate=.85;speechSynthesis.speak(u);}catch(e){}}
+const SB=t=>`<button class="say" onclick='say(${JSON.stringify(t).replace(/'/g,"&#39;")})'>🔊</button>`;
+
+/* ---------- разделы ---------- */
+const SECS=[
+ {id:"plan",n:"0 · План"},
+ {id:"pron",n:"1 · 발음",sc:1},
+ {id:"voc",n:"2 · 어휘",sc:1},
+ {id:"gram",n:"3 · 문법",sc:1},
+ {id:"speak",n:"4 · 말하기"},
+ {id:"story",n:"5 · 그림 이야기"},
+ {id:"read",n:"6 · 읽기",sc:1},
+ {id:"write",n:"7 · 쓰기"},
+ {id:"topik",n:"8 · TOPIK II",sc:1},
+ {id:"gaps",n:"9 · 쓰기 51–52"},
+ {id:"send",n:"✅ Итог"}
+];
+window.MIRAE_PARTS=[{g:"복습 2 (2A 4–6과)",t:SECS.filter(s=>s.id!=="plan"&&s.id!=="send").map(s=>({k:"r:"+s.id,n:s.n}))}];
+if(window.MIRAE_PICK){ const k=SECS.filter(s=>s.id==="plan"||s.id==="send"||MIRAE_PICK.has("r:"+s.id)); MIRAE_PICK.used=true; SECS.splice(0,SECS.length,...k); }
+const SCORE={}; // sec -> {ok,tot,done:Set}
+const TEXTS={}; // для отчёта
+function mark(sec,key,ok,tot){ const s=SCORE[sec]||(SCORE[sec]={ok:0,tot:tot,done:new Set()}); s.tot=tot; if(s.done.has(key)) return; s.done.add(key); if(ok) s.ok++; drawTabs(); }
+let CUR="plan";
+function drawTabs(){ $("tabs").innerHTML=SECS.map(s=>{const r=SCORE[s.id];return `<button class="${s.id===CUR?"on":""}" onclick="openSec('${s.id}')">${s.n}${r&&r.done.size?`<span class="sc">${r.ok}/${r.tot}</span>`:""}</button>`;}).join(""); }
+function openSec(id){ CUR=id; drawTabs(); $("sec").innerHTML=""; ({plan:secPlan,pron:secPron,voc:secVoc,gram:secGram,speak:secSpeak,story:secStory,read:secRead,write:secWrite,topik:secTopik,gaps:secGaps,send:secSend})[id](); window.scrollTo({top:0}); }
+
+/* ---------- MCQ ---------- */
+function mcqHTML(sec,list,opt){
+  opt=opt||{};
+  return list.map((it,i)=>{
+    const p=it.ref!==undefined?"":(it.p?`<div class="passage">${it.html?it.p:rich(it.p)}</div>`:"");
+    return `${it.lead?`<h3>${esc(it.lead)}</h3>`:""}<div class="item">
+     ${p}${it.box?`<div class="box">${esc(it.box)}</div>`:""}
+     <div class="q"><span class="qn">${i+1}.</span>${it.sub?esc(it.sub):""}${it.q?rich(it.q):""} ${it.q?SB(it.q):""}</div>
+     <div class="opts ${it.o.some(x=>x.length>18)?"one":""}">${it.o.map((o,k)=>`<button onclick="mcq('${sec}',${i},${k},this)">${["①","②","③","④"][k]||""} ${esc(o)}</button>`).join("")}</div>
+     <div class="ex hide" id="ex-${sec}-${i}"></div></div>`;}).join("");
+}
+const LISTS={};
+function mcq(sec,i,k,b){
+  const it=LISTS[sec][i], box=b.parentNode; if(box.dataset.lock) return; box.dataset.lock=1;
+  [...box.children].forEach((x,j)=>{ if(j===it.a) x.classList.add("ok"); else if(j===k) x.classList.add("bad"); });
+  const e=$(`ex-${sec}-${i}`); e.classList.remove("hide"); e.innerHTML=(k===it.a?"✅ ":"❌ ")+esc(it.n);
+  mark(sec,i,k===it.a,LISTS[sec].length);
+}
+
+/* ---------- разделы ---------- */
+function secPlan(){
+  $("sec").innerHTML=`<div class="card"><h2>Что повторяем</h2>
+  <div class="lead">Темы: 4과 쇼핑 (одежда, интернет-магазин, обмен и возврат) · 5과 우체국과 은행 (посылки, счёт, переводы) · 6과 집안일 (уборка, стирка, мусор, распорядок дня).</div>
+  <h3>Грамматика — отметь, что уже уверенно знаешь</h3>
+  <div class="chk">${GRAMMARS.map((g,i)=>`<label><input type="checkbox" data-g="${i}" onchange="selfChk()">${esc(g)}</label>`).join("")}</div>
+  <h3>Как работать</h3>
+  <div class="muted">1–3 и 6, 8 проверяются сразу. В 4 (말하기) и 5 (рассказ по картинкам) нажимай «Подсказка» — появится начало фразы и слова-помощники. В 7 и 9 текст собирается по шагам. В конце (✅ Итог) результат уйдёт учителю.</div>
+  <button class="btn" style="width:100%;margin-top:12px" onclick="openSec(SECS[1].id)">Начать →</button></div>`;
+  (TEXTS.self||[]).forEach(i=>{const c=document.querySelector(`[data-g="${i}"]`); if(c) c.checked=true;});
+}
+function selfChk(){ TEXTS.self=[...document.querySelectorAll("[data-g]:checked")].map(c=>+c.dataset.g); }
+function secPron(){
+  LISTS.pron=PRON;
+  $("sec").innerHTML=`<div class="card"><h2>1 · 발음 — произношение</h2>
+  ${PRON_RULES.map(r=>`<div class="rule"><b>${r.t}</b><br>${esc(r.x)}<div style="margin-top:6px">${r.ex.map(x=>`<div>${esc(x)} ${SB(x.replace(/\[.*?\]/,""))}</div>`).join("")}</div></div>`).join("")}
+  <h3>Проверь себя</h3>${mcqHTML("pron",PRON)}</div>`;
+}
+function secVoc(){ LISTS.voc=VOCAB; $("sec").innerHTML=`<div class="card"><h2>2 · 어휘 — слова</h2>${mcqHTML("voc",VOCAB)}</div>`; }
+function secGram(){
+  LISTS.gram=GRAM_MCQ;
+  const tot=GRAM_MCQ.length+GRAM_FIX.length+GRAM_BUILD.length;
+  $("sec").innerHTML=`<div class="card"><h2>3 · 문법 — грамматика</h2>
+  <h3>А. Выбери подходящее</h3>${mcqHTML("gram",GRAM_MCQ)}
+  <h3>Б. Исправь подчёркнутое</h3><div class="lead">Напиши только исправленную часть. Например: <u>먹기 후에</u> → 먹은 후에</div>
+  ${GRAM_FIX.map((f,i)=>`<div class="item"><div class="q"><span class="qn">${i+1}.</span>${rich(f.s)}</div>
+   <div style="display:flex;gap:6px;margin-top:6px"><input class="t" id="fx${i}" placeholder="→ правильно" onkeydown="if(event.key==='Enter')fix(${i})"><button class="btn2" onclick="fix(${i})">OK</button></div><div class="ex hide" id="fxe${i}"></div></div>`).join("")}
+  <h3>В. Составь ответ с грамматикой</h3><div class="lead">Нажимай на кусочки по порядку. Один кусочек — лишний (ловушка!). Ошибся — «Сбросить».</div>
+  ${GRAM_BUILD.map((b,i)=>`<div class="item"><div class="q"><span class="qn">${i+1}.</span>${esc(b.q)} ${SB(b.q)} <span class="scard" style="padding:2px 8px;border-radius:8px;font-size:14px;margin:0">${esc(b.g)}</span></div>
+   <div class="q" style="font-size:16px;margin-top:4px">나: </div><div class="line" id="bl${i}"></div>
+   <div class="chips" id="bc${i}">${shuffle([...b.w,...b.x]).map(w=>`<span class="chip" onclick="bpick(${i},this)">${esc(w)}</span>`).join("")}</div>
+   <div style="margin-top:6px"><button class="btn2" onclick="bcheck(${i})">Проверить</button> <button onclick="breset(${i})">Сбросить</button></div><div class="ex hide" id="be${i}"></div></div>`).join("")}
+  </div>`;
+  SCORE.gram&&(SCORE.gram.tot=tot);
+}
+function fix(i){
+  const f=GRAM_FIX[i], inp=$("fx"+i), v=norm(inp.value); if(!v) return;
+  const ok=f.a.some(a=>norm(a)===v); inp.classList.remove("ok","bad"); inp.classList.add(ok?"ok":"bad");
+  const e=$("fxe"+i); e.classList.remove("hide"); e.innerHTML=(ok?"✅ ":"❌ Правильно: <b>"+esc(f.a[0])+"</b>. ")+esc(f.n);
+  mark("gram","f"+i,ok,GRAM_MCQ.length+GRAM_FIX.length+GRAM_BUILD.length);
+}
+function bpick(i,ch){ ch.classList.add("used"); const s=document.createElement("span"); s.className="chip"; s.textContent=ch.textContent; s.onclick=()=>{ s.remove(); ch.classList.remove("used"); }; $("bl"+i).appendChild(s); say(ch.textContent); }
+function breset(i){ $("bl"+i).innerHTML=""; $("bl"+i).classList.remove("ok","bad"); [...$("bc"+i).children].forEach(c=>c.classList.remove("used")); }
+function bcheck(i){
+  const b=GRAM_BUILD[i], got=[...$("bl"+i).children].map(c=>c.textContent).join(" "), want=b.w.join(" ");
+  if(!got) return; const ok=norm(got)===norm(want);
+  $("bl"+i).classList.remove("ok","bad"); $("bl"+i).classList.add(ok?"ok":"bad");
+  const e=$("be"+i); e.classList.remove("hide"); e.innerHTML=(ok?"✅ ":"❌ ")+"나: "+esc(want)+" "+SB(want)+`<div>Лишний кусочек: <s>${esc(b.x.join(", "))}</s></div>`;
+  mark("gram","b"+i,ok,GRAM_MCQ.length+GRAM_FIX.length+GRAM_BUILD.length);
+}
+function secSpeak(){
+  $("sec").innerHTML=`<div class="card"><h2>4 · 말하기 — говорим с партнёром</h2>
+  <div class="lead">Задавайте вопросы друг другу. Не получается придумать ответ — нажми <b>💡 Подсказка</b>: там начало фразы и слова, которые можно взять. <b>👀 Образец</b> — пример ответа (смотри после того, как попробуешь сам!).</div>
+  ${SPEAK.map((s,i)=>`<div class="scard"><span class="gt">${esc(s.g)}</span><div class="muted" style="margin-top:4px">${esc(s.rule)}</div>
+   ${s.qs.map((q,j)=>`<div class="sq"><div class="q">${esc(q.q)} ${SB(q.q)}</div><div class="muted">${esc(q.ru)}</div>
+    <button class="btn2" style="margin-top:6px" onclick="tog('h${i}_${j}')">💡 Подсказка</button> <button style="margin-top:6px" onclick="tog('m${i}_${j}')">👀 Образец</button>
+    <div class="hide" id="h${i}_${j}"><div class="frame">${esc(q.f)}</div><div class="chips">${q.c.map(c=>`<span class="chip" onclick="say(this.textContent)">${esc(c)}</span>`).join("")}</div></div>
+    <div class="hide model" id="m${i}_${j}">${esc(q.m)} ${SB(q.m)}</div></div>`).join("")}</div>`).join("")}</div>`;
+}
+function tog(id){ $(id).classList.toggle("hide"); }
+function secStory(){
+  $("sec").innerHTML=`<div class="card"><h2>5 · 그림을 보고 이야기를 만들어 보세요</h2>
+  <div class="lead">История про Минсу и новую футболку — в 6 кадрах (по мотивам задания из учебника, с. 126). Рассказывай по кадру: смотри на сцену → слова → нужная грамматика → начало фразы. Если совсем не идёт — открой образец для этого кадра.</div>
+  ${STORY.map((f,i)=>`<div class="scard"><div style="display:flex;gap:12px;align-items:center"><div class="scene">${f.e}</div><div><b>Кадр ${i+1}</b><div>${esc(f.d)}</div></div></div>
+   <div class="kw" style="margin-top:6px">🔤 ${esc(f.kw)}</div>
+   <div style="margin-top:4px"><span class="gt" style="background:var(--warm)">${esc(f.g)}</span></div>
+   <div class="frame">➡️ ${esc(f.st)}</div>
+   <button style="margin-top:6px" onclick="tog('st${i}')">👀 Образец кадра</button><div class="hide model" id="st${i}">${rich(f.m)} ${SB(f.m)}</div></div>`).join("")}
+  <h3>Какую грамматику ты использовал(а) в рассказе?</h3>
+  <div class="chk" id="stChk">${GRAMMARS.map((g,i)=>`<label><input type="checkbox" data-s="${i}" onchange="storyChk()">${esc(g)}</label>`).join("")}</div>
+  <div class="muted">Цель — не меньше 6 из 12.</div>
+  <button class="btn2" style="margin-top:10px" onclick="tog('stAll')">📖 Весь рассказ-образец</button>
+  <div class="hide model" id="stAll">${rich(STORY.map(f=>f.m).join("\n"))}</div></div>`;
+  (TEXTS.story||[]).forEach(i=>{const c=document.querySelector(`[data-s="${i}"]`); if(c) c.checked=true;});
+}
+function storyChk(){ TEXTS.story=[...document.querySelectorAll("[data-s]:checked")].map(c=>+c.dataset.s); }
+function secRead(){
+  // для [10] показываем текст из [9]
+  const L=READ.map(it=>it.ref!==undefined?{...it}:it); LISTS.read=L;
+  $("sec").innerHTML=`<div class="card"><h2>6 · 읽기 — чтение</h2><div class="lead">Все тексты — про наши темы: дела по дому, интернет-магазин, почта, банк. Перед ответом найди в тексте ключевое слово.</div>${mcqHTML("read",L)}</div>`;
+}
+let WV={};
+function secWrite(){
+  let slot=0;
+  const rows=WRITE_FRAMES.map((f,i)=>{
+    if(typeof f.c[0]==="string"){ const id="w"+(slot++); return `<div class="item"><div class="muted">${esc(f.ru)}</div><input class="t" id="${id}" value="${esc(WV[id]||"")}" oninput="WV['${id}']=this.value" placeholder="Выбери ниже или напиши своё"><div class="chips">${f.c.map(c=>`<span class="chip" onclick="setW('${id}',this.textContent)">${esc(c)}</span>`).join("")}</div></div>`; }
+    let html=esc(f.t), k=0; const ids=[];
+    html=html.replace(/\[\d+\]/g,()=>{ const id="w"+(slot++); ids.push(id); return `<input class="slot" id="${id}" value="${esc(WV[id]||"")}" oninput="WV['${id}']=this.value" size="12">`; });
+    return `<div class="item"><div class="muted">${esc(f.ru)}</div><div class="q">${html}</div>${f.c.map((list,j)=>`<div class="chips">${list.map(c=>`<span class="chip" onclick="setW('${ids[j]}',this.textContent)">${esc(c)}</span>`).join("")}</div>`).join("")}</div>`;
+  }).join("");
+  $("sec").innerHTML=`<div class="card"><h2>7 · 쓰기 — 200~300자</h2>
+  <div class="box" style="font-weight:500">여러분은 한국에서 쇼핑해 봤습니까? 무엇을 샀습니까?\n어디에서 샀습니까? 그 물건이 어떻습니까?</div>
+  <div class="lead">Не был(а) в Корее — пиши про покупки в корейском интернет-магазине (вариант в шаге 1). Можно выдумать! Главное — грамматика 4–6과.</div>
+  <h3>Шаг 1. Заполни кусочки</h3>${rows}
+  <button class="btn" style="width:100%;margin-top:10px" onclick="buildDraft()">Шаг 2. Собрать черновик ↓</button>
+  <h3>Шаг 3. Допиши и исправь свой текст</h3>
+  <div class="muted">Добавь 1–2 своих предложения (например, с 마다, -(으)ㄹ 거예요, -는데). Считаем знаки вместе с пробелами, как на TOPIK.</div>
+  <textarea id="wText" rows="9" oninput="TEXTS.write=this.value;wCount()">${esc(TEXTS.write||"")}</textarea>
+  <div style="margin-top:6px"><span class="cnt" id="wCnt">0</span> 자 <span class="muted">(нужно 200–300)</span></div>
+  <div class="chk" id="wDet" style="margin-top:6px"></div>
+  <button class="btn2" style="margin-top:10px" onclick="tog('wMod')">👀 Текст-образец</button><div class="hide model" id="wMod">${esc(WRITE_MODEL)} <div class="muted">${WRITE_MODEL.length} 자</div></div>
+  <div class="lead" style="margin-top:12px">글을 다 썼어요? Перечитай: ✔ везде один стиль (-아요/어요) ✔ частицы 을/를, 이/가 ✔ после 후에/전에 время только в конце ✔ 200–300 знаков.</div></div>`;
+  wCount();
+}
+function setW(id,v){ const el=$(id); el.value=v; WV[id]=v; say(v); }
+function buildDraft(){
+  let slot=0; const out=WRITE_FRAMES.map(f=>{
+    if(typeof f.c[0]==="string"){ return (WV["w"+(slot++)]||"").trim(); }
+    let parts=[], t=f.t.replace(/\[\d+\]/g,()=>{ const v=(WV["w"+(slot++)]||"").trim(); parts.push(v); return v||"___"; });
+    return parts.some(Boolean)?t.replace(/\s+/g," ").trim():"";
+  }).filter(Boolean).join(" ");
+  $("wText").value=out; TEXTS.write=out; wCount(); $("wText").focus();
+}
+function wCount(){
+  const t=$("wText").value; $("wCnt").textContent=t.trim().length;
+  $("wCnt").style.color=t.trim().length>=200&&t.trim().length<=300?"var(--ok)":"var(--bad)";
+  $("wDet").innerHTML="Найдено в тексте: "+DETECT.map(([n,r])=>`<label style="opacity:${r.test(t+" ")?1:.35}">${r.test(t+" ")?"✅":"▫️"} ${esc(n)}</label>`).join("");
+}
+function secTopik(){
+  LISTS.topik=TOPIK;
+  $("sec").innerHTML=`<div class="card"><h2>8 · TOPIK II — чтение (лёгкий уровень)</h2>
+  <div class="lead">Так выглядят первые задания TOPIK II. Обрати внимание: в TOPIK тексты часто в стиле <b>-다</b> (산다, 빠르다, 했다) — это тот же смысл, что -아요/어요, просто письменный стиль.</div>${mcqHTML("topik",TOPIK)}</div>`;
+}
+let GV={};
+function secGaps(){
+  $("sec").innerHTML=`<div class="card"><h2>9 · 쓰기 51–52</h2>
+  <div class="lead"><b>51</b> — бытовой текст (сообщение, объявление): впиши в ㉠ и ㉡ по одной фразе <u>в стиле текста</u>. <b>52</b> — короткий объяснительный текст в стиле <b>-다</b>. На экзамене за каждый пропуск до 5 баллов (51) / 5 баллов (52). Иди по шагам: 🔎 → 🧩 → ✍️.</div>
+  ${GAPS.map((g,i)=>`<div class="scard"><span class="gt">${g.n}</span> <b>${esc(g.title)}</b>
+   <div class="passage">${esc(g.p)}</div>${g.gl?`<div class="kw">🔤 ${esc(g.gl)}</div>`:""}
+   <button class="btn2" style="margin-top:6px" onclick="nextStep(${i})">🔎 Подсказка-шаг</button><div id="gs${i}"></div>
+   ${g.b.map((b,j)=>`<div style="margin-top:8px"><b>${b.id}</b> <input class="t" style="width:calc(100% - 40px)" id="g${i}_${j}" value="${esc(GV[i+"_"+j]||"")}" oninput="GV['${i}_${j}']=this.value" placeholder="напиши фразу">
+     <div class="chips"><span class="muted" style="font-size:13px">🧩 Детали:</span>${b.bl.map(x=>`<span class="chip">${esc(x)}</span>`).join("")}</div></div>`).join("")}
+   <div style="margin-top:8px"><button class="btn" onclick="gCheck(${i})">✍️ Проверить</button> <button onclick="tog('gm${i}')">👀 Образец</button></div>
+   <div class="ex hide" id="gr${i}"></div><div class="hide model" id="gm${i}">${g.b.map(b=>`${b.id} ${esc(b.m)}`).join("<br>")}</div></div>`).join("")}
+  </div>`;
+}
+const GSTEP={};
+function nextStep(i){ const g=GAPS[i]; GSTEP[i]=(GSTEP[i]||0); if(GSTEP[i]>=g.steps.length) return; $("gs"+i).insertAdjacentHTML("beforeend",`<div class="frame">${GSTEP[i]+1}. ${esc(g.steps[GSTEP[i]])}</div>`); GSTEP[i]++; }
+function gCheck(i){
+  const g=GAPS[i]; const res=g.b.map((b,j)=>{ const inp=$(`g${i}_${j}`), v=inp.value.trim(); const ok=!!v&&b.k.every(r=>r.test(v)); inp.classList.remove("ok","bad"); if(v) inp.classList.add(ok?"ok":"bad"); return {id:b.id,v,ok}; });
+  const e=$("gr"+i); e.classList.remove("hide");
+  e.innerHTML=res.map(r=>`${r.id}: ${r.v?(r.ok?"✅ похоже на правильный ответ":"🤔 сравни с образцом — может быть, другая грамматика или стиль"):"✏️ пусто"}`).join("<br>")+`<div class="muted">Учитель проверит твою фразу целиком.</div>`;
+  TEXTS["gap"+i]=res;
+}
+function secSend(){
+  const rows=SECS.filter(s=>s.sc).map(s=>{const r=SCORE[s.id];return `<div class="item">${s.n}: <b>${r?r.ok+" / "+r.tot:"—"}</b> ${r&&r.done.size<r.tot?`<span class="muted">(сделано ${r.done.size})</span>`:""}</div>`;}).join("");
+  $("sec").innerHTML=`<div class="card"><h2>✅ Итог</h2>${rows}
+   <div class="item">7 · 쓰기: <b>${(TEXTS.write||"").trim().length}</b> 자</div>
+   <div class="item">9 · 51–52: ${GAPS.map((g,i)=>TEXTS["gap"+i]?TEXTS["gap"+i].map(r=>r.ok?"✅":"✏️").join(""):"—").join(" · ")}</div>
+   <button class="btn" style="width:100%;margin-top:12px" id="sendBtn" onclick="sendR()">📨 Отправить учителю</button>
+   <div class="muted" id="sendFb" style="margin-top:8px"></div>
+   <textarea id="copyBox" class="hide" readonly rows="8" style="margin-top:8px;font-size:13px"></textarea></div>`;
+}
+const TG_TOKEN="9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU", TG_CHAT_ID="347625701";
+function report(){
+  const name=$("nameInput").value.trim()||"(без имени)";
+  let t=`📚 <b>복습 2 · 2A 4–6과</b>\n👤 ${esc(name)}\n📅 ${new Date().toLocaleString("ru-RU")}\n\n`;
+  SECS.filter(s=>s.sc).forEach(s=>{const r=SCORE[s.id]; t+=`${s.n}: ${r?r.ok+"/"+r.tot+(r.done.size<r.tot?` (сделано ${r.done.size})`:""):"—"}\n`;});
+  if(TEXTS.self) t+=`\nУверенно знаю: ${TEXTS.self.map(i=>GRAMMARS[i]).join(", ")||"—"}\n`;
+  if(TEXTS.story) t+=`Рассказ по картинкам — грамматика: ${TEXTS.story.length}/12\n`;
+  t+=`\n✍️ <b>쓰기</b> (${(TEXTS.write||"").trim().length} 자):\n${esc((TEXTS.write||"—").trim())}\n`;
+  GAPS.forEach((g,i)=>{ const r=TEXTS["gap"+i]; t+=`\n${g.n} «${g.title}»: `+(r?r.map(x=>`${x.id} ${esc(x.v||"—")} ${x.ok?"✅":"❓"}`).join(" | "):"—"); });
+  return t;
+}
+async function sendR(){
+  const fb=$("sendFb"), btn=$("sendBtn"); btn.disabled=true; fb.textContent="Отправляю…"; const R=report();
+  try{ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:R.slice(0,4000),parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description); fb.textContent="✅ Отправлено учителю! 수고했어요!"; }
+  catch(e){ fb.textContent="Не получилось отправить — скопируй и пришли учителю:"; const b=$("copyBox"); b.value=R.replace(/<[^>]+>/g,"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&"); b.classList.remove("hide"); }
+  btn.disabled=false;
+}
+try{ $("nameInput").value=$("nameInput").value||localStorage.getItem("ko_review2_name")||""; $("nameInput").oninput=e=>{try{localStorage.setItem("ko_review2_name",e.target.value)}catch(_){}}; }catch(e){}
+openSec("plan");
+</script>
+</body>
+</html>
