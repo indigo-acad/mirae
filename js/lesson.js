@@ -58,7 +58,7 @@ function setup(lid,lesson){
   PV=window.KR&&KR.vocab||null;
   SECS=L.hw?L.sections:L.sections.filter(s=>partOf(s)!=="hw");
   blocks=[];SECS.forEach(s=>{const pt=partOf(s);s.blocks.forEach((b,i)=>{b._key=s.id+"-"+i;b._part=pt;blocks.push(b)})});
-  SPLIT=!L.back&&!L.hw&&blocks.some(b=>b._part==="theory")&&blocks.some(b=>b._part==="practice");
+  SPLIT=!L.stages&&!L.back&&!L.hw&&blocks.some(b=>b._part==="theory")&&blocks.some(b=>b._part==="practice");
 }
 // блок закрыт: пройден, а в домашке упражнение с проверкой и тест по словам засчитываются, когда их проверили (баллы видит преподаватель)
 const closed=b=>{const p=P[b._key];return !!(p&&(p.done||(L.hw&&(EXT.includes(b.type)||b.type==="wtest")&&p.total!=null)))};
@@ -79,7 +79,12 @@ function render(){
   if(SPLIT)h+=`<div class="seg lparts" role="tablist" aria-label="Части урока">${["theory","practice"].map(pt=>`<button type="button" role="tab" id="tab-${pt}" data-part="${pt}" aria-selected="${pt===PART}" aria-controls="part-${pt}">${ic(pt==="theory"?"book":"repeat",16)}${pt==="theory"?"Теория":"Отработка"}<small id="pc-${pt}"></small></button>`).join("")}</div>`;
   if(!L.hw&&!L.back)h+=`<div id="hwhere"></div>`;   // домашка по этому уроку, если её задал преподаватель
   if(!L.hw)h+=`<div class="subnav"><nav class="nav" id="nav" aria-label="Разделы урока"></nav><div class="subnav-bar"><i id="navfill"></i></div></div>`;
-  const sec=s=>`<h2 class="sec" id="${s.id}">${em(s.icon,24)}${esc(s.title)}</h2>`+(s.from?`<p class="muted hw-from">${esc(s.from)}</p>`:"")+s.blocks.map(block).join("");
+  // Ступени внутри раздела (урок с L.stages): у блока поле at — "class" (на занятии) или "home" (на дом), без поля — теория.
+  // Перед первой карточкой каждой ступени ставится подзаголовок: 📘 Теория → 👥 На занятии → 🏠 Домашнее задание.
+  const STG={theory:["book","Теория",""],class:["users","На занятии","Делаем вместе с преподавателем."],home:["home","Домашнее задание","Сделай дома: ответы проверятся и сохранятся, преподаватель увидит результат."]};
+  const stage=(b,i,arr)=>{if(!L.stages||L.hw)return "";const st=STG[b.at]?b.at:"theory",pr=i?(STG[arr[i-1].at]?arr[i-1].at:"theory"):null;
+    return st===pr?"":`<div class="stage stage-${st}">${ic(STG[st][0],16)}<b>${STG[st][1]}</b>${STG[st][2]?`<span>${STG[st][2]}</span>`:""}</div>`};
+  const sec=s=>`<h2 class="sec" id="${s.id}">${em(s.icon,24)}${esc(s.title)}</h2>`+(s.from?`<p class="muted hw-from">${esc(s.from)}</p>`:"")+s.blocks.map((b,i,arr)=>stage(b,i,arr)+block(b)).join("");
   // появляется, когда закрыты все блоки: завершение главы
   const fin=`<div class="card glass fin" id="fin" hidden><span class="spark">${ic("spark",34)}</span><h3>${L.back?"Отработка пройдена":"Глава пройдена"}</h3><p class="muted">Все блоки закрыты, прогресс сохранён.</p>${L.back?"":`<a class="btn pri" href="course.html">Вернуться на путь${ic("arrow",16)}</a>`}</div>`;
   if(SPLIT){

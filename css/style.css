@@ -141,6 +141,11 @@ main>:first-child{margin-top:18px}
 .card p{margin:8px 0}
 h2.sec{display:flex;align-items:center;gap:10px;margin:34px 4px 4px;font-size:30px;font-weight:500;color:var(--gold);letter-spacing:.01em;line-height:1.15;scroll-margin-top:calc(var(--nav-h) + 76px)}
 h2.sec .ic{opacity:.9}
+/* ступени раздела в уроке (L.stages): теория → на занятии → домашнее задание */
+.stage{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:22px 6px 2px;color:var(--gold);font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.stage b{font-weight:600}
+.stage span{flex-basis:100%;text-transform:none;letter-spacing:0;font-size:14px;color:var(--fg-2)}
+.stage-class,.stage-home{border-top:1px solid rgba(212,175,124,.35);padding-top:14px}
 .grid{display:grid;gap:14px}
 .grid>.card{margin:0}
 .mats{margin-top:16px}
