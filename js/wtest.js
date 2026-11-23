@@ -11,14 +11,30 @@
    с устройства ученика — в его словарь.
    Откуда слова: ?id=<ключ> — тест собрал преподаватель (localStorage kr_wtest:<ключ>); ?l=<урок> — слова урока;
    ?hw=<номер>&k=<блок> — тест из домашки.
-   Вопросы: tr — слово → перевод (выбор); rev — перевод → слово (выбор); ctx — вставить слово в предложение (видны первые
-   буквы или первый слог); wr — написать слово по переводу. */
+   Вопросы (форматы отработки, их выбирает преподаватель): tr — слово → перевод (выбор); rev — перевод → слово (выбор);
+   tf — верно или неверно (слово и перевод); ctc — слово в пропуск предложения (выбор); ctx — вписать слово в предложение
+   (видны первые буквы или первый слог); wr — написать слово по переводу; fl — написать по первой букве (слогу) и числу
+   клеточек; bld — собрать слово из букв (в корейском — из слогов); mch — найти пары (до 4 слов в одном задании);
+   aud — на слух: выбрать перевод; dic — диктант: написать услышанное слово; say — сказать слово вслух (распознавание речи).
+   Если формат на устройстве не работает (нет озвучки, микрофона) или слову не подходит (нет примера), задание
+   заменяется похожим: aud → tr, dic/say/bld → wr, ctx/ctc → tr.
+   Порядок слов: SPEC.ord — как прислал преподаватель (миксы «новые + повторение», новое слово может встретиться дважды
+   в разных форматах), иначе случайный. У слова может быть метка g (new, rev, week, hard…) — итог показывает счёт по ним. */
 (function(){
 "use strict";
 var KR=window.KR;if(!KR)return;
 var Q=new URLSearchParams(location.search),$=function(s){return document.querySelector(s)},esc=KR.esc,ic=KR.icon;
-var KINDS={tr:"Перевод (выбор)",rev:"Слово по переводу (выбор)",ctx:"Вставь в предложение",wr:"Напиши слово"};
-var TASK={tr:"Выбери перевод.",rev:"Выбери слово.",ctx:"Вставь слово в предложение. Видны первые буквы, черта — буква (в корейском — слог).",wr:"Напиши слово по переводу."};
+var KINDS={tr:"Перевод (выбор)",rev:"Слово по переводу (выбор)",tf:"Верно или неверно",ctc:"Слово в предложение (выбор)",ctx:"Вставь в предложение",
+  wr:"Напиши слово",fl:"По первой букве",bld:"Собери слово",mch:"Найди пары",aud:"На слух: перевод",dic:"Диктант на слух",say:"Скажи вслух"};
+var TASK={tr:"Выбери перевод.",rev:"Выбери слово.",tf:"Перевод верный? 1 — верно, 2 — неверно.",ctc:"Выбери слово для пропуска.",
+  ctx:"Вставь слово в предложение. Видны первые буквы, черта — буква (в корейском — слог).",wr:"Напиши слово по переводу.",
+  fl:"Напиши слово по переводу. Видна первая буква (в корейском — первый слог), клеточки — сколько всего.",
+  bld:"Собери слово: нажимай буквы по порядку (в корейском — слоги).",mch:"Найди пары: нажми на слово, потом на его перевод.",
+  aud:"Послушай слово и выбери перевод.",dic:"Послушай и напиши слово.",say:"Скажи слово вслух: нажми на микрофон."};
+var GN={new:"новые",rev:"повторение",week:"слова недели",hard:"сложные",due:"повторение",all:"другие",lesson:"слова урока"};
+var EAR=KR.ear||null;
+var canTTS=function(){return !!(KR.canSay&&KR.canSay())};
+var canMic=function(){return !!(EAR&&EAR.canHear&&EAR.canHear())};
 var MODE=Q.get("mode")==="class"?"class":"self";
 var SPEC=null,QS=[],I=0,RES=[],locked=false,T0=0,tick=null,HWC=null,CH={},DONE={},SUM='';
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
@@ -37,7 +53,7 @@ async function loadSpec(){
     var it=rec&&rec.items&&rec.items[idx];
     if(!rec||rec.status!=="active"||!it||!it.wt)return {gone:true,hw:hw};
     HWC={rec:rec,key:k};
-    return {title:it.wt.title||"Тест по словам",sub:"домашка",lang:it.wt.lang||rec.lang||"ko",words:it.wt.w||[],kinds:it.wt.k,n:(it.wt.w||[]).length,min:it.wt.min||0,back:"lesson.html?hw="+encodeURIComponent(rec.id),backT:"домашка"};
+    return {title:it.wt.title||"Тест по словам",sub:"домашка",lang:it.wt.lang||rec.lang||"ko",words:it.wt.w||[],kinds:it.wt.k,ord:!!it.wt.ord,n:(it.wt.w||[]).length,min:it.wt.min||0,back:"lesson.html?hw="+encodeURIComponent(rec.id),backT:"домашка"};
   }
   return null;
 }
@@ -48,25 +64,55 @@ function blank(f){
   if(isKo(f))return Array.from(f).map(function(c,i){return i===0||!isKo(c)?c:"＿"}).join("");
   return f.split(" ").map(function(p){return Array.from(p).map(function(c,i){return i===0||c==="-"?c:"_"}).join(" ")}).join("   ");
 }
-function makeQ(w,k,pool){
-  if((k==="tr"||k==="rev")&&pool.length<2)k="wr";
-  if(k==="ctx"&&!canCtx(w))k=pool.length>=2?"tr":"wr";
-  var ok=function(x){return x.w!==w.w&&(k!=="tr"||(x.t&&x.t!==w.t))},same=pool.filter(function(x){return ok(x)&&wl(x)===wl(w)});
-  var others=shuffle(same.length?same:pool.filter(ok)).slice(0,3);   // варианты — из слов того же языка
-  if(k==="tr")return {k:k,w:w,ans:w.t,opts:shuffle([w.t].concat(others.map(function(x){return x.t})))};
-  if(k==="rev")return {k:k,w:w,ans:w.w,opts:shuffle([w.w].concat(others.map(function(x){return x.w})))};
-  if(k==="ctx"){var f=w.f||w.w,i=w.ex.indexOf(f);return {k:k,w:w,ans:f,before:w.ex.slice(0,i),after:w.ex.slice(i+f.length)}}
-  return {k:"wr",w:w,ans:w.w};
+var unitsOf=function(w){return Array.from(String(w||"").normalize("NFC").replace(/\s+/g,""))};
+function others(w,pool,k,n){
+  var ok=function(x){return x.w!==w.w&&(k!=="tr"&&k!=="aud"&&k!=="tf"&&k!=="mch"||(x.t&&x.t!==w.t))},same=pool.filter(function(x){return ok(x)&&wl(x)===wl(w)});
+  var seen={},out=[];shuffle(same.length>=n?same:pool.filter(ok)).forEach(function(x){var key=k==="rev"||k==="ctc"?x.w:x.t;if(!seen[key]&&out.length<n){seen[key]=1;out.push(x)}});   // варианты — из слов того же языка
+  return out;
+}
+function fit(w,k,pool){   // формат, который подходит слову и работает на этом устройстве
+  if((k==="aud"||k==="dic")&&!canTTS())k=k==="aud"?"tr":"wr";
+  if(k==="say"&&!canMic())k="wr";
+  if(k==="bld"){var u=unitsOf(w.w);if(u.length<2||u.length>16)k="wr"}
+  if((k==="ctx"||k==="ctc")&&!canCtx(w))k=pool.length>=2?"tr":"wr";
+  if(["tr","rev","tf","ctc","aud","mch"].indexOf(k)>=0&&others(w,pool,k,1).length<1)k="wr";
+  return k;
+}
+function makeQ(w,k,pool,rest){
+  k=fit(w,k,pool);
+  if(k==="tr"||k==="aud"){var o=others(w,pool,k,3);return {k:k,w:w,ans:w.t,opts:shuffle([w.t].concat(o.map(function(x){return x.t})))}}
+  if(k==="rev"){var o2=others(w,pool,k,3);return {k:k,w:w,ans:w.w,opts:shuffle([w.w].concat(o2.map(function(x){return x.w})))}}
+  if(k==="tf"){var right=Math.random()<.5,x=others(w,pool,k,1)[0];return {k:k,w:w,shown:right?w.t:x.t,ans:right?"Верно":"Неверно",opts:["Верно","Неверно"]}}
+  if(k==="ctc"){var f=w.f||w.w,i=w.ex.indexOf(f),o3=others(w,pool,k,3);return {k:k,w:w,ans:w.w,opts:shuffle([w.w].concat(o3.map(function(x){return x.w}))),before:w.ex.slice(0,i),after:w.ex.slice(i+f.length)}}
+  if(k==="ctx"){var f2=w.f||w.w,j=w.ex.indexOf(f2);return {k:k,w:w,ans:f2,before:w.ex.slice(0,j),after:w.ex.slice(j+f2.length)}}
+  if(k==="bld"){var u=unitsOf(w.w),t=shuffle(u);for(var a=0;a<5&&t.join("")===u.join("");a++)t=shuffle(u);return {k:k,w:w,ans:w.w,tiles:t,pick:[]}}
+  if(k==="mch"){   // пары: слово и до трёх следующих слов теста (они тоже засчитываются), иначе слова из общего списка
+    var used={},grp=[w];used[w.w]=1;used["t:"+w.t]=1;
+    var take=function(x){if(!x||used[x.w]||used["t:"+x.t]||!x.t||grp.length>=4)return false;used[x.w]=1;used["t:"+x.t]=1;grp.push(x);return true};
+    while(rest&&rest.length&&grp.length<4){var nx=rest[0];if(take(nx))rest.shift();else break}
+    others(w,pool,k,6).forEach(take);
+    if(grp.length<2)return makeQ(w,"tr",pool);
+    return {k:k,w:w,ws:grp,ans:"",L:shuffle(grp),R:shuffle(grp),sel:null,got:{},bad:{}};
+  }
+  if(k==="say")return {k:k,w:w,ans:w.w,tries:0};
+  return {k:k,w:w,ans:w.w};   // wr, fl, dic
 }
 function kinds(){var a=(SPEC.kinds||[]).filter(function(k){return KINDS[k]});return a.length?a:["tr","rev","ctx","wr"]}
 function build(words,n){
-  var pool=(SPEC.words||[]).filter(function(w){return w&&w.w&&w.t}),ks=kinds();
+  var pool=(SPEC.words||[]).filter(function(w){return w&&w.w&&w.t}),ks=kinds(),again=!!words;
   words=(words||pool).filter(function(w){return w&&w.w&&w.t});
-  return shuffle(words).slice(0,Math.min(n||words.length,words.length)).map(function(w,i){return makeQ(w,ks[i%ks.length],pool)});
+  var list=(SPEC.ord&&!again?words.slice():shuffle(words)).slice(0,Math.min(n||words.length,words.length)),out=[],last={},ki=Math.floor(Math.random()*ks.length);
+  while(list.length){
+    var w=list.shift(),k=ks[ki++%ks.length];
+    if(last[w.w]&&ks.length>1&&k===last[w.w])k=ks[ki++%ks.length];   // слово второй раз — в другом формате
+    var q=makeQ(w,k,pool,list);last[w.w]=q.k;out.push(q);
+  }
+  return out;
 }
-var isWrite=function(q){return q.k==="ctx"||q.k==="wr"};
-function okAns(q,a){if(a==null)return false;if(!isWrite(q))return a===q.ans;return norm(a)===norm(q.ans)||(q.k==="ctx"&&norm(a)===norm(q.w.w))}
-var qText=function(q){return q.k==="tr"?q.w.w:q.k==="ctx"?q.before+"(…)"+q.after:q.w.t};
+var isWrite=function(q){return q.k==="ctx"||q.k==="wr"||q.k==="fl"||q.k==="dic"};
+var qWords=function(q){return q.ws||[q.w]};
+function okAns(q,a){if(a==null)return false;if(!isWrite(q)&&q.k!=="bld")return a===q.ans;var n=norm(a);return n===norm(q.ans)||n===norm(q.w.w)||String(q.w.w).split("/").some(function(v){return norm(v)===n})}
+var qText=function(q){return q.k==="tr"||q.k==="aud"?q.w.w:q.k==="tf"?q.w.w+" = "+q.shown+"?":q.k==="ctx"||q.k==="ctc"?q.before+"(…)"+q.after:q.k==="mch"?"Пары: "+q.ws.map(function(x){return x.w}).join(", "):q.k==="dic"?"Диктант: "+q.w.w:q.w.t};
 
 // ---------- экраны ----------
 function head(){
@@ -107,47 +153,99 @@ function score(){var ok=RES.filter(function(r){return r&&r.ok}).length,bad=RES.f
 function left(){return SPEC.min?Math.max(0,Math.round(SPEC.min*60-(Date.now()-T0)/1000)):0}
 function clock(){var e=$("#wtclock");if(!e||MODE!=="self"||!SPEC.min||!tick)return;var l=left();e.textContent="⏱ "+Math.floor(l/60)+":"+String(l%60).padStart(2,"0");e.classList.toggle("low",l<=60);
   if(l<=0){clearInterval(tick);tick=null;for(var i=I;i<QS.length;i++)if(!RES[i])RES[i]={ok:false,given:""};finish()}}
+function sayB(w,big){return '<button type="button" class="say'+(big?' wt-ear':'')+'" data-say="'+esc(w)+'" aria-label="Послушать">'+ic("volume",big?34:18)+'</button>'}
 function promptHtml(q){
-  if(q.k==="tr")return '<div class="wt-p"><span'+wcls(q.w.w)+'>'+esc(q.w.w)+'</span> <button type="button" class="say" data-say="'+esc(q.w.w)+'" aria-label="Послушать">'+ic("volume",18)+'</button></div>';
+  if(q.k==="tr")return '<div class="wt-p"><span'+wcls(q.w.w)+'>'+esc(q.w.w)+'</span> '+sayB(q.w.w)+'</div>';
+  if(q.k==="tf")return '<div class="wt-p"><span'+wcls(q.w.w)+'>'+esc(q.w.w)+'</span> '+sayB(q.w.w)+'</div><div class="wt-p wt-tr">= '+esc(q.shown)+' ?</div>';
+  if(q.k==="aud"||q.k==="dic")return '<div class="wt-p wt-earp">'+sayB(q.w.w,true)+'<button type="button" class="wt-slow" data-slow="'+esc(q.w.w)+'">Медленно</button></div>'+
+    (q.k==="dic"?'<p class="muted wt-et">'+(isKo(q.w.w)?'Слогов: ':'Букв: ')+unitsOf(q.w.w).length+(q.w.w.indexOf(" ")>=0?' · слов: '+q.w.w.split(/\s+/).length:'')+'</p>':'');
   if(q.k==="ctx")return '<div class="wt-p wt-ctx"><span'+wcls(q.w.ex)+'>'+esc(q.before)+'<b class="wt-blank">'+esc(blank(q.ans))+'</b>'+esc(q.after)+'</span></div>'+(q.w.et?'<p class="muted wt-et">'+esc(q.w.et)+'</p>':'');
+  if(q.k==="ctc")return '<div class="wt-p wt-ctx"><span'+wcls(q.w.ex)+'>'+esc(q.before)+'<b class="wt-blank">＿＿＿</b>'+esc(q.after)+'</span></div>'+(q.w.et?'<p class="muted wt-et">'+esc(q.w.et)+'</p>':'');
+  if(q.k==="fl"){var u=unitsOf(q.w.w);return '<div class="wt-p wt-tr">'+esc(q.w.t)+'</div><div class="wt-cells'+(isKo(q.w.w)?' ko':'')+'" aria-label="Первая буква '+esc(u[0])+', всего '+u.length+'">'+u.map(function(c,i){return '<i>'+(i===0?esc(c):'')+'</i>'}).join("")+'</div>'}
+  if(q.k==="bld")return '<div class="wt-p wt-tr">'+esc(q.w.t)+'</div><div class="wt-cells'+(isKo(q.w.w)?' ko':'')+'" id="wtslots">'+q.tiles.map(function(c,i){return '<i>'+(q.pick[i]!=null?esc(q.tiles[q.pick[i]]):'')+'</i>'}).join("")+'</div>';
+  if(q.k==="say")return '<div class="wt-p wt-tr">'+esc(q.w.t)+'</div><p class="muted wt-et">Скажи '+(isKo(q.w.w)?'по-корейски':'по-английски')+(isKo(q.w.w)?' · слогов: '+unitsOf(q.w.w).length:'')+'</p>';
+  if(q.k==="mch")return '';
   return '<div class="wt-p wt-tr">'+esc(q.w.t)+'</div>';
+}
+function mchHtml(q){
+  var col=function(side){return '<div class="wt-mcol">'+q[side].map(function(x,i){var key=side==="L"?x.w:x.t,done=q.got[x.w];
+    return '<button type="button" data-mc="'+side+i+'" class="'+(done?'ok':'')+(side==="L"&&q.sel===i?' sel':'')+'"'+(done||locked?' disabled':'')+(side==="L"?wcls(x.w):'')+'>'+esc(key)+'</button>'}).join("")+'</div>'};
+  return '<div class="wt-mch" id="wtmch">'+col("L")+col("R")+'</div>';
 }
 function show(){
   var q=QS[I];locked=false;score();
   var h='<div class="bar"><div style="width:'+Math.round(I/QS.length*100)+'%"></div></div><p class="muted wt-n">Вопрос '+(I+1)+' из '+QS.length+' · '+TASK[q.k]+'</p>'+promptHtml(q);
-  if(isWrite(q))h+='<form class="wt-in" id="wtf" autocomplete="off"><input id="wta" class="name'+(isKo(q.ans)?' ko':'')+'" lang="'+(isKo(q.ans)?"ko":"en")+'" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Ответ"><button type="submit" class="btn pri">Проверить</button></form>';
-  else h+='<div class="wt-opts">'+q.opts.map(function(o,i){return '<button type="button" data-opt="'+i+'"'+wcls(o)+'><small>'+(i+1)+'</small>'+esc(o)+'</button>'}).join("")+'</div>';
+  if(isWrite(q)){var ko=isKo(q.ans);h+='<form class="wt-in" id="wtf" autocomplete="off"><input id="wta" class="name'+(ko?' ko':'')+'" lang="'+(ko?"ko":"en")+'" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Ответ"><button type="submit" class="btn pri">Проверить</button></form>'}
+  else if(q.k==="bld")h+='<div class="wt-tiles'+(isKo(q.w.w)?' ko':'')+'" id="wttiles">'+q.tiles.map(function(c,i){return '<button type="button" data-tile="'+i+'"'+(q.pick.indexOf(i)>=0?' disabled':'')+'>'+esc(c)+'</button>'}).join("")+'</div><div class="wt-acts wt-l"><button type="button" data-wt="undo">⌫ Стереть</button></div>';
+  else if(q.k==="mch")h+=mchHtml(q);
+  else if(q.k==="say")h+='<div class="wt-earp"><button type="button" class="say wt-ear wt-mic" data-wt="mic" aria-label="Нажми и скажи слово">'+ic("mic",34)+'</button></div><p class="muted wt-et" id="wtmic" aria-live="polite">Нажми на микрофон и скажи слово. Две попытки.</p><div class="wt-acts wt-l"><button type="button" data-wt="say-type">Ответить текстом</button></div>';
+  else h+='<div class="wt-opts'+(q.k==="tf"?' wt-tf':'')+'">'+q.opts.map(function(o,i){return '<button type="button" data-opt="'+i+'"'+wcls(o)+'><small>'+(i+1)+'</small>'+esc(o)+'</button>'}).join("")+'</div>';
   h+='<div class="wt-fb" id="wtfb" role="status"></div><div class="wt-acts">'+(MODE==="class"?'<button type="button" data-wt="reveal">👀 Показать ответ</button>':'<span></span>')+'<button type="button" class="btn pri" data-wt="next" hidden>Дальше'+ic("arrow",16)+'</button></div>';
   $("#wtq").innerHTML=h;
   var inp=$("#wta");if(inp)inp.focus({preventScroll:true});
+  if(q.k==="aud"||q.k==="dic")setTimeout(function(){if(QS[I]===q&&!locked)KR.say(q.w.w,wl(q.w))},250);
 }
-function answer(given,shown){
-  if(locked)return;locked=true;var q=QS[I],ok=!shown&&okAns(q,given);RES[I]={ok:ok,given:shown?null:given};
+// собери слово: нажатая буква встаёт в следующую клеточку; когда все клеточки заполнены, ответ проверяется
+function tile(i){var q=QS[I];if(locked||q.k!=="bld"||q.pick.indexOf(i)>=0)return;q.pick.push(i);bldDraw(q);if(q.pick.length===q.tiles.length)answer(q.pick.map(function(j){return q.tiles[j]}).join(""),false)}
+function bldDraw(q){var sl=$("#wtslots");if(sl)sl.innerHTML=q.tiles.map(function(c,i){return '<i>'+(q.pick[i]!=null?esc(q.tiles[q.pick[i]]):'')+'</i>'}).join("");
+  [].forEach.call(document.querySelectorAll("#wttiles button"),function(b){b.disabled=locked||q.pick.indexOf(+b.dataset.tile)>=0})}
+// пары: слово слева, потом перевод справа; ошибка отмечает оба слова пары
+function mchTap(id){
+  var q=QS[I];if(locked||q.k!=="mch")return;var side=id[0],i=+id.slice(1);
+  if(side==="L"){q.sel=q.sel===i?null:i;$("#wtmch").outerHTML=mchHtml(q);var w0=q.L[i];if(q.sel!=null)KR.say(w0.w,wl(w0));return}
+  if(q.sel==null){var fb=$("#wtfb");fb.className="wt-fb";fb.textContent="Сначала нажми на слово слева.";return}
+  var a=q.L[q.sel],b=q.R[i];
+  if(a===b||a.t===b.t){q.got[a.w]=1;q.sel=null;$("#wtmch").outerHTML=mchHtml(q);$("#wtfb").textContent="";
+    if(q.ws.every(function(x){return q.got[x.w]}))answer("",false,!Object.keys(q.bad).length)}
+  else{q.bad[a.w]=1;q.bad[b.w]=1;var fb2=$("#wtfb");fb2.className="wt-fb bad";fb2.textContent="Не пара, попробуй ещё.";
+    var bt=document.querySelector('[data-mc="R'+i+'"]');if(bt){bt.classList.add("bad");setTimeout(function(){bt.classList.remove("bad")},600)}}
+}
+// скажи вслух: распознавание речи (js/ear.js), две попытки; «почти» на второй попытке — неверно, но видно, что услышали
+async function micGo(b){
+  var q=QS[I];if(locked||q.k!=="say"||q.busy)return;var st=$("#wtmic");q.busy=true;b.classList.add("on");if(st)st.textContent="Слушаю…";
+  try{var alts=await EAR.recognize(wl(q.w),{accent:KR.accent&&KR.accent()});if(QS[I]!==q)return;
+    var r=EAR.heard(alts,q.w.w,wl(q.w)),got="Услышали: «"+(r.best||alts[0])+"».";q.tries++;
+    if(r.ok){if(st)st.textContent=got;return answer(r.best||alts[0],false,true)}
+    if(q.tries>=2){if(st)st.textContent=got+(r.close?" Почти!":"");return answer(r.best||alts[0]||"",false,false)}
+    if(st)st.textContent=got+" "+(r.close?"Почти. Послушай и скажи ещё раз.":"Попробуй ещё раз.");if(r.close)KR.say(q.w.w,wl(q.w));
+  }catch(e){if(st)st.textContent=EAR.errText(e)||"Нажми на микрофон и скажи слово";if(!canMic()){q.k="wr";show()}}
+  finally{q.busy=false;b.classList.remove("on")}
+}
+function answer(given,shown,force){
+  if(locked)return;locked=true;var q=QS[I],ok=!shown&&(force!==undefined?!!force:okAns(q,given));RES[I]={ok:ok,given:shown?null:given};
+  if(q.k==="mch"){RES[I].bad=shown?q.ws.map(function(x){return x.w}):Object.keys(q.bad);q.ws.forEach(function(x){q.got[x.w]=1});q.sel=null;var mm=$("#wtmch");if(mm)mm.outerHTML=mchHtml(q)}
+  if(q.k==="bld"){if(shown)q.pick=q.tiles.map(function(c,i){return i});bldDraw(q);var sl=$("#wtslots");if(sl)sl.classList.add(ok?"ok":"bad")}
+  [].forEach.call(document.querySelectorAll('[data-wt="undo"],[data-wt="mic"],[data-wt="say-type"]'),function(b){b.disabled=true});
   [].forEach.call(document.querySelectorAll(".wt-opts button"),function(b){b.disabled=true;var o=QS[I].opts[+b.dataset.opt];if(o===q.ans)b.classList.add("ok");else if(!shown&&o===given)b.classList.add("bad")});
   var inp=$("#wta");if(inp){inp.disabled=true;if(shown)inp.value=q.ans;inp.classList.add(ok?"ok":"bad")}
   var fb=$("#wtfb");fb.className="wt-fb "+(ok?"ok":"bad");
-  fb.innerHTML=(ok?"✅ ":shown?"👀 ":"❌ Верно: ")+'<b'+wcls(q.w.w)+'>'+esc(q.w.w)+'</b> — '+esc(q.w.t)+' <button type="button" class="say" data-say="'+esc(q.w.w)+'" aria-label="Послушать">'+ic("volume",16)+'</button>'+
+  if(q.k==="mch")fb.innerHTML=(ok?"✅ Все пары верно":shown?"👀 Пары":"❌ Были ошибки: "+RES[I].bad.map(function(w){return '<b'+wcls(w)+'>'+esc(w)+'</b>'}).join(", "))+
+    '<div class="wt-ex">'+q.ws.map(function(x){return '<span'+wcls(x.w)+'>'+esc(x.w)+'</span> — '+esc(x.t)}).join("<br>")+'</div>';
+  else fb.innerHTML=(ok?"✅ ":shown?"👀 ":"❌ Верно: ")+'<b'+wcls(q.w.w)+'>'+esc(q.w.w)+'</b> — '+esc(q.w.t)+' <button type="button" class="say" data-say="'+esc(q.w.w)+'" aria-label="Послушать">'+ic("volume",16)+'</button>'+
     (q.w.ex&&q.k!=="ctx"?'<div class="wt-ex"><span'+wcls(q.w.ex)+'>'+esc(q.w.ex)+'</span>'+(q.w.et?' <span class="muted">— '+esc(q.w.et)+'</span>':'')+'</div>':q.k==="ctx"&&!ok?'<div class="wt-ex muted">В предложении: '+esc(q.ans)+'</div>':'');
-  if(MODE==="class"&&canSend())fb.insertAdjacentHTML("beforeend",sendRow(q.w.w,ok));
+  if(MODE==="class"&&canSend())qWords(q).forEach(function(x){fb.insertAdjacentHTML("beforeend",sendRow(x.w,q.k==="mch"?RES[I].bad.indexOf(x.w)<0:ok,q.ws?x.w:""))});
+  if(!ok&&!shown&&q.k!=="mch")KR.say(q.w.w,wl(q.w));
   var r=$('[data-wt="reveal"]');if(r)r.hidden=true;var f=$("#wtf button");if(f)f.hidden=true;
   var n=$('[data-wt="next"]');n.hidden=false;n.textContent="";n.insertAdjacentHTML("beforeend",(I+1<QS.length?"Дальше":"Итог")+ic("arrow",16));n.focus({preventScroll:true});
   score();
 }
 // ---------- словарь ученика ----------
+/* верно ли ответил на слово w в вопросе i: в «парах» — не было ли ошибок именно с этим словом */
+function wordOk(q,i,w){var r=RES[i];if(!r)return false;if(q.k==="mch")return r.given!==null&&(r.bad||[]).indexOf(w)<0;return !!r.ok}
 function teacherDev(){return !!(KR.ctx&&KR.ctx.teacher)}
 function canSend(){return teacherDev()?!!(SPEC&&SPEC.who):!!(KR.vocab&&KR.user())}
 var SENDN={auto:"авто",today:"сегодня",tom:"завтра"};
-function sendRow(w,ok){
+function sendRow(w,ok,label){
   var ch=CH[w]||"auto";
-  return '<div class="wt-send" data-w="'+esc(w)+'"><span class="muted">Вернуть слово:</span>'+["auto","today","tom"].map(function(k){
+  return '<div class="wt-send" data-w="'+esc(w)+'"><span class="muted">'+(label?'<b'+wcls(label)+'>'+esc(label)+'</b>:':'Вернуть слово:')+'</span>'+["auto","today","tom"].map(function(k){
     return '<button type="button" data-ws="'+k+'" class="'+(ch===k?"sel":"")+'" aria-pressed="'+(ch===k)+'" title="'+(k==="auto"?(ok?"по расписанию":"интервал сократится, слово придёт сегодня"):k==="today"?"заново, как после «Снова»":"повторить завтра")+'">'+SENDN[k]+(k==="auto"?(ok?" · по плану":" · раньше"):"")+'</button>'}).join("")+'</div>';
 }
 /* Записать результат теста в расписание слов. Слово меняется один раз за тест; выбор «сегодня» или «завтра»,
    сделанный позже (в «Повторить ошибки»), заменяет «авто». Возвращает текст для итога. */
 async function applyWords(){
   var lang=SPEC.lang||"ko",by={};
-  var LW={};QS.forEach(function(q){LW[q.w.w]=wl(q.w)});
-  QS.forEach(function(q,i){var w=q.w.w,ok=!!(RES[i]&&RES[i].ok);by[w]=by[w]===false?false:ok});
+  var LW={};QS.forEach(function(q){qWords(q).forEach(function(x){LW[x.w]=wl(x)})});
+  QS.forEach(function(q,i){qWords(q).forEach(function(x){var w=x.w,ok=wordOk(q,i,w);by[w]=by[w]===false?false:ok})});
   var todo=Object.keys(by).filter(function(w){var ch=CH[w]||"auto";return !DONE[w]||(ch!=="auto"&&DONE[w]!==ch)});
   if(!todo.length)return SUM;
   var now=Date.now(),cards={},out=[],n={today:0,tom:0,back:0,rev:0,none:0,miss:0};
@@ -187,8 +285,12 @@ function next(){if(!locked)return;I++;if(I>=QS.length)finish();else show()}
 function finish(){
   clearInterval(tick);tick=null;
   var ok=RES.filter(function(r){return r&&r.ok}).length,bad=QS.map(function(q,i){return [q,RES[i]||{ok:false,given:""}]}).filter(function(x){return !x[1].ok});
+  var grp={};QS.forEach(function(q,i){qWords(q).forEach(function(x){if(!x.g)return;var g=grp[x.g]=grp[x.g]||{ok:0,n:0};g.n++;if(wordOk(q,i,x.w))g.ok++})});
+  var gtx=Object.keys(grp).length>1?'<p class="muted wt-grp">'+Object.keys(grp).map(function(k){return (GN[k]||k)+': '+grp[k].ok+' из '+grp[k].n}).join(" · ")+'</p>':"";
   if(MODE==="self")saveSelf(ok,bad);
-  var h='<section class="card wt-done"><h3>🎯 '+ok+' / '+QS.length+'</h3>'+sumBox()+(MODE==="self"&&SUM?'<p class="muted wt-sum">'+esc(SUM)+'</p>':'')+(bad.length?'<p class="muted">Повторить:</p><table class="wt-res">'+bad.map(function(x){var q=x[0],r=x[1];return '<tr><td><b'+wcls(q.w.w)+'>'+esc(q.w.w)+'</b></td><td>'+esc(q.w.t)+'</td><td class="muted">'+(r.given==null?"👀 показан":r.given===""?"нет ответа":'<s>'+esc(r.given)+'</s>')+'</td></tr>'}).join("")+'</table>':'<p>🎉 Без ошибок!</p>');
+  var h='<section class="card wt-done"><h3>🎯 '+ok+' / '+QS.length+'</h3>'+gtx+sumBox()+(MODE==="self"&&SUM?'<p class="muted wt-sum">'+esc(SUM)+'</p>':'')+(bad.length?'<p class="muted">Повторить:</p><table class="wt-res">'+bad.map(function(x){var q=x[0],r=x[1];
+    if(q.k==="mch")return q.ws.filter(function(y){return (r.bad||[]).indexOf(y.w)>=0||r.given==null}).map(function(y){return '<tr><td><b'+wcls(y.w)+'>'+esc(y.w)+'</b></td><td>'+esc(y.t)+'</td><td class="muted">'+(r.given==null?"👀 показан":"пары")+'</td></tr>'}).join("");
+    return '<tr><td><b'+wcls(q.w.w)+'>'+esc(q.w.w)+'</b></td><td>'+esc(q.w.t)+'</td><td class="muted">'+(r.given==null?"👀 показан":r.given===""?"нет ответа":'<s>'+esc(r.given)+'</s>')+(KINDS[q.k]?' · '+KINDS[q.k].toLowerCase():'')+'</td></tr>'}).join("")+'</table>':'<p>🎉 Без ошибок!</p>');
   h+='<div class="wt-acts">';
   if(HWC)h+='<span class="muted">Результат сохранён в домашке.</span><a class="btn pri" href="'+esc(SPEC.back)+'">Вернуться к домашке'+ic("arrow",16)+'</a>';
   else h+=(bad.length?'<button type="button" class="btn pri" data-wt="again-bad">🔁 Повторить ошибки</button>':'')+'<button type="button" data-wt="restart">Сначала</button>';
@@ -198,7 +300,7 @@ function finish(){
 }
 // самостоятельно: интервалы слов ученика и результат домашки
 function saveSelf(ok,bad){
-  if(KR.vocab&&!(KR.ctx&&KR.ctx.teacher)){var res={};QS.forEach(function(q,i){var c=KR.vocab.find(wl(q.w),q.w.w);if(c)res[c.id]=res[c.id]===false?false:!!(RES[i]&&RES[i].ok)});
+  if(KR.vocab&&!(KR.ctx&&KR.ctx.teacher)){var res={};QS.forEach(function(q,i){qWords(q).forEach(function(x){var c=KR.vocab.find(wl(x),x.w);if(c)res[c.id]=res[c.id]===false?false:wordOk(q,i,x.w)})});
     try{var pr=KR.vocab.practice(res),pt=[];if(pr.back.length)pt.push("вернутся на повторение сегодня: "+pr.back.length);if(pr.done.length)pt.push("засчитано как повторение: "+pr.done.length);
       SUM=pt.length?"В словаре: "+pt.join(" · ")+".":""}catch(e){}}
   if(!HWC)return;
@@ -224,7 +326,13 @@ document.addEventListener("click",function(e){
   if(d.wt==="reveal")return answer(null,true);
   if(d.wt==="next")return next();
   if(d.wt==="restart"){clearInterval(tick);tick=null;return setup()}
-  if(d.wt==="again-bad"){var w=QS.filter(function(q,i){return !(RES[i]&&RES[i].ok)}).map(function(q){return q.w});return start(w)}
+  if(d.wt==="again-bad"){var w=[],seen={};QS.forEach(function(q,i){qWords(q).forEach(function(x){if(!wordOk(q,i,x.w)&&!seen[x.w]){seen[x.w]=1;w.push(x)}})});return start(w)}
+  if(d.slow!==undefined){var q0=QS[I];return KR.say(d.slow,isKo(d.slow)?"ko":wl(q0&&q0.w),{rate:Math.max(.5,(KR.rate?KR.rate():1)*.7)})}
+  if(d.tile!==undefined)return tile(+d.tile);
+  if(d.wt==="undo"){var qb=QS[I];if(!locked&&qb&&qb.k==="bld"&&qb.pick.length){qb.pick.pop();bldDraw(qb)}return}
+  if(d.mc)return mchTap(d.mc);
+  if(d.wt==="mic")return micGo(b);
+  if(d.wt==="say-type"){var qs=QS[I];if(!locked&&qs){qs.k="wr";show()}return}
 });
 document.addEventListener("submit",function(e){if(e.target.id!=="wtf")return;e.preventDefault();var a=($("#wta").value||"").trim();if(a)answer(a,false)});
 document.addEventListener("keydown",function(e){

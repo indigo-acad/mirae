@@ -321,3 +321,136 @@
     });
   };
 })();
+
+/* ---------- 4) «В словарь»: слова материала в словарь ученика ----------
+   В материалах со словами (тренажёры слов, видео-уроки, тесты по лексике) внизу справа появляется кнопка «В словарь».
+   Она открывает список слов материала с галочками; отмеченные слова ждут в localStorage «kr_vinbox:<ученик>», а
+   js/vocab.js забирает их, как только ученик откроет страницу сайта со словарём (кабинет, «Слова», урок).
+   Слова, которые уже есть в словаре на этом устройстве, отмечены «уже в словаре».
+   Откуда список (первое, что нашлось):
+   - window.MIRAE_WORDS — материал объявил сам: [{w, t, ex, et}] или [{g: "группа", words: [...]}], можно функцией;
+   - SETS — наборы слов тренажёров ({name, words: [{ko|en, ru, ex, exRu}]}), LESSONS с полем words;
+   - WORDS — список теста ({ko|en, ru} или ["слово", "перевод"]);
+   - EPS — видео-уроки и дорамы: пары «слово — перевод» из заданий-сопоставлений (match), группа — серия;
+   - ALL — общий список игр. */
+(function () {
+  "use strict";
+  var path = location.pathname, at = path.indexOf("/materials/");
+  if (at < 0 || window.MIRAE_DISCOVER || window.top !== window.self) return;
+  var ROOT = path.slice(0, at + 1), MID = (path.slice(at + 11).split("/")[1] || "").trim();
+  function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v) } catch (e) {} return null }
+  function glob(name) { try { return (0, eval)("typeof " + name + " !== 'undefined' ? " + name + " : undefined") } catch (e) { return undefined } }
+  var HAN = /[가-힣]/, LAT = /[A-Za-z]/, CYR = /[А-Яа-яЁё]/;
+  var txt = function (s) { return String(s == null ? "" : s).replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() };
+  var norm = function (w) { return String(w).normalize("NFC").trim().replace(/\s+/g, " ").toLowerCase() };
+  var langOf = function (s) { return HAN.test(s) ? "ko" : LAT.test(s) ? "en" : "" };
+  function item(x) {
+    if (!x) return null;
+    var w, t, ex, et;
+    if (Array.isArray(x)) { w = x[0]; t = x[1] }
+    else if (typeof x === "object") { w = x.ko || x.en || x.w || x.word || x.term; t = x.ru || x.t || x.tr || x.translation || x.def; ex = x.ex || x.e; et = x.exRu || x.exru || x.et }
+    w = txt(w); t = txt(t); if (!w || w.length > 80 || CYR.test(w)) return null;
+    var l = langOf(w); if (!l) return null;
+    var o = { l: l, w: w, t: "" };
+    if (t && CYR.test(t)) o.t = t.slice(0, 300);
+    else if (t && t.length > w.length + 6 && /\s/.test(t) && langOf(t)) o.d = [{ l: langOf(t), s: t.slice(0, 300) }];   // определение на изучаемом языке
+    else if (t) return null;                                   // «손을 — 잡다»: это не перевод
+    ex = txt(ex); if (ex && langOf(ex) === l) { o.ex = ex.slice(0, 240); et = txt(et); if (et) o.et = et.slice(0, 240) }
+    return o;
+  }
+  function groups() {
+    var out = [], add = function (g, arr) { var ws = (arr || []).map(item).filter(Boolean); if (ws.length) out.push({ g: txt(g) || "Слова", w: ws }) };
+    var M = window.MIRAE_WORDS; if (typeof M === "function") try { M = M() } catch (e) { M = null }
+    if (Array.isArray(M)) {
+      if (M.some(function (x) { return x && Array.isArray(x.words) })) M.forEach(function (x) { if (x) add(x.g || x.name, x.words) });
+      else add(document.title, M);
+      return out;
+    }
+    var S = glob("SETS");
+    if (Array.isArray(S)) S.forEach(function (s) { if (s && Array.isArray(s.words)) add(s.name || s.title || s.id, s.words) });
+    var Ls = glob("LESSONS");
+    if (Array.isArray(Ls)) Ls.forEach(function (s) { if (s && Array.isArray(s.words)) add(s.name || s.title || s.id, s.words) });
+    if (out.length) return out;
+    var W = glob("WORDS"); if (Array.isArray(W)) add("Слова", W);
+    if (out.length) return out;
+    var E = glob("EPS");
+    if (Array.isArray(E)) E.forEach(function (ep) {
+      if (!ep || !Array.isArray(ep.tasks)) return; var a = [];
+      ep.tasks.forEach(function (t) { if (t && t.t === "match" && Array.isArray(t.pairs)) a = a.concat(t.pairs) });
+      add((ep.no != null ? ep.no + ". " : "") + (ep.tt || ep.title || "") + (ep.ru ? " · " + ep.ru : ""), a);
+    });
+    if (out.length) return out;
+    var A = glob("ALL"); if (Array.isArray(A)) add("Слова", A);
+    return out;
+  }
+  function have() {   // id слов, которые уже в словаре на этом устройстве или ждут добавления
+    var u = ls("kr_user"), s = {}; if (!u) return s;
+    try { var d = JSON.parse(ls("kr_vocab:" + u) || "{}"); Object.keys((d && d.w) || {}).forEach(function (k) { s[k] = 1 }) } catch (e) {}
+    try { (JSON.parse(ls("kr_vinbox:" + u) || "[]") || []).forEach(function (x) { if (x && x.w) s[x.l + ":" + norm(x.w)] = 1 }) } catch (e) {}
+    return s;
+  }
+  var host, root, G = [];
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c] }) };
+  var CSS = ":host{all:initial}*{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,sans-serif}" +
+    ".fab{position:fixed;right:14px;bottom:14px;z-index:99998;display:inline-flex;align-items:center;gap:6px;border:1px solid #D4AF7C;background:#0B1535;color:#F8F7F2;border-radius:999px;padding:9px 15px;font:600 14px Inter,system-ui,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(11,21,53,.35)}" +
+    ".fab[hidden]{display:none}.fab b{color:#D4AF7C;font-size:17px;line-height:1}.fab:focus-visible,button:focus-visible{outline:2px solid #D4AF7C;outline-offset:2px}" +
+    ".sheet{position:fixed;right:12px;bottom:12px;z-index:99999;width:min(440px,calc(100vw - 24px));max-height:min(78vh,640px);display:flex;flex-direction:column;background:#F8F7F2;color:#0B1535;border:1px solid #D4AF7C;border-radius:18px;box-shadow:0 18px 50px rgba(11,21,53,.4);overflow:hidden}" +
+    ".hd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px 10px;background:#0B1535;color:#F8F7F2}.hd h2{margin:0;font:600 20px 'Cormorant Garamond',Georgia,serif;color:#D4AF7C}" +
+    ".x{border:0;background:transparent;color:#F8F7F2;font-size:22px;cursor:pointer;padding:2px 6px}" +
+    ".bd{overflow:auto;padding:8px 16px}.ft{padding:10px 16px 14px;border-top:1px solid #e3dccd;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}" +
+    "details{border-bottom:1px solid #ebe5d8;padding:6px 0}summary{cursor:pointer;font-weight:600;padding:4px 0;list-style:revert}" +
+    "label{display:flex;gap:8px;align-items:flex-start;padding:4px 0;font-size:15px;line-height:1.35;cursor:pointer}label.dim{opacity:.55;cursor:default}" +
+    "input{margin-top:3px;accent-color:#1E2A56}.ko{font-family:'Noto Sans KR',system-ui,sans-serif}small{color:#5b6178}.ga{font-weight:600}" +
+    ".pri{border:0;background:#1E2A56;color:#F8F7F2;border-radius:999px;padding:9px 16px;font:600 14px Inter,system-ui,sans-serif;cursor:pointer}.pri:disabled{opacity:.5;cursor:default}" +
+    ".lnk{border:0;background:none;color:#1E2A56;text-decoration:underline;cursor:pointer;font:500 13px Inter,system-ui,sans-serif;padding:0}" +
+    ".msg{margin:0;font-size:14px;line-height:1.4}.msg a{color:#1E2A56}.ok{color:#1f6b3a}";
+  function close() { if (!root) return; var s = root.querySelector(".sheet"); if (s) s.remove(); var f = root.querySelector(".fab"); if (f) { f.hidden = false; f.focus() } }
+  function open() {
+    G = groups(); if (!G.length) return;
+    var H = have(), total = 0, seen = {};
+    G.forEach(function (g) { g.w = g.w.filter(function (x) { var k = x.l + ":" + norm(x.w); if (seen[k]) return false; seen[k] = 1; x.k = k; x.has = !!H[k]; return true }); total += g.w.length });
+    var small = total <= 60, user = ls("kr_user");
+    var h = '<div class="sheet" role="dialog" aria-modal="false" aria-label="Слова в словарь"><div class="hd"><h2>Слова в словарь</h2><button class="x" data-x="close" aria-label="Закрыть">×</button></div><div class="bd">';
+    if (!user) h += '<p class="msg">Чтобы сохранять слова в свой словарь, <a href="' + esc(ROOT) + 'auth.html" target="_top">войди в MIRAÉ</a>.</p>';
+    h += G.map(function (g, gi) {
+      var fresh = g.w.filter(function (x) { return !x.has }).length;
+      return '<details' + (G.length === 1 || small ? " open" : "") + '><summary>' + esc(g.g) + ' <small>· ' + g.w.length + (fresh < g.w.length ? ", новых " + fresh : "") + '</small></summary>' +
+        (fresh > 1 ? '<label class="ga"><input type="checkbox" data-ga="' + gi + '"' + (small ? " checked" : "") + '> Все слова группы</label>' : "") +
+        g.w.map(function (x, i) {
+          return '<label' + (x.has ? ' class="dim"' : "") + '><input type="checkbox" data-g="' + gi + '" data-i="' + i + '"' + (x.has ? " disabled checked" : small ? " checked" : "") + '><span><b' + (x.l === "ko" ? ' class="ko" lang="ko"' : ' lang="en"') + '>' + esc(x.w) + '</b> ' +
+            (x.t ? "— " + esc(x.t) : x.d ? '— <span' + (x.d[0].l === "ko" ? ' class="ko"' : "") + '>' + esc(x.d[0].s) + "</span>" : "") + (x.has ? " <small>· уже в словаре</small>" : "") + "</span></label>";
+        }).join("") + "</details>";
+    }).join("");
+    h += '</div><div class="ft"><p class="msg" id="m" role="status"></p><button class="pri" data-x="add"' + (user ? "" : " disabled") + '>Добавить</button></div></div>';
+    var old = root.querySelector(".sheet"); if (old) old.remove();
+    root.querySelector(".box").insertAdjacentHTML("beforeend", h); root.querySelector(".fab").hidden = true; count();
+    var c = root.querySelector('[data-x="add"]'); if (c && !c.disabled) c.focus(); else root.querySelector(".x").focus();
+  }
+  function picked() { return [].slice.call(root.querySelectorAll("input[data-g]:checked:not(:disabled)")).map(function (b) { return G[+b.dataset.g].w[+b.dataset.i] }) }
+  function count() { var b = root.querySelector('[data-x="add"]'); if (!b || !ls("kr_user")) return; var n = picked().length; b.disabled = !n; b.textContent = n ? "Добавить · " + n : "Отметь слова" }
+  function add() {
+    var u = ls("kr_user"), ws = picked(); if (!u || !ws.length) return;
+    var k = "kr_vinbox:" + u, a = []; try { a = JSON.parse(ls(k) || "[]") || [] } catch (e) {}
+    ws.forEach(function (x) { var o = { l: x.l, w: x.w, t: x.t, src: "mat:" + MID }; if (x.ex) { o.ex = x.ex; if (x.et) o.et = x.et } if (x.d) o.d = x.d; a.push(o) });
+    ls(k, JSON.stringify(a.slice(-500)));
+    open();
+    var m = root.querySelector("#m"); if (m) { m.className = "msg ok"; m.innerHTML = "Добавлено: " + ws.length + ". Слова появятся в разделе <a href=\"" + esc(ROOT) + "words.html\" target=\"_top\">«Слова»</a> (блок новых слов), как только откроешь MIRAÉ." }
+  }
+  function init() {
+    var g; try { g = groups() } catch (e) { g = [] }
+    if (!g.length) return;
+    host = document.createElement("div"); host.id = "mirae-words"; document.body.appendChild(host);
+    root = host.attachShadow ? host.attachShadow({ mode: "open" }) : host;
+    root.innerHTML = "<style>" + CSS + '</style><div class="box"></div><button class="fab" data-x="open" aria-haspopup="dialog" title="Добавить слова этого материала в свой словарь MIRAÉ"><b>＋</b> В словарь</button>';
+    root.addEventListener("click", function (e) {
+      var b = e.target.closest && e.target.closest("[data-x]"); if (!b) return;
+      if (b.dataset.x === "open") open(); else if (b.dataset.x === "close") close(); else if (b.dataset.x === "add") add();
+    });
+    root.addEventListener("change", function (e) {
+      var t = e.target; if (t.dataset.ga !== undefined) [].forEach.call(root.querySelectorAll('input[data-g="' + t.dataset.ga + '"]:not(:disabled)'), function (x) { x.checked = t.checked });
+      count();
+    });
+    root.addEventListener("keydown", function (e) { if (e.key === "Escape") close() });
+  }
+  if (document.readyState === "complete") setTimeout(init, 300); else window.addEventListener("load", function () { setTimeout(init, 300) });
+})();

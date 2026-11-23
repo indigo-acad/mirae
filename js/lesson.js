@@ -75,7 +75,7 @@ function render(){
   const back=L.hw?"cabinet.html":L.lib?"library.html":L.back||"course.html",backT=L.hw?"кабинет":L.lib?"библиотека":L.back?"доп. упражнения":"курс";
   let h=`<div id="topbar"></div><header class="band slim"><div class="in"><a href="${back}">${ic("back",14)}${backT}</a><small>${esc(L.course)} · ${esc(user)}</small><h1${L.hw?"":' class="ko"'}>${esc(L.title)}</h1><p>${esc(L.subtitle||"")}</p></div></header><main>
   <div class="card glass"><b>${L.hw?"Сделано":"Прогресс урока"}</b> <span id="pct" class="muted"></span><div class="bar"><div id="barfill"></div></div></div>`;
-  if(L.hw)h+=hwTop();
+  if(L.hw)h+=hwTop()+`<div id="hwwords"></div>`;   // слова уроков из домашки: кнопка «Добавить в словарь»
   if(SPLIT)h+=`<div class="seg lparts" role="tablist" aria-label="Части урока">${["theory","practice"].map(pt=>`<button type="button" role="tab" id="tab-${pt}" data-part="${pt}" aria-selected="${pt===PART}" aria-controls="part-${pt}">${ic(pt==="theory"?"book":"repeat",16)}${pt==="theory"?"Теория":"Отработка"}<small id="pc-${pt}"></small></button>`).join("")}</div>`;
   if(!L.hw&&!L.back)h+=`<div id="hwhere"></div>`;   // домашка по этому уроку, если её задал преподаватель
   if(!L.hw)h+=`<div class="subnav"><nav class="nav" id="nav" aria-label="Разделы урока"></nav><div class="subnav-bar"><i id="navfill"></i></div></div>`;
@@ -98,7 +98,7 @@ function render(){
   h+="</main>";
   document.body.innerHTML=h;
   if(window.KR){KR.theme(LANG);KR.onLang=()=>{location.href=L.hw?"cabinet.html":"course.html"};KR.topbar(L.hw?"cabinet":L.back?"practice":"course");if(KR.assistant)KR.assistant.sync()}
-  drawNav();wire();refresh();vocabInit();
+  drawNav();wire();refresh();vocabInit();if(L.hw)hwWords();
   if(!L.hw&&!L.back)hwHere();
 }
 // тест по словам урока (test.html): ученик проверяет себя, преподаватель проводит его на уроке
@@ -194,11 +194,11 @@ function answerWords(yes){
 /* Подпись под словами урока: все ли они в словаре; если нет — кнопка добавить недостающие. */
 function wordsNote(){
   if(!VOC)return;
-  const all=lessonWords().length,n=freshWords().length,btn=`<button type="button" class="linkish" data-wadd>`;
+  const all=lessonWords().length,n=freshWords().length,btn=`<button type="button" class="btn vadd" data-wadd>${ic("plus",15)}`;
   document.querySelectorAll(".vnote").forEach(p=>{
     p.innerHTML=!n?`Слова урока в твоём словаре и придут на повторение. Отметь звёздочкой трудные: они вернутся раньше. <a href="words.html">Открыть словарь</a>`
-      :n<all?`В твоём словаре ${all-n} из ${all} слов урока. ${btn}Добавить остальные ${n}</button> или отметь звёздочкой только нужные.`
-      :`Этих слов пока нет в твоём словаре. ${btn}Добавить ${n} ${wordsN(n)}</button> или отметь звёздочкой только нужные.`;
+      :n<all?`В твоём словаре ${all-n} из ${all} слов урока. ${btn}Добавить в словарь ещё ${n}</button>`
+      :`Слов урока пока нет в твоём словаре. ${btn}Добавить в словарь · ${n} ${wordsN(n)}</button>`;
   });
 }
 /* Внизу отработки: «Хочешь ещё?» — доп. упражнения или игры. Домашку здесь не показываем: её задаёт преподаватель. */
@@ -230,6 +230,7 @@ function block(b){
   else if(b.type==="video"){   // видео: общий плеер сайта (js/player.js), b.v = {file, alt, yt:{id,start,end}, cover, time}
     if(b.task)h+=`<p class="muted">${esc(b.task)}</p>`;
     h+=window.MIRAE_PLAYER?MIRAE_PLAYER.html(b.v||{}):`<p class="muted">Плеер не загрузился — обнови страницу.</p>`;
+    if(VOC&&!b._ro&&lessonWords().length)h+=`<p class="note vnote"></p>`;   // слова урока к видео: «Добавить в словарь»
   }
   else if(b.type==="examples"){
     if(b.note)h+=`<p class="muted">${esc(b.note)}</p>`;
@@ -260,8 +261,8 @@ function block(b){
   }else if(b.type==="talk"){
     h+=`<p class="muted">${esc(b.instr)}</p>`+b.prompts.map(p=>`<div class="line"><div class="kolg ko">${esc(p)} ${sayBtn(p)}</div></div>`).join("");
   }else if(b.type==="wtest"){   // тест по словам внутри домашки: проходится на test.html, результат пишется сюда
-    const t=b.wt,K={tr:"перевод",rev:"слово по переводу",ctx:"слово в предложении",wr:"написать слово"};
-    h+=`<p class="muted">${(t.w||[]).length} вопросов: ${(t.k||[]).map(k=>K[k]||k).join(", ")}. ${t.min?`Время: ${t.min} мин.`:"Без таймера."} Ответ сразу проверяется и не исправляется.</p>`+
+    const t=b.wt,K={tr:"перевод",rev:"слово по переводу",tf:"верно или неверно",ctc:"слово в предложение (выбор)",ctx:"слово в предложении",wr:"написать слово",fl:"по первой букве",bld:"собрать слово",mch:"найти пары",aud:"на слух",dic:"диктант",say:"сказать вслух"};
+    h+=`<p class="muted">${(t.w||[]).length} ${plural((t.w||[]).length,"вопрос","вопроса","вопросов")}: ${(t.k||[]).map(k=>K[k]||k).join(", ")}.${(t.k||[]).some(k=>k==="aud"||k==="dic"||k==="say")?" Включи звук"+((t.k||[]).indexOf("say")>=0?" и разреши микрофон":"")+".":""} ${t.min?`Время: ${t.min} мин.`:"Без таймера."} Ответ сразу проверяется и не исправляется.</p>`+
       `<div class="done-row"><span class="score" id="sc-${b._key}"></span><a class="btn pri" href="test.html?hw=${encodeURIComponent(L.hw.id)}&k=${encodeURIComponent(b._key)}">${P[b._key]&&P[b._key].total!=null?"Пройти ещё раз":"Начать тест"}${ic("arrow",16)}</a></div>`;
     return h+"</div>";
   }else if(b.type==="mat"){   // тренажёр или тест из каталога внутри домашки
@@ -369,6 +370,30 @@ function wire(){
    подсказка «Посмотреть теорию». «Сдать преподавателю» отправляет баллы и ошибки, и домашка уходит из кабинета. */
 const plural=(n,f1,f2,f5)=>n%10===1&&n%100!==11?f1:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?f2:f5;
 const fmtDue=d=>new Date(d+"T00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long"});
+/* Домашка: слова уроков, из которых задания, и слова теста — кнопка «Добавить в словарь» (как под словами урока). */
+function hwWordGroups(){
+  const V=window.KR&&KR.vocab,rec=L.hw,LS=window.LESSONS||{},out=[];if(!V||!rec)return out;
+  (rec.items||[]).forEach(it=>{
+    if(it.l&&LS[it.l]&&!out.some(g=>g.id===it.l)){const src=LS[it.l],ws=KR.lessonWords(src);if(ws.length)out.push({id:it.l,lang:src.lang||"ko",title:"Слова урока «"+src.title+"»",words:ws})}
+    if(it.wt&&(it.wt.w||[]).length)out.push({id:"hw-"+rec.id+"-wt",lang:it.wt.lang||rec.lang||"ko",title:"Слова теста",words:it.wt.w,mixed:true});
+  });
+  return out;
+}
+function hwWords(){
+  const box=document.getElementById("hwwords"),V=window.KR&&KR.vocab;if(!box||!V)return;
+  const gs=hwWordGroups();if(!gs.length){box.innerHTML="";return}
+  const lg=(g,w)=>g.mixed?(w.l||(/[가-힣]/.test(w.w)?"ko":"en")):g.lang;
+  const fresh=g=>g.words.filter((w,i,a)=>w&&w.w&&a.findIndex(x=>x&&x.w===w.w)===i&&!V.find(lg(g,w),w.w));
+  box.innerHTML=`<div class="card glass hw-words"><h3>${ic("abc",20)} Слова в словарь</h3>`+gs.map((g,i)=>{const n=fresh(g).length,all=g.words.length;
+    return `<div class="line" style="align-items:center;justify-content:space-between;gap:10px"><div><b>${esc(g.title)}</b><div class="muted">${n?`${all-n?`в словаре ${all-n} из ${all}`:`${all} ${wordsN(all)}`}`:"все слова уже в твоём словаре"}</div></div>`+
+      (n?`<button type="button" class="btn vadd" data-hwadd="${i}">${ic("plus",15)}Добавить в словарь · ${n}</button>`:`<span class="badge ok">${ic("check",14)} в словаре</span>`)+`</div>`}).join("")+
+    `<p class="muted" style="margin:8px 0 0">Добавленные слова ждут на странице <a href="words.html">«Слова»</a>: сначала в блоке новых слов, потом в отработке.</p></div>`;
+  box.onclick=e=>{const b=e.target.closest("[data-hwadd]");if(!b)return;const g=gs[+b.dataset.hwadd];if(!g)return;
+    const now=Date.now();
+    if(g.mixed)fresh(g).forEach((w,i)=>V.add(lg(g,w),w.w,w.t,{ex:w.ex,et:w.et,f:w.f,src:g.id}));
+    else V.addLesson(g.id,g.lang,g.words.map(w=>({w:w.w,t:w.t,ex:w.ex,et:w.et,f:w.f})),true);
+    hwWords()};
+}
 function hwLesson(rec){
   const LS=window.LESSONS||{},MAT=window.MATERIALS||[],sections=[];let lang="",n=0;
   (rec.items||[]).forEach((it,idx)=>{

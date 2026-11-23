@@ -34,7 +34,11 @@ function words(){
   return '<section class="card glass wcab" aria-labelledby="wcab-h"><div class="tb-h"><h3 id="wcab-h">'+KR.icon('abc',20)+'Слова · '+KR.LANGS[lang].name+'</h3></div><div class="wcab-2">'+
     '<a class="wcab-i" href="words.html#new"><span class="tag">'+KR.icon('spark',14)+'Новые слова</span><b>'+nn+'</b><span class="muted">'+(nn?'познакомиться':p.allNew?'на сегодня всё, ещё '+p.allNew+' завтра':'новых нет')+'</span></a>'+
     '<a class="wcab-i" href="words.html#rev"><span class="tag">'+KR.icon('repeat',14)+'Отработка</span><b>'+work+'</b><span class="muted">'+(work?'повторить сейчас':s.total?'на сегодня всё':'слов пока нет')+'</span></a></div>'+
-    '<p class="muted wcab-f">'+(s.total?'В словаре: '+s.total+' · выучено: '+s.known+'. ':'Слова появятся из уроков, от преподавателя или по выделению в тексте. ')+'<a href="words.html">Открыть «Слова»</a></p></section>';
+    '<p class="muted wcab-f">'+(s.total?'В словаре: '+s.total+' · выучено: '+s.known+'. ':'Слова появятся из уроков, от преподавателя или по выделению в тексте. ')+'<a href="words.html">Открыть «Слова»</a>'+(s.total&&KR.wexport?' · <button type="button" class="linkish" data-wexp>'+KR.icon('abc',14)+' Скачать или скопировать список</button>':'')+'</p></section>';
 }
+// «Скачать или скопировать список»: все слова ученика, корейские и английские (js/wexport.js)
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-wexp]');if(!b||!KR.vocab||!KR.wexport)return;
+  var all=KR.vocab.all().sort(function(a,c){return (a.l>c.l?1:a.l<c.l?-1:0)||(c.a||0)-(a.a||0)});
+  KR.wexport.open(all.map(function(c){return {l:c.l,w:c.w,t:c.t||((c.d||[])[0]||{}).s||'',ex:c.ex,et:c.et}}),{title:'Мои слова',file:'moi-slova'})});
 KR.cards={words:words,homework:homework,active:active,plural:plural};
 })();

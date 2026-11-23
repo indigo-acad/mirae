@@ -36,7 +36,7 @@ function errText(x){
   var m=String(x&&x.message||'');
   if(x&&x.status===404||/Could not find the function/.test(m))return 'На сервере ещё нет словарей 2.0: выполните в Supabase файл supabase/vocab2.sql.';
   if(/exists/.test(m))return 'Такое слово с этой частью речи уже есть в базе школы. Если это другое значение, впишите его в поле «Значение»; если то же — найдите слово во вкладке «База слов» и измените.';
-  if(/in_use/.test(m))return form?'Слово уже есть у учеников: их карточки записаны под этим написанием, поэтому его нельзя переименовать или удалить.':'Нельзя поменять язык: в словаре уже есть слова.';
+  if(/in_use/.test(m))return form?(form.w&&form.w.students&&readForm()&&readForm().word!==form.w.word?'Чтобы исправить написание слова, которое уже у учеников, выполните в Supabase файл supabase/vocab-rename.sql (один раз).':'Слово уже есть у учеников: его нельзя удалить или перевести на другой язык.'):'Нельзя поменять язык: в словаре уже есть слова.';
   if(/not_author/.test(m))return 'Менять этот словарь может его автор или владелец школы.';
   if(/no_student/.test(m))return 'Этого ученика ведёт другой преподаватель.';
   if(/no_word/.test(m))return 'Слово не найдено: возможно, его удалили. Обновите страницу.';
@@ -265,8 +265,8 @@ function drawForm(){
   var t=function(name,label,val,hint,attrs){return '<label class="field" for="wf-'+name+'">'+label+'</label><textarea class="name" id="wf-'+name+'" name="'+name+'" '+(attrs||'')+'>'+esc(val)+'</textarea>'+(hint?'<p class="hint">'+hint+'</p>':'')};
   var h='<form class="'+(form.ctx==='set'?'wform sub':'card wform')+'" id="wform" autocomplete="off" aria-label="Карточка слова"><h3>'+(w.id?'Карточка слова «'+esc(w.word)+'»':'Новое слово')+'</h3><div class="wgrid"><div>'+
     '<label class="field" for="wf-lang">Язык</label><select id="wf-lang" name="lang"'+(used?' disabled':'')+'>'+['en','ko'].map(function(l){return '<option value="'+l+'"'+(w.lang===l?' selected':'')+'>'+LN[l]+'</option>'}).join('')+'</select>'+
-    f('word','Слово',w.word,'required maxlength="120" lang="'+esc(w.lang)+'" class="name'+(en?'':' ko')+'"'+(used?' readonly aria-describedby="wf-used"':''))+
-    (used?'<p class="hint" id="wf-used">Слово уже у учеников ('+w.students+'): написание и язык не меняются, остальное можно.</p>':'')+
+    f('word','Слово',w.word,'required maxlength="120" lang="'+esc(w.lang)+'" class="name'+(en?'':' ko')+'"'+(used?' aria-describedby="wf-used"':''))+
+    (used?'<p class="hint" id="wf-used">Слово уже у учеников ('+w.students+'). Если исправить написание, оно исправится и у них, прогресс повторений сохранится. Язык не меняется.</p>':'')+
     '<label class="field" for="wf-pos">Часть речи</label><select id="wf-pos" name="pos"><option value="">не указана</option>'+Object.keys(W2.POS).map(function(k){return '<option value="'+k+'"'+(w.pos===k?' selected':'')+'>'+W2.POS[k]+'</option>'}).join('')+'</select>'+
     f('sense','Значение',w.sense,'maxlength="80" placeholder="например: лёгкий (по весу)" aria-describedby="wf-sense-h"')+
     '<p class="hint" id="wf-sense-h">Нужно, если у слова несколько значений одной части речи: light «лёгкий» и light «светлый» — разные карточки.</p>'+

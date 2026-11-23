@@ -1079,3 +1079,49 @@ button.badge{border:0;font-family:inherit;cursor:pointer;min-height:0}
 .sact small{position:absolute;bottom:-18px;font-size:11px;opacity:.7}
 .wstats .stat{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 @media(max-width:560px){.wstats .stat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* «Добавить в словарь» под словами урока, под видео и в домашке */
+.btn.vadd{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;font-size:14px;margin:6px 6px 0 0;vertical-align:middle}
+.vnote .btn.vadd{margin-left:0}
+.hw-words .line{padding:6px 0}
+.hw-words .btn.vadd{margin:0;white-space:nowrap}
+/* Скачать или скопировать список слов (js/wexport.js) */
+dialog.wexp .wdlg-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+dialog.wexp h3{margin:0}
+.wexp-f{display:grid;grid-template-columns:1fr;gap:6px;margin:12px 0 8px}
+.wexp-f button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;padding:9px 12px}
+.wexp-f button small{opacity:.75;font-size:12.5px;font-weight:400}
+.wexp-ex{display:flex;gap:8px;align-items:center;margin:4px 0 8px;font-size:14px}
+.wexp-pre{white-space:pre-wrap;word-break:break-word;max-height:150px;overflow:auto;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;background:rgba(11,21,53,.06);border-radius:10px;padding:10px 12px;margin:6px 0 10px}
+.wexp-btns{display:inline-flex;gap:8px;flex-wrap:wrap}
+/* Тест по словам: форматы отработки (js/wtest.js) */
+.wt-earp{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0 6px}
+.wt-q .say.wt-ear{width:76px;height:76px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--gold);background:rgba(212,175,124,.14)}
+.wt-q .say.wt-mic.on{background:var(--gold);color:#0B1535;animation:wtpulse 1s ease-in-out infinite}
+@keyframes wtpulse{50%{box-shadow:0 0 0 10px rgba(212,175,124,.25)}}
+@media (prefers-reduced-motion:reduce){.wt-q .say.wt-mic.on{animation:none}}
+.wt-slow{padding:8px 14px}
+.wt-cells{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
+.wt-cells i{font-style:normal;min-width:38px;height:46px;padding:0 6px;border:2px solid rgba(11,21,53,.25);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;background:#fff}
+.wt-cells.ok i{border-color:var(--ok);background:rgba(63,138,90,.1)}
+.wt-cells.bad i{border-color:var(--bad);background:rgba(185,71,59,.08)}
+.wt-tiles{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.wt-tiles button{min-width:48px;min-height:48px;font-size:22px;font-weight:600;border-radius:12px}
+.wt-tiles button:disabled{opacity:.25}
+.wt-acts.wt-l{justify-content:flex-start;margin-top:8px}
+.wt-opts.wt-tf{grid-template-columns:1fr 1fr}
+.wt-mch{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.wt-mcol{display:flex;flex-direction:column;gap:8px}
+.wt-mcol button{text-align:left;padding:12px 14px;font-size:18px;line-height:1.3;border-radius:12px;min-height:52px}
+.wt-mcol button.sel{outline:3px solid var(--gold)}
+.wt-mcol button.ok{outline:2px solid var(--ok);background:rgba(63,138,90,.12);opacity:1}
+.wt-mcol button.bad{outline:3px solid var(--bad)}
+.wt-grp{margin:0 0 8px}
+.wt-send b{margin-right:4px}
+@media (max-width:520px){.wt-mcol button{font-size:16px;padding:10px}.wt-cells i{min-width:32px;height:40px;font-size:20px}}
+/* Тест на начало урока у преподавателя: откуда слова и микс */
+.tg-mix{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+.tg-mixrow{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:6px 0}
+.tg-mixrow label{display:inline-flex;gap:6px;align-items:center}
+.wt-kinds.tg-k label small{opacity:.7}
+.tg-mixrow select{width:auto;margin:0;display:inline-block}
+.tg-mix>span{align-self:center;margin-right:2px}
