@@ -13,8 +13,8 @@ window.COURSE = {
 window.COURSE2 = {
   id: "snu2", title: "서울대 한국어+ · 2급", subtitle: "Основной курс",
   lessons: [
-    { no: "복습 2", tag: "2A · 4–6과 · 복습", title: "복습 2 · Workbook 2A (말하기, 쓰기, TOPIK II, 51–52)", mat: "ko-2a-review2" },
-    { no: "퀘스트", tag: "2A · 4–6과 · квест-проверка", title: "유키의 바쁜 토요일", mat: "ko-2a6-quest" },
+    { no: "복습 2", tag: "2A · 4–6과 · 복습", title: "복습 2 · Workbook 2A", id: "r2a-review2" },
+    { no: "퀘스트", tag: "2A · 4–6과 · квест-проверка", title: "유키의 바쁜 토요일", id: "q2a-yuki" },
     { no: 11, title: "-아/어다 주다", id: "l11-adaju" },
     { no: "어휘", tag: "어휘", title: "초대와 약속", id: "v2-invite" }
   ]
