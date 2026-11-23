@@ -52,7 +52,11 @@ button.bad,select.bad{background:var(--badbg)!important;border-color:var(--bad)!
 .col button.sel{background:var(--sel);border-color:var(--acc)}
 .col button.gone{opacity:.3;pointer-events:none;background:var(--okbg);border-color:var(--ok)}
 .vid{position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000;margin-top:10px}
-.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vid iframe,.vid video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.subcover{position:absolute;left:0;right:0;bottom:7%;height:19%;background:rgba(20,16,25,.93);backdrop-filter:blur(8px);pointer-events:none;display:none;align-items:center;justify-content:center;color:#a99;font-size:13px}
+.vid.cover .subcover{display:flex}
+.vbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.vbtns button{font-size:14px;padding:7px 10px}
 .novid{background:#f1eee8;border-radius:12px;padding:16px;margin-top:10px;font-size:15px}
 .ticks{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .ticks button{font-size:16px;padding:8px 12px}
@@ -116,7 +120,8 @@ const TG_TOKEN="9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU", TG_CHAT_ID="347
 const SB_URL="https://nusfkwtmnbhnbnckhrfk.supabase.co", SB_KEY="sb_publishable_UmWyFo7ciEc-m9x1ZIfkNw_yeQQAgf8";
 const SHOW="슈취타 EP.5 · 타블로";
 
-/* ===== ВИДЕО. alt — запасной плеер для учеников в России (VK Видео / Rutube):
+/* ===== ВИДЕО. file — свой плеер на сайте (mp4 в папке video/ рядом со страницей): открывается в России без VPN, показывается первым.
+   alt — запасной плеер для учеников в России (VK Видео / Rutube):
    вставьте ссылку встраивания из «Поделиться → Код для вставки» (только адрес из src="…").
    Если alt заполнен, он показывается первым, а YouTube доступен кнопкой.
    Вставьте id ролика с YouTube (часть ссылки после watch?v= или youtu.be/). Таймкоды в секундах.
@@ -126,7 +131,7 @@ const VIDEOS={
   1:{id:VIDEO_ID,start:10,end:253},
   2:{id:VIDEO_ID,start:257,end:565},
   3:{id:VIDEO_ID,start:579,end:863},
-  4:{id:VIDEO_ID,start:863,end:1200,alt:""}
+  4:{id:VIDEO_ID,start:863,end:1200,file:"video/l4.mp4",alt:""}
 };
 
 const AVA={SG:"🐱",TB:"🎤",ME:"🙋"};
@@ -153,7 +158,7 @@ const EPS=[
   {t:"type",lines:[["SG","마스터 끝났어, 판 찍고 있어 할 ___ 한데 다시 해 주셨어요."]],base:"-(으)ㄹ ___ 하다: «вполне можно было бы…»",ans:["법도"],ex:"-(으)ㄹ 법도 하다 + -는데: «естественно было бы (отказать), но…». За ней почти всегда идёт контраст."},
   {t:"mc",lines:[["TB","이런 사람들이랑만 앨범을 채울 수도 있을 ___ 그렇게 생각하지 않았어."]],q:"«мог бы…, но…»",opts:["텐데","때문에","거라서","다가"],a:0,ex:"-(으)ㄹ 수도 있을 텐데: предположение + контраст. О прошлом: -(으)ㄹ 수도 있었을 텐데."},
   {t:"mc",lines:[["TB","만약에 앞에 «타블로» 뭐 이랬___ 사람들이 알았을 텐데."]],q:"Нереальное условие в прошлом.",opts:["으면","는데","지만","어서"],a:0,ex:"만약에 -았/었으면 … -았/었을 텐데 — «если бы…, то…» (но так не было)."},
-  {t:"video",q:"영상을 보세요 (14:23–20:00). 들은 말을 누르세요. · Смотрите без субтитров и отмечайте, что услышали.",words:["신청곡","추천","흔쾌히","티가 나","과한 것 같은데","방향성","협업","편곡","까먹었잖아","허전하지","나도 모르게","색깔"]},
+  {t:"video",q:"영상을 보세요 (14:23–20:00). 들은 말을 누르세요. · Нажмите «🙈 Скрыть субтитры», смотрите и отмечайте, что услышали.",words:["신청곡","추천","흔쾌히","티가 나","과한 것 같은데","방향성","협업","편곡","까먹었잖아","허전하지","나도 모르게","색깔"]},
   {t:"mc",q:"타블로는 이소라 선배님의 곡에 누구를 추천했어요?",opts:["슈가","RM","투컷","박진영"],a:0,ex:"«딱 한 명만 얘기했어. 슈가로 했으면 좋겠다» — он назвал только одного человека."},
   {t:"mc",q:"슈가의 첫 녹음은 어땠어요?",opts:["너무 세게 해서 1년 후에 다시 녹음했어요","너무 약해서 다시 녹음했어요","한 번에 끝났어요","녹음을 안 했어요"],a:0,ex:"«잘하고 싶어서 애쓴 게 너무 티가 나는 거예요» — старание было слишком заметно, через год перезаписали."},
   {t:"mc",q:"마스터링 뒤에 «새벽에»에는 무엇이 없었어요?",opts:["슈가의 시그니처 사운드","드럼 트랙","타블로의 랩","멜로디"],a:0,ex:"Забыли фирменный тег «슈가!» в начале трека — и переделали мастеринг."},
@@ -261,18 +266,24 @@ function linesHTML(lines){
   return (lines||[]).map(([w,t])=>{ const txt=esc(t).replace(/___/g,'<span class="gap">&nbsp;?&nbsp;</span>');
     return `<div class="line"><div class="ava">${AVA[w]}</div><div class="bub">${WHO[w]?`<span class="who">${WHO[w]}</span>`:""}${txt}</div></div>`; }).join("");
 }
-let VSRC=null;
+let VSRC=null, VMODE=null, SUBCOVER=false;
 function ytSrc(v){ let p=[]; if(v.start) p.push("start="+v.start); if(v.end) p.push("end="+v.end); p.push("rel=0"); return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.id)}?${p.join("&")}`; }
-let VMODE=null;
-function swapVid(){ VSRC=VMODE==="alt"?"yt":"alt"; const b=document.querySelector(".vidbox"); if(b) b.outerHTML=videoHTML(); }
+function setVid(m){ VSRC=m; const b=document.querySelector(".vidbox"); if(b) b.outerHTML=videoHTML(); }
+function toggleCover(){ SUBCOVER=!SUBCOVER; const v=document.querySelector(".vid"); if(v) v.classList.toggle("cover",SUBCOVER); const b=$("covBtn"); if(b) b.textContent=SUBCOVER?"👀 Показать субтитры":"🙈 Скрыть субтитры"; }
 function videoHTML(){
-  const v=VIDEOS[CL]||{}; const hasAlt=!!v.alt, hasYt=!!v.id;
-  if(!hasAlt&&!hasYt) return `<div class="vidbox novid">🎬 Отрывок <b>${ep().time}</b> учитель добавит позже.</div>`;
-  const mode=VSRC&&((VSRC==="alt"&&hasAlt)||(VSRC==="yt"&&hasYt))?VSRC:(hasAlt?"alt":"yt");
-  VMODE=mode; const src=mode==="alt"?v.alt:ytSrc(v);
-  const sw=hasAlt&&hasYt?`<button style="margin-top:8px;font-size:14px;padding:7px 10px" onclick="swapVid()">${mode==="alt"?"▶ Открыть на YouTube":"▶ Запасной плеер (VK / Rutube)"}</button>`:"";
-  return `<div class="vidbox"><div class="vid"><iframe src="${esc(src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; screen-wake-lock" allowfullscreen></iframe></div>
-    <div class="muted" style="margin-top:6px">${mode==="yt"?"Отрывок "+esc(ep().time)+". Если видео не грузится — нажмите кнопку ниже.":"Отрывок "+esc(ep().time)+"."}</div>${sw}</div>`;
+  const v=VIDEOS[CL]||{}, have={file:!!v.file,alt:!!v.alt,yt:!!v.id};
+  const modes=["file","alt","yt"].filter(m=>have[m]);
+  if(!modes.length) return `<div class="vidbox novid">🎬 Отрывок <b>${ep().time}</b> учитель добавит позже.</div>`;
+  const mode=modes.includes(VSRC)?VSRC:modes[0]; VMODE=mode;
+  const label={file:"▶ Плеер сайта",alt:"▶ VK / Rutube",yt:"▶ YouTube"};
+  const player=mode==="file"
+    ?`<video src="${esc(v.file)}" controls playsinline preload="metadata" controlslist="nodownload"></video><div class="subcover">субтитры скрыты</div>`
+    :`<iframe src="${esc(mode==="alt"?v.alt:ytSrc(v))}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; screen-wake-lock" allowfullscreen></iframe>`;
+  const btns=(mode==="file"?[`<button id="covBtn" onclick="toggleCover()">${SUBCOVER?"👀 Показать субтитры":"🙈 Скрыть субтитры"}</button>`]:[])
+    .concat(modes.filter(m=>m!==mode).map(m=>`<button onclick="setVid('${m}')">${label[m]}</button>`));
+  return `<div class="vidbox"><div class="vid${mode==="file"&&SUBCOVER?" cover":""}">${player}</div>
+    <div class="muted" style="margin-top:6px">Отрывок ${esc(ep().time)}.${mode==="file"?" Первый раз смотрите со скрытыми субтитрами, второй — с субтитрами.":mode==="yt"?" Если видео не грузится — переключите плеер.":""}</div>
+    ${btns.length?`<div class="vbtns">${btns.join("")}</div>`:""}</div>`;
 }
 let CUR=null;
 function task(){
