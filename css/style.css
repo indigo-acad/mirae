@@ -684,7 +684,7 @@ details.rep summary{cursor:pointer;padding:10px 14px;list-style-position:inside}
 details.rep pre{margin:0;padding:4px 14px 14px;max-height:420px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:14px/1.5 var(--font-body);color:var(--fg)}
 
 /* ---------- словарь 2.0: карточка слова, словари преподавателя (js/words2.js, dict.html) ---------- */
-.tnav{max-width:360px;margin:20px 0 0}
+.tnav{max-width:480px;margin:20px 0 0}
 .tnav a{flex:1;display:grid;place-items:center;min-height:40px;padding:6px 12px;border-radius:999px;border:1px solid transparent;color:var(--fg-2);text-decoration:none;font-size:14.5px;font-weight:500}
 .tnav a:hover{color:var(--fg)}
 .tnav a.on{background:rgba(255,255,255,.1);color:var(--fg);border-color:rgba(212,175,124,.5)}
@@ -1151,3 +1151,8 @@ dialog.wexp h3{margin:0}
 .hwt-sec .linkish{display:inline-flex;align-items:center;gap:4px}
 .line.sp>.sp{white-space:nowrap;min-width:3.4em}
 .sp-roles button{flex:1 1 auto;white-space:nowrap}
+/* группы (groups.html): посещаемость и «Пройден на занятии» */
+.gatt{font-size:14.5px;min-width:max-content}
+.gatt th,.gatt td{padding:6px 9px;white-space:nowrap}
+.gsess>summary{cursor:pointer;list-style:none}
+.gsess>summary::-webkit-details-marker{display:none}

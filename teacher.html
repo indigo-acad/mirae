@@ -13,7 +13,7 @@
 <body>
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Преподаватель</small><h1>Ученики и задания</h1><p>Назначай материалы: ученик увидит только их</p></div></header>
-<main><nav class="seg tnav" aria-label="Разделы преподавателя"><a href="teacher.html" class="on" aria-current="page">Ученики</a><a href="dict.html">Словари</a></nav><div id="m"></div></main>
+<main><nav class="seg tnav" aria-label="Разделы преподавателя"><a href="teacher.html" class="on" aria-current="page">Ученики</a><a href="groups.html">Группы</a><a href="dict.html">Словари</a></nav><div id="m"></div></main>
 <script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/q2a-yuki.js"></script><script src="data/r2a-review2.js"></script><script src="data/sw5-l4.js"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/words2.js"></script><script src="js/srs.js"></script><script src="js/wexport.js"></script><script src="js/assistant.js"></script>
 <script>
 var $=function(s){return document.querySelector(s)};
@@ -685,10 +685,19 @@ document.addEventListener('click',async function(e){
   if(b.dataset.hwchk){var id=+b.dataset.hwchk,cm=($('#hwc-'+id)||{}).value||'';b.disabled=true;
     try{await KR.api('teacher_hw_check',{p_id:id,p_comment:cm.trim()});await hwReload();msg(cm.trim()?'Проверено, комментарий ученик увидит в кабинете':'Отмечено как проверенное',true)}catch(x){b.disabled=false;msg('Не получилось отметить')}return}
 });
+/* группы ученика: посещаемость и пропущенные занятия (groups.html) */
+function groupsCardT(gs){
+  if(!gs||!gs.length)return '';
+  var day=function(d){return new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'})};
+  return '<div class="card"><h3>Группы</h3>'+gs.map(function(g){var was=g.present+g.late;
+    return '<div class="line" style="flex-direction:column;gap:2px"><div><a href="groups.html#g'+g.id+'"><b>'+esc(g.name)+'</b></a> <span class="muted">· '+(g.total?'был на '+was+' из '+g.total+' '+plural(g.total,'занятия','занятий','занятий')+(g.late?' (опозданий: '+g.late+')':''):'занятий ещё не было')+'</span></div>'+
+      (g.missed.length?'<div class="muted">Пропущено: '+g.missed.map(function(m){return esc(m.lesson?(MAP[m.lesson]?MAP[m.lesson].title:lessLabel(m.lesson.replace(/^lesson-/,''))):(m.title||'занятие'))+' ('+day(m.day)+')'}).join(', ')+'</div>':'')+'</div>'}).join('')+'</div>';
+}
 async function drawStudent(){
   var as=[],st=null;
   try{as=await KR.api('teacher_assignments',{p_student:cur})||[];st=await KR.api('teacher_student_state',{p_student:cur})}catch(e){}
   try{voc=await KR.api('teacher_vocab',{p_student:cur})||[]}catch(e){voc=null}   // null — на сервере ещё нет supabase/vocab.sql
+  var grps=null;try{grps=await KR.api('teacher_student_groups',{p_student:cur})||[]}catch(e){grps=null}   // группы ученика и посещаемость (supabase/groups.sql)
   try{hws=await KR.api('teacher_hw_list',{p_student:cur})||[]}catch(e){hws=e&&(e.status===404||/Could not find the function/.test(e.message||''))?null:[]}
   assigned=as;var have={};as.forEach(function(a){have[a.id]=1});stw=(st&&st.wl)||{};
   var info=students.filter(function(x){return x.name===cur})[0]||{};
@@ -699,7 +708,7 @@ async function drawStudent(){
   if(!as.length)h+='<p class="muted">Пока ничего не назначено.</p>';
   h+=as.map(function(a){var m=MAP[a.id]||SETMAP[a.id]||{title:a.id,kind:''};
     return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><button data-un="'+esc(a.id)+'">Убрать</button></div>'}).join('');
-  h+='</div>'+hwCardT()+tgCard()+'<div class="card"><h3>Прогресс и ответы</h3>'+lessonProgress(st)+materialsCard(st)+'</div>';
+  h+='</div>'+groupsCardT(grps)+hwCardT()+tgCard()+'<div class="card"><h3>Прогресс и ответы</h3>'+lessonProgress(st)+materialsCard(st)+'</div>';
   h+=vocabCard()+setsCard();
   h+='<div class="card"><h3>Назначить материалы</h3><div class="opts" id="flt"><button data-f="all" class="'+(filt==='all'?'sel':'')+'">Все</button>'+Object.keys(SECTIONS).map(function(k){return '<button data-f="'+k+'" class="'+(filt===k?'sel':'')+'">'+esc(SECTIONS[k])+'</button>'}).join('')+'</div><div style="margin-top:8px;max-height:340px;overflow:auto">';
   MATERIALS.filter(function(m){return !have[m.id]&&(filt==='all'||m.section===filt)}).forEach(function(m){
