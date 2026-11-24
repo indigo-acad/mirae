@@ -32,8 +32,8 @@ function homework(HW){
 function words(){
   if(!KR.vocab)return '';var lang=KR.lang(),p=KR.vocab.plan(lang),s=KR.vocab.stats(lang),nn=p.fresh.length,work=p.learn.length+p.soon.length+p.rev.length;
   return '<section class="card glass wcab" aria-labelledby="wcab-h"><div class="tb-h"><h3 id="wcab-h">'+KR.icon('abc',20)+'Слова · '+KR.LANGS[lang].name+'</h3></div><div class="wcab-2">'+
-    '<a class="wcab-i" href="words.html#new"><span class="tag">'+KR.icon('spark',14)+'Новые слова</span><b>'+nn+'</b><span class="muted">'+(nn?'познакомиться':p.allNew?'на сегодня всё, ещё '+p.allNew+' завтра':'новых нет')+'</span></a>'+
-    '<a class="wcab-i" href="words.html#rev"><span class="tag">'+KR.icon('repeat',14)+'Отработка</span><b>'+work+'</b><span class="muted">'+(work?'повторить сейчас':s.total?'на сегодня всё':'слов пока нет')+'</span></a></div>'+
+    '<a class="wcab-i" href="words.html#day"><span class="tag">'+KR.icon('spark',14)+'Новые слова</span><b>'+nn+'</b><span class="muted">'+(nn?'познакомиться':p.allNew?'на сегодня всё, ещё '+p.allNew+' завтра':'новых нет')+'</span></a>'+
+    '<a class="wcab-i" href="words.html#day"><span class="tag">'+KR.icon('repeat',14)+'Отработка</span><b>'+work+'</b><span class="muted">'+(work?'повторить сейчас':s.total?'на сегодня всё':'слов пока нет')+'</span></a></div>'+
     '<p class="muted wcab-f">'+(s.total?'В словаре: '+s.total+' · выучено: '+s.known+'. ':'Слова появятся из уроков, от преподавателя или по выделению в тексте. ')+'<a href="words.html">Открыть «Слова»</a>'+(s.total&&KR.wexport?' · <button type="button" class="linkish" data-wexp>'+KR.icon('abc',14)+' Скачать или скопировать список</button>':'')+'</p></section>';
 }
 // «Скачать или скопировать список»: все слова ученика, корейские и английские (js/wexport.js)

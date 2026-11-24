@@ -1159,3 +1159,16 @@ dialog.wexp h3{margin:0}
 .gt-box{margin:12px 0 4px;padding:10px 12px;border:1px solid var(--rule);border-radius:12px}
 .gt-box select{margin:4px 0}
 .gt-who label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+
+/* ---------- «Слова»: инструкция и блок «Раздельно и по выбору» ---------- */
+details.tguide{padding-top:14px;padding-bottom:14px}
+details.tguide>summary,details.tsplit>summary{cursor:pointer;list-style:none;min-height:44px;display:flex;align-items:center}
+details.tguide>summary::-webkit-details-marker,details.tsplit>summary::-webkit-details-marker{display:none}
+details.tguide>summary .tb-h{margin:0}
+details.tguide>summary::after,details.tsplit>summary::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(45deg);transition:transform .2s}
+details[open].tguide>summary::after,details[open].tsplit>summary::after{transform:rotate(-135deg)}
+details.tguide .qsteps{padding-left:22px;margin-top:6px}
+details.tsplit{margin:16px 0 4px;padding-top:6px;border-top:1px solid var(--line,rgba(255,255,255,.12))}
+details.tsplit>summary{font-size:17px;font-weight:500}
+details.tsplit .tfree{border-top:0;padding-top:4px}
+@media(prefers-reduced-motion:reduce){details.tguide>summary::after,details.tsplit>summary::after{transition:none}}
