@@ -518,6 +518,14 @@ window.MATERIALS=[
   "level": "3급"
  },
  {
+  "id": "lesson-l10-banmal",
+  "section": "course",
+  "kind": "lesson",
+  "title": "2급 · 10과 · 높임말과 반말",
+  "path": "lesson.html?l=l10-banmal",
+  "level": "2급"
+ },
+ {
   "id": "lesson-l11-adaju",
   "section": "course",
   "kind": "lesson",

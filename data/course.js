@@ -15,6 +15,7 @@ window.COURSE2 = {
   lessons: [
     { no: "복습 2", tag: "2A · 4–6과 · 복습", title: "복습 2 · Workbook 2A", id: "r2a-review2" },
     { no: "퀘스트", tag: "2A · 4–6과 · квест-проверка", title: "유키의 바쁜 토요일", id: "q2a-yuki" },
+    { no: 10, title: "높임말과 반말", id: "l10-banmal" },
     { no: 11, title: "-아/어다 주다", id: "l11-adaju" },
     { no: "어휘", tag: "어휘", title: "초대와 약속", id: "v2-invite" }
   ]
