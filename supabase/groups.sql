@@ -245,3 +245,65 @@ grant execute on function public.teacher_group_session_save(text, text, bigint, 
 grant execute on function public.teacher_group_session_delete(text, text, bigint) to anon;
 grant execute on function public.teacher_student_groups(text, text, text) to anon;
 grant execute on function public.my_group_sessions(text, text) to anon;
+
+-- ---------- 5. Домашка группе (этап 2) ----------
+-- Домашка группе — это обычные строки homework, по одной на ученика, с общей меткой: grp — группа, batch — одна выдача.
+-- Ученик сдаёт её как обычную домашку; в группе по метке собирается сводная таблица и общие ошибки.
+-- Нужен supabase/homework.sql: если таблицы homework ещё нет, этот раздел пропускается (запустите файл ещё раз потом).
+do $do$ begin
+  if to_regclass('public.homework') is not null then
+    alter table public.homework add column if not exists grp bigint;
+    alter table public.homework add column if not exists batch text;
+    create index if not exists homework_grp_idx on public.homework(grp, batch);
+  end if;
+end $do$;
+
+-- задать домашку ученикам группы: [{"student":"логин","hw":{…как в teacher_hw_save…}}, …] — у каждого может быть своя
+-- (тест из его собственных слов); возвращает {"batch": метка выдачи, "n": сколько учеников получили}
+create or replace function public.teacher_group_hw_save(p_name text, p_pin text, p_group bigint, p_list jsonb)
+returns jsonb as $fn$
+declare t text; s text; x jsonb; b text := replace(gen_random_uuid()::text, '-', ''); n int := 0;
+begin
+  t := public._school_teacher(p_name, p_pin);
+  perform public._grp_mine(t, p_group);
+  if p_list is null or jsonb_typeof(p_list) <> 'array' or jsonb_array_length(p_list) not between 1 and 60 then raise exception 'bad_input'; end if;
+  for x in select * from jsonb_array_elements(p_list) loop
+    if jsonb_typeof(x) <> 'object' or jsonb_typeof(x->'student') <> 'string' then raise exception 'bad_input'; end if;
+    s := public._school_mine(t, x->>'student');
+    if not exists (select 1 from public.progress where site = 'school' and name = s) then raise exception 'no_student'; end if;
+    perform public._hw_check(x->'hw');
+    insert into public.homework(student, teacher, lang, title, items, theory, due, note, grp, batch)
+    values (s, t, coalesce(x->'hw'->>'lang', ''), trim(x->'hw'->>'title'), x->'hw'->'items',
+            coalesce(nullif(x->'hw'->'theory', 'null'::jsonb), '[]'::jsonb), nullif(x->'hw'->>'due', '')::date,
+            trim(coalesce(x->'hw'->>'note', '')), p_group, b);
+    n := n + 1;
+  end loop;
+  return jsonb_build_object('batch', b, 'n', n);
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
+
+-- вся домашка группы (новые выдачи сверху): для сводной таблицы и общих ошибок
+create or replace function public.teacher_group_hw(p_name text, p_pin text, p_group bigint)
+returns jsonb as $fn$
+begin
+  perform public._grp_mine(public._school_teacher(p_name, p_pin), p_group);
+  return coalesce((select jsonb_agg(public._hw_json(h) || jsonb_build_object('batch', h.batch) order by h.created_at desc, h.id)
+                     from (select * from public.homework where grp = p_group order by created_at desc limit 400) h), '[]'::jsonb);
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
+
+-- убрать выдачу у тех, кто её ещё не сдал (сданная остаётся)
+create or replace function public.teacher_group_hw_delete(p_name text, p_pin text, p_group bigint, p_batch text)
+returns int as $fn$
+declare n int;
+begin
+  perform public._grp_mine(public._school_teacher(p_name, p_pin), p_group);
+  delete from public.homework where grp = p_group and batch = p_batch and status = 'active';
+  get diagnostics n = row_count;
+  return n;
+end;
+$fn$ language plpgsql security definer set search_path = public, extensions;
+
+grant execute on function public.teacher_group_hw_save(text, text, bigint, jsonb) to anon;
+grant execute on function public.teacher_group_hw(text, text, bigint) to anon;
+grant execute on function public.teacher_group_hw_delete(text, text, bigint, text) to anon;

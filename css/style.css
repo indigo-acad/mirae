@@ -1156,3 +1156,6 @@ dialog.wexp h3{margin:0}
 .gatt th,.gatt td{padding:6px 9px;white-space:nowrap}
 .gsess>summary{cursor:pointer;list-style:none}
 .gsess>summary::-webkit-details-marker{display:none}
+.gt-box{margin:12px 0 4px;padding:10px 12px;border:1px solid var(--rule);border-radius:12px}
+.gt-box select{margin:4px 0}
+.gt-who label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}

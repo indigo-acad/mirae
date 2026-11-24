@@ -27,6 +27,8 @@ var vedit=null,vallOpen=false;   // слово ученика, которое п
 var hws=null;   // домашка ученика (supabase/homework.sql); null — файла на сервере ещё нет
 var stw={};     // журнал занятий словами по дням (state.wl, пишет js/vocab.js): новые слова и повторения
 var tg={srcs:['week'],lang:'all',l:'',n:15,k:{tr:1,rev:1,ctx:1,wr:1},min:10,nd:7,share:.5,dbl:1};   // тест и отработка слов: откуда слова (несколько — микс), сколько, какие форматы, доля новых, новые дважды
+var allGroups=null;   // группы преподавателя (supabase/groups.sql); null — файла на сервере ещё нет
+var GT={to:0,ex:{},own:1},goTo=null;   // кому задать домашку и тест: 0 — только этому ученику, иначе id группы; ex — кого из группы не включать; own — тест из слов каждого ученика
 var hwf={lang:'ko',l:'',sel:{},it:{},th:{},mats:{},mp:{},open:false};   // форма «Задать домашку»: язык, урок в списке, отмеченные упражнения, отдельные задания в них, теория, материалы, отдельные задания тренажёров
 function isOwner(){return !!(KR.ctx&&KR.ctx.owner)}
 function msg(t,ok){var e=$('#msg');if(e){e.textContent=t;e.className='msg '+(ok?'ok':'bad')}}
@@ -97,6 +99,11 @@ async function boot(){
   try{signup=await KR.api('teacher_signup_settings')}catch(e){signup=null}
   if(isOwner()){try{teachers=await KR.api('owner_teachers')||[]}catch(e){teachers=null}}
   await loadWsets();
+  try{allGroups=await KR.api('teacher_groups')||[]}catch(e){allGroups=null}
+  // со страницы «Группы»: teacher.html?st=<ученик>&grp=<группа>&open=hw|tg — сразу форма для всей группы
+  var q=new URLSearchParams(location.search),qs=q.get('st');
+  if(qs&&students.some(function(x){return x.name===qs})){cur=qs;var qg=+q.get('grp')||0;if(qg&&gtGroups().some(function(g){return g.id===qg}))GT.to=qg;
+    goTo=q.get('open')==='tg'?'tgc':q.get('open')==='hw'?'hwnew':null;if(goTo==='hwnew')hwf.open=true}
   draw();
 }
 
@@ -310,11 +317,11 @@ var TYPE_RU={fill:'вписать',choice:'выбрать',build:'собрать
 function plural(n,f1,f2,f5){return n%10===1&&n%100!==11?f1:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?f2:f5}
 function lessLabel(l){var x=LESS.filter(function(y){return y[0]===l})[0],L=window.LESSONS[l];return x?x[1]:L?L.course+' · '+L.title:l}
 /* слова урока (KR.lessonWords) — в словарь ученика, как «Добавить слова» на этой странице; возвращает текст для сообщения */
-async function lessonWordsTo(lid){
-  var L=window.LESSONS&&window.LESSONS[lid];if(!L||!cur)return '';
+async function lessonWordsTo(lid,who){
+  who=who||cur;var L=window.LESSONS&&window.LESSONS[lid];if(!L||!who)return '';
   var lang=L.lang||'ko',now=Date.now(),ws=KR.lessonWords(L).slice(0,300).map(function(x,i){return SRS.make(lang,x.w,x.t,{src:'teacher'},now+i)});
   if(!ws.length)return '';
-  try{var r=await KR.api('teacher_vocab_add',{p_student:cur,p_words:ws});return ' · слов урока в словарь: '+(r&&r.added||0)+(r&&r.bumped?' (уже были: '+r.bumped+')':'')}
+  try{var r=await KR.api('teacher_vocab_add',{p_student:who,p_words:ws});return ' · слов урока в словарь: '+(r&&r.added||0)+(r&&r.bumped?' (уже были: '+r.bumped+')':'')}
   catch(x){return ' · слова урока в словарь не добавились'}
 }
 function hwLessons(){return LESS.filter(function(x){var L=window.LESSONS[x[0]];return L&&(L.lang||'ko')===hwf.lang})}
@@ -444,6 +451,26 @@ function hwBlocks(){
   return '<p class="hwt-h"><b>Упражнения</b> <span class="muted">(ученик сделает их заново, отдельно от урока; можно отметить упражнение целиком или открыть его и выбрать отдельные задания)</span></p>'+(ex||'<p class="muted">В этом уроке нет упражнений.</p>')+
     (th?'<p class="hwt-h"><b>Подсказка: ссылка на теорию</b> <span class="muted">(по желанию: кнопка «Посмотреть теорию»)</span></p>'+th:'');
 }
+/* ---------- кому: ученику или его группе (supabase/groups.sql) ----------
+   Домашка и тест группе — обычная домашка каждому ученику с общей меткой выдачи (teacher_group_hw_save):
+   на странице «Группы» по ней строится сводная таблица и общие ошибки. */
+function gtGroups(){return (allGroups||[]).filter(function(g){return (g.members||[]).some(function(m){return m.name===cur})})}
+function gtTarget(){return GT.to?gtGroups().filter(function(g){return g.id===GT.to})[0]||null:null}
+function gtWho(g){return (g.members||[]).map(function(m){return m.name}).filter(function(n){return !GT.ex[n]})}
+function gtInner(test){
+  var gs=gtGroups(),g=gtTarget();
+  var h='<label class="field">Кому</label><select data-gtto="1" aria-label="Кому">'+'<option value="0">Только '+esc(cur)+'</option>'+gs.map(function(x){return '<option value="'+x.id+'"'+(x.id===GT.to?' selected':'')+'>Группе '+esc(x.name)+' · '+(x.members||[]).length+' '+plural((x.members||[]).length,'ученик','ученика','учеников')+'</option>'}).join('')+'</select>';
+  if(g){h+='<div class="opts gt-who">'+(g.members||[]).map(function(m){var on=!GT.ex[m.name];return '<label class="gt-m"><input type="checkbox" data-gtex="'+esc(m.name)+'"'+(on?' checked':'')+'> <span class="cap">'+esc(m.name)+'</span></label>'}).join('')+'</div>';
+    if(test)h+='<div class="seg hwt-lang" role="group" aria-label="Слова теста">'+[[1,'У каждого свои слова'],[0,'Одинаковые для всех']].map(function(x){return '<button type="button" data-gtown="'+x[0]+'" class="'+(GT.own===x[0]?'on':'')+'" aria-pressed="'+(GT.own===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
+      '<p class="muted" style="margin:4px 0 0">'+(GT.own?'Каждому соберётся тест по тем же правилам из его собственного словаря («Слова урока» — одинаковые у всех).':'Всем — слова этого теста, как в подсказке выше.')+'</p>'}
+  return h;
+}
+function gtRow(test){return gtGroups().length?'<div class="gt-box" data-test="'+(test?1:0)+'">'+gtInner(test)+'</div>':''}
+function gtRedraw(){document.querySelectorAll('.gt-box').forEach(function(e){e.innerHTML=gtInner(e.dataset.test==='1')});
+  var g=gtTarget(),a=$('#hwgo'),b=$('#tgself');if(a)a.textContent=g?'Задать группе':'Задать домашку';if(b)b.textContent=g?'Дать группе на дом':'Дать на дом'}
+document.addEventListener('change',function(e){var t=e.target;if(t.dataset.gtto){GT.to=+t.value;GT.ex={};gtRedraw()}else if(t.dataset.gtex){GT.ex[t.dataset.gtex]=!t.checked;gtRedraw()}});
+document.addEventListener('click',function(e){var b=e.target.closest('button[data-gtown]');if(b){GT.own=+b.dataset.gtown;gtRedraw()}});
+function gtMissing(x){return x&&(x.status===404||/Could not find the function/.test(x.message||''))}
 function hwForm(){
   var ls=hwLessons();if(!hwf.l||!window.LESSONS[hwf.l]||(window.LESSONS[hwf.l].lang||'ko')!==hwf.lang){
     var mine=assigned.map(function(a){return a.id.replace(/^(lesson|practice)-/,'')}).filter(function(id){return ls.some(function(x){return x[0]===id})});
@@ -457,7 +484,7 @@ function hwForm(){
     '<input id="hwti" class="name" maxlength="200" placeholder="Название (по желанию)">'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="hwdue" type="date" class="name" style="flex:1;min-width:150px;margin:0" aria-label="Срок"><input id="hwnote" class="name" maxlength="1000" placeholder="Комментарий для ученика (по желанию)" style="flex:2;min-width:180px;margin:0"></div>'+
     '<label class="line hwt-pick"><input type="checkbox" id="hwvoc"><span>Внести слова урока в словарь ученика <span class="muted">(придут на страницу «Слова» как новые)</span></span></label>'+
-    '<div class="done-row"><span class="muted" id="hwsum"></span><button type="button" class="pri" id="hwgo">Задать домашку</button></div></div></details>';
+    gtRow(false)+'<div class="done-row"><span class="muted" id="hwsum"></span><button type="button" class="pri" id="hwgo">'+(gtTarget()?'Задать группе':'Задать домашку')+'</button></div></div></details>';
 }
 function hwItemsText(r){
   return (r.items||[]).map(function(it){if(it.m)return esc((MAP[it.m]||{title:it.m}).title)+(Array.isArray(it.p)&&it.p.length?' ('+it.p.length+' из '+(it.pt||matKeys(it.m).length||'?')+' заданий)':'');
@@ -560,7 +587,7 @@ function tgCard(){
     '<div class="tg-row"><label>Вопросов <select id="tgn">'+[5,10,15,20,30,40].map(function(v){return '<option value="'+v+'"'+(v===tg.n?' selected':'')+'>'+v+'</option>'}).join('')+'</select></label>'+
     '<label>На дом: время <select id="tgmin">'+[[0,'без таймера'],[5,'5 мин'],[10,'10 мин'],[15,'15 мин'],[20,'20 мин']].map(function(x){return '<option value="'+x[0]+'"'+(x[0]===tg.min?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label>'+
     '<label>Срок <input id="tgdue" type="date" class="name" style="margin:0"></label></div>'+
-    '<div class="done-row"><button type="button" id="tgclass"'+(pk.length<2?' disabled':'')+'>'+KR.icon('users',16)+' С учителем ↗</button><button type="button" class="pri" id="tgself"'+(pk.length<2?' disabled':'')+'>Дать на дом</button></div></div>';
+    gtRow(true)+'<div class="done-row"><button type="button" id="tgclass"'+(pk.length<2?' disabled':'')+'>'+KR.icon('users',16)+' С учителем ↗</button><button type="button" class="pri" id="tgself"'+(pk.length<2?' disabled':'')+'>'+(gtTarget()?'Дать группе на дом':'Дать на дом')+'</button></div></div>';
   return h;
 }
 function tgRedraw(){var c=$('#tgc');if(!c)return;var due=$('#tgdue'),dv=due&&due.value;c.outerHTML=tgCard();if(dv&&$('#tgdue'))$('#tgdue').value=dv}
@@ -622,6 +649,19 @@ document.addEventListener('click',async function(e){
     var wt={title:tgTitle(),lang:lang,k:tgKinds(),min:tg.min,w:w};if(tgMix())wt.ord=1;
     var hw={title:'Слова: '+tgTitle(),lang:lang,items:[{wt:wt}],theory:[],due:$('#tgdue').value||null,note:''};
     b.disabled=true;
+    var tgg=gtTarget();
+    if(tgg){var tw=gtWho(tgg);if(!tw.length){b.disabled=false;msg('Отметьте хотя бы одного ученика группы');return}
+      var own=GT.own&&tg.srcs.some(function(x){return x!=='lesson'}),list=[],skip=[],keep=voc;
+      try{for(var ti=0;ti<tw.length;ti++){var n=tw[ti],ww=w;
+          if(own){try{voc=n===cur?keep:(await KR.api('teacher_vocab',{p_student:n})||[])}catch(y){voc=[]}ww=tgPick(tg.n)}
+          if(ww.length<2){skip.push(n);continue}
+          var wt2=Object.assign({},wt,{w:ww});list.push({student:n,hw:Object.assign({},hw,{items:[{wt:wt2}]})})}}
+      finally{voc=keep}
+      if(!list.length){b.disabled=false;msg('Ни у кого из отмеченных учеников нет хотя бы двух слов для теста');return}
+      try{await KR.api('teacher_group_hw_save',{p_group:tgg.id,p_list:list});await hwReload();tgRedraw();
+        msg('Тест задан группе '+tgg.name+': '+list.length+' '+plural(list.length,'ученику','ученикам','ученикам')+(own?', каждому из его слов':'')+(skip.length?'. Не хватило слов: '+skip.join(', '):''),true)}
+      catch(x){b.disabled=false;msg(gtMissing(x)?'Выполните в Supabase файл supabase/groups.sql заново: в нём появилась домашка группе':'Не получилось задать тест группе')}
+      return}
     try{await KR.api('teacher_hw_save',{p_student:cur,p_hw:hw});await hwReload();tgRedraw();msg('Задано на дом: '+w.length+' '+plural(w.length,'вопрос','вопроса','вопросов')+'. Ученик увидит это в домашке.',true)}
     catch(x){b.disabled=false;msg(/no_student/.test(x.message||'')?'Этого ученика ведёт другой преподаватель':'Не получилось задать тест')}
   }
@@ -675,6 +715,13 @@ document.addEventListener('click',async function(e){
     var pk=hwPicked();if(!pk.items.length){hmsg('Отметьте хотя бы одно упражнение, задание или тренажёр');return}
     var hw={title:($('#hwti').value||'').trim()||hwAutoTitle(pk),lang:hwf.lang,items:pk.items,theory:pk.theory,due:$('#hwdue').value||null,note:($('#hwnote').value||'').trim()};
     b.disabled=true;
+    var gg=gtTarget();
+    if(gg){var who=gtWho(gg);if(!who.length){b.disabled=false;hmsg('Отметьте хотя бы одного ученика группы');return}
+      try{var gr=await KR.api('teacher_group_hw_save',{p_group:gg.id,p_list:who.map(function(n){return {student:n,hw:hw}})});
+        var gwv='',hv2=$('#hwvoc');if(hv2&&hv2.checked){var gls=[];(pk.items||[]).forEach(function(x){if(x.l&&gls.indexOf(x.l)<0)gls.push(x.l)});for(var gi=0;gi<who.length;gi++)for(var gj=0;gj<gls.length;gj++)await lessonWordsTo(gls[gj],who[gi]);if(gls.length)gwv=' · слова урока внесены в словари'}
+        hwf={lang:hwf.lang,l:hwf.l,sel:{},it:{},th:{},mats:{},mp:{},open:false};await hwReload();hmsg('Домашка задана группе '+gg.name+': '+(gr&&gr.n||who.length)+' '+plural(who.length,'ученику','ученикам','ученикам')+'. Сводная таблица — на странице «Группы».'+gwv,true)}
+      catch(x){b.disabled=false;hmsg(gtMissing(x)?'Выполните в Supabase файл supabase/groups.sql заново: в нём появилась домашка группе':/no_student/.test(x.message||'')?'Одного из учеников ведёт другой преподаватель':'Не получилось задать домашку группе')}
+      return}
     var hv=$('#hwvoc'),wv='';if(hv&&hv.checked){var hls=[];(pk.items||[]).forEach(function(x){if(x.l&&hls.indexOf(x.l)<0)hls.push(x.l)});if(!hls.length&&hwf.l)hls.push(hwf.l);for(var hi=0;hi<hls.length;hi++)wv+=await lessonWordsTo(hls[hi])}
     try{await KR.api('teacher_hw_save',{p_student:cur,p_hw:hw});hwf={lang:hwf.lang,l:hwf.l,sel:{},it:{},th:{},mats:{},mp:{},open:false};await hwReload();hmsg('Домашка задана: «'+hw.title+'». Ученик увидит её в кабинете.'+wv,true)}
     catch(x){b.disabled=false;hmsg(/no_student/.test(x.message||'')?'Этого ученика ведёт другой преподаватель':/no_material/.test(x.message||'')?'Тренажёр не найден в каталоге на сервере — обновите страницу':'Не получилось задать домашку')}
@@ -715,6 +762,7 @@ async function drawStudent(){
     h+='<label class="line" style="align-items:center;cursor:pointer"><input type="checkbox" data-m="'+esc(m.id)+'" '+(sel[m.id]?'checked':'')+'><span style="flex:1">'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>'});
   h+='</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><input id="due" type="date" class="name" style="flex:1;min-width:150px;margin:0"><input id="note" class="name" placeholder="Комментарий (по желанию)" style="flex:2;min-width:180px;margin:0"></div><label class="line" style="margin-top:8px"><input type="checkbox" id="asgvoc"><span>Внести слова назначенных уроков в словарь ученика</span></label><div class="done-row"><span class="muted" id="cnt"></span><button class="pri" id="go">Назначить выбранные</button></div></div>';
   $('#stud').innerHTML=h;count();hwSummary();
+  if(goTo){var gt=document.getElementById(goTo);goTo=null;if(gt&&gt.scrollIntoView)setTimeout(function(){gt.scrollIntoView({block:'start',behavior:'smooth'})},60)}
 }
 function count(){var n=Object.keys(sel).filter(function(k){return sel[k]}).length;var e=$('#cnt');if(e)e.textContent=n?('Выбрано: '+n):''}
 document.addEventListener('click',async function(e){
@@ -796,7 +844,7 @@ document.addEventListener('click',async function(e){
   else if(b.id==='tcs'){var tc=($('#tcode').value||'').trim();
     if(tc&&tc.length<6){msg('Код преподавателя: от 6 символов');return}
     try{await KR.api('owner_set_teacher_code',{p_code:tc});signup=Object.assign({},signup,{teacher_code:tc});draw();msg(tc?'Код сохранён: заявки включены':'Заявки преподавателей выключены',true)}catch(x){msg('Не получилось сохранить код')}}
-  else if(b.dataset.st){cur=b.dataset.st;sel={};draw()}
+  else if(b.dataset.st){cur=b.dataset.st;sel={};GT={to:0,ex:{},own:GT.own};draw()}
   else if(b.dataset.f){filt=b.dataset.f;drawStudent()}
   else if(b.dataset.un){try{await KR.api('teacher_unassign',{p_student:cur,p_material:b.dataset.un});students=await KR.api('teacher_students')||students;draw();msg('Убрано',true)}catch(x){msg('Не получилось убрать')}}
   else if(b.id==='go'){
