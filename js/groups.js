@@ -14,7 +14,7 @@ var $=function(s){return document.querySelector(s)};
 var esc=KR.esc||function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
 var MAP={};(window.MATERIALS||[]).forEach(function(m){MAP[m.id]=m});
 var LANG={ko:'корейский',en:'английский'};
-var S={list:null,students:[],cur:null,edit:null,sessions:[],sets:null,sess:null,gw:{id:null,words:null},busy:false,addm:''};
+var S={hw:[],hwb:'',review:false,list:null,students:[],cur:null,edit:null,sessions:[],sets:null,sess:null,gw:{id:null,words:null},busy:false,addm:''};
 
 function plural(n,f1,f2,f5){return n%10===1&&n%100!==11?f1:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?f2:f5}
 function today(){var d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
@@ -45,7 +45,8 @@ async function boot(){
   draw();
 }
 async function reload(){try{S.list=await KR.api('teacher_groups')||[]}catch(e){}if(S.cur)await loadSessions();draw()}
-async function loadSessions(){try{S.sessions=await KR.api('teacher_group_sessions',{p_id:S.cur})||[]}catch(e){S.sessions=[]}S.sess=null}
+async function loadSessions(){try{S.sessions=await KR.api('teacher_group_sessions',{p_id:S.cur})||[]}catch(e){S.sessions=[]}S.sess=null;
+  try{S.hw=await KR.api('teacher_group_hw',{p_group:S.cur})||[]}catch(e){S.hw=missing(e)?null:[]}}
 
 // ---------- раскладка на учеников ----------
 // открыть материалы ученикам: только тем, у кого их ещё нет (иначе затрутся срок и комментарий из личного назначения)
@@ -117,7 +118,7 @@ function groupView(g){
   var h='<div class="card"><div class="done-row" style="margin-top:0"><div><h3 style="margin:0">'+esc(g.name)+'</h3><div class="muted">'+(LANG[g.lang]||'')+' · '+mem.length+' '+plural(mem.length,'ученик','ученика','учеников')+' · занятий: '+(g.sessions||0)+(g.last?' · последнее '+fmtDay(g.last):'')+'</div></div>'+
     '<button data-gedit="1">'+KR.icon('pencil',15)+' Состав и название</button></div>'+
     (mem.length?attendance(g):'<p class="muted">В группе пока нет учеников: «Состав и название».</p>')+'</div>';
-  h+=sessionCard(g)+programCard(g,p)+setsCard(g,p)+journal(g);
+  h+=sessionCard(g)+hwCard(g)+programCard(g,p)+setsCard(g,p)+journal(g);
   return h;
 }
 // посещаемость: ученики по строкам, последние занятия по столбцам
@@ -180,6 +181,70 @@ function journal(g){
     return '<div class="line" style="align-items:center;justify-content:space-between;gap:8px"><div style="min-width:0"><b>'+fmtDay(s.day)+'</b> · '+esc(s.lesson?title(s.lesson):(s.title||'без урока'))+
       '<div class="muted">был: '+(s.present.length+la.length)+(la.length?' (опоздал: '+esc(la.join(', '))+')':'')+(ab.length?' · не был: '+esc(ab.join(', ')):'')+(s.note?' · '+esc(s.note):'')+'</div></div>'+
       '<button data-sdel="'+s.id+'" aria-label="Удалить запись">'+KR.icon('trash',14)+'</button></div>'}).join('')+'</div>';
+}
+
+// ---------- домашка группы: сводная таблица и общие ошибки ----------
+// выдачи (batch) по порядку, новые первыми; в каждой — домашка каждого ученика
+function batches(){var r=[],by={};(S.hw||[]).forEach(function(h){if(!h.batch)return;if(!by[h.batch]){by[h.batch]={id:h.batch,title:h.title,due:h.due,created:h.created,rows:{}};r.push(by[h.batch])}by[h.batch].rows[h.student]=h});return r}
+function pct(h){var x=h.result||{};return x.max?Math.round(x.score/x.max*100)+'%':x.total?Math.round((x.done||0)/x.total*100)+'%':''}
+function hwCell(h){
+  if(!h)return '<span class="muted">—</span>';
+  if(h.status==='active')return h.due&&h.due<today()?'<span class="badge warn" style="background:#fbe6e2;color:#8a2b1d">просрочено</span>':'<span class="badge">задано</span>';
+  return '<span class="badge '+(h.status==='checked'?'ok':'warn')+'">'+(h.status==='checked'?'✓ ':'сдано ')+pct(h)+'</span>';
+}
+// общие ошибки выдачи: одинаковый вопрос и верный ответ у разных учеников
+function commonErrors(bt){
+  var by={},sub=0;
+  Object.keys(bt.rows).forEach(function(n){var h=bt.rows[n];if(h.status==='active')return;sub++;
+    ((h.result||{}).items||[]).forEach(function(x){(x.wrong||[]).forEach(function(w){var k=(x.t||'')+'|'+w.q+'|'+w.a;
+      var e=by[k]=by[k]||{t:x.t||'',q:w.q,a:w.a,who:[],g:[]};if(e.who.indexOf(n)<0){e.who.push(n);e.g.push(w.g)}})})});
+  return {sub:sub,list:Object.keys(by).map(function(k){return by[k]}).sort(function(a,b){return b.who.length-a.who.length})};
+}
+function hwCard(g){
+  if(S.hw===null)return '<div class="card"><h3>Домашка группе</h3><p class="muted">Чтобы задавать домашку всей группе, выполните в Supabase файл supabase/groups.sql ещё раз (в нём появилась домашка группе) и обновите страницу.</p></div>';
+  var mem=members(g);if(!mem.length)return '';
+  var link=function(o){return 'teacher.html?st='+encodeURIComponent(mem[0])+'&grp='+g.id+'&open='+o};
+  var h='<div class="card" id="ghw"><h3>Домашка группе</h3><p class="muted" style="margin-top:0">Тот же конструктор, что и для одного ученика: упражнения целиком или отдельные задания, тренажёры, теория. Тест по словам можно собрать каждому из его собственных слов.</p>'+
+    '<div class="opts"><a class="btn pri" href="'+link('hw')+'">'+KR.icon('plus',15)+' Задать домашку группе</a><a class="btn" href="'+link('tg')+'">'+KR.icon('pencil',15)+' Тест по словам группе</a></div>';
+  var bs=batches();
+  if(!bs.length)return h+'<p class="muted" style="margin:12px 0 0">Домашки группе ещё не было. Здесь появится таблица: кто сдал, с каким результатом, и общие ошибки.</p></div>';
+  var cols=bs.slice(0,6);
+  h+='<div style="overflow:auto;margin-top:12px"><table class="gatt"><tr><th>Ученик</th>'+cols.map(function(b){return '<th title="'+esc(b.title)+'">'+esc(b.title.length>22?b.title.slice(0,21)+'…':b.title)+(b.due?'<br><span style="font-weight:400">до '+fmtDay(b.due)+'</span>':'')+'</th>'}).join('')+'</tr>'+
+    mem.map(function(n){return '<tr><td class="cap">'+esc(n)+'</td>'+cols.map(function(b){return '<td>'+hwCell(b.rows[n])+'</td>'}).join('')+'</tr>'}).join('')+'</table></div>';
+  if(!S.hwb||!bs.some(function(b){return b.id===S.hwb})){var w=bs.filter(function(b){return Object.keys(b.rows).some(function(n){return b.rows[n].status!=='active'})})[0];S.hwb=(w||bs[0]).id}
+  var bt=bs.filter(function(b){return b.id===S.hwb})[0],ce=commonErrors(bt),tot=Object.keys(bt.rows).length,act=Object.keys(bt.rows).filter(function(n){return bt.rows[n].status==='active'}).length;
+  h+='<p style="margin:16px 0 4px"><b>Ошибки</b></p><select id="ghwb" aria-label="Выдача">'+bs.map(function(b){return '<option value="'+b.id+'"'+(b.id===S.hwb?' selected':'')+'>'+esc(b.title)+' · '+fmtDay(new Date(b.created).toISOString().slice(0,10))+'</option>'}).join('')+'</select>'+
+    '<p class="muted" style="margin:6px 0">Сдали '+ce.sub+' из '+tot+(act?' · ещё не сдали: '+esc(Object.keys(bt.rows).filter(function(n){return bt.rows[n].status==='active'}).join(', ')):'')+'</p>';
+  if(!ce.sub)h+='<p class="muted">Пока никто не сдал: ошибки появятся после сдачи.</p>';
+  else if(!ce.list.length)h+='<p class="muted">Ошибок нет.</p>';
+  else{
+    var com=ce.list.filter(function(e){return e.who.length>=2}),rest=ce.list.filter(function(e){return e.who.length<2});
+    var row=function(e){return '<div class="ko" style="font-size:15px;padding:4px 0 4px 10px;margin:4px 0;border-left:3px solid '+(e.who.length>=2?'var(--bad)':'var(--gold)')+'"><b>'+e.who.length+' из '+ce.sub+'</b> · '+esc(e.q)+' → <b>'+esc(e.a)+'</b><br><span class="muted">'+esc(e.t)+' · '+e.who.map(function(n,i){return esc(n)+': «'+esc(e.g[i]===''?'пусто':e.g[i])+'»'}).join(', ')+'</span></div>'};
+    h+=(com.length?'<p class="muted" style="margin:8px 0 2px">Общие — у двоих и больше:</p>'+com.map(row).join(''):'<p class="muted">Общих ошибок нет: у каждого свои.</p>')+
+      (rest.length?'<details class="rep"><summary>Остальные ошибки · '+rest.length+'</summary>'+rest.map(row).join('')+'</details>':'');
+    if(S.review&&com.length)h+='<div class="gt-box" style="margin-top:12px"><h3>Разбор на уроке</h3><p class="muted">Покажите экран группе: вопрос, ответы обсуждаете вместе, потом открываете верный.</p>'+
+      com.map(function(e,i){return '<details class="rep"><summary class="ko" style="font-size:18px">'+(i+1)+'. '+esc(e.q)+'</summary><p class="ko" style="font-size:18px;margin:6px 14px"><b>'+esc(e.a)+'</b></p></details>'}).join('')+'</div>';
+    h+='<div class="done-row">'+(com.length?'<button data-grev="1">'+KR.icon('users',15)+' '+(S.review?'Скрыть разбор':'Разобрать на уроке')+'</button>':'<span></span>')+'<button class="pri" data-gfix="1">Работа над ошибками</button></div>'+
+      '<p class="muted" style="margin:6px 0 0">«Работа над ошибками» — каждому домашкой только те задания, в которых ошибся он сам.</p>';
+  }
+  if(act)h+='<div class="done-row"><span class="muted">Ещё не сдали: '+act+'</span><button data-gunhw="1">Убрать у тех, кто не сдал</button></div>';
+  return h+'</div>';
+}
+// работа над ошибками: из сданной домашки — только задания с ошибками (вопросы упражнений, слова теста)
+function itText(it){return String(it.q||it.p||it.l||it.say||'').slice(0,200)}
+function fixHw(h){
+  var by={},wts=[];
+  ((h.result||{}).items||[]).forEach(function(x){var wr=x.wrong||[];if(!wr.length)return;
+    if(x.l&&x.b&&window.LESSONS[x.l]){var L=window.LESSONS[x.l],j=x.b.lastIndexOf('-'),sec=L.sections.filter(function(q){return q.id===x.b.slice(0,j)})[0],bl=sec&&sec.blocks[+x.b.slice(j+1)];
+      if(!bl||!Array.isArray(bl.items))return;var ix=[];bl.items.forEach(function(it,i){if(wr.some(function(w){return w.q===itText(it)})&&ix.indexOf(i)<0)ix.push(i)});
+      if(ix.length){by[x.l]=by[x.l]||{};by[x.l][x.b]=ix.length<bl.items.length?ix:null}}
+    else if(x.type==='wtest'){(h.items||[]).forEach(function(it){if(!it.wt)return;var ws=(it.wt.w||[]).filter(function(w){return wr.some(function(r){return r.a===w.w||r.a===w.t||String(r.q).indexOf(w.w)>=0})});
+      if(ws.length>=2)wts.push(Object.assign({},it.wt,{title:'Ошибки: '+(it.wt.title||'слова'),w:ws.slice(0,40)}))})}});
+  var items=[];
+  Object.keys(by).forEach(function(l){var it={l:l,b:Object.keys(by[l]).slice(0,40)},i={};it.b.forEach(function(k){if(by[l][k])i[k]=by[l][k]});if(Object.keys(i).length)it.i=i;items.push(it)});
+  wts.slice(0,2).forEach(function(wt){items.push({wt:wt})});
+  if(!items.length)return null;
+  return {title:('Работа над ошибками: '+h.title).slice(0,200),lang:h.lang||'',items:items,theory:(h.theory||[]).slice(0,10),due:null,note:'Здесь только задания, в которых были ошибки. Загляни в теорию, если не помнишь правило.'};
 }
 
 // ---------- сохранение ----------
@@ -250,6 +315,7 @@ document.addEventListener('change',async function(e){
   if(t.dataset.gm&&S.edit){S.edit.members[t.dataset.gm]=t.checked;return}
   if(t.id==='gws'){var d=$('#gwpk');if(d&&d.open)gwLoad();else gwSync();return}
   if(t.id==='padd'){S.addm=t.value;return}
+  if(t.id==='ghwb'){S.hwb=t.value;S.review=false;draw();var gh=$('#ghw');if(gh&&gh.scrollIntoView)gh.scrollIntoView({block:'start'});return}
   if(t.id==='sles'){readSess();S.sess.lesson=t.value;draw();return}
   if(t.id==='pstep'){var g=grp(),p=plan(g);p.step=t.checked;try{await savePlan(g,p);if(S.sess)S.sess.next=p.step;msg(p.step?'Уроки будут открываться по мере занятий':'Новые уроки программы будут открываться сразу',true)}catch(x){msg('Не получилось сохранить')}}
 });
@@ -265,6 +331,16 @@ document.addEventListener('click',async function(e){
     try{await KR.api('teacher_group_delete',{p_id:+b.dataset.gdel});S.cur=null;S.edit=null;location.hash='';await reload();msg('Группа удалена',true)}catch(x){msg('Не получилось удалить группу')}return}
   if(b.dataset.sst){readSess();S.sess.st[b.dataset.sst]=b.dataset.v;S.sess.open=true;draw();return}
   if(b.id==='sgo'){S.busy=true;try{await saveSession(b)}finally{S.busy=false}return}
+  if(b.dataset.grev){S.review=!S.review;draw();var gh=$('#ghw');if(gh&&gh.scrollIntoView)gh.scrollIntoView({block:'start'});return}
+  if(b.dataset.gfix&&g){var bt=batches().filter(function(x){return x.id===S.hwb})[0];if(!bt)return;
+    var list=[];Object.keys(bt.rows).forEach(function(n){var h=bt.rows[n];if(h.status==='active')return;var hw=fixHw(h);if(hw)list.push({student:n,hw:hw})});
+    if(!list.length){msg('Нет заданий для работы над ошибками: в упражнениях и тестах этой домашки не было ошибок (тренажёры сюда не входят)');return}
+    if(!confirm('Задать «Работу над ошибками» '+list.length+' '+plural(list.length,'ученику','ученикам','ученикам')+': '+list.map(function(x){return x.student}).join(', ')+'?'))return;
+    S.busy=true;b.disabled=true;
+    try{await KR.api('teacher_group_hw_save',{p_group:g.id,p_list:list});await loadSessions();draw();msg('«Работа над ошибками» задана: '+list.map(function(x){return x.student}).join(', '),true)}
+    catch(x){b.disabled=false;msg('Не получилось задать работу над ошибками')}finally{S.busy=false}return}
+  if(b.dataset.gunhw&&g){if(!confirm('Убрать эту домашку у тех, кто её ещё не сдал? Сданная останется.'))return;
+    try{var n=await KR.api('teacher_group_hw_delete',{p_group:g.id,p_batch:S.hwb});await loadSessions();draw();msg('Убрано у '+n,true)}catch(x){msg('Не получилось убрать')}return}
   if(b.dataset.sdel){if(!confirm('Удалить запись о занятии? Уроки, слова и домашка учеников останутся.'))return;
     try{await KR.api('teacher_group_session_delete',{p_id:+b.dataset.sdel});await reload();msg('Запись удалена',true)}catch(x){msg('Не получилось удалить')}return}
   if(!g)return;
