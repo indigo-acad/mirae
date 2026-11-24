@@ -23,6 +23,16 @@
    Задел под сюжет: если у урока в data/course.js есть поле scene, его текст показывается в карточке урока.
    Уроки — карточки с миниатюрой (img/thumb-*.svg, рисует tools/art.py) и статусом; кнопка в шапке ведёт к последнему уроку. */
 var esc=KR.esc;
+// занятия групп ученика (supabase/groups.sql, my_group_sessions): урок, пройденный на занятии, считается пройденным;
+// пропущенный — «Догнать», пока ученик не пройдёт его сам
+var GS={};
+function gday(d){return new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}
+async function loadGS(){GS={};if(KR.ctx&&KR.ctx.teacher)return;var r=[];try{r=await KR.api('my_group_sessions')||[]}catch(e){return}
+  r.forEach(function(x){if(!x.lesson)return;var g=GS[x.lesson]=GS[x.lesson]||{};if(x.st!=='absent'){if(!g.held||x.day>g.held)g.held=x.day}else if(!g.miss||x.day>g.miss)g.miss=x.day});}
+function gmark(x,id){var g=GS[id];if(!g)return x;
+  if(g.held){x.state='done';x.meta=(x.meta?x.meta+' · ':'')+'пройден на занятии '+gday(g.held);if(x.go==='Начать')x.go='Открыть'}
+  else if(g.miss&&x.state!=='done'){x.miss=g.miss;x.meta=(x.meta?x.meta+' · ':'')+'тебя не было на занятии '+gday(g.miss)+' — догони урок'}
+  return x}
 // ---------- программа: список частей с главами ----------
 function programKo(){
   var C=COURSE,C2=window.COURSE2;
@@ -33,12 +43,13 @@ function programKo(){
       x.key=m.id; if(!KR.can(m.id)){x.state='lock';return x}
       var d=KR.taken().indexOf(m.id)>=0;x.n=d?1:0;x.tot=1;x.pct=d?100:0;x.state=d?'done':'open';x.href=m.path;x.go=d?'Повторить':'Открыть';
       x.extra='<button data-take="'+esc(m.id)+'" aria-pressed="'+d+'">'+(d?KR.icon('check',16)+' Пройдено':'Отметить пройденным')+'</button>';
-      return x;
+      return gmark(x,m.id);
     }
     if(!l.id){x.state='soon';return x}
     if(!KR.can('lesson-'+l.id)){x.state='lock';return x}
     var p=KR.progress(l.id);x.n=p.n;x.tot=p.tot;x.pct=p.pct;x.P=p.P;x.state=p.pct>=100?'done':'open';
     x.meta=p.n+' из '+p.tot+' блоков';x.href='lesson.html?l='+l.id;x.go=p.pct>=100?'Повторить':p.n?'Продолжить':'Начать';
+    gmark(x,'lesson-'+l.id);
     x.extra=l.hangul?'<a class="btn" href="materials/korean/ko-hangul-games/">'+KR.icon('spark',16)+'Игры</a>':'<a class="btn" href="practice.html">'+KR.icon('repeat',16)+'Доп. упражнения</a>';
     return x;
   };
@@ -61,7 +72,7 @@ function programEn(){
     var d=done.indexOf(m.id)>=0;x.n=d?1:0;x.tot=1;x.state=d?'done':'open';x.href=m.path;x.go='Открыть';
     var a=KR.assignedInfo(m.id);x.meta=a&&(a.due||a.note)?((a.due?'срок '+a.due:'')+(a.due&&a.note?' · ':'')+(a.note||'')):'';
     x.extra='<button data-take="'+esc(m.id)+'" aria-pressed="'+d+'">'+(d?KR.icon('check',16)+' Пройдено':'Отметить пройденным')+'</button>';
-    return x;
+    return gmark(x,m.id);
   };
   var list=MATERIALS.filter(function(m){return m.section==='english'&&m.kind!=='class'});
   var C=window.EN_COURSES||[],ids=C.map(function(c){return c.id});
@@ -110,6 +121,7 @@ function draw(){
     if(x.state==='soon')return ['soon','spark','Скоро'];
     if(x.state==='lock')return ['lock','lock','Будет доступен'];
     if(x.state==='done')return ['done','check','Пройден'];
+    if(x.miss)return ['now','alert','Догнать'];
     if(x.n)return ['now','spark','В процессе'];
     return ['open','arrow',x===now?'Следующий':'Доступен'];
   };
@@ -146,7 +158,7 @@ document.addEventListener('click',function(e){
   KR.setTaken(a);draw();
 });
 KR.onLang=draw;
-if(KR.require()){KR.topbar('course');KR.load().then(draw)}
+if(KR.require()){KR.topbar('course');KR.load().then(loadGS).then(draw)}
 </script>
 </body>
 </html>
