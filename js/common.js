@@ -340,6 +340,13 @@ function reveal(){
 function icons(root){(root||document).querySelectorAll("[data-ic]").forEach(e=>{if(!e.firstChild)e.innerHTML=icon(e.dataset.ic,+e.dataset.s||20)})}
 function onScroll(){const t=document.querySelector(".top");if(t)t.classList.toggle("scrolled",(window.scrollY||0)>8)}
 window.addEventListener("scroll",onScroll,{passive:true});
+// анимации шапки (js/topbar-fx.js + GSAP) подгружаются отдельно, чтобы не трогать каждую страницу
+const FX_BASE=(document.currentScript&&document.currentScript.src||"").replace(/common\.js.*$/,"");
+function topfx(){
+  if(window.KR_topfx)return window.KR_topfx();
+  if(document.getElementById("topfx-js"))return;
+  const s=document.createElement("script");s.id="topfx-js";s.src=FX_BASE+"topbar-fx.js";document.head.appendChild(s);
+}
 
 // ---------- шапка, переключатель языка, нижняя панель на телефоне ----------
 // переключатель показываем, только если преподаватель открыл ученику курсы минимум на двух языках
@@ -486,7 +493,7 @@ window.KR={
       }
     }
     el.innerHTML=h;
-    tabbar(active);shooting();onScroll();
+    tabbar(active);shooting();onScroll();topfx();
   },
   esc,icon,icons,emo,bar,ring,count,reveal,calm
 };
