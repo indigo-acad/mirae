@@ -11,8 +11,9 @@
 <link rel="stylesheet" href="css/style.css">
 <style>
 .lib-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.lib-bar input[type=search]{flex:1 1 220px;min-width:0}
-.lib-bar select{flex:0 1 auto}
+.lib-bar input[type=search]{flex:1 1 220px;min-width:0;margin:0}
+.lib-bar select{flex:1 1 140px;width:auto;margin:0}
+@media(max-width:640px){.lib-bar input[type=search]{flex-basis:100%}.lib-bar select{flex:1 1 40%;padding:10px 12px}}
 .lib-kinds{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .lib-kinds button{font-size:.85rem;padding:4px 10px}
 .lib-kinds button[aria-pressed=true]{background:var(--gold,#D4AF7C);color:#0B1535}
@@ -39,7 +40,7 @@
 <script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/l10-banmal.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/q2a-yuki.js"></script><script src="data/r2a-review2.js"></script><script src="data/sw5-l4.js"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script><script src="js/library.js"></script>
 <div id="topbar"></div>
 <header class="band slim"><div class="in"><a href="teacher.html"><span data-ic="back" data-s="14"></span>ученики</a><h1>Библиотека</h1><p>Упражнения и теория из всех уроков: найти, отметить ♡, собрать свой урок и задать его домашкой.</p></div></header>
-<main id="app"><div class="card glass"><p class="muted">Загрузка…</p></div></main>
+<main><nav class="seg tnav" aria-label="Разделы преподавателя"><a href="teacher.html">Ученики</a><a href="groups.html">Группы</a><a href="dict.html">Словари</a><a href="library.html" class="on" aria-current="page">Библиотека</a></nav><div id="app"><div class="card glass"><p class="muted">Загрузка…</p></div></div></main>
 <script>
 (function(){
 const $=s=>document.querySelector(s),esc=KR.esc,ic=KR.icon,lib=KR.lib;
@@ -79,7 +80,7 @@ function blocksView(){
   const fc=S.facets||{levels:[],topics:[],kinds:{},total:0},f=S.f;
   const opt=(v,t,cur)=>`<option value="${esc(v)}"${v===cur?" selected":""}>${esc(t)}</option>`;
   let h=`<div class="card glass"><div class="lib-bar">`+
-    `<input type="search" id="q" placeholder="Поиск: слово, грамматика, тема" value="${esc(f.q)}" aria-label="Поиск">`+
+    `<input type="search" class="name" id="q" placeholder="Поиск: слово, грамматика, тема" value="${esc(f.q)}" aria-label="Поиск">`+
     `<select id="flang" aria-label="Язык">${opt("","Все языки",f.lang)}${opt("ko","한국어",f.lang)}${opt("en","English",f.lang)}</select>`+
     `<select id="flevel" aria-label="Уровень">${opt("","Все уровни",f.level)}${fc.levels.map(l=>opt(l,l,f.level)).join("")}</select>`+
     `<select id="ftopic" aria-label="Тема">${opt("","Все темы",f.topic)}${fc.topics.map(l=>opt(l,l,f.topic)).join("")}</select>`+
