@@ -12,6 +12,9 @@
   --green:#1E2A56;--green-d:#1E2A56;
   --font-display:"Cormorant Garamond",Georgia,"Times New Roman",serif;
   --font-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR","Malgun Gothic",sans-serif;
+  --font-ko-art:"Deogon Princess Classic","Song Myung","Noto Sans KR",serif;
+  --font-ru-art:"Comforter Brush",var(--font-display);
+  --font-en-art:"UnifrakturMaguntia",var(--font-display);
   --font-ko:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --nav-h:68px;--r:20px;--ease:cubic-bezier(.2,.7,.2,1);
 }
@@ -87,7 +90,7 @@ h1.ko,h2.ko,h3.ko{font-family:var(--font-ko);font-weight:600;letter-spacing:-.01
 .logo.brand .emb{flex:none;width:42px;height:42px;background:var(--emblem) center/contain no-repeat}
 .logo.brand .wm{display:flex;flex-direction:column;line-height:1}
 .logo.brand .wm b{font-weight:500;font-size:25px;letter-spacing:.01em;color:var(--ivory)}
-.logo.brand .wm b:lang(ko){font-family:"Song Myung",var(--font-ko);font-weight:400;font-size:22px;letter-spacing:.06em}
+.logo.brand .wm b:lang(ko){font-family:var(--font-ko-art);font-weight:400;font-size:22px;letter-spacing:.06em}
 .logo.brand .wm b:lang(ja),.logo.brand .wm b:lang(zh){font-family:var(--font-body);font-size:20px}
 .logo.brand .wm small{font-family:var(--font-body);font-size:9.5px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--la,var(--silver));margin-top:6px}
 /* гость: кнопка входа заметнее */
@@ -322,7 +325,7 @@ input.ans.bad{border-color:var(--bad);background:#fbe6e2}
 .m-school .hero{min-height:min(100vh,800px);min-height:min(100svh,800px);justify-content:flex-start;padding-top:calc(var(--nav-h) + clamp(26px,7vh,76px));padding-bottom:calc(var(--hz,64px) + max(168px,min(18vw,290px)))}
 .m-school .hero::before,.m-school .hero .sky{-webkit-mask-image:linear-gradient(#000 93%,transparent);mask-image:linear-gradient(#000 93%,transparent)}
 .hero-title em:lang(en){letter-spacing:0}
-.hero-title .wm-ko{display:inline-block;font-family:"Song Myung",var(--font-ko);font-weight:400;font-size:1.06em;line-height:1.16;letter-spacing:.07em;padding:.02em .06em 0;color:var(--gold-hi)}
+.hero-title .wm-ko{display:inline-block;font-family:var(--font-ko-art);font-weight:400;font-size:1.06em;line-height:1.16;letter-spacing:.07em;padding:.02em .06em 0;color:var(--gold-hi)}
 @supports ((-webkit-background-clip:text) or (background-clip:text)){
   .hero-title .wm-ko{color:transparent;-webkit-text-stroke:1.8px var(--gold);paint-order:stroke fill;
     background:url(../img/seigaiha.svg) 0 100%/44px 22px repeat-x,url(../img/seigaiha.svg) 22px calc(100% - 22px)/44px 22px repeat-x,linear-gradient(180deg,#24348a 0%,#131e60 52%,#0a1240 100%);
@@ -355,7 +358,7 @@ h2.sec.orn-h::after{transform:scaleX(-1)}
 .lc-art{position:absolute;left:0;right:0;bottom:0;height:150px;z-index:-1;background:var(--scene) 50% 100%/760px auto no-repeat,radial-gradient(60% 90px at 50% 100%,rgba(226,186,128,.34),rgba(11,21,53,0) 75%)}
 .lc-emb{width:46px;height:46px;margin-bottom:14px;background:var(--emblem) center/contain no-repeat}
 .lc h3{margin:0;font-size:38px;font-weight:500;line-height:1.1;color:var(--ivory)}
-.lc h3.ko{font-family:"Song Myung",var(--font-ko);font-weight:400;font-size:33px;letter-spacing:.06em}
+.lc h3.ko{font-family:var(--font-ko-art);font-weight:400;font-size:33px;letter-spacing:.06em}
 .lc h3:lang(en){font-style:italic}
 .lc h3:lang(ja),.lc h3:lang(zh){font-family:var(--font-body);font-size:26px;font-weight:500}
 .lc-ru{margin:8px 0 0;color:var(--la,var(--gold));font-size:12px;font-weight:500;letter-spacing:.24em;text-transform:uppercase}
@@ -1285,3 +1288,10 @@ html:is([data-lang=ko],[data-lang=en]) .hero-art{transform:translate3d(var(--mx,
 header.band h1 .hw{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em}
 header.band h1 .hw>span{display:inline-block}
 @media(prefers-reduced-motion:reduce){.top nav a .rl-a,.top nav a .rl-b{transition:none}.top .acc.enter.pulse::before{animation:none}}
+
+/* ---------- акцентные шрифты языков: русская каллиграфия, Old English, корейский 덕온공주옛체 ---------- */
+@font-face{font-family:"Deogon Princess Classic";src:url(../fonts/DeogonPrincessClassic.woff2) format("woff2");font-display:swap}
+h2.sec{font-family:var(--font-ru-art);font-size:44px;font-weight:400;letter-spacing:0}
+h1 em:not(:lang(en)),h2 em:not(:lang(en)){font-family:var(--font-ru-art);font-style:normal;font-weight:400;font-size:1.12em}
+h1.hero-title em,h1.hero-title em:lang(en),h1 em:lang(en),.lc h3:lang(en),.langs div b:lang(en),.logo.brand .wm b:lang(en){font-family:var(--font-en-art);font-style:normal;font-weight:400;letter-spacing:0}
+.logo.brand .wm b:lang(ko),.lc h3.ko,.hero-title .wm-ko{font-weight:400;letter-spacing:.02em}
