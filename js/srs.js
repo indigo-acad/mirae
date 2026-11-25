@@ -12,7 +12,7 @@
    Оценки: 1 «Снова», 2 «Трудно», 3 «Хорошо», 4 «Легко». */
 (function(root){
 "use strict";
-var MIN=60000,DAY=86400000,AHEAD=20*MIN;
+var MIN=60000,DAY=86400000,AHEAD=20*MIN,AGAIN=MIN;   // «Снова» — всегда через 1 минуту
 var GAMES=["cards","tr","mean","ctx","wr","build","pairs","hear","dict","say"];   // hear, dict, say — на слух и вслух (js/ear.js)
 var CTXM=["ru","ctx","mix"];
 /* Тренировка по выбору: из каких слов собирать тренажёры. Можно отметить несколько, слова берутся из всех отмеченных.
@@ -105,7 +105,7 @@ function next(c,g,S,now){
     var ivl=Math.max(1,c.ivl||1),ef=c.ef||S.ease,late=Math.max(0,Math.floor((now-c.due)/DAY)),n;
     if(g===1){                                          // забыл: интервал сбрасывается, слово уходит на переучивание
       c.lap=(c.lap||0)+1;c.ef=Math.max(1.3,ef-.2);c.ivl=Math.max(1,Math.round(ivl*S.lapse));
-      c.st=3;c.step=0;c.due=now+S.relearn[0]*MIN;return c;
+      c.st=3;c.step=0;c.due=now+AGAIN;return c;
     }
     if(c.sh&&g<4){delete c.sh;                         // интервал недавно сократили за ошибку: растим осторожно
       if(g===2){c.ef=Math.max(1.3,ef-.15);n=ivl}else n=Math.max(ivl+1,Math.round(ivl*1.5*S.mod));
@@ -119,8 +119,11 @@ function next(c,g,S,now){
   }
   var steps=st===3?S.relearn:S.steps,i=st===0?0:Math.min(c.step||0,steps.length-1);
   if(st===0)c.st=1;
-  if(g===1){c.step=0;c.due=now+steps[0]*MIN;return c}
-  if(g===2){c.step=i;c.due=now+(i===0&&steps.length>1?(steps[0]+steps[1])/2:steps[i])*MIN;return c}   // «Трудно»: шаг повторяется
+  if(g===1){c.step=0;c.due=now+AGAIN;return c}            // «Снова»: через минуту, изучение заново
+  /* «Трудно»: шаг повторяется. На первом шаге — между первым и вторым шагом; если шаг один — в полтора раза дольше
+     (как в Anki). Всегда дольше «Снова», чтобы кнопки не показывали одно и то же. */
+  if(g===2){var h=i===0&&steps.length>1?(steps[0]+steps[1])/2:i===0?steps[0]*1.5:steps[i];
+    c.step=i;c.due=now+Math.max(h*MIN,AGAIN+MIN);return c}
   if(g===3&&i+1<steps.length){c.step=i+1;c.due=now+steps[i+1]*MIN;return c}
   if(st===3){c.ivl=Math.max(1,c.ivl||1)+(g===4?1:0)}    // вернулось из переучивания
   else{c.ivl=g===4?S.easy:S.grad;c.ef=c.ef||S.ease}     // выучено: переходит в повторения
