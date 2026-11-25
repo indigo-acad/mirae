@@ -73,6 +73,12 @@ function mergeState(a,b){
   return out;
 }
 let timer;
+/* Без интернета сайт работает из кэша (sw.js), прогресс копится на устройстве; когда связь вернулась — досылаем. */
+if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost"))window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});
+  // при первом открытии страница загрузилась ещё без кэша: передаём её файлы, чтобы они тоже сохранились
+  navigator.serviceWorker.ready.then(r=>{if(r.active)r.active.postMessage({cache:[location.href].concat(performance.getEntriesByType("resource").map(e=>e.name))})}).catch(()=>{})});
+window.addEventListener("online",()=>{if(window.KR){KR.push();if(KR.vocab&&KR.vocab.sync)KR.vocab.sync()}});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&navigator.onLine&&window.KR)KR.push()});
 async function doPush(){
   const u=U(),pin=localStorage.getItem("kr_pin");if(!cloud.on||!u||!pin)return;
   try{const remote=await cloud.load(u,pin);const m=mergeState(collect(),remote||{});apply(m);await cloud.save(u,pin,m);setStatus("ok")}
