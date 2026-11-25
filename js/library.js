@@ -9,10 +9,11 @@ const missing=e=>!!(e&&(e.status===404||/Could not find the function/.test(e.mes
 
 // типы блоков: названия для фильтра и часть урока
 const KINDS={
-  fill:"Вписать ответ",choice:"Выбрать ответ",build:"Собрать из букв",talk:"Поговорить",
-  dialogue:"Диалог",words:"Слова",examples:"Примеры",table:"Таблица",text:"Текст / объяснение"
+  fill:"Вписать ответ",choice:"Выбрать ответ",build:"Собрать из букв",match:"Сопоставить",order:"Собрать предложение",
+  talk:"Поговорить",write:"Написать ответ",speak:"Прочитать вслух",
+  dialogue:"Диалог",words:"Слова",examples:"Примеры",table:"Таблица",text:"Текст / объяснение",video:"Видео"
 };
-const PRACTICE=["fill","choice","build","talk"];
+const PRACTICE=["fill","choice","build","match","order","talk","write","speak"];
 const SKIP=["wtest","mat"];   // блоки, которые живут только внутри домашки
 
 // уровень из подписи курса: «1급 · 12과» → 1급, «CLT-синтез · A1» → A1, «한글 · Занятие 2» → A0, «IELTS Band 4–5» → Band 4–5
@@ -63,6 +64,16 @@ async function ensure(ids){
     try{const r=await api("lib_lesson_get",{p_id:+k.slice(4)});if(r&&r.sections)window.LESSONS[k]=toLesson(r)}catch(e){}
   }));
 }
+// все уроки библиотеки на странице (для панели преподавателя: «Задать домашку», прогресс, слова урока)
+async function loadAll(){
+  let ls=[];try{ls=await api("teacher_liblesson_list")||[]}catch(e){return []}
+  await ensure(ls.map(l=>"lib-"+l.id));
+  return ls.map(l=>window.LESSONS["lib-"+l.id]).filter(Boolean);
+}
+// блоки по номерам, с тегами (supabase/library2.sql); null — функции на сервере ещё нет
+async function getBlocks(ids){
+  try{return await api("teacher_lib_get",{p_ids:ids})||[]}catch(e){if(missing(e))return null;throw e}
+}
 // урок из выбранных блоков: теория и отработка — отдельными разделами, в порядке выбора
 function sectionsFor(blocks){
   const th=blocks.filter(b=>PRACTICE.indexOf(b.kind)<0).map(b=>b.id),pr=blocks.filter(b=>PRACTICE.indexOf(b.kind)>=0).map(b=>b.id),s=[];
@@ -77,7 +88,8 @@ function hwItem(r){
 }
 
 KR.lib={
-  KINDS,PRACTICE,level,fromSite,importSite,toLesson,ensure,sectionsFor,hwItem,missing,
+  KINDS,PRACTICE,level,fromSite,importSite,toLesson,ensure,loadAll,getBlocks,sectionsFor,hwItem,missing,
+  get:id=>api("lib_lesson_get",{p_id:id}),
   search:f=>api("teacher_lib_search",{p_f:f||{}}),
   facets:lang=>api("teacher_lib_facets",{p_lang:lang||""}),
   save:b=>api("teacher_lib_save",{p_b:b}),

@@ -104,7 +104,6 @@ function render(){
 }
 // тест по словам урока (test.html): ученик проверяет себя, преподаватель проводит его на уроке
 function testCard(){
-  if(L.lib)return "";   // test.html пока знает только уроки сайта
   const n=window.KR&&KR.lessonWords?KR.lessonWords(L).length:0;if(n<2)return "";
   const t=window.KR&&KR.ctx&&KR.ctx.teacher,q=encodeURIComponent(id);
   return `<div class="card glass wt-card"><h3>${ic("abc",20)} Тест по словам урока</h3><p class="muted">${n} ${plural(n,"слово","слова","слов")}: перевод, слово по переводу, слово в предложении, написание.${t?" «С учителем» — вопросы по одному на экране, ответы обсуждаете вместе.":""}</p>`+

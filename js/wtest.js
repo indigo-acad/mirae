@@ -46,7 +46,8 @@ var wcls=function(s){return isKo(s)?' class="ko" lang="ko"':""};
 async function loadSpec(){
   var id=Q.get("id"),l=Q.get("l"),hw=Q.get("hw");
   if(id){try{return JSON.parse(localStorage.getItem("kr_wtest:"+id)||"null")}catch(e){return null}}
-  if(l){var L=(window.LESSONS||{})[l];if(!L)return null;
+  if(l){if(!(window.LESSONS||{})[l]&&KR.lib)await KR.lib.ensure([l]);   // урок из библиотеки: lib-<номер>
+    var L=(window.LESSONS||{})[l];if(!L)return null;
     return {title:"Слова урока · "+L.title,sub:L.course,lang:L.lang||"ko",words:KR.lessonWords(L),kinds:["tr","rev","ctx","wr"],n:15,min:0,back:"lesson.html?l="+encodeURIComponent(l),backT:"урок"}}
   if(hw){
     var list=await KR.homework(),rec=list&&list.find(function(x){return String(x.id)===String(hw)}),k=Q.get("k")||"",idx=+(k.split("-")[1]);

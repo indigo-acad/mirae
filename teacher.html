@@ -14,7 +14,7 @@
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Преподаватель</small><h1>Ученики и задания</h1><p>Назначай материалы: ученик увидит только их</p></div></header>
 <main><nav class="seg tnav" aria-label="Разделы преподавателя"><a href="teacher.html" class="on" aria-current="page">Ученики</a><a href="groups.html">Группы</a><a href="dict.html">Словари</a></nav><div id="m"></div></main>
-<script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/l10-banmal.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/q2a-yuki.js"></script><script src="data/r2a-review2.js"></script><script src="data/sw5-l4.js"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/words2.js"></script><script src="js/srs.js"></script><script src="js/wexport.js"></script><script src="js/assistant.js"></script>
+<script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/l10-banmal.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/q2a-yuki.js"></script><script src="data/r2a-review2.js"></script><script src="data/sw5-l4.js"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/words2.js"></script><script src="js/srs.js"></script><script src="js/wexport.js"></script><script src="js/assistant.js"></script><script src="js/library.js"></script>
 <script>
 var $=function(s){return document.querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
@@ -99,6 +99,8 @@ async function boot(){
   try{signup=await KR.api('teacher_signup_settings')}catch(e){signup=null}
   if(isOwner()){try{teachers=await KR.api('owner_teachers')||[]}catch(e){teachers=null}}
   await loadWsets();
+  // уроки из библиотеки (library.html): их тоже можно задать домашкой блоками и смотреть по ним прогресс
+  if(KR.lib){var libs=await KR.lib.loadAll();libs.forEach(function(L){if(!LESS.some(function(x){return x[0]===L.id}))LESS.push([L.id,'Библиотека · '+L.title])})}
   try{allGroups=await KR.api('teacher_groups')||[]}catch(e){allGroups=null}
   // со страницы «Группы»: teacher.html?st=<ученик>&grp=<группа>&open=hw|tg — сразу форма для всей группы
   var q=new URLSearchParams(location.search),qs=q.get('st');

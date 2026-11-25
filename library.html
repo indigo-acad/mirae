@@ -29,6 +29,9 @@
 .lib-more{text-align:center;margin:14px 0}
 .icb.fav[aria-pressed=true]{color:#D4AF7C}
 .lib-lesson .lib-meta{margin:4px 0 8px}
+.lib-eds{margin:6px 0 0 18px;padding:0}
+.lib-eds li{display:flex;align-items:center;gap:4px;padding:3px 0}
+.lib-eds li>span{flex:1;min-width:0}
 @media (max-width:640px){.lib-item{grid-template-columns:auto 1fr}.lib-acts{grid-column:1/-1;justify-content:flex-end}}
 </style>
 </head>
@@ -57,6 +60,11 @@ function preview(b){
   if(b.type==="words"||b.type==="examples")return `<ol>${(b.items||[]).map(w=>`<li><span class="ko">${L(w[0])}</span> — ${L(w[1])}</li>`).join("")}</ol>`;
   if(b.type==="text")return `<div>${b.html||""}</div>`;
   if(b.type==="table")return `<p class="muted">Таблица: ${(b.rows||[]).length} строк</p>`;
+  if(b.type==="match")return `<p class="muted">${L(b.instr)}</p><ol>${(b.items||[]).map(it=>`<li class="ko">${L(it.l)} ↔ ${L(it.r)}</li>`).join("")}</ol>`;
+  if(b.type==="order")return `<p class="muted">${L(b.instr)}</p><ol>${(b.items||[]).map(it=>`<li><span class="ko">${L((it.w||[]).join(" / "))}</span> → <b class="ko">${L([].concat(it.a)[0])}</b></li>`).join("")}</ol>`;
+  if(b.type==="write")return `<p class="muted">${L(b.instr)}</p><ol>${(b.prompts||[]).map(p=>`<li class="ko">${L(p)}</li>`).join("")}</ol>`;
+  if(b.type==="speak")return `<p class="muted">${L(b.instr)}</p>`+(b.lines||[]).map(l=>`<div class="ko"><b>${L(l[0])}</b> ${L(l[1])}</div>`).join("");
+  if(b.type==="video")return `<p class="muted">Видео${b.v&&b.v.time?" · "+L(b.v.time):""}${b.note?" · "+L(b.note):""}</p>`;
   return `<p class="muted">Блок «${L(b.type)}»</p>`;
 }
 function count(b){const a=b.items||b.prompts||b.lines||b.rows;return Array.isArray(a)?a.length:0}
@@ -116,13 +124,49 @@ function tray(){
 function lessonsView(){
   if(S.lessons===null)return `<div class="card glass"><p class="muted">Загрузка…</p></div>`;
   if(!S.lessons.length)return `<div class="card glass"><h3>${ic("book",20)} Уроков из библиотеки пока нет</h3><p class="muted">Во вкладке «Блоки» отметьте галочками упражнения и теорию и нажмите «Собрать урок». Урок хранит ссылки на блоки: поправили блок — он обновится во всех уроках.</p></div>`;
-  return S.lessons.map(l=>`<div class="card lib-lesson" data-lid="${l.id}"><h3>${esc(l.title)}</h3>`+
+  return S.lessons.map(l=>S.edit&&S.edit.id===l.id?editor():`<div class="card lib-lesson" data-lid="${l.id}"><h3>${esc(l.title)}</h3>`+
     `<div class="lib-meta"><span class="chip">${l.lang==="en"?"English":"한국어"}</span>${l.level?`<span class="chip">${esc(l.level)}</span>`:""}<span class="chip">${l.n} ${plural(l.n,"блок","блока","блоков")}</span><span class="muted">${esc(l.author||"")} · ${new Date(l.updated).toLocaleDateString("ru-RU",{day:"numeric",month:"long"})}</span></div>`+
     (l.subtitle?`<p class="muted">${esc(l.subtitle)}</p>`:"")+
     `<div class="done-row"><span><a class="btn" href="lesson.html?l=lib-${l.id}" target="_blank" rel="noopener">${ic("arrow",16)} Открыть</a> `+
-    (l.author===KR.user()||KR.ctx.owner?`<button type="button" data-ldel="${l.id}">${ic("trash",15)} Удалить</button>`:"")+`</span>`+
+    (l.author===KR.user()||KR.ctx.owner?`<button type="button" data-ledit="${l.id}">${ic("pencil",15)} Изменить</button> <button type="button" data-ldel="${l.id}">${ic("trash",15)} Удалить</button>`:"")+`</span>`+
     `<button type="button" class="btn pri" data-assign="${l.id}">${ic("send",16)} Задать ученику</button></div>`+
     `<div class="lib-form" id="as-${l.id}" hidden></div></div>`).join("");
+}
+// правка урока: название, разделы, порядок блоков; удалённые из библиотеки блоки при сохранении выпадают
+function editor(){
+  const E=S.edit;
+  return `<div class="card lib-lesson lib-edit" data-lid="${E.id}"><div class="lib-form">`+
+    `<input id="ed-t" value="${esc(E.title)}" maxlength="200" aria-label="Название урока">`+
+    `<input id="ed-s" value="${esc(E.subtitle||"")}" maxlength="300" placeholder="Подзаголовок" aria-label="Подзаголовок"></div>`+
+    E.sections.map((s,si)=>`<div class="lib-sec"><div class="lib-bar" style="margin-top:12px"><input data-sect="${si}" value="${esc(s.title)}" maxlength="80" aria-label="Название раздела">`+
+      `<select data-spart="${si}" aria-label="Часть урока"><option value="theory"${s.part==="theory"?" selected":""}>Теория</option><option value="practice"${s.part==="practice"?" selected":""}>Отработка</option></select></div>`+
+      `<ol class="lib-eds">`+s.items.map((it,i)=>`<li><span${it.gone?' class="muted"':""}>${esc(it.title)} <small class="muted">${esc(lib.KINDS[it.kind]||it.kind||"")}</small></span> `+
+        `<button type="button" class="icb" data-mv="${si}:${i}:-1" aria-label="Выше" title="Выше"${i?"":" disabled"}>↑</button>`+
+        `<button type="button" class="icb" data-mv="${si}:${i}:1" aria-label="Ниже" title="Ниже"${i<s.items.length-1?"":" disabled"}>↓</button>`+
+        `<button type="button" class="icb" data-rm="${si}:${i}" aria-label="Убрать из урока" title="Убрать из урока">${ic("x",15)}</button></li>`).join("")+`</ol></div>`).join("")+
+    `<div class="done-row"><span class="msg" id="ed-msg" role="status"></span><span><button type="button" data-edcancel>Отмена</button> <button type="button" class="btn pri" data-edsave>Сохранить${ic("check",16)}</button></span></div>`+
+    `<p class="muted" style="font-size:.85rem">Блоки добавляются во вкладке «Блоки»: отметьте их и выберите этот урок в «Добавить в урок…». Если урок уже задан домашкой, не сдвигайте в нём блоки до того, как ученик её сдаст.</p></div>`;
+}
+async function startEdit(id){
+  const l=(S.lessons||[]).find(x=>x.id===id);if(!l)return;
+  const ids=[].concat(...(l.sections||[]).map(s=>s.b||[]));let byId={};
+  try{const bl=await lib.getBlocks(ids);
+    if(bl)bl.forEach(b=>{byId[b.id]={title:b.title||lib.KINDS[b.kind]||b.kind,kind:b.kind}});
+    else{const full=await lib.get(id);(full.sections||[]).forEach(s=>{if((s.blocks||[]).length===(s.b||[]).length)s.b.forEach((x,i)=>{const b=s.blocks[i];byId[x]={title:b.title||b.type,kind:b.type}})})}}
+  catch(e){alert(err(e));return}
+  S.edit={id:l.id,title:l.title,subtitle:l.subtitle,lang:l.lang,level:l.level,topic:l.topic,
+    sections:(l.sections||[]).map(s=>({id:s.id,title:s.title,icon:s.icon||"",part:s.part==="practice"?"practice":"theory",
+      items:(s.b||[]).map(x=>byId[x]?Object.assign({id:x},byId[x]):{id:x,title:"Блок #"+x+(Object.keys(byId).length?" · удалён из библиотеки":""),kind:"",gone:!!Object.keys(byId).length})}))};
+  draw();
+}
+async function saveEdit(){
+  keepEd();const E=S.edit,m=$("#ed-msg");E.title=$("#ed-t").value.trim();E.subtitle=$("#ed-s").value.trim();
+  if(!E.title){m.textContent="Впишите название урока.";m.className="msg bad";return}
+  const sections=E.sections.map(s=>({id:s.id,title:s.title.trim()||"Раздел",icon:s.icon,part:s.part,b:s.items.filter(it=>!it.gone).map(it=>it.id)})).filter(s=>s.b.length);
+  if(!sections.length){m.textContent="В уроке не осталось блоков.";m.className="msg bad";return}
+  try{await lib.saveLesson({id:E.id,title:E.title,subtitle:E.subtitle,lang:E.lang,level:E.level,topic:E.topic,sections});
+    S.edit=null;await lessons();draw()}
+  catch(e){m.textContent=err(e);m.className="msg bad"}
 }
 function assignForm(id){
   const box=document.getElementById("as-"+id);if(!box)return;
@@ -190,6 +234,10 @@ async function assign(id){
 
 let qt=0;
 app.addEventListener("input",e=>{if(e.target.id==="q"){clearTimeout(qt);qt=setTimeout(()=>{S.f.q=e.target.value;search().then(()=>{const q=$("#q");if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}})},350)}});
+// введённые названия не теряются при перерисовке редактора
+function keepEd(){if(!S.edit)return;const t=$("#ed-t"),s=$("#ed-s");if(t)S.edit.title=t.value;if(s)S.edit.subtitle=s.value;
+  document.querySelectorAll("[data-sect]").forEach(i=>{S.edit.sections[+i.dataset.sect].title=i.value});
+  document.querySelectorAll("[data-spart]").forEach(i=>{S.edit.sections[+i.dataset.spart].part=i.value})}
 app.addEventListener("change",async e=>{
   const t=e.target;
   if(t.id==="flang"){S.f.lang=t.value;S.f.level="";S.f.topic="";S.f.kind=[];await facets();return search()}
@@ -214,6 +262,12 @@ app.addEventListener("click",async e=>{
   if(b.id==="mksave")return makeLesson();
   if(b.dataset.assign){if(S.students===null){try{S.students=await lib.students()||[]}catch(er){S.students=[]}}return assignForm(b.dataset.assign)}
   if(b.dataset.asgo)return assign(b.dataset.asgo);
+  if(b.dataset.ledit)return startEdit(+b.dataset.ledit);
+  if(b.dataset.edcancel!==undefined){S.edit=null;return draw()}
+  if(b.dataset.edsave!==undefined)return saveEdit();
+  if(b.dataset.mv||b.dataset.rm){keepEd();const [si,i,d]=(b.dataset.mv||b.dataset.rm).split(":").map(Number),a=S.edit.sections[si].items;
+    if(b.dataset.rm)a.splice(i,1);else{const j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]]}
+    const keep=scrollY;draw();return scrollTo(0,keep)}
   if(b.dataset.ldel){if(!confirm("Удалить урок из библиотеки? Блоки останутся в библиотеке."))return;
     try{await lib.removeLesson(+b.dataset.ldel);await lessons();draw()}catch(er){alert(err(er))}}
 });

@@ -39,6 +39,7 @@ async function boot(){
   try{S.students=(await KR.api('teacher_students')||[]).filter(function(s){return s.name!==KR.user()})}catch(e){S.students=[]}
   try{S.list=await KR.api('teacher_groups')||[]}catch(e){S.list=missing(e)?null:[]}
   try{S.sets=await KR.api('teacher_sets')||[]}catch(e){S.sets=null}
+  if(KR.lib)await KR.lib.loadAll();   // уроки из библиотеки: названия в домашке и результатах группы
   var h=(location.hash||'').match(/^#g(\d+)$/);if(h&&S.list&&S.list.some(function(g){return g.id===+h[1]}))S.cur=+h[1];
   else if(S.list&&S.list.length===1)S.cur=S.list[0].id;
   if(S.cur)await loadSessions();
