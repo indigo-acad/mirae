@@ -353,8 +353,8 @@ h2.sec.orn-h::after{transform:scaleX(-1)}
 /* карточки языков */
 .lcards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
 .lc{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;padding:30px 32px 136px;border-radius:26px}
-.lc[data-l=ko]{--la:#7CC4B5;--scene:image-set(url(../img/scene-ko-sm.webp) 1x,url(../img/scene-ko.webp) 2x);--emblem:url(../img/emblem-ko.svg);--frame:url(../img/frame-ko.svg)}
-.lc[data-l=en]{--la:#DC97A0;--scene:image-set(url(../img/scene-en-sm.webp) 1x,url(../img/scene-en.webp) 2x);--emblem:url(../img/emblem-en.svg);--frame:url(../img/frame-en.svg)}
+.lc[data-l=ko]{--la:#7CC4B5;--scene:url(../img/scene-ko.webp);--emblem:url(../img/emblem-ko.svg);--frame:url(../img/frame-ko.svg)}
+.lc[data-l=en]{--la:#DC97A0;--scene:url(../img/scene-en.webp);--emblem:url(../img/emblem-en.svg);--frame:url(../img/frame-en.svg)}
 .lc-art{position:absolute;left:0;right:0;bottom:0;height:150px;z-index:-1;background:var(--scene) 50% 100%/760px auto no-repeat,radial-gradient(60% 90px at 50% 100%,rgba(226,186,128,.34),rgba(11,21,53,0) 75%)}
 .lc-emb{width:46px;height:46px;margin-bottom:14px;background:var(--emblem) center/contain no-repeat}
 .lc h3{margin:0;font-size:38px;font-weight:500;line-height:1.1;color:var(--ivory)}
@@ -574,8 +574,8 @@ textarea{resize:vertical}
    Корейский: башня Намсан, горы, зал-ханок, сосны, волны, луна и ветка сливы, меандр «нвемун», лотос из «танчхон».
    Английский: Биг-Бен, колесо обозрения, разводной мост, капелла, фонари и розы, лоза, щит с розой.
    Атрибут data-lang на <html> ставит js/common.js; рисунки лежат в img/ и их можно заменить своими. */
-html[data-lang=ko]{--la:#7CC4B5;--scene:image-set(url(../img/scene-ko-sm.webp) 1x,url(../img/scene-ko.webp) 2x);--band:url(../img/band-ko.svg);--emblem:url(../img/emblem-ko.svg);--frame:url(../img/frame-ko.svg)}
-html[data-lang=en]{--la:#DC97A0;--scene:image-set(url(../img/scene-en-sm.webp) 1x,url(../img/scene-en.webp) 2x);--band:url(../img/band-en.svg);--emblem:url(../img/emblem-en.svg);--frame:url(../img/frame-en.svg)}
+html[data-lang=ko]{--la:#7CC4B5;--scene:url(../img/scene-ko.webp);--band:url(../img/band-ko.svg);--emblem:url(../img/emblem-ko.svg);--frame:url(../img/frame-ko.svg)}
+html[data-lang=en]{--la:#DC97A0;--scene:url(../img/scene-en.webp);--band:url(../img/band-en.svg);--emblem:url(../img/emblem-en.svg);--frame:url(../img/frame-en.svg)}
 /* языки, для которых рисунков пока нет: только свой акцент */
 html[data-lang=ja]{--la:#E3A9B8}
 html[data-lang=zh]{--la:#E0A070}
@@ -1247,9 +1247,8 @@ main.tmain{max-width:1240px}
 body:has(main.tmain) header.band .in{max-width:1240px;padding:0 16px}
 
 /* шапка курса: нарисованные пейзажи (img/hero-*.webp, gpt-image), края растворяются в небе страницы */
-html[data-lang=ko]{--hero2:image-set(url(../img/hero-ko-sm.webp) 1x,url(../img/hero-ko.webp) 2x)}
-html[data-lang=en]{--hero2:image-set(url(../img/hero-en-sm.webp) 1x,url(../img/hero-en.webp) 2x)}
-@media(min-width:1000px){html[data-lang=ko]{--hero2:url(../img/hero-ko.webp)}html[data-lang=en]{--hero2:url(../img/hero-en.webp)}}
+@media(max-width:719px){html[data-lang=ko]{--hero2:url(../img/hero-ko-sm.webp)}html[data-lang=en]{--hero2:url(../img/hero-en-sm.webp)}}
+@media(min-width:720px){html[data-lang=ko]{--hero2:url(../img/hero-ko.webp)}html[data-lang=en]{--hero2:url(../img/hero-en.webp)}}
 html:is([data-lang=ko],[data-lang=en]) header.band.course-hero{--hw:max(100vw,1100px);min-height:calc(var(--hw)*.2917 + 16px);padding-bottom:40px;box-sizing:border-box}
 html:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{
   background:var(--hero2) 100% calc(100% - 16px)/var(--hw) auto no-repeat;
@@ -1280,11 +1279,10 @@ html[data-lang=ko] .hero::after,html[data-lang=ko] header.band:not(.slim)::after
 
 /* ---------- анимации шапки: пейзаж, звёзды, горизонт ---------- */
 header.band{overflow:clip}
-html:is([data-lang=ko],[data-lang=en]) header.band:not(.slim)::before{transform:translate3d(var(--mx,0px),calc(var(--py,0px) + var(--rise,0px)),0) scale(1.03);opacity:var(--fade,1);will-change:transform}
-html:is([data-lang=ko],[data-lang=en]) .hero-art{transform:translate3d(var(--mx,0px),calc(var(--py,0px) * .6),0)}
-.band-stars{position:absolute;inset:0 0 40% 0;z-index:-1;pointer-events:none;transform:translateY(calc(var(--py,0px) * .5))}
+html:is([data-lang=ko],[data-lang=en]) header.band:not(.slim)::before{transform:translateY(var(--rise,0px));opacity:var(--fade,1)}
+.band-stars{position:absolute;inset:0 0 40% 0;z-index:-1;pointer-events:none}
 .band-stars i{position:absolute;width:var(--s);height:var(--s);border-radius:50%;background:#FFF1D6;box-shadow:0 0 6px 1px rgba(255,226,160,.8);opacity:.15}
-.band-glow{position:absolute;left:15%;right:15%;bottom:6%;height:38%;z-index:-1;pointer-events:none;opacity:.55;background:radial-gradient(50% 60% at 50% 100%,rgba(230,180,110,.35),rgba(230,180,110,0) 70%);mix-blend-mode:screen;transform:translateY(var(--py,0px))}
+.band-glow{position:absolute;left:15%;right:15%;bottom:6%;height:38%;z-index:-1;pointer-events:none;opacity:.55;background:radial-gradient(50% 60% at 50% 100%,rgba(230,180,110,.35),rgba(230,180,110,0) 70%);mix-blend-mode:screen}
 header.band h1 .hw{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em}
 header.band h1 .hw>span{display:inline-block}
 @media(prefers-reduced-motion:reduce){.top nav a .rl-a,.top nav a .rl-b{transition:none}.top .acc.enter.pulse::before{animation:none}}
@@ -1325,3 +1323,4 @@ body{letter-spacing:.005em}
 .reading .gap{white-space:nowrap}.reading .gap sup{opacity:.6;margin:0 2px}
 .reading .gap input.ans{width:auto;min-width:4em;max-width:100%;display:inline-block;margin:2px 2px;padding:2px 8px;font-size:16px}
 .ex.dlg .q{line-height:1.8}
+@media(max-width:719px){html[data-lang=ko],.lc[data-l=ko]{--scene:url(../img/scene-ko-sm.webp)}html[data-lang=en],.lc[data-l=en]{--scene:url(../img/scene-en-sm.webp)}}

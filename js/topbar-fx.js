@@ -111,14 +111,8 @@ function bandFx(g){
   if(sm)tl.from(sm,{opacity:0,x:-30,letterSpacing:"0.6em",duration:1.1});
   if(wd.length)tl.from(wd,{yPercent:110,rotate:4,opacity:0,filter:"blur(10px)",duration:1.1,stagger:.08},"<.1").set(wd,{clearProps:"filter"});
   if(rest.length)tl.from(rest,{y:24,opacity:0,duration:.9,stagger:.1},"<.3");
-  // пейзаж: выплывает снизу и при прокрутке уходит медленнее текста (параллакс)
-  band.style.setProperty("--py","0px");
-  tl.fromTo(band,{"--rise":"40px","--fade":0},{"--rise":"0px","--fade":1,duration:1.6,ease:"power3.out"},0);
-  let tick=false;
-  addEventListener("scroll",()=>{if(tick)return;tick=true;requestAnimationFrame(()=>{tick=false;const y=Math.min(scrollY,band.offsetHeight+200);band.style.setProperty("--py",(y*.14).toFixed(1)+"px");band.style.setProperty("--tx",(-y*.05).toFixed(1)+"px")})},{passive:true});
-  // курсор: лёгкий наклон пейзажа
-  if(matchMedia("(hover:hover)").matches){const mx=g.quickTo(band,"--mx",{duration:1.2,ease:"power3.out"});
-    band.addEventListener("pointermove",e=>{const r=band.getBoundingClientRect();mx(((e.clientX-r.left)/r.width-.5)*-24)});band.addEventListener("pointerleave",()=>mx(0))}
+  // пейзаж: один раз мягко выплывает снизу, дальше стоит на месте
+  tl.fromTo(band,{"--rise":"24px","--fade":0},{"--rise":"0px","--fade":1,duration:1.4,ease:"power3.out"},0);
 }
 
 window.KR_topfx=function(){
