@@ -185,7 +185,7 @@ function guideBox(){
   return '<details class="card glass today tguide" data-open="guide"'+(open?' open':'')+'><summary><span class="tb-h"><h3>'+KR.icon('book',20)+'Как заниматься</h3></span></summary>'+
     '<ol class="qsteps">'+
     '<li><b>Нажми «Начать».</b> Сначала идут карточки: новые слова вперемешку со словами на повторение.</li>'+
-    '<li><b>Новое слово:</b> послушай, попробуй догадаться, открой перевод. «Запомнить» — слово начнёт повторяться, «Уже знаю» — вернётся на проверку через несколько дней.</li>'+
+    '<li><b>Новое слово:</b> послушай, попробуй догадаться, открой перевод и оцени, как и остальные карточки: <b>Снова</b>, <b>Трудно</b>, <b>Хорошо</b> или <b>Легко</b> (уже знаешь — вернётся на проверку через несколько дней).</li>'+
     '<li><b>Слово на повторение:</b> вспомни перевод (лучше вслух), открой и честно оцени себя. <b>Снова</b> — не вспомнил(а), покажем через минуту; <b>Трудно</b>, <b>Хорошо</b>, <b>Легко</b> — вернётся через столько дней, сколько написано на кнопке.</li>'+
     '<li><b>После карточек — упражнения, если хочешь:</b> выбрать перевод, написать, собрать слово, на слух. Ошибка в упражнении вернёт слово раньше.</li>'+
     '<li>Лучше понемногу каждый день. Закончить можно в любой момент — крестик вверху занятия.</li>'+
@@ -377,8 +377,8 @@ function finishDay(){
   S.exIds=ids;drawToday();var f=$('#play .fin-acts .btn');if(f)f.focus({preventScroll:true});
 }
 // ---------- знакомство с новыми словами ----------
-/* Новое слово показано целиком: перевод, пример, звук, картинка. «Запомнить» — слово уходит в отработку
-   (вернётся через первый шаг изучения), «Уже знаю» — сразу в повторения с интервалом «Легко». */
+/* Новое слово показано целиком: перевод, пример, звук, картинка. После перевода — обычная оценка
+   «Снова / Трудно / Хорошо / Легко»: слово вернётся через столько, сколько написано на кнопке («Легко» — сразу в повторения). */
 function gNew(c){
   var I=info(c)||{},ipa=(c.l==='en'?(KR.accent()==='us'?I.ipa_us||I.ipa_uk:I.ipa_uk||I.ipa_us):'')||c.ipa||'',set=V.settings(),now=Date.now();
   var src=KR.W2.source(c.src||I.src,(setById(String(c.src||'').replace('set:',''))||{}).title);
@@ -391,9 +391,9 @@ function gNew(c){
     '<div id="nback"'+(S.nopen===c.id?'':' hidden')+'><div class="flash-t">'+esc(trOf(c)||'перевод не указан')+'</div>'+newMore(c)+(c.ex&&c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>'+
     (S.nopen===c.id?'':'<div class="done-row" id="nshowrow"><span class="muted">Догадайся, что значит слово, и открой</span><button type="button" class="btn pri" data-x="nshow">Показать перевод</button></div>')+
     '<div class="muted new-src">'+esc(src)+'</div></div>'+
-    '<div class="new-acts"><button type="button" data-x="knew">Уже знаю</button><button type="button" class="btn pri" data-x="learn">Запомнить'+KR.icon('arrow',16)+'</button></div>'+
-    '<p class="muted new-hint">«Запомнить»: слово придёт в отработку через '+SRS.label(c,3,set,now)+'. «Уже знаю»: вернётся на проверку через '+SRS.label(c,4,set,now)+'.</p>');
-  var b=$('[data-x="nshow"]')||$('[data-x="learn"]');if(b)b.focus({preventScroll:true});
+    // оценка как у остальных карточек: та же сортировка по интервалам
+    '<div class="rate" id="nrate"'+(S.nopen===c.id?'':' hidden')+'>'+RATE.map(function(r){return '<button type="button" data-ng="'+r[0]+'"><b>'+r[1]+'</b><small>'+SRS.label(c,r[0],set,now)+'</small></button>'}).join('')+'</div>');
+  var b=$('[data-x="nshow"]')||$('#nrate [data-ng="3"]');if(b)b.focus({preventScroll:true});
   if(KR.canSay())KR.say(c.w,c.l);
   if(!c.dq){var tk=S.tok;dictPull(c.id,function(n,r){if(r&&r.found&&S&&(S.mode==='new'||S.mode==='day')&&S.tok===tk&&!S.lock){S.card=n;if($('.newcard'))gNewRedraw(n)}}).catch(function(){})}
 }
@@ -452,7 +452,9 @@ function newMore(c){
 }
 function learnNew(g){
   if(!S||(S.mode!=='new'&&S.mode!=='day')||!S.card||S.lock)return;S.lock=true;
-  V.answer(S.card.id,g);S.done++;S.seen.push(S.card.id);if(g===4)S.known++;S.qi++;drawToday();nextCard();
+  V.answer(S.card.id,g);S.done++;S.seen.push(S.card.id);if(g===4)S.known++;
+  if(S.mode==='day'&&g===1&&!S.rq[S.card.id]){S.rq[S.card.id]=1;S.queue.push(S.card.id)}   // «Снова» — ещё раз в конце карточек
+  S.qi++;drawToday();nextCard();
 }
 function finishNew(){
   var n=S.done,k=S.known,w=n-k;S.mode='done';
@@ -1213,8 +1215,7 @@ document.addEventListener('click',function(e){
   if(d.x==='day-ex'){var di0=S&&S.exIds||[];return di0.length?start('free',false,di0):stop()}
   if(d.x==='ex-again'){var ea=S&&S.ids||[];return ea.length?start('free',false,ea):stop()}
   if(d.x==='guide-ok'){try{localStorage.setItem('kr_wguide','1')}catch(x){}OPEN.guide=false;var gd=$('.tguide');if(gd)gd.open=false;return}
-  if(d.x==='learn')return learnNew(3);
-  if(d.x==='knew')return learnNew(4);
+  if(d.ng)return learnNew(+d.ng);
   if(d.dict){var dm=$('#dmsg'),id0=d.dict;if(dm)dm.textContent='Ищем в словаре…';b.disabled=true;
     dictPull(id0,function(n,r){var dl=$('#wdlg');if(dl&&dl.open&&dl.dataset.id===id0)openCard(id0);var m2=$('#dmsg');if(m2)m2.textContent=r.found?'Добавлено из словаря: '+(r.srcName||''):(r.message||'Слова нет в словаре.');drawList()})
       .catch(function(e){var m2=$('#dmsg');if(m2)m2.textContent='Словарь не ответил: '+e.message;b.disabled=false});return}
@@ -1244,7 +1245,7 @@ document.addEventListener('click',function(e){
   if(d.tab)return setTab(d.tab);
   if(d.x==='stop')return stop(true);
   if(d.x==='flip')return flip();
-  if(d.x==='nshow'){if(S)S.nopen=S.card&&S.card.id;var nb=$('#nback'),nr=$('#nshowrow');if(nb)nb.hidden=false;if(nr)nr.remove();var lb=$('[data-x="learn"]');if(lb)lb.focus({preventScroll:true});return}
+  if(d.x==='nshow'){if(S)S.nopen=S.card&&S.card.id;var nb=$('#nback'),nr=$('#nshowrow');if(nb)nb.hidden=false;if(nr)nr.remove();var nq=$('#nrate');if(nq)nq.hidden=false;var lb=$('#nrate [data-ng="3"]');if(lb)lb.focus({preventScroll:true});return}
   if(d.x==='next')return nextCard();
   if(d.x==='hint'){S.hint=true;var c=S.card;$('#fb').innerHTML='<div class="muted">Начинается на: <b'+wcls(c)+'>'+esc(units(c)[0])+'…</b></div>';$('#win').focus();return}
   if(d.g&&S&&S.card){var r=$('#rate');if(r)[].forEach.call(r.children,function(x){x.disabled=true});return grade(+d.g,true)}
