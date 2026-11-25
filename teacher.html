@@ -315,7 +315,7 @@ document.addEventListener('toggle',function(e){if(e.target.id==='wpk'&&e.target.
    Преподаватель выбирает задания: упражнения из отработки уроков целиком или отдельные задания в них (ученик делает их заново), «Домашнее задание» из урока,
    тренажёры и тесты; по желанию — разделы теории, которые ученик откроет кнопкой «Посмотреть теорию»; срок и комментарий.
    Сданная домашка приходит сюда с баллами и ошибками; «Проверено» с комментарием ученик увидит в кабинете. */
-var TYPE_RU={fill:'вписать',choice:'выбрать',build:'собрать',talk:'поговорить',match:'сопоставить',order:'собрать предложение',write:'написать ответ',speak:'прочитать вслух'};
+var TYPE_RU={fill:'вписать',choice:'выбрать',build:'собрать',talk:'поговорить',match:'сопоставить',order:'собрать предложение',write:'написать ответ',speak:'прочитать вслух',sort:'расставить по порядку'};
 function plural(n,f1,f2,f5){return n%10===1&&n%100!==11?f1:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?f2:f5}
 function lessLabel(l){var x=LESS.filter(function(y){return y[0]===l})[0],L=window.LESSONS[l];return x?x[1]:L?L.course+' · '+L.title:l}
 /* слова урока (KR.lessonWords) — в словарь ученика, как «Добавить слова» на этой странице; возвращает текст для сообщения */
@@ -514,6 +514,10 @@ function hwResultHtml(r){
       :'<span class="badge '+(x.done?'ok':'warn')+'">'+(x.done?'сделано':'не сделано')+'</span>';
     return '<div class="hwt-it"><div class="line" style="justify-content:space-between;align-items:center;gap:8px"><b>'+esc(x.t||'')+'</b>'+badge+'</div>'+
       (x.wrong||[]).map(function(w){return '<div class="ko hwt-w">'+esc(w.q)+'<br><span class="muted">Ответ: «'+esc(w.g===''?'пусто':w.g)+'», верно: «'+esc(w.a)+'»</span></div>'}).join('')+
+      (x.texts||[]).filter(function(t){return t.a||t.s}).map(function(t){return '<div class="hwt-w"><span class="ko">'+esc(t.q)+'</span>'+
+        (t.a?'<br><span class="muted">Написал(а):</span> <span class="ko">'+esc(t.a)+'</span>':'')+
+        (t.s!=null?'<br><span class="muted">Сказал(а) — распознано:</span> <span class="ko">'+esc(t.s||'—')+'</span>'+(t.m!=null?' <span class="muted">· совпадение с написанным '+t.m+'%</span>':'')+(t.rec?' <span class="muted">· запись в Telegram</span>':''):'')+'</div>'}).join('')+
+      (x.lines||[]).map(function(t){return '<div class="hwt-w"><span class="ko">'+esc(t.q)+'</span><br><span class="muted">Распознано:</span> <span class="ko">'+esc(t.h||'—')+'</span> <span class="muted">· '+t.s+'%'+(t.rec?' · запись в Telegram':'')+'</span></div>'}).join('')+
       (x.rep?'<details class="rep" open><summary>Ошибки по заданиям</summary>'+repHtml(x.rep)+'</details>':'')+'</div>';
   }).join('');
 }
