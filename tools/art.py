@@ -50,7 +50,7 @@ def inner(pts, cx, base, k):
     return [(cx + (x - cx) * k, base - (base - y) * k) for x, y in pts]
 
 
-def cloud(x, y, s=1.0, o=.6, flip=1):
+def cloud(x, y, s=1.0, o=.6, flip=1, tail=1.0):
     """Облако «унмун» (구름무늬), как в танчхоне и на ширмах «десять символов долголетия»:
     шапка из трёх лепестков, в каждом золотой завиток, снизу длинный изогнутый хвост с завитком на конце.
     Лёгкая заливка чуть светлее неба и двойная золотая обводка. (x, y) — левый нижний угол шапки."""
@@ -58,6 +58,7 @@ def cloud(x, y, s=1.0, o=.6, flip=1):
     b = 30                                                  # нижняя линия шапки
 
     def P(px, py):
+        if px > 64: px = 64 + (px - 64) * tail          # хвост можно укоротить
         return f'{f(x + flip * px * s)} {f(y + (py - b) * s)}'
 
     def meet(c1, c2):
@@ -88,11 +89,11 @@ def cloud(x, y, s=1.0, o=.6, flip=1):
     pts = [foot(lobes[0], -1), meet(lobes[0], lobes[1]), meet(lobes[1], lobes[2]), foot(lobes[2], 1)]
     head = f'M{P(*pts[0])}' + ''.join(arc(lobes[i], pts[i], pts[i + 1]) for i in range(3))
     # хвост: от правого лепестка вниз и вправо, сужается, на конце маленький завиток
-    tail = (f'C{P(80, 29)} {P(96, 25.5)} {P(112, 27.5)}C{P(126, 29.5)} {P(138, 31)} {P(150, 29)}'
+    tl = (f'C{P(80, 29)} {P(96, 25.5)} {P(112, 27.5)}C{P(126, 29.5)} {P(138, 31)} {P(150, 29)}'
             f'C{P(140, 34)} {P(124, 34.5)} {P(110, 33.5)}C{P(94, 32.5)} {P(80, 36)} {P(64, 35.5)}'
             f'C{P(44, 36.5)} {P(18, 36)} {P(*pts[0])}Z')
-    fill = f'<path d="{head}{tail}" fill="#22347E" opacity="{f(min(.62, o + .08))}"/>'
-    line = f'<path d="{head}{tail}" fill="none" stroke="{GOLD}" stroke-width="{f(max(.8, 1.15*s))}" stroke-linejoin="round" opacity="{f(min(1, o * 1.55))}"/>'
+    fill = f'<path d="{head}{tl}" fill="url(#cl)" opacity="{f(min(.9, o + .3))}"/>'
+    line = f'<path d="{head}{tl}" fill="none" stroke="{GOLD}" stroke-width="{f(max(.8, 1.15*s))}" stroke-linejoin="round" opacity="{f(min(1, o * 1.55))}"/>'
     # завитки внутри лепестков: спираль из точек, сглаженная
     curls = ''
     for i, (cx, cy, r) in enumerate(lobes):
@@ -289,7 +290,8 @@ def moon(raw=False):
     return svg(200, 200, b)
 
 
-KO_DEFS = (f'<linearGradient id="pk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A3C98"/><stop offset="1" stop-color="#0E1A52"/></linearGradient>'
+KO_DEFS = (f'<linearGradient id="cl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A4FA8"/><stop offset="1" stop-color="#1A2870" stop-opacity=".55"/></linearGradient>'
+           f'<linearGradient id="pk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A3C98"/><stop offset="1" stop-color="#0E1A52"/></linearGradient>'
            f'<linearGradient id="gs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{GOLD_HI}" stop-opacity="1"/><stop offset="1" stop-color="{GOLD}" stop-opacity=".12"/></linearGradient>'
            f'<radialGradient id="mist"><stop offset="0" stop-color="#8FA2F2" stop-opacity=".30"/><stop offset="1" stop-color="#8FA2F2" stop-opacity="0"/></radialGradient>'
            f'<radialGradient id="glow"><stop offset="0" stop-color="#FFE3A0" stop-opacity=".9"/><stop offset="1" stop-color="#FFE3A0" stop-opacity="0"/></radialGradient>'
@@ -345,8 +347,8 @@ def hero_ko(raw=False):
            (1720, 150), (1830, 142), (1920, 170), (2000, 186), (2000, 300), (0, 300)]
     b += f'<path d="{smooth(far)}" fill="{FAR}" opacity=".5"/>'
     b += f'<path d="{smooth(far[:-2], False)}" fill="none" stroke="{GOLD}" stroke-width="1" opacity=".26"/>'
-    for x, y, s, o, fl in [(1130, 70, .9, .46, 1), (1470, 30, .76, .42, -1), (1640, 92, .96, .48, 1), (560, 200, .6, .3, 1)]:
-        b += cloud(x, y, s, o, fl)
+    for x, y, s, o, fl in [(1150, 96, .8, .4, 1), (1500, 58, .62, .34, -1), (1700, 112, .74, .4, 1)]:
+        b += cloud(x, y, s, o, fl, tail=.45)
     b += ntower(1096, 270, .82)
     b += peaks([(1250, 230, 142, -.05), (1380, 262, 204, .03), (1525, 300, 262, 0), (1675, 264, 198, -.03), (1822, 240, 146, .05)])
     for cx, cy, rx, ry in [(1270, 262, 300, 26), (1730, 266, 320, 24), (1500, 282, 440, 20), (520, 280, 520, 18)]:
@@ -655,20 +657,35 @@ def leaf(x, y, a, L, col='#1C4A3B', vein='#3F7C63'):
 
 
 def rose(x, y, r, red=True, rot=0):
-    """Роза: листья, пять внешних лепестков, три внутренних и завиток сердцевины."""
-    dk, md, hi, ln = ('#6E1B30', '#A32F49', '#CF5F74', '#F0A0AC') if red else ('#9C8660', '#D8C6A0', '#F1E6CC', '#8A7450')
+    """Роза в профиль-три-четверти: листья, чашечка из лепестков-капель, тёмная середина и завиток бутона."""
+    dk, md, hi, ln = ('#5E1428', '#A32F49', '#D26A7E', '#F3B3BD') if red else ('#8C7650', '#D8C6A0', '#F4EAD2', '#FFF8E8')
     t = ''
-    for a in (rot + 200, rot + 335, rot + 80):
-        t += leaf(x, y, a, r * 1.75)
-    t += f'<circle cx="{f(x)}" cy="{f(y)}" r="{f(r*.8)}" fill="{dk}"/>'
+    for a, k in ((rot + 205, 1.6), (rot + 330, 1.5), (rot + 95, 1.2)):
+        t += leaf(x, y, a, r * k)
+    def petal(a, d, w, L, col, edge):
+        return (f'<g transform="translate({f(x)} {f(y)}) rotate({f(a)})"><path d="M{f(d)} 0C{f(d+L*.2)} {f(-w)} {f(d+L*.9)} {f(-w*.9)} {f(d+L)} 0'
+                f'C{f(d+L*.9)} {f(w*.9)} {f(d+L*.2)} {f(w)} {f(d)} 0Z" fill="{col}" stroke="{edge}" stroke-width="{f(max(.5, r*.05))}"/></g>')
+    for i in range(6):
+        t += petal(rot + i * 60, 0, r * .55, r * 1.02, md, dk)
     for i in range(5):
-        a = math.radians(rot + i * 72)
-        t += f'<circle cx="{f(x+r*.52*math.cos(a))}" cy="{f(y+r*.52*math.sin(a))}" r="{f(r*.52)}" fill="{md}" stroke="{dk}" stroke-width="{f(max(.7, r*.06))}"/>'
-    for i in range(3):
-        a = math.radians(rot + 40 + i * 120)
-        t += f'<circle cx="{f(x+r*.24*math.cos(a))}" cy="{f(y+r*.24*math.sin(a))}" r="{f(r*.36)}" fill="{hi}" stroke="{dk if red else ln}" stroke-width="{f(max(.6, r*.05))}"/>'
-    t += (f'<path d="M{f(x-r*.2)} {f(y+r*.05)}A{f(r*.2)} {f(r*.2)} 0 1 1 {f(x+r*.12)} {f(y+r*.17)}A{f(r*.11)} {f(r*.11)} 0 1 1 {f(x)} {f(y-r*.03)}" '
-          f'fill="none" stroke="{dk if red else ln}" stroke-width="{f(max(.8, r*.08))}" stroke-linecap="round"/>')
+        t += petal(rot + 30 + i * 72, 0, r * .4, r * .7, hi, dk)
+    t += f'<circle cx="{f(x)}" cy="{f(y)}" r="{f(r*.34)}" fill="{dk}"/>'
+    t += (f'<path d="M{f(x-r*.22)} {f(y+r*.04)}A{f(r*.22)} {f(r*.22)} 0 1 1 {f(x+r*.14)} {f(y+r*.18)}A{f(r*.12)} {f(r*.12)} 0 1 1 {f(x)} {f(y-r*.03)}" '
+          f'fill="none" stroke="{ln}" stroke-width="{f(max(.7, r*.07))}" stroke-linecap="round" opacity=".85"/>')
+    return t
+
+
+def bush(x, base, s=1.0, seed=1):
+    """Куст роз у подножия фонаря: тёмная листва куполом, на ней 4–5 роз разного размера и цвета."""
+    rng = random.Random(seed)
+    t = ''
+    for dx, dy, rr in [(-22, -8, 13), (0, -14, 16), (22, -8, 13), (-10, -4, 12), (12, -4, 12)]:
+        t += f'<circle cx="{f(x+dx*s)}" cy="{f(base+dy*s)}" r="{f(rr*s)}" fill="#0F2A24"/>'
+    for a in range(-150, -20, 18):
+        L = rng.uniform(10, 15) * s
+        t += leaf(x + rng.uniform(-24, 24) * s, base - rng.uniform(2, 14) * s, a, L, '#1C4A3B', '#3F7C63')
+    for dx, dy, rr, red in [(-18, -12, 7, True), (2, -20, 8.5, False), (20, -11, 7, True), (-6, -6, 6, False), (12, -4, 5.5, True)]:
+        t += rose(x + dx * s, base + dy * s, rr * s, red, rng.uniform(0, 60))
     return t
 
 
@@ -748,9 +765,7 @@ def hero_en(raw=False):
     b += f'<path d="{quay}" fill="{NEAR}"/>'
     b += gl('M0 286Q260 280 540 285T1040 289Q1300 292 1540 284T2000 282', .4)
     b += lamp(1010, 285, 1.0) + lamp(1880, 285, .93)
-    for x, y, r, red, rot in [(40, 290, 11, True, 20), (66, 292, 8, False, 0), (950, 289, 13, True, 30), (976, 292, 9, False, 10),
-                              (1040, 290, 15, True, 50), (1792, 291, 11, True, 30), (1818, 288, 16, False, 0), (1914, 288, 17, True, 15), (1942, 292, 11, False, 60)]:
-        b += rose(x, y, r, red, rot)
+    b += bush(1010, 286, 1.0, 3) + bush(1880, 284, .9, 7)
     if raw:
         return defs, b
     d2, g = fade(W, H, b, .025)
