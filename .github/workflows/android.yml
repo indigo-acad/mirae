@@ -1,0 +1,30 @@
+# Сборка APK «MIRAÉ для Android» (папка android/): при изменении android/ или вручную (Actions → Android APK → Run workflow).
+# Готовый файл — в выпуске «android» (Releases), его можно скачать прямо с телефона.
+name: Android APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["android/**", ".github/workflows/android.yml"]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: "8.7" }
+      - name: Build
+        working-directory: android
+        run: gradle assembleDebug --no-daemon
+      - run: cp android/app/build/outputs/apk/debug/app-debug.apk mirae.apk
+      - uses: actions/upload-artifact@v4
+        with: { name: mirae-apk, path: mirae.apk }
+      - name: Release
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          gh release delete android -y --cleanup-tag || true
+          gh release create android mirae.apk -t "MIRAÉ для Android" -n "Скачайте mirae.apk на телефон и откройте. Android спросит разрешение на установку из этого источника."
