@@ -106,11 +106,15 @@ function gapIn(text,c){
   return hit?r:null;
 }
 /* подсказки на изучаемом языке: определения (без самого слова), выражения и примеры с пропуском, синонимы */
+/* Всё — по уровню ученика (KR.mean.level), даже если слово сложное: длинные определения и примеры не даём.
+   Свой пример карточки (c.ex) — всегда: словарный не по уровню убирает KR.dict.refit, свой выбрал ученик или преподаватель.
+   Дополнительные примеры — из статьи словаря, только из того значения слова, которое ученик учит. */
 function ctxPrompts(c){
-  var I=info(c)||{},out=[],nw=SRS.norm(c.w);
-  M.tdefs(c,I).forEach(function(d){if(SRS.norm(d.s).indexOf(nw)<0)out.push({k:'def',s:d.s})});
-  M.cols(c).forEach(function(x){var g=gapIn(x.s,c);if(g)out.push({k:'col',s:g})});
-  var ex=[];if(c.ex)ex.push(c.ex);(I.examples||[]).forEach(function(e){if(e.s&&ex.indexOf(e.s)<0)ex.push(e.s)});
+  var I=info(c)||{},out=[],nw=SRS.norm(c.w),lv=M.level(c.l),ok=function(t,k){return M.fits(t,c.l,lv,k)};
+  M.tdefs(c,I).forEach(function(d){if(SRS.norm(d.s).indexOf(nw)<0&&ok(d.s,1.3))out.push({k:'def',s:d.s})});
+  M.cols(c).forEach(function(x){var g=ok(x.s,1.3)&&gapIn(x.s,c);if(g)out.push({k:'col',s:g})});
+  var ex=[];if(c.ex)ex.push(c.ex);(I.examples||[]).forEach(function(e){if(e.s&&ex.indexOf(e.s)<0&&ok(e.s))ex.push(e.s)});
+  var de=KR.dict.cached(c.w,c.l);if(de)KR.dict.examplesFor(c,de,lv).forEach(function(e){if(ex.indexOf(e.s)<0)ex.push(e.s)});
   ex.slice(0,3).forEach(function(t){var g=gapIn(t,c);if(g)out.push({k:'ex',s:g})});
   var sy=M.syns(c,I);if(sy.length)out.push({k:'syn',s:sy.slice(0,3).join(', '),list:sy.slice(0,3)});
   return out;
@@ -405,7 +409,27 @@ var dictGet=KR.dict.get,enrich=KR.dict.enrich;
 async function dictPull(id,done){
   var c=V.get(id);if(!c||!KR.cloud.on||!KR.user())return null;
   var r=await dictGet(c.w,c.l);c=V.get(id);if(!c)return null;
-  var n=enrich(c,r);c=V.update(n);if(done)done(c,r);return r;
+  var n=KR.dict.refit(c,r);c=V.update(n);if(done)done(c,r);return r;
+}
+/* Карточки, заполненные из словаря раньше, брали определения и примеры из всех значений слова подряд
+   (까먹다 «забывать» — с примером про очистку каштанов) и примеры любой сложности. Поправляем их понемногу в фоне:
+   по одному слову, не больше 40 за открытие страницы, не во время занятия. */
+var FIXING=false;
+async function fixOld(){
+  if(FIXING||!KR.cloud.on||!KR.user())return;FIXING=true;
+  var ids=V.all().filter(function(c){return c.dsrc&&c.sv!==2}).slice(0,40).map(function(c){return c.id});
+  try{
+    for(var i=0;i<ids.length;i++){
+      while(S)await new Promise(function(r){setTimeout(r,5000)});
+      var c=V.get(ids[i]);if(!c)continue;
+      var r=await dictGet(c.w,c.l);c=V.get(ids[i]);if(!c)continue;
+      if(!r||!r.found){c=Object.assign({},c,{sv:2});V.update(c);continue}
+      if(!r.senses)break;   // функция словаря ещё старая: статья без значений, поправить нечем
+      var n=KR.dict.refit(c,r);n.sv=2;V.update(n);
+      await new Promise(function(r){setTimeout(r,400)});
+    }
+  }catch(e){}
+  FIXING=false;
 }
 /* все слова раздела без статьи: по одному, не больше 40 за раз */
 var DALL=false;
@@ -807,6 +831,15 @@ function wstats(c){
     row('Интервал',c.st===2?SRS.span((c.ivl||1)*SRS.DAY):'шаги изучения')+row('Следующее',c.due<=now?'сегодня':'через '+SRS.span(c.due-now))+
     row('Начал(а) учить',d(c.fr))+row('Последний раз',d(c.lr))+(c.b?row('Добавляли снова',c.b):'')+'</div></div>';
 }
+/* значения слова в словаре: какие ученик учит. Определения, примеры и выражения — только из отмеченных */
+function senseHtml(c){
+  var r=KR.dict.cached(c.w,c.l),ss=KR.dict.senses(r);if(ss.length<2)return '';
+  var on=KR.dict.pickSenses(c,r);
+  var lab=function(x){var t=(x.tr_ru||[]).slice(0,2).join(', '),d=(x.defs||[]).filter(function(y){return y.l===c.l})[0]||(x.defs||[]).filter(function(y){return y.l==='ru'})[0]||(x.defs||[])[0];
+    return (t?'<b>'+esc(t)+'</b> ':'')+(d?'<span'+(d.l==='ko'?' class="ko"':'')+' lang="'+d.l+'">'+esc(d.s.length>70?d.s.slice(0,68)+'…':d.s)+'</span>':'')};
+  return '<div class="wsense"><h4>Какое значение учу</h4><p class="hint">Примеры, определения и выражения в отработке — только для отмеченных значений.</p><div class="opts" role="group" aria-label="Значения слова">'+
+    ss.map(function(x,i){var y=on.indexOf(i)>=0;return '<button type="button" data-sense="'+i+'" data-id="'+esc(c.id)+'" aria-pressed="'+y+'" class="'+(y?'sel':'')+'" style="text-align:left">'+(y?'✓ ':'')+lab(x)+'</button>'}).join('')+'</div></div>';
+}
 function openCard(id){
   var c=V.get(id);if(!c)return;
   var d=$('#wdlg');if(!d){d=document.createElement('dialog');d.id='wdlg';d.className='wdlg card';d.setAttribute('aria-label','Карточка слова');document.body.appendChild(d);d.addEventListener('close',saveNote)}
@@ -815,7 +848,7 @@ function openCard(id){
   d.dataset.id=id;
   d.innerHTML='<form method="dialog" class="wdlg-in"><div class="wdlg-top"><span class="muted">'+esc(st)+' · '+esc(KR.W2.source(src,set&&set.title))+'</span>'+
     '<button type="submit" class="icb" aria-label="Закрыть">'+KR.icon('x',18)+'</button></div>'+KR.W2.card(i,c)+
-    wstats(c)+
+    senseHtml(c)+wstats(c)+
     '<div class="wdlg-me"><button type="button" class="pick'+(c.star?' on':'')+'" data-star="'+esc(c.id)+'" aria-pressed="'+!!c.star+'">'+KR.icon('star',16)+(c.star?'Сложное слово':'Отметить как сложное')+'</button>'+
     '<label class="field" for="wnote">Моя заметка</label><textarea id="wnote" class="name" rows="2" maxlength="500" placeholder="Как запомнить, где встретилось слово">'+esc(c.note||'')+'</textarea>'+
     (c.st?'<div class="opts wsend" role="group" aria-label="Повторить раньше"><span class="muted">Повторить раньше:</span><button type="button" data-send="today" data-id="'+esc(c.id)+'">Сегодня</button><button type="button" data-send="tom" data-id="'+esc(c.id)+'">Завтра</button></div>':'')+
@@ -1048,7 +1081,11 @@ function drawPrefs(){
   h+='<div class="card glass prefs" id="cxcfg"><h3>Как отрабатывать слова · '+LN+'</h3><p class="hint">Отметь, на каком языке давать значение слова. Можно несколько: тогда направления чередуются, например '+LN+' ↔ русский и '+LN+' ↔ '+gname(lang==='en'?'ko':'en')+' вперемешку.</p><div class="opts" role="group" aria-label="Направления перевода">'+
     glsOpts().map(function(g){var on=gs.indexOf(g)>=0;return '<button type="button" data-gl="'+g+'" aria-pressed="'+on+'" class="'+(on?'sel':'')+'">'+(on?'✓ ':'')+(g==='ctx'?'В контексте · с '+lvl:g==='ru'?LN+' ↔ русский':LN+' ↔ '+gname(g))+'</button>'}).join('')+'</div>'+
     '<p class="hint">В обе стороны: в одних заданиях видишь слово и вспоминаешь значение, в других — по значению вспоминаешь слово. Английское или корейское значение берётся из определений слова (карандаш → «Определения и переводы на других языках»; «Заполнить из словаря» добавляет их сам). Если у слова нет значения на выбранном языке, задание будет с русским. «В контексте» — только на '+ln+': определение, выражение или пример с пропуском, синонимы.</p>'+
-    '<p class="hint">Рекомендуем «В контексте» с уровня '+lvl+' и выше: слово запоминается вместе с тем, как его употребляют, и не приходится переводить в голове. В любом режиме синоним или другое значение слова ошибкой не считается.'+lvTip()+'</p></div>';
+    '<p class="hint">Рекомендуем «В контексте» с уровня '+lvl+' и выше: слово запоминается вместе с тем, как его употребляют, и не приходится переводить в голове. В любом режиме синоним или другое значение слова ошибкой не считается.'+lvTip()+'</p>'+
+    (function(){var my=(s.lv||{})[lang]||'',auto=M.levelAuto(lang);
+      return '<span class="field">Мой уровень · '+LN+'</span><div class="opts" role="group" aria-label="Мой уровень">'+
+      [['','Сам · сейчас '+auto]].concat((M.LV[lang]||[]).map(function(x){return [x,x]})).map(function(x){var on=my===x[0];return '<button type="button" data-lvl="'+x[0]+'" aria-pressed="'+on+'" class="'+(on?'sel':'')+'">'+esc(x[1])+'</button>'}).join('')+'</div>'+
+      '<p class="hint">Примеры, определения и выражения в контексте подбираются под этот уровень, даже если само слово сложнее: длинные и трудные не показываем. «Сам» — уровень по числу слов в словаре.</p>'})()+'</div>';
   var lw=s.lw;
   h+='<div class="card glass prefs" id="lwcfg"><h3>Слова из уроков</h3><p class="hint">Что делать со словами урока, когда открываешь его в первый раз.</p><div class="opts" role="group" aria-label="Слова из новых уроков">'+
     [['ask','Спрашивать'],['auto','Добавлять сами'],['off','Не добавлять']].map(function(x){return '<button type="button" data-lw="'+x[0]+'" aria-pressed="'+(lw===x[0])+'" class="'+(lw===x[0]?'sel':'')+'">'+x[1]+'</button>'}).join('')+'</div>'+
@@ -1081,7 +1118,7 @@ function lvTip(){
 function savePrefs(reset){
   if(reset){V.setSettings(null);drawPrefs();drawToday();$('#pmsg').textContent='Настройки сброшены';$('#pmsg').className='msg ok';return}
   var g={};[].forEach.call(document.querySelectorAll('#pf input[name=g]'),function(i){g[i.value]=i.checked?1:0});
-  V.setSettings({steps:$('#p-steps').value,grad:$('#p-grad').value,easy:$('#p-easy').value,mod:parseFloat($('#p-mod').value)/100,newDay:$('#p-new').value,revDay:$('#p-rev').value,games:g,lw:V.settings().lw,ctxm:V.settings().ctxm,gls:V.settings().gls});
+  V.setSettings({steps:$('#p-steps').value,grad:$('#p-grad').value,easy:$('#p-easy').value,mod:parseFloat($('#p-mod').value)/100,newDay:$('#p-new').value,revDay:$('#p-rev').value,games:g,lw:V.settings().lw,ctxm:V.settings().ctxm,gls:V.settings().gls,lv:V.settings().lv,scope:V.settings().scope});
   drawPrefs();drawToday();$('#pmsg').textContent='Сохранено';$('#pmsg').className='msg ok';
 }
 
@@ -1186,11 +1223,15 @@ document.addEventListener('click',function(e){
       b.disabled=false;if(!r.found){if(em)em.textContent=r.message||'Слова нет в словаре.';return}
       // в форму: дописываем то, чего в полях ещё нет; сохранит ученик
       var cur={id:c0.id,l:c0.l,w:c0.w,t:M.splitTr(f0.t.value,c0.l).t,d:M.parseDefs(f0.d.value),syn:M.parseSyn(f0.syn.value),col:M.parseCols(f0.col.value),ex:f0.ex.value.trim(),et:f0.et.value.trim()};
-      var n=enrich(cur,r);f0.t.value=n.t||'';f0.d.value=M.fmtDefs(n.d);f0.syn.value=(n.syn||[]).join(', ');f0.col.value=M.fmtCols(n.col);f0.ex.value=n.ex||'';f0.et.value=n.et||'';
+      var n=KR.dict.refit(cur,r);f0.t.value=n.t||'';f0.d.value=M.fmtDefs(n.d);f0.syn.value=(n.syn||[]).join(', ');f0.col.value=M.fmtCols(n.col);f0.ex.value=n.ex||'';f0.et.value=n.et||'';
       S_DF[c0.id]={dsrc:n.dsrc,ipa:n.ipa};
       if(em)em.textContent='Заполнено: '+(r.srcName||'словарь')+'. Проверь и сохрани.';
     }).catch(function(e){b.disabled=false;if(em)em.textContent='Словарь не ответил: '+e.message});return}
   if(d.x==='dict-all')return dictAll(b);
+  if(d.sense!==undefined&&d.id){var sc=V.get(d.id),sr=sc&&KR.dict.cached(sc.w,sc.l);if(!sr)return;
+    var cur2=KR.dict.pickSenses(sc,sr).slice(),si=+d.sense,sp=cur2.indexOf(si);if(sp>=0){if(cur2.length>1)cur2.splice(sp,1)}else cur2.push(si);
+    cur2.sort(function(a,b){return a-b});var nc=KR.dict.refit(sc,sr,cur2);nc.sv=2;V.update(nc);openCard(d.id);
+    var sb=document.querySelector('#wdlg [data-sense="'+si+'"]');if(sb)sb.focus();return}
   if(d.gl){var cs=V.settings(),cur=gls().slice(),gi=cur.indexOf(d.gl);if(gi>=0){if(cur.length>1)cur.splice(gi,1)}else cur.push(d.gl);cs.gls=Object.assign({},cs.gls);cs.gls[lang]=cur;V.setSettings(cs);drawPrefs();drawToday();var cc=$('#cxcfg [data-gl="'+d.gl+'"]');if(cc)cc.focus();return}
   if(d.x==='cx-cfg'){setTab('prefs');var cx=$('#cxcfg');if(cx)cx.scrollIntoView({block:'start'});return}
   if(d.x==='mdk')return meanCheck(true);
@@ -1198,6 +1239,7 @@ document.addEventListener('click',function(e){
   if(d.x==='mbad'){if(S&&S.game==='mean'&&S.mv!==undefined){S.mv=undefined;[].forEach.call(document.querySelectorAll('[data-x="mown"],[data-x="mbad"]'),function(x){x.disabled=true});grade(1,false)}return}
   if(d.x==='wown'){if(S&&S.card&&S.retype&&S.wv&&!S.lock){var wc=S.card;addMeaning(wc,S.wv,true);S.lock=true;var wi=$('#win');if(wi)wi.disabled=true;
     $('#fb').innerHTML='<div class="ok">Засчитано: «'+esc(S.wv)+'» добавлено в синонимы. Слово, которое мы ждали: '+word(wc)+' — '+glH(wc)+'</div>'+more(wc);grade(3,false)}return}
+  if(d.lvl!==undefined){var vs2=V.settings();vs2.lv=Object.assign({},vs2.lv);if(d.lvl)vs2.lv[lang]=d.lvl;else delete vs2.lv[lang];V.setSettings(vs2);drawPrefs();var lb2=$('#cxcfg [data-lvl="'+d.lvl+'"]');if(lb2)lb2.focus();return}
   if(d.lw){var ls=V.settings();ls.lw=d.lw;V.setSettings(ls);return drawPrefs()}
   if(d.tab)return setTab(d.tab);
   if(d.x==='stop')return stop(true);
@@ -1272,6 +1314,7 @@ document.addEventListener('submit',function(e){
       if(rn){if(S_DF[c.id]){S_DF[rn.id]=S_DF[c.id];delete S_DF[c.id]}c=rn}}
     var tt=M.splitTr(f.t.value,c.l),dd=M.parseDefs(f.d.value),seen={};dd=dd.concat(tt.d).filter(function(x){var k=x.l+':'+x.s.toLowerCase();if(seen[k])return false;seen[k]=1;return true}).slice(0,12);
     var arr=function(o,k,v){if(v.length)o[k]=v;else delete o[k]};
+    if(tt.t!==(c.t||''))c=Object.assign({},c),delete c.sn;   // перевод поменяли — значение слова подберётся по новому переводу
     c=Object.assign({},c,{t:tt.t,ex:f.ex.value.trim(),et:f.et.value.trim()});arr(c,'d',dd);arr(c,'syn',M.parseSyn(f.syn.value));arr(c,'col',M.parseCols(f.col.value));
     if(S_DF[c.id]){if(S_DF[c.id].dsrc)c.dsrc=S_DF[c.id].dsrc;if(S_DF[c.id].ipa&&!c.ipa)c.ipa=S_DF[c.id].ipa;c.dq=1;delete S_DF[c.id]}if(!c.ex){delete c.ex;delete c.et;delete c.f}else if(c.f&&c.ex.indexOf(c.f)<0)delete c.f;V.update(c)}editing=null;drawAll()}
 });
@@ -1302,7 +1345,7 @@ KR.onLang=function(l){try{sessionStorage.setItem(wkey(),l)}catch(e){}stopListen(
 if(window.speechSynthesis)speechSynthesis.onvoiceschanged=function(){if(!$('#prefs').hidden&&!typing())drawPrefs()};
 if(KR.require()){KR.topbar('words');drawAll();KR.load().then(function(){
   var l=URLP.get('lang');if(l&&wlangs().indexOf(l)>=0){try{sessionStorage.setItem(wkey(),l)}catch(e){}if(l!==KR.lang()&&KR.langs().indexOf(l)>=0)KR.setLang(l)}
-  drawAll();loadInfo();
+  drawAll();loadInfo();setTimeout(fixOld,3000);
   // из кабинета: words.html#day (и старые #new, #rev) — сразу занятие на сегодня: карточки, потом упражнения
   var hs=location.hash,pl=V.plan(DL());
   if(hs==='#day'||hs==='#new'||hs==='#rev'){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
