@@ -1324,3 +1324,6 @@ body{letter-spacing:.005em}
 .reading .gap input.ans{width:auto;min-width:4em;max-width:100%;display:inline-block;margin:2px 2px;padding:2px 8px;font-size:16px}
 .ex.dlg .q{line-height:1.8}
 @media(max-width:719px){html[data-lang=ko],.lc[data-l=ko]{--scene:url(../img/scene-ko-sm.webp)}html[data-lang=en],.lc[data-l=en]{--scene:url(../img/scene-en-sm.webp)}}
+/* меню прокручивается по горизонтали (overflow) и обрезало свечение подсветки прямоугольником: даём свечению место внутри */
+.top nav{padding:14px 18px;margin:-14px -18px}
+.top .nav-pill{box-shadow:0 0 14px -4px rgba(212,175,124,.45),inset 0 1px 0 rgba(255,241,214,.12)}
