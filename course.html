@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0B1535">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Playfair+Display+SC:wght@400;700&family=Manrope:wght@400;500;600;700&family=Comforter+Brush&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -82,7 +82,7 @@ function programEn(){
   return {sub:'Программа',title:(window.SECTIONS||{}).english||'English',note:'Тренажёры, домашние задания и проверочные по программе. Пройденное отмечай сам.',unit:'материалов',parts:parts};
 }
 // миниатюра урока: фрагмент пейзажа раздела, по кругу из пяти
-function thumb(k){return 'img/thumb-'+(KR.lang()==='en'?'en':'ko')+'-'+(k%5+1)+'.svg'}
+function thumb(k){return 'img/thumb-'+(KR.lang()==='en'?'en':'ko')+'-'+(k%5+1)+'.webp'}
 // последний урок, к которому ученик возвращался: по времени последнего пройденного блока
 function lastTouched(all){
   var best=null,bt=0;

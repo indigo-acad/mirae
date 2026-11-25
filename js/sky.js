@@ -13,7 +13,7 @@ var FS=[
 "#else",
 "precision mediump float;",
 "#endif",
-"uniform vec2 uR;uniform float uT;uniform float uH;uniform float uFlat;uniform float uLive;",
+"uniform vec2 uR;uniform float uT;uniform float uH;uniform float uFlat;uniform float uLive;uniform vec2 uM;",
 "float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}",
 "float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);",
 "  return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}",
@@ -24,8 +24,16 @@ var FS=[
 "  float sz=mix(.03,.075,hash(id+3.3));",
 "  float tw=.6+.4*sin(uT*(.5+1.8*hash(id+5.5))+h*40.);",
 "  return smoothstep(sz,0.,length(f-o))*tw*(.35+.65*hash(id+9.9));}",
+"vec3 bright(vec2 q,float sc){",                       // крупные звёзды: ореол и четыре луча, тёплые и холодные
+"  vec2 g=q*sc,id=floor(g),f=fract(g)-.5;float h=hash(id+2.2);if(h<.9)return vec3(0.);",
+"  vec2 o=(vec2(hash(id+4.1),hash(id+8.3))-.5)*.5,d=f-o;float r=length(d);",
+"  float tw=.55+.45*sin(uT*(.7+1.6*hash(id+1.9))+h*60.);tw*=tw;",
+"  float core=smoothstep(.06,0.,r),halo=exp(-r*22.)*.5;",
+"  float ray=(exp(-abs(d.x)*140.)*exp(-abs(d.y)*9.)+exp(-abs(d.y)*140.)*exp(-abs(d.x)*9.))*.8;",
+"  vec3 c=mix(vec3(.75,.85,1.),vec3(1.,.86,.62),hash(id+6.6));",
+"  return c*(core+halo+ray*tw)*tw;}",
 "float meteor(vec2 p,float seed){",
-"  float T=6.+seed*3.,t=uT/T+seed*13.7,id=floor(t),f=fract(t),life=1.1/T;",
+"  float T=4.+seed*2.5,t=uT/T+seed*13.7,id=floor(t),f=fract(t),life=1.1/T;",
 "  if(f>life)return 0.;",
 "  float k=f/life,asp=uR.x/uR.y;",
 "  vec2 a=vec2((hash(vec2(id,seed))*1.5-.6)*asp*.55,.2+.4*hash(vec2(seed,id)));",
@@ -33,7 +41,8 @@ var FS=[
 "  float len=.2+.2*hash(vec2(id,seed*3.1)),tail=.1*sin(3.14159*k)+.015;",
 "  vec2 q=p-(a+dir*len*k);float h=clamp(dot(q,-dir)/tail,0.,1.);",
 "  float w=mix(.0022,.0005,h);",
-"  return smoothstep(w*2.5,0.,length(q+dir*tail*h))*(1.-h)*(1.-h)*sin(3.14159*k);}",
+"  float head=exp(-length(q)*420.)*1.6;",
+"  return (smoothstep(w*2.5,0.,length(q+dir*tail*h))*(1.-h)*(1.-h)+head)*sin(3.14159*k);}",
 "void main(){",
 "  vec2 uv=gl_FragCoord.xy/uR;",
 "  vec2 p=(gl_FragCoord.xy-vec2(.5*uR.x,uH*uR.y))/uR.y;",
@@ -53,10 +62,16 @@ var FS=[
 "  sky+=indigo*smoothstep(.42,.8,v)*haze*.28;",        // медленная «вуаль» света
 "  sky=mix(sky,gold,glow*glow*.85*s);",                // тёплое зарево у самого горизонта
 "  sky=mix(sky,warm,rim*(.35+.6*hot)*(.4+.6*s));",     // тонкая горящая линия
-"  float st=stars(p+vec2(uT*.0012,0.),42.,.82)+.6*stars(p*1.7+vec2(uT*.0008,3.),60.,.88);",
-"  st+=.8*stars(p*1.25+vec2(uT*.016,uT*.03),34.,.93);",          // редкие звёздочки, которые медленно падают
-"  sky+=vec3(.95,.93,.88)*st*smoothstep(.03,.4,dd)*(1.-.8*glow);",
-"  float mt=meteor(p,.13)+meteor(p,.57)+meteor(p,.91);",          // падающие звёзды
+"  vec2 m1=uM*.012,m2=uM*.025,m3=uM*.045;",             // параллакс от курсора: дальние слои двигаются меньше
+"  float mw=fbm(vec2((p.x+p.y*.55)*2.2+uT*.004,(p.y-p.x*.35)*5.)+m1);",
+"  float band=exp(-pow((p.y-.42+p.x*.32)*3.2,2.));",     // млечный путь: пыльная полоса по диагонали
+"  sky+=mix(indigo,vec3(.62,.55,.75),.4)*smoothstep(.35,.85,mw)*band*.16*smoothstep(.05,.5,dd);",
+"  float st=stars(p+m1+vec2(uT*.0012,0.),42.,.82)+.6*stars(p*1.7+m1+vec2(uT*.0008,3.),60.,.88);",
+"  st+=.7*stars(p*2.4+m1,80.,.8)*band;",                 // россыпь мелких звёзд в млечном пути
+"  st+=.8*stars(p*1.25+m2+vec2(uT*.016,uT*.03),34.,.93);",
+"  vec3 bs=bright(p+m3+vec2(uT*.002,0.),9.)+bright(p*1.3+m2+vec2(3.1,uT*.0015),12.)*.7;",          // редкие звёздочки, которые медленно падают
+"  sky+=(vec3(.95,.93,.88)*st+bs)*smoothstep(.03,.4,dd)*(1.-.8*glow);",
+"  float mt=meteor(p,.13)+meteor(p,.57)+meteor(p,.91)+meteor(p,.34);",          // падающие звёзды
 "  sky+=vec3(1.,.95,.84)*mt*uLive*smoothstep(.02,.2,dd);",
 "  float k=max(-d,0.);",
 "  vec3 body=mix(vec3(.02,.036,.1),bg,smoothstep(0.,.3,k));",
@@ -76,7 +91,7 @@ function mount(cv,opts){
   var gl=null;
   try{gl=cv.getContext("webgl",{antialias:false,alpha:false,powerPreference:"low-power"})||cv.getContext("experimental-webgl")}catch(e){}
   if(!gl)return null;
-  var uR,uT,uH,uFlat,uLive;
+  var uR,uT,uH,uFlat,uLive,uM,mx=0,my=0,tx=0,ty=0;
   function shader(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return gl.getShaderParameter(s,gl.COMPILE_STATUS)?s:null}
   function init(){
     var v=shader(gl.VERTEX_SHADER,VS),f=shader(gl.FRAGMENT_SHADER,FS);if(!v||!f)return false;
@@ -87,7 +102,7 @@ function mount(cv,opts){
     gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
     var a=gl.getAttribLocation(pr,"a");gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
     uR=gl.getUniformLocation(pr,"uR");uT=gl.getUniformLocation(pr,"uT");uH=gl.getUniformLocation(pr,"uH");
-    uFlat=gl.getUniformLocation(pr,"uFlat");uLive=gl.getUniformLocation(pr,"uLive");
+    uFlat=gl.getUniformLocation(pr,"uFlat");uLive=gl.getUniformLocation(pr,"uLive");uM=gl.getUniformLocation(pr,"uM");
     return true;
   }
   if(!init())return null;
@@ -106,13 +121,13 @@ function mount(cv,opts){
   function draw(){
     if(lost||!cv.width)return;
     gl.uniform2f(uR,cv.width,cv.height);gl.uniform1f(uT,t);gl.uniform1f(uH,hz);
-    gl.uniform1f(uFlat,opts.flat?1:0);gl.uniform1f(uLive,paused&&!peek?0:1);   // на паузе падающие звёзды не «застывают» в кадре
+    gl.uniform1f(uFlat,opts.flat?1:0);mx+=(tx-mx)*.06;my+=(ty-my)*.06;gl.uniform2f(uM,mx,my);gl.uniform1f(uLive,paused&&!peek?0:1);   // на паузе падающие звёзды не «застывают» в кадре
     gl.drawArrays(gl.TRIANGLES,0,3);cv.classList.add("on");
   }
   function running(){return !paused&&visible&&!lost&&!document.hidden}
   function frame(now){
     raf=0;if(!running())return;
-    if(now-last>=33){t+=Math.min(.1,(now-last)/1000);last=now;draw()}   // ~30 кадров в секунду достаточно
+    if(now-last>=16){t+=Math.min(.1,(now-last)/1000);last=now;draw()}   // ~30 кадров в секунду достаточно
     raf=requestAnimationFrame(frame);
   }
   function kick(){if(!raf&&running())raf=requestAnimationFrame(frame)}
@@ -123,6 +138,11 @@ function mount(cv,opts){
   document.addEventListener("visibilitychange",kick);
   cv.addEventListener("webglcontextlost",function(e){e.preventDefault();lost=true});
   cv.addEventListener("webglcontextrestored",function(){lost=!init();refresh()});
+  // курсор и прокрутка сдвигают слои звёзд (без «уменьшения движения»)
+  if(!reduce){
+    window.addEventListener("pointermove",function(e){tx=(e.clientX/innerWidth-.5)*2;ty=-(e.clientY/innerHeight-.5)*2},{passive:true});
+    window.addEventListener("scroll",function(){ty=-(scrollY/innerHeight)*2.5;if(paused)draw()},{passive:true});
+  }
   refresh();
 
   return {
