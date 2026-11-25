@@ -113,6 +113,25 @@ function refit(c,r,sn){
   if(c.ex&&(bad(c.ex)||((mine[key(c.ex)]||other[key(c.ex)])&&!M().fits(c.ex,c.l)))){delete c.ex;delete c.et;delete c.f}
   return enrich(c,r);
 }
+/* Ученик добавляет значение i к тем, что учит (on), или убирает его. Перевод карточки меняется вместе со значением:
+   добавили «использовать» к 쓰다 «писать» — перевод «писать; использовать»; убрали — перевод этого значения уходит
+   (свой перевод ученика и преподавателя, которого нет в словаре, остаётся). Возвращает новую карточку (ещё не сохранена). */
+function setSense(c,r,i,on){
+  var ss=senses(r);if(!ss[i])return c;
+  var cur=pickSenses(c,r).slice(),p=cur.indexOf(i);
+  if(on&&p<0)cur.push(i);else if(!on&&p>=0&&cur.length>1)cur.splice(p,1);else return c;
+  cur.sort(function(a,b){return a-b});
+  var nm=function(s){return M().nm(s)},parts=String(c.t||'').split(/;|\n/).map(function(s){return s.trim()}).filter(Boolean),tr=ss[i].tr_ru||[];
+  if(on){var has=function(t){var n=nm(t);return parts.some(function(x){var q=nm(x);return q===n||stemEq(q,n)})};if(tr[0]&&!has(tr[0]))parts.push(tr[0])}
+  else{var keep=[];cur.forEach(function(j){(ss[j].tr_ru||[]).forEach(function(t){keep.push(nm(t))})});
+    var drop=tr.map(nm),left=parts.filter(function(x){var q=nm(x);return !(drop.indexOf(q)>=0&&keep.indexOf(q)<0)});if(left.length)parts=left}
+  var n=refit(Object.assign({},c,{t:parts.join('; ')}),r,cur);n.sv=2;return n;
+}
+/* короткая подпись значения: перевод и начало определения */
+function senseLabel(x,l){
+  var t=(x.tr_ru||[]).slice(0,2).join(', '),d=(x.defs||[]).filter(function(y){return y.l==='ru'})[0]||(x.defs||[]).filter(function(y){return y.l===l})[0]||(x.defs||[])[0];
+  return {t:t,d:d?{l:d.l,s:d.s.length>70?d.s.slice(0,68)+'…':d.s}:null};
+}
 /* Запись произношения из словаря для слова: сначала из карточки ученика (c.au), потом из сохранённой статьи.
    en — по выбранному произношению (gb → британская запись, us → американская), если нужной нет — любая; ko — запись словаря. */
 function rec(text,l,acc){
@@ -127,5 +146,5 @@ function rec(text,l,acc){
 KR.rec=rec;
 /* подпись источника перевода */
 var SRC={base:'база школы',dict:'словарь','dict+deepl':'словарь + DeepL',deepl:'DeepL'};
-KR.dict={rec:rec,get:get,put:put,cached:cached,translate:translate,enrich:enrich,refit:refit,senses:senses,pickSenses:pickSenses,examplesFor:examplesFor,SRC:SRC};
+KR.dict={rec:rec,get:get,put:put,cached:cached,translate:translate,enrich:enrich,refit:refit,setSense:setSense,senseLabel:senseLabel,senses:senses,pickSenses:pickSenses,examplesFor:examplesFor,SRC:SRC};
 })();

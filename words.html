@@ -131,20 +131,31 @@ function pickCx(c){
 function promptHtml(c){
   var p=S&&S.cx?S.pr:null;
   if(!p)return S&&S.gx?'<div class="q-word q-cx"><small class="muted">'+esc(gname(S.gx))+'</small><div lang="'+S.gx+'"'+(S.gx==='ko'?' class="ko"':'')+'>'+esc(trOf(c))+' '+sayBtn(trOf(c),S.gx)+'</div></div>':'<div class="q-word q-ru">'+esc(trOf(c))+'</div>';
-  return '<div class="q-word q-cx"><small class="muted">'+PK[p.k]+'</small><div'+wcls(c)+' lang="'+c.l+'">'+esc(p.s)+(p.k==='def'||p.k==='syn'?' '+sayBtn(p.s,c.l):'')+'</div></div>';
+  return '<div class="q-word q-cx"><small class="muted">'+PK[p.k]+' · '+esc(M.level(c.l))+'</small><div'+wcls(c)+' lang="'+c.l+'">'+esc(p.s)+(p.k==='def'||p.k==='syn'?' '+sayBtn(p.s,c.l):'')+'</div></div>'+trPeek(c,true);
+}
+/* определения на изучаемом языке по силам ученику: сложные (длиннее уровня) в контексте не показываем */
+function lvDefs(c){var lv=M.level(c.l);return M.tdefs(c,info(c)||{}).filter(function(d){return M.fits(d.s,c.l,lv,1.3)})}
+/* «Посмотреть перевод» в контексте: объяснение на изучаемом языке бывает не до конца понятно — перевод открывается по нажатию.
+   q — до ответа: тогда это подсказка (как «Начинается на»), в оценке слова учитывается. */
+function trPeek(c,q){
+  if(!(S&&S.cx))return '';var I=info(c)||{},t=trOf(c),rd=M.defs(c,I).filter(function(d){return d.l==='ru'})[0];
+  if(!q&&gl(c).l==='ru')t='';
+  if(!t&&!rd&&!(c.et&&c.ex))return '';
+  return '<details class="trpeek"'+(q?' data-peek="q"':'')+'><summary>'+(q?'Не понятно? Посмотреть перевод':'Посмотреть перевод')+'</summary><div class="exbox">'+
+    (t?'<div><b>'+esc(t)+'</b></div>':'')+(rd?'<div class="muted">'+esc(rd.s)+'</div>':'')+(c.et&&c.ex&&!q?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div></details>';
 }
 /* значение слова в ответе: в контексте — на изучаемом языке */
 function gl(c){
-  if(S&&S.cx){var I=info(c)||{},d=M.tdefs(c,I)[0],sy=M.syns(c,I);if(d)return {s:d.s,l:c.l};if(sy.length)return {s:'≈ '+sy.slice(0,3).join(', '),l:c.l}}
+  if(S&&S.cx){var I=info(c)||{},d=lvDefs(c)[0],sy=M.syns(c,I);if(d)return {s:d.s,l:c.l};if(sy.length)return {s:'≈ '+sy.slice(0,3).join(', '),l:c.l}}
   return {s:trOf(c),l:S&&S.gx||'ru'};
 }
 function glH(c){var g=gl(c);return g.l==='ru'?esc(g.s):'<span'+(g.l==='ko'?' class="ko"':'')+' lang="'+g.l+'">'+esc(g.s)+'</span>'}
 /* все значения слова — показать после ответа */
 function meaningsHtml(c,cx){
   var I=info(c)||{},h='';
-  if(cx){var sy=M.syns(c,I),td=M.tdefs(c,I);
+  if(cx){var sy=M.syns(c,I),td=lvDefs(c);
     if(sy.length)h+='<div><span class="muted">Синонимы:</span> <span'+wcls(c)+' lang="'+c.l+'">'+sy.map(esc).join(', ')+'</span></div>';
-    td.forEach(function(d){h+='<div'+wcls(c)+' lang="'+c.l+'">'+esc(d.s)+'</div>'});
+    var g0=gl(c).s;td.forEach(function(d){if(d.s!==g0)h+='<div'+wcls(c)+' lang="'+c.l+'">'+esc(d.s)+'</div>'});
     return h?'<div class="exbox">'+h+'</div>':'';
   }
   var t=M.trs(c,I),od=M.defs(c,I);
@@ -199,7 +210,7 @@ function drawToday(){
   var busy=S?S.mode:'',nNew=p.fresh.length,inWork=p.learn.length+p.soon.length,rev=p.rev.length,due=p.learn.length+rev;
   var h='<section class="card glass today tday" aria-labelledby="tday-h"><div class="tb-h"><h3 id="tday-h">'+KR.icon('spark',20)+'Занятие на сегодня</h3></div>'+
     '<div class="stat">'+box(nNew,'новых')+box(inWork+rev,'повторить')+box(st.total,'всего слов')+'</div>';
-  h+='<p class="muted tb-sub">'+(MIXL?'Все языки · '+wlangs().map(function(l){return KR.LANGS[l].name+': '+gls(l).map(gname).join(' + ')}).join(' · '):'Значения: '+gls().map(gname).join(' + '))+' · <button type="button" class="linkish" data-x="cx-cfg">сменить</button></p>';
+  h+='<p class="muted tb-sub">'+(MIXL?'Все языки · '+wlangs().map(function(l){return KR.LANGS[l].name+': '+gls(l).map(gname).join(' + ')}).join(' · '):'Значения: '+gls().map(gname).join(' + ')+(gls().indexOf('ctx')>=0?' · уровень '+M.level(lang)+((set.lv||{})[lang]?'':' (по числу слов)'):''))+' · <button type="button" class="linkish" data-x="cx-cfg">сменить</button></p>';
   if(busy)h+=busy==='done'?'':'<p class="muted tb-sub">Идёт занятие: оно открыто ниже.</p>';   // кнопки старта не дублируем, пока открыто занятие или его итог
   else if(nNew+due)h+='<div class="done-row"><span class="muted">Сначала карточки'+(nNew&&due?': новые слова и повторение вместе':nNew?' с новыми словами':' на повторение')+'. Потом — упражнения, если захочешь.</span><button type="button" class="cta" id="goday">Начать'+KR.icon('arrow',18)+'</button></div>';
   else if(inWork)h+='<div class="done-row"><span class="muted">Карточек на сейчас нет, но несколько слов скоро вернутся. Можно сразу закрепить их упражнениями.</span><button type="button" class="cta" id="go">Упражнения'+KR.icon('arrow',18)+'</button></div>';
@@ -388,7 +399,7 @@ function gNew(c){
     (ipa?'<div class="flash-ipa" lang="'+(c.l==='ko'?'ko':'en')+'">'+esc(ipa)+'</div>':'')+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+
     (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+'</div>':'')+
     // перевод не виден сразу: сначала попробовать догадаться, потом открыть
-    '<div id="nback"'+(S.nopen===c.id?'':' hidden')+'><div class="flash-t">'+esc(trOf(c)||'перевод не указан')+'</div>'+newMore(c)+(c.ex&&c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>'+
+    '<div id="nback"'+(S.nopen===c.id?'':' hidden')+'><div class="flash-t">'+esc(trOf(c)||'перевод не указан')+'</div>'+newMore(c)+(c.ex&&c.et?'<div class="muted">'+esc(c.et)+'</div>':'')+otherSenses(c)+'</div>'+
     (S.nopen===c.id?'':'<div class="done-row" id="nshowrow"><span class="muted">Догадайся, что значит слово, и открой</span><button type="button" class="btn pri" data-x="nshow">Показать перевод</button></div>')+
     '<div class="muted new-src">'+esc(src)+'</div></div>'+
     // оценка как у остальных карточек: та же сортировка по интервалам
@@ -448,6 +459,7 @@ async function dictAll(b){
 function newMore(c){
   var I=info(c)||{},t=M.trs(c,I).slice(1),d=M.defs(c,I),sy=M.syns(c,I),co=M.cols(c),h='';
   if(t.length)h+='<div class="muted">также: '+t.map(esc).join('; ')+'</div>';
+  var lv=M.level(c.l);d=d.filter(function(x){return x.l!==c.l||M.fits(x.s,c.l,lv,1.3)});   // определение на изучаемом языке — только по уровню ученика
   d.forEach(function(x){if(x.s===trOf(c))return;h+='<div><small class="muted">'+esc(M.NAMES[x.l]||x.l)+'</small> <span lang="'+x.l+'"'+(x.l==='ko'?' class="ko"':'')+'>'+esc(x.s)+'</span></div>'});
   if(sy.length)h+='<div><span class="muted">≈</span> <span'+wcls(c)+' lang="'+c.l+'">'+sy.map(esc).join(', ')+'</span></div>';
   co.slice(0,3).forEach(function(x){h+='<div><span'+wcls(c)+' lang="'+c.l+'">'+esc(x.s)+'</span>'+(x.t?' <span class="muted">· '+esc(x.t)+'</span>':'')+'</div>'});
@@ -477,8 +489,17 @@ function grade(g,auto){
   if(auto)S.timer=setTimeout(nextCard,KR.calm()?600:1100);
   else{var b=$('#nextb');if(b){b.hidden=false;b.focus()}else nextCard()}
 }
-function more(c){   // пример после ответа
-  return c.ex?'<div class="exbox"><div'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+' '+sayBtn(c.ex,c.l)+'</div>'+(c.et&&!(S&&S.cx)?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>':'';
+function more(c){   // пример после ответа; в контексте — и «Посмотреть перевод»
+  return (c.ex?'<div class="exbox"><div'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+' '+sayBtn(c.ex,c.l)+'</div>'+(c.et&&!(S&&S.cx)?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>':'')+trPeek(c);
+}
+/* У нового слова есть и другие значения: ученик учит одно (то, в котором слово добавлено), другие может добавить сам */
+function otherSenses(c){
+  var r=KR.dict.cached(c.w,c.l),ss=KR.dict.senses(r);if(ss.length<2)return '';
+  var on=KR.dict.pickSenses(c,r),rest=ss.map(function(x,i){return i}).filter(function(i){return on.indexOf(i)<0&&(ss[i].tr_ru||[]).length});
+  if(!rest.length)return '';
+  return '<details class="trpeek osense"><summary>У слова есть и другие значения · '+rest.length+'</summary><p class="muted">Сейчас учишь только это значение. Другое можно добавить — тогда будешь учить оба.</p>'+
+    rest.slice(0,4).map(function(i){var b=KR.dict.senseLabel(ss[i],c.l);return '<div class="osrow"><span>'+(b.t?'<b>'+esc(b.t)+'</b> ':'')+(b.d?'<span class="muted"'+(b.d.l==='ko'?' lang="ko"':'')+'>'+esc(b.d.s)+'</span>':'')+'</span>'+
+      '<button type="button" class="btn" data-addsense="'+i+'" data-id="'+esc(c.id)+'">Добавить</button></div>'}).join('')+'</details>';
 }
 // карточки: вспомнил — открыл — оценил сам
 function gCards(c){
@@ -496,7 +517,7 @@ function gCards(c){
     (ipa?'<div class="flash-ipa" lang="'+(c.l==='ko'?'ko':'en')+'">'+esc(ipa)+'</div>':'')+
     (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+'</div>':'')+
     '<div class="flash-back" id="back" hidden>'+(I.image?'<img class="flash-img" src="'+esc(I.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
-    '<div class="flash-t">'+(S.cx?glH(c):esc(trOf(c)||'перевод не указан'))+'</div>'+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+(c.et&&!S.cx?'<div class="muted">'+esc(c.et)+'</div>':'')+meaningsHtml(c,S.cx)+'</div></div>'+
+    '<div class="flash-t">'+(S.cx?glH(c):esc(trOf(c)||'перевод не указан'))+'</div>'+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+(c.et&&!S.cx?'<div class="muted">'+esc(c.et)+'</div>':'')+meaningsHtml(c,S.cx)+trPeek(c)+(c.st?'':otherSenses(c))+'</div></div>'+
     '<div id="fb" class="q-fb"></div>'+
     '<div class="done-row" id="showrow"><span class="muted">'+(S.cx?'Вспомни, что значит слово, и объясни его своими словами':c.st?'Вспомни перевод, потом открой':'Прочитай, послушай и открой перевод')+'</span><button type="button" class="btn pri" data-x="flip">'+(S.cx?'Показать значение':'Показать перевод')+'</button></div>'+
     rateRow(c,intro,set,now));
@@ -839,11 +860,14 @@ function wstats(c){
 /* значения слова в словаре: какие ученик учит. Определения, примеры и выражения — только из отмеченных */
 function senseHtml(c){
   var r=KR.dict.cached(c.w,c.l),ss=KR.dict.senses(r);if(ss.length<2)return '';
-  var on=KR.dict.pickSenses(c,r);
-  var lab=function(x){var t=(x.tr_ru||[]).slice(0,2).join(', '),d=(x.defs||[]).filter(function(y){return y.l===c.l})[0]||(x.defs||[]).filter(function(y){return y.l==='ru'})[0]||(x.defs||[])[0];
-    return (t?'<b>'+esc(t)+'</b> ':'')+(d?'<span'+(d.l==='ko'?' class="ko"':'')+' lang="'+d.l+'">'+esc(d.s.length>70?d.s.slice(0,68)+'…':d.s)+'</span>':'')};
-  return '<div class="wsense"><h4>Какое значение учу</h4><p class="hint">Примеры, определения и выражения в отработке — только для отмеченных значений.</p><div class="opts" role="group" aria-label="Значения слова">'+
-    ss.map(function(x,i){var y=on.indexOf(i)>=0;return '<button type="button" data-sense="'+i+'" data-id="'+esc(c.id)+'" aria-pressed="'+y+'" class="'+(y?'sel':'')+'" style="text-align:left">'+(y?'✓ ':'')+lab(x)+'</button>'}).join('')+'</div></div>';
+  var on=KR.dict.pickSenses(c,r),one=on.length<2;
+  var lab=function(x){var b=KR.dict.senseLabel(x,c.l);return (b.t?'<b>'+esc(b.t)+'</b> ':'')+(b.d?'<span'+(b.d.l==='ko'?' class="ko"':'')+' lang="'+b.d.l+'">'+esc(b.d.s)+'</span>':'')};
+  var btn=function(i,y,txt){return '<button type="button" data-sense="'+i+'" data-id="'+esc(c.id)+'" aria-pressed="'+y+'" class="'+(y?'sel':'')+'" style="text-align:left"'+(y&&one?' disabled title="Хотя бы одно значение нужно учить"':'')+'>'+txt+lab(ss[i])+'</button>'};
+  var rest=ss.map(function(x,i){return i}).filter(function(i){return on.indexOf(i)<0});
+  return '<div class="wsense"><h4>Какое значение учу</h4><p class="hint">Перевод, примеры, определения и выражения в отработке — только для этих значений.'+(one?'':' Нажми, чтобы убрать значение.')+'</p><div class="opts" role="group" aria-label="Значения, которые учу">'+
+    on.map(function(i){return btn(i,true,'✓ ')}).join('')+'</div>'+
+    (rest.length?'<h4>Другие значения этого слова</h4><p class="hint">Хочешь учить слово и в этом значении? Нажми — оно добавится вместе с переводом.</p><div class="opts" role="group" aria-label="Другие значения">'+
+    rest.map(function(i){return btn(i,false,'+ ')}).join('')+'</div>':'')+'</div>';
 }
 function openCard(id){
   var c=V.get(id);if(!c)return;
@@ -1008,7 +1032,7 @@ function badge(c){
 function drawList(){
   var all=V.all(DL()).sort(function(a,b){return (b.a||0)-(a.a||0)}),G=KR.LANGS[lang];
   var F={all:['Все',function(){return true}],new:['Новые',function(c){return !c.st}],learn:['Учу',function(c){return c.st===1||c.st===3}],known:['Знаю',function(c){return c.st===2}],star:['Сложные',function(c){return c.star}]};
-  var h='<div class="card glass"><h3>Добавить слово</h3><form id="addf" class="addw" autocomplete="off"><input class="name'+(lang==='ko'?' ko':'')+'" id="aw" lang="'+lang+'" placeholder="Слово: '+G.name+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false"><input class="name" id="at" placeholder="Перевод или определение" aria-label="Перевод или определение" maxlength="300"><button type="submit" class="btn pri">'+KR.icon('plus',16)+'Добавить</button></form><p class="msg" id="amsg" role="status"></p>'+
+  var h='<div class="card glass"><h3>Добавить слово</h3><form id="addf" class="addw" autocomplete="off"><input class="name'+(lang==='ko'?' ko':'')+'" id="aw" lang="'+lang+'" placeholder="Слово: '+G.name+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false"><input class="name" id="at" placeholder="Перевод или определение" aria-label="Перевод или определение" maxlength="300"><button type="submit" class="btn pri">'+KR.icon('plus',16)+'Добавить</button></form><p class="msg'+(AMSG&&Date.now()-AMSG.at<8000?' ok':'')+'" id="amsg" role="status">'+(AMSG&&Date.now()-AMSG.at<8000?esc(AMSG.s):'')+'</p>'+
     '<p class="hint">Несколько значений — через «;». Подойдёт и определение на любом языке: «a place to live», «사는 곳». Синонимы и устойчивые выражения добавляются в карточке слова (карандаш). Слова попадают сюда из уроков, по выделению в тексте урока и от преподавателя. Если добавить слово, которое уже есть, оно вернётся на повторение раньше.</p></div>'+
     '<div class="card glass"><h3>Добавить список слов</h3><p class="hint">Корейские и английские слова можно вперемешку: по одному в строке, через запятую или парами «слово — перевод» (также «=», «:», Tab из Quizlet и Excel). Перевод может стоять и слева. Несколько значений — через «;», можно определение на любом языке. Пример: «слово — перевод | пример | перевод примера». Слова без перевода ищем в базе слов школы, потом в словаре (한국어기초사전, Free Dictionary), и только потом переводит DeepL.</p><textarea class="name" id="bulk-input" rows="5" maxlength="8000" placeholder="runny nose, sore throat\naccommodation — жильё\n식욕 — аппетит\n선생님" aria-label="Список слов"></textarea><div class="done-row"><span></span><button type="button" class="btn pri" data-x="bulk-translate">Разобрать и перевести</button></div><p class="msg" id="bulk-msg" role="status"></p><div id="bulk-preview"></div></div>';
   h=setsCard()+h;
@@ -1206,7 +1230,10 @@ function langBar(){
   return '<div class="opts wlangs" role="group" aria-label="Язык словаря">'+ls.map(function(l){return b(l,'<span lang="'+l+'">'+esc(KR.LANGS[l].name)+'</span> · '+(n[l]||0),!MIXL&&l===lang)}).join('')+
     b('all','Все языки · '+V.all().length,MIXL)+'</div>';
 }
+var AMSG=null;   // сообщение формы «Добавить слово», которое должно пережить перерисовку списка
 function drawAll(){lang=wlang();MIXL=wmix();KR.topbar('words');drawToday();if(!S){drawList();if(!$('#prefs').hidden&&!typing())drawPrefs();if(!$('#stats').hidden)drawStats()}}
+/* перевод открыли до ответа — это подсказка: слово вернётся чуть раньше (как после «Начинается на») */
+document.addEventListener('toggle',function(e){var t=e.target;if(t&&t.open&&t.dataset&&t.dataset.peek==='q'&&S)S.hint=true},true);
 document.addEventListener('click',function(e){
   var b=e.target.closest('button');if(!b)return;var d=b.dataset;
   if(d.say!==undefined){KR.say(d.say,d.l);return}
@@ -1233,9 +1260,14 @@ document.addEventListener('click',function(e){
     }).catch(function(e){b.disabled=false;if(em)em.textContent='Словарь не ответил: '+e.message});return}
   if(d.x==='dict-all')return dictAll(b);
   if(d.sense!==undefined&&d.id){var sc=V.get(d.id),sr=sc&&KR.dict.cached(sc.w,sc.l);if(!sr)return;
-    var cur2=KR.dict.pickSenses(sc,sr).slice(),si=+d.sense,sp=cur2.indexOf(si);if(sp>=0){if(cur2.length>1)cur2.splice(sp,1)}else cur2.push(si);
-    cur2.sort(function(a,b){return a-b});var nc=KR.dict.refit(sc,sr,cur2);nc.sv=2;V.update(nc);openCard(d.id);
+    var si=+d.sense,nc=KR.dict.setSense(sc,sr,si,KR.dict.pickSenses(sc,sr).indexOf(si)<0);if(nc!==sc)V.update(nc);openCard(d.id);
     var sb=document.querySelector('#wdlg [data-sense="'+si+'"]');if(sb)sb.focus();return}
+  if(d.addsense!==undefined&&d.id){var ac=V.get(d.id),ar=ac&&KR.dict.cached(ac.w,ac.l);if(!ar)return;
+    var an=KR.dict.setSense(ac,ar,+d.addsense,true);if(an!==ac){V.update(an);if(S&&S.card&&S.card.id===an.id)S.card=V.get(an.id)}
+    var row=b.closest('.osrow');if(row)row.insertAdjacentHTML('beforeend','<span class="ok">✓ добавлено: учишь и это значение</span>');b.remove();return}
+  if(d.x==='addtr'&&d.id){var tc=V.get(d.id);if(!tc)return;tc=Object.assign({},tc,{t:tc.t?tc.t+'; '+d.t:d.t});delete tc.sn;V.update(tc);drawAll();
+    AMSG={at:Date.now(),s:'Добавлено значение «'+d.t+'»: слово '+tc.w+' учишь теперь и в нём.'};var tm=$('#amsg');if(tm){tm.textContent=AMSG.s;tm.className='msg ok'}
+    dictPull(tc.id,function(){drawAll()});return}
   if(d.gl){var cs=V.settings(),cur=gls().slice(),gi=cur.indexOf(d.gl);if(gi>=0){if(cur.length>1)cur.splice(gi,1)}else cur.push(d.gl);cs.gls=Object.assign({},cs.gls);cs.gls[lang]=cur;V.setSettings(cs);drawPrefs();drawToday();var cc=$('#cxcfg [data-gl="'+d.gl+'"]');if(cc)cc.focus();return}
   if(d.x==='cx-cfg'){setTab('prefs');var cx=$('#cxcfg');if(cx)cx.scrollIntoView({block:'start'});return}
   if(d.x==='mdk')return meanCheck(true);
@@ -1307,8 +1339,11 @@ document.addEventListener('submit',function(e){
     if(!w||!t){m.textContent='Нужны и слово, и перевод.';m.className='msg bad';return}
     if(!wl&&KR.W2.langOf(t)){var sw=w;w=t;t=sw;wl=KR.W2.langOf(w)}   // перевод и слово перепутаны местами
     if(!wl){m.textContent='Слово должно быть корейским или английским.';m.className='msg bad';return}
-    var r=addW(wl,w,t,{src:'manual'});drawAll();m=$('#amsg');
-    var on=wl!==lang&&!MIXL?' Оно в словаре «'+KR.LANGS[wl].name+'»: переключи кнопкой вверху страницы.':'';m.textContent=(r.added?'Добавлено: '+r.card.w+'.':'Это слово уже было в словаре. Оно вернётся на повторение раньше.')+on;m.className='msg ok';$('#aw').focus();return;
+    var old=V.find(wl,w),oldT=old&&old.t||'',r=addW(wl,w,t,{src:'manual'});drawAll();m=$('#amsg');
+    var on=wl!==lang&&!MIXL?' Оно в словаре «'+KR.LANGS[wl].name+'»: переключи кнопкой вверху страницы.':'';
+    var nt=M.splitTr(t,wl).t,seen=oldT.split(/;|\n/).map(function(x){return M.nm(x)}),fresh=nt.split(';').map(function(x){return x.trim()}).filter(function(x){return x&&seen.indexOf(M.nm(x))<0}).join('; ');
+    if(!r.added&&oldT&&fresh){m.innerHTML='Слово '+esc(r.card.w)+' уже есть в словаре в значении «'+esc(oldT)+'». Добавить и значение «'+esc(fresh)+'»? <button type="button" class="btn" data-x="addtr" data-id="'+esc(r.card.id)+'" data-t="'+esc(fresh)+'">Добавить значение</button>'+esc(on);m.className='msg';$('#aw').focus();return}
+    m.textContent=(r.added?'Добавлено: '+r.card.w+'.':'Это слово уже было в словаре. Оно вернётся на повторение раньше.')+on;m.className='msg ok';$('#aw').focus();return;
   }
   if(f.classList.contains('wedit')){var c=V.get(f.dataset.id);if(c){
     var nw=f.w.value.normalize('NFC').trim().replace(/\s+/g,' ');

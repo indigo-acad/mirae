@@ -521,6 +521,15 @@ header.band .hero-cta a.ghost:hover{border-color:var(--gold);color:var(--gold-hi
 .q-fb .ok{color:var(--ok-fg)}.q-fb .bad{color:var(--bad-fg)}
 .back-in{margin-top:6px;font-size:13.5px}
 .exbox{margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--fill);font-size:17px;text-align:left;color:var(--fg)}
+/* «Посмотреть перевод» в режиме «В контексте» и другие значения слова (words.html) */
+.trpeek{margin-top:10px;text-align:left;font-size:15px}
+.trpeek>summary{cursor:pointer;color:var(--muted,inherit);display:inline-block;padding:4px 0;text-decoration:underline dotted;text-underline-offset:3px}
+.trpeek[open]>summary{margin-bottom:2px}
+.trpeek .exbox{margin-top:6px}
+.trpeek[data-peek="q"]{text-align:center}
+.trpeek[data-peek="q"] .exbox{text-align:center}
+.osense .osrow{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line,rgba(127,127,127,.2))}
+.osense .osrow>span{flex:1 1 200px;min-width:0}
 .wr{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .wr input.name{flex:1;min-width:180px;margin:0;font-size:22px;text-align:center}
 input.ans-ok{border-color:var(--ok-fg)!important}input.ans-bad{border-color:var(--bad-fg)!important}
