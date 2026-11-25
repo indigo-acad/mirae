@@ -1242,3 +1242,18 @@ main.tmain{max-width:1240px}
   .tp-ib{grid-template-columns:1fr;gap:2px}
 }
 body:has(main.tmain) header.band .in{max-width:1240px;padding:0 16px}
+
+/* шапка курса: нарисованные пейзажи (img/hero-*.webp, gpt-image), края растворяются в небе страницы */
+html[data-lang=ko]{--hero2:image-set(url(../img/hero-ko-sm.webp) 1x,url(../img/hero-ko.webp) 2x)}
+html[data-lang=en]{--hero2:image-set(url(../img/hero-en-sm.webp) 1x,url(../img/hero-en.webp) 2x)}
+@media(min-width:1000px){html[data-lang=ko]{--hero2:url(../img/hero-ko.webp)}html[data-lang=en]{--hero2:url(../img/hero-en.webp)}}
+html:is([data-lang=ko],[data-lang=en]) header.band.course-hero{--hw:max(100vw,1100px);min-height:calc(var(--hw)*.2917 + 16px);padding-bottom:40px;box-sizing:border-box}
+html:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{
+  background:var(--hero2) 100% calc(100% - 16px)/var(--hw) auto no-repeat;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 22%,#000 calc(100% - 40px),transparent calc(100% - 16px),#000 calc(100% - 16px)),linear-gradient(90deg,transparent 0,#000 8%);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(180deg,transparent 0,#000 22%,#000 calc(100% - 40px),transparent calc(100% - 16px),#000 calc(100% - 16px)),linear-gradient(90deg,transparent 0,#000 8%);mask-composite:intersect}
+html[data-lang=ko] header.band.course-hero::after{display:none}
+@media(max-width:720px){
+  html:is([data-lang=ko],[data-lang=en]) header.band.course-hero{--hw:max(100vw,900px);min-height:0;padding-bottom:calc(var(--hw)*.2917*.8 + 16px)}
+  html:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{background-position:82% calc(100% - 16px)}
+}
