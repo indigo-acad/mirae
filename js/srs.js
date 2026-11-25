@@ -35,6 +35,7 @@ var DEF={
   ctxm:{},        // режим отработки по языкам: {ko: "ru", en: "ctx"}; нет языка — "ru" (прежняя настройка, см. gls)
   gls:{},         // направления: на каком языке значение слова. {ko: ["ru","en","ctx"]} — корейское слово отрабатывается
                   // с русским, с английским и в контексте вперемешку. Нет языка — берётся из ctxm
+  lv:{},          // уровень ученика по языкам: {ko: "2급", en: "A2"}; нет языка — уровень подбирается сам (KR.mean.level)
   scope:["today","tom"],   // тренировка по выбору: какие слова отрабатывать в тренажёрах (см. SCOPES)
   lw:"ask"        // слова нового урока: ask — спросить ученика, auto — добавить сразу, off — не добавлять
 };
@@ -54,7 +55,7 @@ function cfg(s){
     ease:num(s.ease,DEF.ease,1.3,4),hard:num(s.hard,DEF.hard,1,2),bonus:num(s.bonus,DEF.bonus,1,2),
     lapse:num(s.lapse,DEF.lapse,0,1),mod:num(s.mod,DEF.mod,.5,2),maxIvl:Math.round(num(s.maxIvl,DEF.maxIvl,7,3650)),
     newDay:Math.round(num(s.newDay,DEF.newDay,0,200)),revDay:Math.round(num(s.revDay,DEF.revDay,1,2000)),games:g,
-    lw:s.lw==="auto"||s.lw==="off"?s.lw:DEF.lw,ctxm:ctxm(s.ctxm),gls:gls(s.gls),scope:scope(s.scope)};
+    lw:s.lw==="auto"||s.lw==="off"?s.lw:DEF.lw,ctxm:ctxm(s.ctxm),gls:gls(s.gls),lv:lvs(s.lv),scope:scope(s.scope)};
 }
 function scope(a){a=(Array.isArray(a)?a:[]).filter(function(x,i,arr){return SCOPES.indexOf(x)>=0&&arr.indexOf(x)===i});return a.length?a:DEF.scope.slice()}
 /* Слово пора отрабатывать по расписанию: изучаемое (шаги в минутах) или повторение на сегодня. */
@@ -73,6 +74,9 @@ function inScope(c,k,now){
 }
 function ctxm(m){var o={};if(m&&typeof m==="object")Object.keys(m).forEach(function(l){if(/^[a-z]{2,3}$/.test(l)&&CTXM.indexOf(m[l])>=0)o[l]=m[l]});return o
 }
+/* уровень ученика по языкам: только известные уровни */
+var LVS={ko:["1급","2급","3급","4급","5급","6급"],en:["A1","A2","B1","B2","C1","C2"]};
+function lvs(m){var o={};if(m&&typeof m==="object")Object.keys(LVS).forEach(function(l){if(LVS[l].indexOf(m[l])>=0)o[l]=m[l]});return o}
 /* направления по языкам: "ru", "ctx" или код другого языка (не самого слова) */
 function gls(m){
   var o={};if(!m||typeof m!=="object")return o;

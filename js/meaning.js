@@ -119,6 +119,30 @@ function wordOk(answer,c,I,others){
   if(r)return {ok:true,kind:'rel',match:r.c.w};
   return {ok:false};
 }
-KR.mean={NAMES:NAMES,FULL:FULL,langOf:langOf,parseDefs:parseDefs,fmtDefs:fmtDefs,parseCols:parseCols,fmtCols:fmtCols,parseSyn:parseSyn,splitTr:splitTr,
+// ---------- уровень ученика и сложность текста ----------
+/* Примеры, определения и выражения в контексте — по уровню ученика, а не слова: даже у слова 4급 пример должен быть
+   понятен ученику 2급. Сложность меряем длиной: корейский — слоги хангыля и слова (어절), английский — слова. */
+var LV={ko:['1급','2급','3급','4급','5급','6급'],en:['A1','A2','B1','B2','C1','C2']};
+var CAP={ko:{syl:[14,22,32,45,65,999],tok:[4,6,8,11,15,99]},en:{tok:[7,11,15,20,28,99]}};
+function lvIdx(l,lv){var a=LV[l]||LV.en,i=a.indexOf(lv);return i<0?1:i}
+/* уровень ученика: из настроек (Настройки → «Мой уровень»), иначе — по числу слов в словаре */
+function level(l){
+  var a=LV[l]||LV.en,V=root.KR&&root.KR.vocab,s=V&&V.settings?V.settings():{},v=(s.lv||{})[l];
+  return a.indexOf(v)>=0?v:levelAuto(l);
+}
+function levelAuto(l){var a=LV[l]||LV.en,V=root.KR&&root.KR.vocab,n=V&&V.all?V.all(l).length:0;return a[n<120?0:n<400?1:n<900?2:3]}
+function size(s){s=String(s||'');return {syl:(s.match(/[가-힯]/g)||[]).length,tok:s.split(/\s+/).filter(Boolean).length}}
+/* текст по силам ученику; k — запас (определения чуть длиннее примеров) */
+function fits(s,l,lv,k){
+  var i=lvIdx(l==='ko'?'ko':'en',lv||level(l)),z=size(s),c=CAP[l==='ko'?'ko':'en'];k=k||1;
+  return l==='ko'?z.syl<=c.syl[i]*k&&z.tok<=c.tok[i]*k:z.tok<=c.tok[i]*k;
+}
+/* примеры по силам ученику, лучшие первыми: не слишком короткие (от 3 слов) и не на пределе уровня */
+function byLevel(list,l,lv){
+  lv=lv||level(l);var i=lvIdx(l==='ko'?'ko':'en',lv),c=CAP[l==='ko'?'ko':'en'],aim=(l==='ko'?c.syl[i]:c.tok[i])*.55;
+  return (list||[]).filter(function(x){return x&&fits(x.s||x,l,lv)}).map(function(x){var z=size(x.s||x),n=l==='ko'?z.syl:z.tok;
+    return {x:x,k:(z.tok<3?100:0)+Math.abs(n-aim)}}).sort(function(a,b){return a.k-b.k}).map(function(o){return o.x});
+}
+KR.mean={LV:LV,level:level,levelAuto:levelAuto,fits:fits,byLevel:byLevel,NAMES:NAMES,FULL:FULL,langOf:langOf,parseDefs:parseDefs,fmtDefs:fmtDefs,parseCols:parseCols,fmtCols:fmtCols,parseSyn:parseSyn,splitTr:splitTr,
   trs:trs,defs:defs,tdefs:tdefs,syns:syns,cols:cols,nm:nm,nw:nw,forms:forms,meaningOk:meaningOk,wordOk:wordOk,related:related,lev:lev};
 })(typeof window!=="undefined"?window:globalThis);
