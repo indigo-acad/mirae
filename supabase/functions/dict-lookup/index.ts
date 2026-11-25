@@ -9,7 +9,11 @@
 // Cambridge и NAVER открытого API не дают: подключатся сменными адаптерами здесь же, когда будут лицензии.
 // Вход:  { p_name, p_pin, word, lang: "ko" | "en" }  или пакетом { p_name, p_pin, words: [...], langs: [...] } (до 80 слов)
 // Выход: одно слово — { found, src, srcName, word, lang, pos, level, ipa, tr_ru: [], defs: [{l, s}], examples: [{s, t}],
-//          cols: [{s, t}], syn: [] }; пакет — { entries: [...] } в том же порядке (found: false — слова нет).
+//          cols: [{s, t}], syn: [], senses: [...] }; пакет — { entries: [...] } в том же порядке (found: false — слова нет).
+// senses — значения слова по отдельности: [{ h, pos, tr_ru, defs, examples, cols, syn }] (h — номер омонима: 쓰다 «писать»
+//          и 쓰다 «использовать» — разные слова). Сайт берёт определения и примеры только из значения, которое ученик учит
+//          (js/dict.js): у 까먹다 «забывать» не должно быть примера про очистку каштанов. Плоские поля — все значения
+//          вместе, для старых версий сайта.
 // Пакетом функцию вызывает translate-words: база школы → словарь → DeepL.
 
 const cors = {
@@ -22,13 +26,24 @@ const json = (body: unknown, status = 200) =>
 
 type Ex = { s: string; t: string };
 type Def = { l: string; s: string };
+type Sense = { h: number; pos: string; tr_ru: string[]; defs: Def[]; examples: Ex[]; cols: Ex[]; syn: string[] };
 type Entry = {
   found: boolean; src: string; srcName: string; word: string; lang: string; pos: string; level: string; ipa: string;
-  tr_ru: string[]; defs: Def[]; examples: Ex[]; cols: Ex[]; syn: string[]; audio: Record<string, string>;
+  tr_ru: string[]; defs: Def[]; examples: Ex[]; cols: Ex[]; syn: string[]; audio: Record<string, string>; senses: Sense[];
 };
 const empty = (word: string, lang: string): Entry => ({
-  found: false, src: "", srcName: "", word, lang, pos: "", level: "", ipa: "", tr_ru: [], defs: [], examples: [], cols: [], syn: [], audio: {},
+  found: false, src: "", srcName: "", word, lang, pos: "", level: "", ipa: "", tr_ru: [], defs: [], examples: [], cols: [], syn: [], audio: {}, senses: [],
 });
+const sense = (h = 0, pos = ""): Sense => ({ h, pos, tr_ru: [], defs: [], examples: [], cols: [], syn: [] });
+/* плоские поля статьи — из значений по порядку (для старых версий сайта) */
+function flatten(e: Entry) {
+  for (const s of e.senses) {
+    e.tr_ru.push(...s.tr_ru); e.defs.push(...s.defs); e.cols.push(...s.cols); e.syn.push(...s.syn);
+    e.examples.push(...s.examples.slice(0, 2));
+  }
+  e.tr_ru = uniq(e.tr_ru).slice(0, 5); e.syn = uniq(e.syn).filter((x) => x.toLowerCase() !== e.word.toLowerCase()).slice(0, 6);
+  e.defs = e.defs.slice(0, 8); e.cols = e.cols.slice(0, 5); e.examples = e.examples.slice(0, 4);
+}
 const https = (u: string) => u.replace(/^http:\/\//, "https://").replace(/^\/\//, "https://");
 const uniq = (a: string[]) => {
   const s = new Set<string>(), r: string[] = [];
@@ -78,48 +93,67 @@ async function krGet(url: string): Promise<Response> {
 // ---------- 한국어기초사전 ----------
 const POS_KO: Record<string, string> = { "명사": "noun", "동사": "verb", "형용사": "adjective", "부사": "adverb", "대명사": "pronoun",
   "수사": "number", "관형사": "determiner", "감탄사": "interjection", "조사": "particle" };
-async function krdict(key: string, word: string): Promise<Entry | null> {
+/* значения из блоков <sense> (поиск) или <sense_info> (подробная статья) */
+function krSenses(blocksXml: string[], h: number, pos: string): Sense[] {
+  const out: Sense[] = [];
+  for (const s of blocksXml.slice(0, 6)) {
+    const x = sense(h, pos);
+    const dfn = first(s, "definition"); if (dfn) x.defs.push({ l: "ko", s: dfn });
+    for (const t of blocks(s, "translation")) {
+      const lang = first(t, "trans_lang"), w = first(t, "trans_word"), d = first(t, "trans_dfn");
+      if (lang === "러시아어") { if (w) x.tr_ru.push(...w.split(/[;,]\s*/)); if (d) x.defs.push({ l: "ru", s: d }); }
+      if (lang === "영어" && d) x.defs.push({ l: "en", s: d });
+    }
+    for (const ei of blocks(s, "example_info")) {
+      const ex = first(ei, "example"), tp = first(ei, "type");
+      if (!ex) continue;
+      // примеры — все предложения значения (до 8): сайт выберет подходящие по уровню ученика
+      if (tp === "구") { if (x.cols.length < 5) x.cols.push({ s: ex.replace(/\.$/, ""), t: "" }); }
+      else if (tp === "문장" && x.examples.length < 8) x.examples.push({ s: ex, t: "" });
+    }
+    for (const r of blocks(s, "rel_info")) if (/유의어|비슷한말/.test(first(r, "type"))) x.syn.push(first(r, "word"));
+    x.tr_ru = uniq(x.tr_ru).slice(0, 5); x.syn = uniq(x.syn).slice(0, 6);
+    if (x.defs.length) out.push(x);
+  }
+  return out;
+}
+/* Корейское слово: до трёх омонимов (쓰다 «писать», «использовать», «горький»). deep — подробная статья (примеры) для каждого
+   омонима; в пакете — только для первого, остальным хватает значений из поиска, чтобы уложиться во время. */
+async function krdict(key: string, word: string, deep = true): Promise<Entry | null> {
   const q = new URLSearchParams({ key, q: word, part: "word", sort: "dict", num: "10", translated: "y", trans_lang: "0", advanced: "y", method: "exact" });
   const r = await krGet(`https://krdict.korean.go.kr/api/search?${q}`);
   if (!r.ok) throw new Error(`krdict ${r.status}`);
   const xml = await r.text();
   if (/<error>/.test(xml)) throw new Error("krdict: " + first(xml, "message"));
-  const items = blocks(xml, "item").filter((it) => first(it.split("<sense>")[0], "word").replace(/[\d\s-]/g, "") === word.replace(/[\s-]/g, ""));
+  const items = blocks(xml, "item").filter((it) => first(it.split("<sense>")[0], "word").replace(/[\d\s-]/g, "") === word.replace(/[\s-]/g, "")).slice(0, 3);
   if (!items.length) return null;
-  const it = items[0], code = first(it, "target_code"), e = empty(word, "ko");
+  const e = empty(word, "ko");
   e.found = true; e.src = "krdict"; e.srcName = "한국어기초사전 (국립국어원), CC BY-SA 2.0 KR";
-  e.pos = POS_KO[first(it, "pos")] || first(it, "pos"); e.level = first(it, "word_grade").replace("없음", "");
-  let senses = blocks(it, "sense");
-  // подробная статья: примеры и синонимы
-  let view = "";
-  try {
-    const v = new URLSearchParams({ key, method: "target_code", q: code, translated: "y", trans_lang: "0" });
-    const rv = await krGet(`https://krdict.korean.go.kr/api/view?${v}`);
-    if (rv.ok) view = await rv.text();
-  } catch (_) { /* без примеров */ }
-  if (view && blocks(view, "sense_info").length) {
-    senses = blocks(view, "sense_info");
-    const pr = first(view, "pronunciation"); if (pr && pr !== word) e.ipa = "[" + pr + "]";
-    // запись произношения, если словарь её даёт: ищем ссылку на звук в сведениях о произношении
-    const snd = (blocks(view, "pronunciation_info").join(" ").match(/(?:https?:)?\/\/[^<>\s"]+?\.(?:wav|mp3|ogg|m4a)/i) || [])[0];
-    if (snd) e.audio.ko = https(strip(snd));
-  }
-  for (const s of senses.slice(0, 4)) {
-    const dfn = first(s, "definition"); if (dfn) e.defs.push({ l: "ko", s: dfn });
-    for (const t of blocks(s, "translation")) {
-      const lang = first(t, "trans_lang"), w = first(t, "trans_word"), d = first(t, "trans_dfn");
-      if (lang === "러시아어") { if (w) e.tr_ru.push(...w.split(/[;,]\s*/)); if (d) e.defs.push({ l: "ru", s: d }); }
-      if (lang === "영어" && d) e.defs.push({ l: "en", s: d });
+  e.pos = POS_KO[first(items[0], "pos")] || first(items[0], "pos"); e.level = first(items[0], "word_grade").replace("없음", "");
+  for (let h = 0; h < items.length; h++) {
+    const it = items[h], code = first(it, "target_code"), pos = POS_KO[first(it, "pos")] || first(it, "pos");
+    let ss = blocks(it, "sense");
+    if (deep || h === 0) {
+      let view = "";
+      try {
+        const v = new URLSearchParams({ key, method: "target_code", q: code, translated: "y", trans_lang: "0" });
+        const rv = await krGet(`https://krdict.korean.go.kr/api/view?${v}`);
+        if (rv.ok) view = await rv.text();
+      } catch (_) { /* без примеров */ }
+      if (view && blocks(view, "sense_info").length) {
+        ss = blocks(view, "sense_info");
+        if (h === 0) {
+          const pr = first(view, "pronunciation"); if (pr && pr !== word) e.ipa = "[" + pr + "]";
+          // запись произношения, если словарь её даёт: ищем ссылку на звук в сведениях о произношении
+          const snd = (blocks(view, "pronunciation_info").join(" ").match(/(?:https?:)?\/\/[^<>\s"]+?\.(?:wav|mp3|ogg|m4a)/i) || [])[0];
+          if (snd) e.audio.ko = https(strip(snd));
+        }
+      }
     }
-    for (const x of blocks(s, "example_info")) {
-      const ex = first(x, "example"), tp = first(x, "type");
-      if (!ex) continue;
-      if (tp === "구") e.cols.push({ s: ex.replace(/\.$/, ""), t: "" }); else if (tp === "문장") e.examples.push({ s: ex, t: "" });
-    }
-    for (const x of blocks(s, "rel_info")) if (/유의어|비슷한말/.test(first(x, "type"))) e.syn.push(first(x, "word"));
+    e.senses.push(...krSenses(ss, h, pos));
   }
-  e.tr_ru = uniq(e.tr_ru).slice(0, 5); e.syn = uniq(e.syn).slice(0, 6);
-  e.cols = e.cols.slice(0, 5); e.examples = e.examples.slice(0, 4);
+  if (!e.senses.length) return null;
+  flatten(e);
   return e;
 }
 
@@ -142,15 +176,21 @@ async function freeDict(word: string): Promise<Entry | null> {
     for (const m of en.meanings || []) {
       if (!e.pos) e.pos = m.partOfSpeech || "";
       syn.push(...(m.synonyms || []));
-      for (const d of (m.definitions || []).slice(0, 3)) {
-        if (d.definition && e.defs.length < 5) e.defs.push({ l: "en", s: d.definition });
-        if (d.example && e.examples.length < 4) e.examples.push({ s: d.example, t: "" });
-        syn.push(...(d.synonyms || []));
-      }
+      (m.definitions || []).slice(0, 3).forEach((d: { definition?: string; example?: string; synonyms?: string[] }, j: number) => {
+        if (!d.definition || e.senses.length >= 8) return;
+        // каждое определение — отдельное значение; синонимы части речи — к первому
+        const x = sense(0, m.partOfSpeech || "");
+        x.defs.push({ l: "en", s: d.definition });
+        if (d.example) x.examples.push({ s: d.example, t: "" });
+        x.syn = uniq([...(d.synonyms || []), ...(j === 0 ? m.synonyms || [] : [])]).filter((s) => s.toLowerCase() !== word.toLowerCase()).slice(0, 6);
+        e.senses.push(x);
+      });
     }
   }
-  e.syn = uniq(syn).filter((s) => s.toLowerCase() !== word.toLowerCase()).slice(0, 6);
-  return e.defs.length ? e : null;
+  if (!e.senses.length) return null;
+  flatten(e);
+  e.syn = uniq([...e.syn, ...syn]).filter((s) => s.toLowerCase() !== word.toLowerCase()).slice(0, 6);
+  return e;
 }
 
 // ---------- Викисловарь (запасной для обоих языков) ----------
@@ -162,25 +202,30 @@ async function wiktionary(word: string, lang: string): Promise<Entry | null> {
   if (!list.length) return null;
   const e = empty(word, lang); e.found = true; e.src = "wiktionary"; e.srcName = "Wiktionary, CC BY-SA";
   for (const p of list) {
-    if (!e.pos) e.pos = String(p.partOfSpeech || "").toLowerCase();
+    const pos = String(p.partOfSpeech || "").toLowerCase();
+    if (!e.pos) e.pos = pos;
     for (const d of (p.definitions || []).slice(0, 3)) {
-      const s = strip(d.definition); if (s && e.defs.length < 5) e.defs.push({ l: "en", s });
-      for (const x of (d.parsedExamples || []).slice(0, 1)) {
-        const ex = strip(x.example); if (ex && e.examples.length < 3) e.examples.push({ s: ex, t: lang === "en" ? "" : strip(x.translation || "") });
+      const s = strip(d.definition); if (!s || e.senses.length >= 8) continue;
+      const x = sense(0, pos); x.defs.push({ l: "en", s });
+      for (const y of (d.parsedExamples || []).slice(0, 3)) {
+        const ex = strip(y.example); if (ex) x.examples.push({ s: ex, t: lang === "en" ? "" : strip(y.translation || "") });
       }
+      e.senses.push(x);
     }
   }
-  return e.defs.length ? e : null;
+  if (!e.senses.length) return null;
+  flatten(e);
+  return e;
 }
 
 /* одно слово: корейский — 한국어기초사전, потом Викисловарь; английский — Free Dictionary API, потом Викисловарь */
-async function lookup(word: string, lang: string): Promise<Entry & { message?: string }> {
+async function lookup(word: string, lang: string, deep = true): Promise<Entry & { message?: string }> {
   const errs: string[] = [];
   const tryIt = async (f: () => Promise<Entry | null>) => { try { return await f(); } catch (e) { errs.push(String((e as Error).message || e)); return null; } };
   let e: Entry | null = null;
   if (lang === "ko") {
     const key = Deno.env.get("KRDICT_KEY") || "";
-    if (key) e = await tryIt(() => krdict(key, word));
+    if (key) e = await tryIt(() => krdict(key, word, deep));
     if (!e) e = await tryIt(() => wiktionary(word, "ko"));
   } else {
     e = await tryIt(() => freeDict(word.replace(/^to\s+/i, "")));
@@ -225,7 +270,7 @@ Deno.serve(async (req) => {
       while (next < words.length) {
         const i = next++, left = until - Date.now();
         if (left <= 0) { entries[i] = late(i); continue; }
-        entries[i] = await Promise.race([lookup(words[i], langs[i]), sleep(left).then(() => late(i))]);
+        entries[i] = await Promise.race([lookup(words[i], langs[i], false), sleep(left).then(() => late(i))]);
       }
     }));
     return json({ entries });

@@ -49,7 +49,7 @@ let blocks=[];          // все блоки страницы по порядк�
    преподаватель. Доп. упражнения (L.back) и домашка (L.hw) показываются одним списком. */
 const partOf=s=>window.KR&&KR.part?KR.part(s):"theory";
 let SECS=[],SPLIT=false,PART="theory";
-const EXT=["fill","choice","build","match","order"];   // упражнения с проверкой (кнопка «Проверить»)
+const EXT=["fill","choice","build","match","order","sort"];   // упражнения с проверкой (кнопка «Проверить»)
 const OWN=EXT.concat(["write","speak"]);   // блоки со своей строкой внизу (без «Отметить пройденным»)
 function setup(lid,lesson){
   id=lid;L=lesson;KEY="kr_progress:"+user+":"+id;
@@ -238,11 +238,16 @@ function block(b){
   }else if(b.type==="table"){
     if(b.note)h+=`<p class="muted">${b.note}</p>`;
     h+=`<div style="overflow-x:auto"><table class="ko"><tr>${b.head.map(x=>`<th>${x}</th>`).join("")}</tr>${b.rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join("")}</tr>`).join("")}</table></div>`;
+  }else if(b.type==="fill"&&Array.isArray(b.story)){   // скрипт с пропусками: story[i] — текст перед пропуском i, последний — хвост; ответ вписывается
+    h+=`<p class="muted">${esc(b.instr)}</p><div class="reading ko">`+b.items.map((it,i)=>{
+      const v=(P[b._key]&&P[b._key].v&&P[b._key].v[i])||"";
+      return esc(b.story[i]||"").replace(/\n/g,"<br>")+`<span class="gap"><sup>${i+1}</sup><input class="ans ko" data-b="${b._key}" data-i="${i}" value="${esc(v)}" size="${Math.max(4,(it.n||String(it.a[0]).length)+1)}" aria-label="Пропуск ${i+1}" autocomplete="off" autocapitalize="off" spellcheck="false"><span class="fb" id="fb-${b._key}-${i}"></span></span>`}).join("")+esc(b.story[b.items.length]||"").replace(/\n/g,"<br>")+`</div>`+doneRow(b);
   }else if(b.type==="fill"){
     h+=`<p class="muted">${esc(b.instr)}</p>`+b.items.map((it,i)=>{
       const v=(P[b._key]&&P[b._key].v&&P[b._key].v[i])||"";
       const parts=it.q.split("___");
-      return `<div class="ex" data-i="${i}"><span class="q ko">${esc(parts[0])}<input class="ans ko" data-b="${b._key}" data-i="${i}" value="${esc(v)}" aria-label="Ответ ${i+1}" autocomplete="off" autocapitalize="off" spellcheck="false">${esc(parts[1]||"")}</span><span class="fb" id="fb-${b._key}-${i}"></span></div>`}).join("")+doneRow(b);
+      const br=t=>esc(t).replace(/\n/g,"<br>");
+      return `<div class="ex${it.q.indexOf("\n")>=0?" dlg":""}" data-i="${i}"><span class="q ko">${br(parts[0])}<input class="ans ko" data-b="${b._key}" data-i="${i}" value="${esc(v)}" aria-label="Ответ ${i+1}" autocomplete="off" autocapitalize="off" spellcheck="false">${br(parts[1]||"")}</span><span class="fb" id="fb-${b._key}-${i}"></span></div>`}).join("")+doneRow(b);
   }else if(b.type==="choice"&&Array.isArray(b.story)){   // текст с выбором прямо в строке: story[i] — текст перед пропуском i, последний — хвост
     h+=`<p class="muted">${esc(b.instr)}</p><div class="reading ko">`+b.items.map((it,i)=>{
       const sel=(P[b._key]&&P[b._key].v&&P[b._key].v[i])||"";
@@ -268,10 +273,15 @@ function block(b){
       const v=(P[b._key]&&P[b._key].v&&P[b._key].v[i])||"",ch=it.w.map((w,j)=>j).sort((x,y)=>((x*5+i+1)%it.w.length)-((y*5+i+1)%it.w.length));
       return `<div class="ex od" data-i="${i}">${it.p?`<div class="q">${esc(it.p)}</div>`:""}<div class="bk-row"><output class="built ko" id="od-${b._key}-${i}">${esc(v.split("|").filter(Boolean).join(" "))}</output><span class="fb" id="fb-${b._key}-${i}"></span></div>
         <div class="kb od-kb ko" data-ob="${b._key}" data-i="${i}">${ch.map(j=>`<button type="button" data-ow="${esc(it.w[j])}">${esc(it.w[j])}</button>`).join("")}<button type="button" data-ow="⌫" class="kb-del" aria-label="Убрать последнюю часть">${ic("back",15)}</button></div></div>`}).join("")+doneRow(b);
-  }else if(b.type==="write"){   // письменный ответ: prompts — вопросы, model — образцы ответов (показываются после сохранения)
-    const v=(P[b._key]&&P[b._key].v)||{},sv=!!(P[b._key]&&P[b._key].done);
-    h+=`<p class="muted">${esc(b.instr||"Напиши ответы полными предложениями.")}</p>`+b.prompts.map((p,i)=>`<div class="ex wr"><label class="q ko" for="wr-${b._key}-${i}">${esc(p)}</label><textarea class="wr-in ko" id="wr-${b._key}-${i}" data-wb="${b._key}" data-i="${i}" rows="${b.rows||2}" placeholder="${esc(b.ph||"한국어로 쓰세요…")}" spellcheck="false">${esc(v[i]||"")}</textarea>${b.model&&b.model[i]?`<details class="wr-model"${sv?"":" hidden"}><summary>Образец ответа</summary><p class="ko">${esc(b.model[i])}</p></details>`:""}</div>`).join("")+
-      `<div class="done-row"><span class="muted" id="sc-${b._key}"></span><button type="button" class="pri" data-wsave="${b._key}">${sv?"Сохранено ✓":"Сохранить ответы"}</button></div>`;
+  }else if(b.type==="write"){   // письменный ответ: prompts — вопросы, hints — подсказки, model — образцы (после сохранения), voice — можно сказать голосом
+    const p=P[b._key]||{},v=p.v||{},sv=!!p.done,vo=!!b.voice&&voiceOk();
+    h+=`<p class="muted">${esc(b.instr||"Напиши ответы полными предложениями.")}</p>`+(b.voice&&!vo?`<p class="note">Запись голоса работает в Chrome, Edge и Safari с микрофоном. Здесь можно ответить письменно.</p>`:"")+
+      b.prompts.map((q,i)=>`<div class="ex wr"><label class="q ko" for="wr-${b._key}-${i}">${esc(q)}</label>`+
+        (b.hints&&b.hints[i]?`<details class="wr-hint"><summary>${ic("spark",14)} Подсказка</summary><div>${esc(b.hints[i]).replace(/\n/g,"<br>")}</div></details>`:"")+
+        `<textarea class="wr-in ko" id="wr-${b._key}-${i}" data-wb="${b._key}" data-i="${i}" rows="${b.rows||2}" placeholder="${esc(b.ph||(vo?"Скажи в микрофон или напиши…":"한국어로 쓰세요…"))}" spellcheck="false">${esc(v[i]||"")}</textarea>`+
+        (vo?`<div class="vrow"><button type="button" class="btn vbtn" data-vrec="${b._key}" data-i="${i}">${ic("mic",16)} Сказать</button><span class="vtm muted" id="vt-${b._key}-${i}"></span></div><div class="vres" id="vr-${b._key}-${i}" aria-live="polite">${voiceRes(b._key,i)}</div>`:"")+
+        (b.model&&b.model[i]?`<details class="wr-model"${sv?"":" hidden"}><summary>Образец ответа</summary><p class="ko">${esc(b.model[i])}</p></details>`:"")+`</div>`).join("")+
+      `<div class="done-row"><span class="muted" id="sc-${b._key}"></span><button type="button" class="pri" data-wsave="${b._key}">${sv?"Сохранено ✓":vo?"Сохранить и отправить":"Сохранить ответы"}</button></div>`;
   }else if(b.type==="speak"){   // чтение вслух с проверкой произношения (js/ear.js): lines [[кто, текст, перевод?]], roles — выбор роли
     const p=P[b._key]||{},v=p.v||{},role=p.role||"",can=window.KR&&KR.ear&&KR.ear.canHear();
     h+=`<p class="muted">${esc(b.instr||"Послушай реплику, нажми микрофон и прочитай её вслух.")}</p>`+
@@ -279,7 +289,11 @@ function block(b){
       (can?"":`<p class="note">Проверка произношения работает в Chrome, Edge и Safari с микрофоном. Здесь можно послушать и прочитать вслух самостоятельно.</p>`)+
       b.lines.map((l,i)=>{const mine=!role||l[0]===role,r=v[i];
         return `<div class="line sp${mine?"":" sp-other"}"><span class="sp ko">${esc(l[0])}</span><div><div class="kolg ko">${esc(l[1])} ${sayBtn(l[1])}${mine&&can?`<button type="button" class="say mic" data-spm="${b._key}" data-i="${i}" title="Прочитать вслух" aria-label="Прочитать вслух">${ic("mic",16)}</button>`:""}</div>${l[2]?`<div class="ru">${esc(l[2])}</div>`:""}<div class="micfb ${r?r.c:""}" id="sp-${b._key}-${i}" aria-live="polite">${r?esc(r.m):""}</div></div></div>`}).join("")+
-      `<div class="done-row"><span class="score" id="sc-${b._key}"></span><button data-done="${b._key}">${doneLabel(!!p.done)}</button></div>`;
+      `<div class="done-row"><span class="score" id="sc-${b._key}"></span>${b.rec&&can?`<button type="button" data-vsend="${b._key}">${ic("send",15)} Отправить записи</button>`:""}<button data-done="${b._key}">${doneLabel(!!p.done)}</button></div>`;
+  }else if(b.type==="sort"){   // порядок событий перетаскиванием: items [{q}] в правильном порядке, в P.v — текущий порядок (номера items)
+    const ord=sortOrder(b);
+    h+=`<p class="muted">${esc(b.instr||"Перетаскивай карточки, пока история не сложится: сверху — то, что было раньше.")}</p><ol class="srt" data-srt="${b._key}">`+
+      ord.map((j,pos)=>`<li class="srt-it" data-j="${j}"><span class="srt-h" aria-hidden="true">⠿</span><span class="srt-n">${pos+1}</span><span class="ko srt-q">${esc(b.items[j].q)}</span><span class="srt-mv"><button type="button" class="icb" data-smv="-1" aria-label="Выше">↑</button><button type="button" class="icb" data-smv="1" aria-label="Ниже">↓</button></span></li>`).join("")+`</ol>`+doneRow(b);
   }else if(b.type==="talk"){
     h+=`<p class="muted">${esc(b.instr)}</p>`+b.prompts.map(p=>`<div class="line"><div class="kolg ko">${esc(p)} ${sayBtn(p)}</div></div>`).join("");
   }else if(b.type==="wtest"){   // тест по словам внутри домашки: проходится на test.html, результат пишется сюда
@@ -299,6 +313,133 @@ function block(b){
   }
   if(!OWN.includes(b.type))h+=doneRow(b);
   return h+"</div>";
+}
+/* ---------- голос: запись + распознавание (блоки write с voice, speak с rec) ----------
+   Запись (MediaRecorder) и распознавание (SpeechRecognition) идут одновременно: ученик видит, что услышал браузер,
+   а преподавателю в Telegram уходит запись с тем, что ученик написал («хотел сказать») и что распознано («сказал»).
+   Записи живут, пока открыта страница (VREC); распознанный текст сохраняется в прогрессе (P[блок].s). */
+const SRc=window.SpeechRecognition||window.webkitSpeechRecognition||null;
+const canRec=()=>!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder);
+const voiceOk=()=>canRec()||!!SRc;
+const VREC={};let VCUR=null;
+const fmtS=x=>Math.floor(x/60)+":"+String(Math.floor(x%60)).padStart(2,"0");
+async function voiceStart(opt){
+  let stream=null,mr=null,mime="";const parts=[];
+  if(canRec()){try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){if(!SRc)throw {error:"not-allowed"}}}
+  if(stream){mime=["audio/ogg;codecs=opus","audio/webm;codecs=opus","audio/mp4","audio/webm"].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||"";
+    try{mr=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);mr.ondataavailable=e=>{if(e.data&&e.data.size)parts.push(e.data)};mr.start(1000)}catch(e){mr=null}}
+  let fin="",on=true,r=null,err=null,stopped=false,fails=0,resolve;const alts=[],t0=Date.now(),done=new Promise(x=>resolve=x);
+  function mk(){
+    if(!SRc)return;r=new SRc();r.lang=opt.lang==="ko"?"ko-KR":"en-GB";r.continuous=!opt.auto;r.interimResults=true;r.maxAlternatives=opt.auto?5:1;
+    r.onresult=e=>{let tmp="";for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i];if(x.isFinal){fin+=x[0].transcript.trim()+" ";if(opt.auto)for(let j=0;j<x.length;j++)alts.push(x[j].transcript)}else tmp+=x[0].transcript}
+      if(opt.onText)opt.onText((fin+tmp).trim())};
+    r.onerror=e=>{err=e.error||"error";if(err!=="no-speech"&&err!=="aborted")fails++;if(fails>2||/not-allowed|service-not-allowed|audio-capture|language-not-supported/.test(err))r=null};
+    r.onend=()=>{if(!on)return;if(opt.auto)return stop();if(!r)return mr?null:stop();try{mk()}catch(e){r=null;if(!mr)stop()}};
+    try{r.start()}catch(e){err="start";r=null}
+  }
+  mk();
+  if(!mr&&!r){if(stream)stream.getTracks().forEach(t=>t.stop());throw {error:err||"unsupported"}}
+  const tick=setInterval(()=>{const x=(Date.now()-t0)/1000;if(opt.onTick)opt.onTick(x);if(x>=(opt.max||90))stop()},250);
+  function stop(){
+    if(stopped)return;stopped=true;on=false;clearInterval(tick);try{r&&r.stop()}catch(e){}
+    const end=()=>{if(stream)stream.getTracks().forEach(t=>t.stop());const type=(mr&&mr.mimeType)||mime||"audio/webm";
+      resolve({blob:parts.length?new Blob(parts,{type}):null,mime:type,dur:(Date.now()-t0)/1000,text:fin.trim(),alts,err})};
+    setTimeout(()=>{if(mr&&mr.state!=="inactive"){mr.onstop=end;try{mr.stop()}catch(e){end()}}else end()},SRc?900:50);   // ждём последние слова распознавания
+  }
+  return {stop,done};
+}
+function voiceRes(k,i){
+  const S=(P[k]&&P[k].s||{})[i],R=VREC[k+":"+i];if(!S)return "";
+  return (S.s?`<div class="vheard"><span class="muted">Распознано:</span> <span class="ko">«${esc(S.s)}»</span></div>`:`<div class="vheard muted">${esc(S.e||"Распознать речь не получилось, но запись есть.")}</div>`)+
+    (S.m!=null?`<div class="vmatch ${S.m>=85?"ok":S.m>=65?"":"bad"}">Совпадает с написанным на ${S.m}%${S.m>=85?" — отлично":S.m>=65?" — почти, проверь слова":" — сравни, что написано и что услышали"}</div>`:"")+
+    (R?`<audio controls src="${R.url}" class="vaud"></audio>`:"")+
+    `<div class="muted vsent">${S.sent?ic("check",14)+" отправлено преподавателю":R?"Запись уйдёт преподавателю, когда нажмёшь «Сохранить и отправить».":"Запись не сохранилась (страницу обновили). Запиши ещё раз, чтобы преподаватель её услышал."}</div>`;
+}
+function voiceMatch(k,i){
+  const S=(P[k]&&P[k].s||{})[i],w=String((P[k]&&P[k].v||{})[i]||"").trim();if(!S)return;
+  S.m=S.s&&w.length>=2&&window.KR&&KR.ear?Math.round(KR.ear.sim(w,S.s,LANG)*100):null;
+}
+async function voiceToggle(t){
+  const k=t.dataset.vrec,i=+t.dataset.i,id=k+":"+i;
+  if(VCUR){const same=VCUR.id===id;VCUR.stop();if(same)return;return}
+  if(window.KR&&KR.hush)KR.hush();
+  const tm=document.getElementById(`vt-${k}-${i}`),box=document.getElementById(`vr-${k}-${i}`);
+  let c;
+  try{c=await voiceStart({lang:LANG,max:(blocks.find(x=>x._key===k)||{}).max||90,
+    onTick:x=>{if(tm)tm.textContent="● "+fmtS(x)},onText:x=>{if(box)box.innerHTML=`<div class="vheard"><span class="muted">Слышу:</span> <span class="ko">${esc(x)}</span></div>`}})}
+  catch(e){if(tm)tm.textContent=window.KR&&KR.ear?KR.ear.errText(e):"Нет доступа к микрофону.";return}
+  VCUR={id,stop:c.stop};t.classList.add("on");t.innerHTML=ic("mic",16)+" Стоп";if(box)box.innerHTML=`<div class="vheard muted">Говори… Нажми «Стоп», когда закончишь.</div>`;
+  const r=await c.done;VCUR=null;t.classList.remove("on");t.innerHTML=ic("mic",16)+" Перезаписать";if(tm)tm.textContent=r.dur?"✓ "+fmtS(r.dur):"";
+  const old=VREC[id];if(old)try{URL.revokeObjectURL(old.url)}catch(e){}
+  if(r.blob)VREC[id]={blob:r.blob,mime:r.mime,dur:r.dur,url:URL.createObjectURL(r.blob)};else delete VREC[id];
+  const p=P[k]=P[k]||{};p.s=p.s||{};
+  p.s[i]={s:r.text,d:Math.round(r.dur),t:Date.now(),sent:false,e:r.text?"":r.err&&r.err!=="no-speech"?"Распознать речь здесь не получилось (нужны интернет и Chrome, Edge или Safari). Запись есть — преподаватель её послушает.":"Ничего не распознали. Говори чуть громче или ближе к микрофону."};
+  if(!r.blob&&!r.text){delete p.s[i]}
+  voiceMatch(k,i);p.t=Date.now();
+  if(p.done){p.done=false;const sb=document.querySelector(`[data-wsave="${k}"]`);if(sb)sb.textContent="Сохранить и отправить"}
+  if(box)box.innerHTML=voiceRes(k,i);save();refresh();
+}
+/* отправка в Telegram преподавателю (CONFIG.TG_TOKEN, CONFIG.TG_CHAT_ID — тот же бот, что у материалов сайта) */
+async function tg(method,body){
+  const c=window.CONFIG||{};if(!c.TG_TOKEN||!c.TG_CHAT_ID)throw new Error("не настроена отправка");
+  const r=await fetch("https://api.telegram.org/bot"+c.TG_TOKEN+"/"+method,{method:"POST",body});const j=await r.json().catch(()=>({}));
+  if(!j.ok)throw new Error(j.description||"ошибка "+r.status);
+}
+async function tgVoice(id,cap,name){
+  const c=window.CONFIG||{},R=VREC[id];cap=cap.slice(0,1000);
+  if(!R)return tg("sendMessage",new URLSearchParams({chat_id:c.TG_CHAT_ID,text:cap}));
+  const fd=new FormData();fd.append("chat_id",c.TG_CHAT_ID);fd.append("caption",cap);
+  if(/ogg/.test(R.mime)){fd.append("voice",R.blob,"answer.ogg");return tg("sendVoice",fd)}
+  fd.append("document",R.blob,name+"."+(/mp4|aac|m4a/.test(R.mime)?"m4a":"webm"));return tg("sendDocument",fd);
+}
+const capHead=b=>`🎙 ${user} · ${(b.src&&(window.LESSONS||{})[b.src]||L).title}${L.hw?" · домашка":""}\n«${b.title}»`;
+// неотправленные ответы блока write: запись или распознанный текст
+async function voiceSendWrite(b){
+  const k=b._key,p=P[k]||{},S=p.s||{},v=p.v||{};
+  for(let i=0;i<b.prompts.length;i++){const x=S[i];if(!x||x.sent)continue;
+    const w=String(v[i]||"").trim();
+    await tgVoice(k+":"+i,[capHead(b),"❓ "+b.prompts[i],w?"✍️ Хотел(а) сказать: "+w:"","👂 Распознано: "+(x.s||"—"),x.m!=null?"Совпадение: "+x.m+"%":""].filter(Boolean).join("\n"),user+"_"+k+"_"+(i+1));
+    x.sent=true;save();const box=document.getElementById(`vr-${k}-${i}`);if(box)box.innerHTML=voiceRes(k,i)}
+}
+async function voiceSendSpeak(t){
+  const k=t.dataset.vsend,b=blocks.find(x=>x._key===k),v=(P[k]&&P[k].v)||{};
+  const ids=Object.keys(v).filter(i=>VREC[k+":"+i]&&!v[i].sent),sc=document.getElementById("sc-"+k);
+  if(!ids.length){if(sc)sc.textContent=Object.keys(v).some(i=>v[i].sent)?"Все записи уже отправлены.":"Сначала прочитай реплики в микрофон.";return}
+  t.disabled=true;
+  try{for(const i of ids){const l=b.lines[i];if(sc)sc.textContent=`Отправляю ${ids.indexOf(i)+1} из ${ids.length}…`;
+      await tgVoice(k+":"+i,[capHead(b),"📜 "+l[1],"👂 Распознано: "+(v[i].h||"—"),"Совпадение: "+v[i].s+"%"].join("\n"),user+"_"+k+"_"+(+i+1));v[i].sent=true;save()}
+    if(sc)sc.textContent="✓ Записи отправлены преподавателю";}
+  catch(e){if(sc)sc.textContent="Не получилось отправить ("+e.message+"). Нажми ещё раз."}
+  t.disabled=false;
+}
+/* порядок событий: текущий порядок карточек */
+function sortOrder(b){
+  const n=b.items.length,v=P[b._key]&&P[b._key].v;
+  if(Array.isArray(v)&&v.length===n&&v.every(j=>j>=0&&j<n))return v.slice();
+  let o=b.items.map((x,j)=>j).sort((x,y)=>((x*5+2)%n)-((y*5+2)%n));
+  if(o.every((j,i)=>j===i))o.reverse();
+  return o;
+}
+function sortSave(ol){
+  const k=ol.dataset.srt,o=[...ol.children].map(li=>+li.dataset.j);P[k]=P[k]||{};P[k].v=o;P[k].t=Date.now();
+  [...ol.children].forEach((li,i)=>{li.querySelector(".srt-n").textContent=i+1;li.classList.remove("ok","bad")});
+  const sc=document.getElementById("sc-"+k);if(sc&&P[k].total==null)sc.textContent="";save();
+}
+function sortDrag(){
+  let D=null;
+  document.body.addEventListener("pointerdown",e=>{
+    const li=e.target.closest(".srt-it");if(!li||e.target.closest("button"))return;
+    if(e.pointerType!=="mouse"&&!e.target.closest(".srt-h"))return;   // на телефоне тянем за ⠿, чтобы страница прокручивалась
+    e.preventDefault();D={li,ol:li.parentElement,id:e.pointerId};li.classList.add("drag");try{li.setPointerCapture(e.pointerId)}catch(x){}
+  });
+  document.body.addEventListener("pointermove",e=>{
+    if(!D||e.pointerId!==D.id)return;e.preventDefault();
+    const over=[...D.ol.children].find(x=>{if(x===D.li)return false;const r=x.getBoundingClientRect();return e.clientY>=r.top&&e.clientY<=r.bottom});
+    if(over){const r=over.getBoundingClientRect();D.ol.insertBefore(D.li,e.clientY<r.top+r.height/2?over:over.nextSibling)}
+    if(e.clientY<60)window.scrollBy(0,-12);else if(e.clientY>innerHeight-60)window.scrollBy(0,12);
+  },{passive:false});
+  const up=e=>{if(!D||e.pointerId!==D.id)return;D.li.classList.remove("drag");sortSave(D.ol);D=null};
+  document.body.addEventListener("pointerup",up);document.body.addEventListener("pointercancel",up);
 }
 function getItems(b){return b.items}
 /* Слова из словаря ученика, которые проверяет задание: явно (it.w — слово или список) или по правильному ответу. */
@@ -324,8 +465,18 @@ function practiceWords(b,key,wrong){
     `<a href="words.html">Открыть «Слова»</a></p>`);
 }
 function check(key){
-  const b=blocks.find(x=>x._key===key);const v=(P[key]=P[key]||{}).v=(P[key].v||{});
+  const b=blocks.find(x=>x._key===key);
+  if(b.type==="sort"){P[key]=P[key]||{};P[key].v=sortOrder(b)}
+  const v=(P[key]=P[key]||{}).v=(P[key].v||{});
   let ok=0;const wr=[];
+  if(b.type==="sort"){
+    const ol=document.querySelector(`[data-srt="${key}"]`);
+    v.forEach((j,pos)=>{const good=j===pos,li=ol&&ol.children[pos];if(li){li.classList.remove("ok","bad");li.classList.add(good?"ok":"bad")}if(good)ok++;else wr.push([j,String(pos+1)])});
+    P[key].tries=(P[key].tries||0)+1;const ms=P[key].miss=P[key].miss||{};wr.forEach(w=>{ms[w[0]]=(ms[w[0]]||0)+1});
+    const hs=P[key].hist=P[key].hist||[];hs.push({t:Date.now(),s:ok,n:b.items.length,w:wr});if(hs.length>10)hs.splice(0,hs.length-10);
+    P[key].t=Date.now();P[key].score=ok;P[key].total=b.items.length;P[key].done=ok===b.items.length;
+    save();refresh();const sc=document.getElementById("sc-"+key);if(sc&&!P[key].done)sc.textContent+=" · красные карточки стоят не на своём месте";return;
+  }
   b.items.forEach((it,i)=>{
     let good=false;
     if(b.type==="fill"){const inp=document.querySelector(`input[data-b="${key}"][data-i="${i}"]`);v[i]=inp.value;good=it.a.some(a=>norm(a)===norm(inp.value));inp.className="ans ko "+(good?"ok":"bad")}
@@ -370,14 +521,21 @@ async function speakLine(t){
   const fb=document.getElementById(`sp-${k}-${i}`),E=KR.ear;if(window.KR&&KR.hush)KR.hush();
   t.classList.add("on");if(fb){fb.className="micfb";fb.textContent="Слушаю… прочитай реплику"}
   let r=null;
-  try{const alts=await E.recognize("ko",{max:Math.min(20000,4000+line[1].length*250)}),h=E.heard(alts,line[1],"ko");
+  try{let alts;
+    if(b.rec){   // с записью для преподавателя: запись и распознавание вместе, останавливается само после фразы
+      const c=await voiceStart({lang:"ko",auto:true,max:Math.min(20,4+line[1].length*.25)}),x=await c.done;
+      const id=k+":"+i,old=VREC[id];if(old)try{URL.revokeObjectURL(old.url)}catch(e){}
+      if(x.blob)VREC[id]={blob:x.blob,mime:x.mime,dur:x.dur,url:URL.createObjectURL(x.blob)};
+      alts=x.alts.length?x.alts:x.text?[x.text]:[];if(!alts.length)throw {error:x.err||"no-speech"};
+    }else alts=await E.recognize("ko",{max:Math.min(20000,4000+line[1].length*250)});
+    const h=E.heard(alts,line[1],"ko");
     const sc=Math.round(h.score*100),c=sc>=85?"ok":sc>=65?"":"bad";
-    r={s:sc,c,m:(sc>=85?"Отлично! ":sc>=65?"Почти. ":"Ещё раз. ")+"Совпадение "+sc+"% · услышали: «"+(h.best||alts[0])+"»"};
+    r={s:sc,c,h:h.best||alts[0],m:(sc>=85?"Отлично! ":sc>=65?"Почти. ":"Ещё раз. ")+"Совпадение "+sc+"% · услышали: «"+(h.best||alts[0])+"»"};
     if(sc<65)setTimeout(()=>say(line[1]),400);
   }catch(e){if(fb){fb.className="micfb bad";fb.textContent=E.errText(e)}}
   t.classList.remove("on");if(!r)return;
   if(fb){fb.className="micfb "+r.c;fb.textContent=r.m}
-  const p=P[k]=P[k]||{};p.v=p.v||{};const was=p.v[i];if(!was||r.s>=was.s)p.v[i]=r;p.t=Date.now();
+  const p=P[k]=P[k]||{};p.v=p.v||{};const was=p.v[i];if(!was||r.s>=was.s||b.rec)p.v[i]=r;p.t=Date.now();
   const mine=b.lines.map((l,j)=>j).filter(j=>!p.role||b.lines[j][0]===p.role),got=mine.filter(j=>p.v[j]);
   const sc=document.getElementById("sc-"+k);if(sc)sc.textContent=`Прочитано ${got.length} из ${mine.length} · в среднем ${got.length?Math.round(got.reduce((a,j)=>a+p.v[j].s,0)/got.length):0}%`;
   if(got.length===mine.length&&!p.done){p.done=true;refresh()}
@@ -411,9 +569,19 @@ function wire(){
     if(t.dataset.wsave){const k=t.dataset.wsave,b=blocks.find(x=>x._key===k),v=(P[k]=P[k]||{}).v=P[k].v||{};
       b.prompts.forEach((x,i)=>{const e=document.getElementById(`wr-${k}-${i}`);if(e)v[i]=e.value});
       const n=b.prompts.filter((x,i)=>String(v[i]||"").trim().length>=2).length,sc=document.getElementById("sc-"+k);
-      if(n<b.prompts.length){if(sc)sc.textContent=`Ответь на все вопросы: заполнено ${n} из ${b.prompts.length}`;save();return}
+      const S=P[k].s||{},n2=b.voice?b.prompts.filter((x,i)=>String(v[i]||"").trim().length>=2||S[i]).length:n;
+      if(n2<b.prompts.length){if(sc)sc.textContent=`Ответь на все ${b.voice?"(письменно или голосом)":"вопросы"}: готово ${n2} из ${b.prompts.length}`;save();return}
+      if(VCUR){if(sc)sc.textContent="Сначала останови запись.";return}
+      b.prompts.forEach((x,i)=>voiceMatch(k,i));
+      if(b.voice&&Object.keys(S).some(i=>!S[i].sent)){t.disabled=true;t.textContent="Отправляю…";
+        voiceSendWrite(b).then(()=>{P[k].done=true;P[k].t=Date.now();t.textContent="Сохранено ✓";if(sc)sc.textContent="Записи отправлены преподавателю.";document.querySelectorAll(`#b-${k} .wr-model`).forEach(d=>d.hidden=false);save();refresh()})
+          .catch(e=>{t.textContent="Сохранить и отправить";if(sc)sc.textContent="Не получилось отправить ("+e.message+"). Проверь интернет и нажми ещё раз — ответы сохранены."})
+          .then(()=>{t.disabled=false});return}
       P[k].done=true;P[k].t=Date.now();t.textContent="Сохранено ✓";if(sc)sc.textContent="";
       document.querySelectorAll(`#b-${k} .wr-model`).forEach(d=>d.hidden=false);save();return refresh()}
+    if(t.dataset.vrec!==undefined)return voiceToggle(t);
+    if(t.dataset.vsend!==undefined)return voiceSendSpeak(t);
+    if(t.dataset.smv!==undefined){const li=t.closest(".srt-it"),ol=li.parentElement;if(+t.dataset.smv<0&&li.previousElementSibling)ol.insertBefore(li,li.previousElementSibling);else if(+t.dataset.smv>0&&li.nextElementSibling)ol.insertBefore(li.nextElementSibling,li);sortSave(ol);t.focus();return}
     if(t.dataset.spr!==undefined){const k=t.dataset.spr;P[k]=P[k]||{};P[k].role=t.dataset.r;save();const c=document.getElementById("b-"+k),b=blocks.find(x=>x._key===k);if(c){c.outerHTML=block(b);refresh()}return}
     if(t.dataset.spm!==undefined)return speakLine(t);
     if(t.dataset.done){const k=t.dataset.done;P[k]=P[k]||{};P[k].done=!P[k].done;P[k].t=Date.now();save();return refresh()}
@@ -421,6 +589,7 @@ function wire(){
   });
   document.body.addEventListener("input",e=>{const w=e.target;if(w.dataset&&w.dataset.wb){const k=w.dataset.wb;P[k]=P[k]||{};P[k].v=P[k].v||{};P[k].v[w.dataset.i]=w.value;P[k].t=Date.now();clearTimeout(window._wrT);window._wrT=setTimeout(save,800)}});
   document.body.addEventListener("input",e=>{const i=e.target;if(i.classList.contains("ans")){const k=i.dataset.b;P[k]=P[k]||{};P[k].v=P[k].v||{};P[k].v[i.dataset.i]=i.value;P[k].t=Date.now();i.className="ans ko";save()}});
+  sortDrag();
   // ссылка на раздел другой части урока (#grammar из домашки или из закладки): открыть нужную часть
   window.addEventListener("hashchange",()=>{const s=SECS.find(x=>x.id===location.hash.slice(1));if(s&&SPLIT&&partOf(s)!==PART){setPart(partOf(s));const e=document.getElementById(s.id);if(e)e.scrollIntoView()}});
   // домашка: тренажёр открывается в новой вкладке; когда ученик вернулся, проверяем, отправил ли он отчёт
@@ -477,7 +646,9 @@ function hwPick(b,idx){
   if(!key||!Array.isArray(idx))return b;
   const ok=[...new Set(idx)].filter(x=>Number.isInteger(x)&&x>=0&&x<b[key].length).sort((a,c)=>a-c);
   if(!ok.length||ok.length===b[key].length)return b;
-  return Object.assign(b,{[key]:ok.map(x=>b[key][x]),subIdx:ok,subOf:b[key].length});
+  const sub={[key]:ok.map(x=>b[key][x]),subIdx:ok,subOf:b[key].length};
+  if(key==="prompts")["hints","model"].forEach(f=>{if(Array.isArray(b[f]))sub[f]=ok.map(x=>b[f][x])});   // подсказки и образцы — по тем же номерам
+  return Object.assign(b,sub);
 }
 function hwTop(){
   const r=L.hw;let h="";
@@ -515,12 +686,14 @@ function hwResult(){
     if(b.src){x.l=b.src;x.b=b.srcKey;if(b.subIdx){x.i=b.subIdx;x.of=b.subOf}}
     if(b.type==="mat"){x.m=b.m.id;if(b.p&&b.p.length)x.p=b.p.length;const r=window.KR&&KR.matInfo(b.m.id).rep;if(r&&r.t>=L.hw.created)x.rep=String(r.x||"").slice(0,8000)}
     if(b.type==="wtest"){x.score=p.score||0;x.total=p.total||(b.wt.w||[]).length;x.tries=p.tries||0;x.wrong=p.wrong||[];if(p.sec)x.sec=p.sec;score+=x.score;max+=x.total}
-    if(b.type==="write"){x.texts=b.prompts.map((q,i)=>({q:String(q).slice(0,200),a:String((p.v||{})[i]||"").slice(0,2000)}))}
-    if(b.type==="speak"){const v=p.v||{},ks=Object.keys(v);x.read=ks.length;x.avg=ks.length?Math.round(ks.reduce((a,j)=>a+(v[j].s||0),0)/ks.length):0}
+    if(b.type==="write"){x.texts=b.prompts.map((q,i)=>{const o={q:String(q).slice(0,200),a:String((p.v||{})[i]||"").slice(0,2000)},S=(p.s||{})[i];
+      if(S){o.s=String(S.s||"").slice(0,2000);if(S.m!=null)o.m=S.m;o.rec=!!S.sent}return o})}
+    if(b.type==="speak"){const v=p.v||{},ks=Object.keys(v);x.read=ks.length;x.avg=ks.length?Math.round(ks.reduce((a,j)=>a+(v[j].s||0),0)/ks.length):0;
+      x.lines=ks.slice(0,30).map(j=>({q:String((b.lines[j]||[])[1]||"").slice(0,200),h:String(v[j].h||"").slice(0,300),s:v[j].s||0,rec:!!v[j].sent}))}
     if(EXT.includes(b.type)){
       x.score=p.score||0;x.total=b.items.length;x.tries=p.tries||0;score+=x.score;max+=x.total;
       const last=p.hist&&p.hist[p.hist.length-1];
-      x.wrong=(last?last.w:[]).slice(0,30).map(w=>{const it=b.items[w[0]]||{};return {q:String(it.q||it.p||it.l||it.say||"").slice(0,200),g:String(w[1]==null?"":w[1]).slice(0,100),a:String(Array.isArray(it.a)?it.a[0]:it.a).slice(0,100)}});
+      x.wrong=(last?last.w:[]).slice(0,30).map(w=>{const it=b.items[w[0]]||{};return {q:String(it.q||it.p||it.l||it.say||"").slice(0,200),g:String(w[1]==null?"":w[1]).slice(0,100),a:String(b.type==="sort"?w[0]+1:Array.isArray(it.a)?it.a[0]:it.a).slice(0,100)}});
     }
     return x;
   });

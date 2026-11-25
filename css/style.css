@@ -1301,3 +1301,27 @@ header.band h1:not(.ko){font-family:"Playfair Display SC",var(--font-display);fo
 body{letter-spacing:.005em}
 .top .logo .lt{padding-top:.3em;margin-top:-.3em}
 .steps b,.lcard .no,.ring b,.stat b{font-variant-numeric:lining-nums}
+/* урок: подсказка к письменному ответу, ответ голосом (запись + распознавание), порядок перетаскиванием, скрипт с пропусками */
+.wr-hint{margin:2px 0 8px;font-size:15px}
+.wr-hint summary{cursor:pointer;color:var(--accent);display:inline-flex;align-items:center;gap:5px}
+.wr-hint>div{margin-top:6px;padding:8px 12px;border-left:3px solid var(--gold);background:rgba(212,175,124,.1);border-radius:0 10px 10px 0;line-height:1.55}
+.vrow{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.vbtn{display:inline-flex;align-items:center;gap:6px}
+.vbtn.on{background:var(--gold);color:#0B1535;border-color:var(--gold)}
+.vtm{font-variant-numeric:tabular-nums;font-size:14px}
+.vres{margin-top:6px;font-size:15px;line-height:1.5}
+.vres:empty{display:none}
+.vmatch{font-size:14px;color:var(--fg-2)}.vmatch.ok{color:var(--ok-fg)}.vmatch.bad{color:var(--bad-fg)}
+.vaud{width:100%;max-width:420px;height:38px;margin-top:6px;display:block}
+.vsent{font-size:13.5px;margin-top:2px}
+.srt{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px}
+.srt-it{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--field-line);border-radius:14px;background:var(--field);cursor:grab;user-select:none;-webkit-user-select:none;transition:box-shadow .15s}
+.srt-it.drag{cursor:grabbing;box-shadow:0 8px 24px rgba(11,21,53,.22);border-color:var(--gold);position:relative;z-index:2}
+.srt-it.ok{border-color:var(--ok)}.srt-it.bad{border-color:var(--bad)}
+.srt-h{touch-action:none;font-size:22px;line-height:1;color:var(--silver);padding:6px 4px;cursor:grab}
+.srt-n{min-width:1.6em;height:1.6em;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:600;background:rgba(212,175,124,.25)}
+.srt-q{flex:1;font-size:16px;line-height:1.4}
+.srt-mv{display:flex;gap:2px}.srt-mv .icb{width:30px;height:30px;font-size:15px}
+.reading .gap{white-space:nowrap}.reading .gap sup{opacity:.6;margin:0 2px}
+.reading .gap input.ans{width:auto;min-width:4em;max-width:100%;display:inline-block;margin:2px 2px;padding:2px 8px;font-size:16px}
+.ex.dlg .q{line-height:1.8}

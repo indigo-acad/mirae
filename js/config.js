@@ -15,5 +15,9 @@ window.CONFIG = {
   TRANSLATE: "mymemory",
   // Облачный голос для озвучки (функция supabase/functions/tts). Пусто: говорит лучший голос устройства.
   // Пока в Supabase не добавлены ключи голосов, функция отвечает «не настроено» и сайт говорит голосом устройства.
+  // Записи голоса из уроков (блоки «скажи / запиши голосом») уходят преподавателю в Telegram вместе с распознанным текстом.
+  // Тот же бот, что у материалов сайта (materials/…/index.html).
+  TG_TOKEN: "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU",
+  TG_CHAT_ID: "347625701",
   TTS_URL: "https://nusfkwtmnbhnbnckhrfk.supabase.co/functions/v1/tts"
 };
