@@ -12,8 +12,8 @@
 </head>
 <body>
 <div id="topbar"></div>
-<header class="band"><div class="in"><small>Преподаватель</small><h1>Ученики и задания</h1><p>Назначай материалы: ученик увидит только их</p></div></header>
-<main><nav class="seg tnav" aria-label="Разделы преподавателя"><a href="teacher.html" class="on" aria-current="page">Ученики</a><a href="groups.html">Группы</a><a href="dict.html">Словари</a></nav><div id="m"></div></main>
+<header class="band slim"><div class="in"><small>Преподаватель</small><h1>Ученики и задания</h1><p>Назначай материалы: ученик увидит только их</p></div></header>
+<main class="tmain"><nav class="seg tnav" aria-label="Разделы преподавателя"><a href="teacher.html" class="on" aria-current="page">Ученики</a><a href="groups.html">Группы</a><a href="dict.html">Словари</a></nav><div id="m"></div></main>
 <script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/l10-banmal.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/q2a-yuki.js"></script><script src="data/r2a-review2.js"></script><script src="data/sw5-l4.js"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/words2.js"></script><script src="js/srs.js"></script><script src="js/wexport.js"></script><script src="js/assistant.js"></script><script src="js/library.js"></script>
 <script>
 var $=function(s){return document.querySelector(s)};
@@ -106,7 +106,7 @@ async function boot(){
   var q=new URLSearchParams(location.search),qs=q.get('st');
   if(qs&&students.some(function(x){return x.name===qs})){cur=qs;var qg=+q.get('grp')||0;if(qg&&gtGroups().some(function(g){return g.id===qg}))GT.to=qg;
     goTo=q.get('open')==='tg'?'tgc':q.get('open')==='hw'?'hwnew':null;if(goTo==='hwnew')hwf.open=true}
-  draw();
+  draw();loadInbox();
 }
 
 // ---------- преподаватели (только владелец школы, supabase/teachers.sql) ----------
@@ -126,20 +126,71 @@ function teachersCard(){
   return h;
 }
 async function reloadTeachers(){try{teachers=await KR.api('owner_teachers')||[]}catch(e){}try{students=await KR.api('teacher_students')||students}catch(e){}draw()}
-function draw(){
-  var h='<div class="card"><h3>Ученики</h3>';
-  var list=students.filter(function(s){return s.name!==KR.user()});
-  if(!list.length)h+='<p class="muted">Пока нет учеников. Добавь первого ниже.</p>';
-  h+='<div class="opts">'+list.map(function(s){var lead=isOwner()&&s.teacher&&s.teacher!==KR.user()?'<span class="badge">'+esc(s.teacher)+'</span>':'';
-    return '<button data-st="'+esc(s.name)+'" class="'+(cur===s.name?'sel':'')+' cap">'+esc(s.name)+' · '+s.assigned+(isNew(s)?'<span class="badge new">новый</span>':'')+lead+'</button>'}).join('')+'</div>'+
-    (isOwner()&&teachers&&teachers.length>1?'<p class="muted" style="margin:8px 0 0">У учеников других преподавателей рядом с именем стоит их преподаватель.</p>':'')+'</div>';
-  h+='<div class="card"><h3>Добавить ученика</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="nem" type="email" class="name" placeholder="Email ученика" style="flex:2;min-width:200px;margin:0"><input id="nlg" class="name" placeholder="Логин (по желанию)" style="flex:1;min-width:140px;margin:0" autocomplete="off"></div><div class="done-row"><span class="muted">Если логин пустой, возьмётся часть email до «@»</span><button class="pri" id="add">Создать</button></div><div id="inv"></div></div>';
-  if(isOwner()){h+=regCard();h+=teachersCard()}
-  if(cur)h+='<div id="stud"></div>';
-  h+='<p id="msg" class="msg" role="status" aria-live="polite"></p>';
-  $('#m').innerHTML=h;
-  if(cur)drawStudent();
+var view='st',tab='over',tq='',inbox=null;   // view: st — ученики, school — регистрация и преподаватели; tab — вкладка ученика; tq — поиск; inbox — домашка всех учеников для «К проверке»
+var toMain=false;   // на телефоне после выбора ученика прокручиваем к его карточке
+var TABS=[['over','Обзор'],['hw','Домашка'],['words','Слова'],['prog','Прогресс'],['mat','Материалы']];
+function stList(){return students.filter(function(s){return s.name!==KR.user()})}
+function inboxOf(n){var a=inbox&&inbox[n]||[],td=new Date().toISOString().slice(0,10);
+  return {sub:a.filter(function(r){return r.status==='done'}),late:a.filter(function(r){return r.status==='active'&&r.due&&r.due<td}),act:a.filter(function(r){return r.status==='active'})}}
+// домашка всех учеников разом: из неё сводка «К проверке» и значки в списке
+async function loadInbox(){
+  var out={},list=stList(),off=false;
+  await Promise.all(list.map(async function(s){try{out[s.name]=await KR.api('teacher_hw_list',{p_student:s.name})||[]}catch(e){if(gtMissing(e))off=true;out[s.name]=[]}}));
+  inbox=off?false:out;sideList();if(!cur&&view==='st')$('#tpmain').innerHTML=inboxCard();
 }
+function sideItems(){
+  var q=tq.trim().toLowerCase(),list=stList().filter(function(s){return !q||s.name.toLowerCase().indexOf(q)>=0||String(s.email||'').toLowerCase().indexOf(q)>=0});
+  if(!stList().length)return '<p class="muted">Пока нет учеников. Добавьте первого ниже.</p>';
+  if(!list.length)return '<p class="muted">Никого не нашлось</p>';
+  return list.map(function(s){var x=inboxOf(s.name),lead=isOwner()&&s.teacher&&s.teacher!==KR.user()?'<small class="tp-lead">'+esc(s.teacher)+'</small>':'';
+    return '<button type="button" data-st="'+esc(s.name)+'" class="tp-st'+(cur===s.name&&view==='st'?' on':'')+'"'+(cur===s.name?' aria-current="true"':'')+'><span class="tp-av" aria-hidden="true">'+esc(s.name.slice(0,1).toUpperCase())+'</span>'+
+      '<span class="tp-nm"><b class="cap">'+esc(s.name)+'</b><small>материалов: '+s.assigned+lead+'</small></span><span class="tp-bd">'+
+      (isNew(s)?'<i class="badge new">новый</i>':'')+(x.sub.length?'<i class="badge warn" title="Сдана домашка, ждёт проверки">✓ '+x.sub.length+'</i>':'')+(x.late.length?'<i class="badge bad" title="Просрочена домашка">⏰ '+x.late.length+'</i>':'')+'</span></button>'}).join('');
+}
+function sideList(){var e=$('#tplist');if(e)e.innerHTML=sideItems()}
+function inboxCard(){
+  var h='<div class="card tp-inbox"><h3>'+KR.icon('home',20)+' К проверке</h3>';
+  if(inbox===false)return h+'<p class="muted">Сводка появится, когда в Supabase будет файл supabase/homework.sql.</p></div>';
+  if(!inbox)return h+'<p class="muted">Собираю домашку учеников…</p></div>';
+  var sub=[],late=[],idle=[];
+  stList().forEach(function(s){var x=inboxOf(s.name);x.sub.forEach(function(r){sub.push([s.name,r])});x.late.forEach(function(r){late.push([s.name,r])});if(!x.act.length&&!x.sub.length&&!isNew(s))idle.push(s.name)});
+  var row=function(n,r,t){return '<button type="button" class="tp-ib" data-st="'+esc(n)+'" data-go="hw"><b class="cap">'+esc(n)+'</b><span>'+esc(r.title)+'</span><small>'+t+'</small></button>'};
+  h+='<div class="tp-stats"><div><b>'+sub.length+'</b><span>сдано, ждёт проверки</span></div><div><b>'+late.length+'</b><span>просрочено</span></div><div><b>'+idle.length+'</b><span>без домашки</span></div></div>';
+  if(sub.length)h+='<p class="hwt-h"><b>Сдано — проверить</b></p>'+sub.map(function(x){return row(x[0],x[1],'сдана '+fmtDate(x[1].submitted))}).join('');
+  if(late.length)h+='<p class="hwt-h"><b>Просрочено</b></p>'+late.map(function(x){return row(x[0],x[1],'срок был '+fmtDay(x[1].due))}).join('');
+  if(idle.length)h+='<p class="hwt-h"><b>Сейчас без домашки</b></p><div class="opts">'+idle.map(function(n){return '<button type="button" class="cap" data-st="'+esc(n)+'" data-go="hw">'+esc(n)+'</button>'}).join('')+'</div>';
+  if(!sub.length&&!late.length&&!idle.length)h+='<p class="muted">Всё проверено, у всех есть домашка.</p>';
+  return h+'<p class="muted" style="margin-top:14px">Выберите ученика слева, чтобы открыть его карточку.</p></div>';
+}
+function draw(){
+  var h='<div class="tp"><aside class="tp-side card"><div class="tp-sh"><h3>Ученики</h3><span class="muted">'+stList().length+'</span></div>'+
+    '<input id="tq" type="search" class="name" placeholder="Поиск по имени или email" value="'+esc(tq)+'" autocomplete="off" aria-label="Поиск ученика">'+
+    '<div id="tplist" class="tp-list">'+sideItems()+'</div>'+
+    '<button type="button" class="tp-home'+(!cur&&view==='st'?' on':'')+'" data-home="1">'+KR.icon('home',17)+' К проверке</button>'+
+    (isOwner()?'<button type="button" class="tp-home'+(view==='school'?' on':'')+'" data-school="1">'+KR.icon('users',17)+' Школа: регистрация и преподаватели</button>':'')+
+    '<details class="tp-add"><summary class="btn">'+KR.icon('plus',16)+' Добавить ученика</summary><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><input id="nem" type="email" class="name" placeholder="Email ученика" style="flex:2;min-width:160px;margin:0"><input id="nlg" class="name" placeholder="Логин (по желанию)" style="flex:1;min-width:120px;margin:0" autocomplete="off"></div><div class="done-row"><span class="muted">Пустой логин — часть email до «@»</span><button class="pri" id="add">Создать</button></div><div id="inv"></div></details>'+
+    (isOwner()&&teachers&&teachers.length>1?'<p class="muted" style="margin:8px 0 0;font-size:13px">Под именем ученика другого преподавателя стоит его преподаватель.</p>':'')+
+    '</aside><section class="tp-main" id="tpmain">';
+  if(view==='school')h+=regCard()+teachersCard();
+  else if(cur)h+='<div id="stud"><div class="card"><p class="muted">Загружаю карточку ученика…</p></div></div>';
+  else h+=inboxCard();
+  h+='</section></div><p id="msg" class="msg tp-msg" role="status" aria-live="polite"></p>';
+  $('#m').innerHTML=h;
+  if(cur&&view==='st')drawStudent();
+}
+function setTab(t){tab=t;document.querySelectorAll('.tp-tabs [data-tab]').forEach(function(b){var on=b.dataset.tab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
+  document.querySelectorAll('.tp-pane').forEach(function(p){p.hidden=p.dataset.pane!==t})}
+// вкладка по id блока (переход со страницы «Группы», кнопка «Задать домашку»)
+var PANE_OF={hwnew:'hw',hwt:'hw',tgc:'words'};
+document.addEventListener('input',function(e){if(e.target.id==='tq'){tq=e.target.value;sideList()}});
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button');if(!b)return;
+  if(b.dataset.tab){setTab(b.dataset.tab);return}
+  if(b.dataset.home){cur=null;view='st';draw();if(!inbox)loadInbox();return}
+  if(b.dataset.school){view='school';cur=null;draw();return}
+  if(b.dataset.hwgo){setTab('hw');hwf.open=true;var d=$('#hwnew');if(d){d.open=true;setTimeout(function(){d.scrollIntoView({block:'start',behavior:'smooth'})},40)}return}
+  if(b.dataset.st&&b.dataset.go){tab=b.dataset.go}
+  if(b.dataset.st){view='st';toMain=matchMedia('(max-width:900px)').matches;if(b.dataset.st!==cur&&!b.dataset.go)tab='over'}
+},true);
 /* Словарь ученика: сколько слов, какие даются трудно, добавление новых. Слово, которое у ученика уже есть,
    после повторного добавления вернётся к нему на повторение раньше. */
 // материалы из папки materials/: отчёты «Отправить учителю», время занятий и отметки «Пройдено» (их пишет js/bridge.js)
@@ -757,13 +808,19 @@ async function drawStudent(){
   if(!as.length)h+='<p class="muted">Пока ничего не назначено.</p>';
   h+=as.map(function(a){var m=MAP[a.id]||SETMAP[a.id]||{title:a.id,kind:''};
     return '<div class="line" style="align-items:center;justify-content:space-between"><div><div>'+esc(m.title)+'</div><div class="muted">'+esc((window.KINDS||{})[m.kind]||'')+(a.due?' · срок '+esc(a.due):'')+(a.note?' · '+esc(a.note):'')+'</div></div><button data-un="'+esc(a.id)+'">Убрать</button></div>'}).join('');
-  h+='</div>'+groupsCardT(grps)+hwCardT()+tgCard()+'<div class="card"><h3>Прогресс и ответы</h3>'+lessonProgress(st)+materialsCard(st)+'</div>';
-  h+=vocabCard()+setsCard();
-  h+='<div class="card"><h3>Назначить материалы</h3><div class="opts" id="flt"><button data-f="all" class="'+(filt==='all'?'sel':'')+'">Все</button>'+Object.keys(SECTIONS).map(function(k){return '<button data-f="'+k+'" class="'+(filt===k?'sel':'')+'">'+esc(SECTIONS[k])+'</button>'}).join('')+'</div><div style="margin-top:8px;max-height:340px;overflow:auto">';
+  var hx=hws?{sub:hws.filter(function(r){return r.status==='done'}).length,act:hws.filter(function(r){return r.status==='active'}).length}:null;
+  var quick='<div class="card tp-quick"><div class="tp-stats">'+(hx?'<div><b>'+hx.sub+'</b><span>сдано, ждёт проверки</span></div><div><b>'+hx.act+'</b><span>задано, ждёт ученика</span></div>':'')+'<div><b>'+as.length+'</b><span>назначено материалов</span></div><div><b>'+(voc?voc.length:'—')+'</b><span>слов в словаре</span></div></div>'+
+    '<div class="tp-acts"><button type="button" class="pri" data-hwgo="1">'+KR.icon('plus',16)+' Задать домашку</button>'+(hx&&hx.sub?'<button type="button" data-tab="hw">Проверить сданное · '+hx.sub+'</button>':'')+'<button type="button" data-tab="words">Тест по словам</button><button type="button" data-tab="mat">Назначить материалы</button></div></div>';
+  h+='</div><div class="tp-tabs" role="tablist">'+TABS.map(function(t){var n=t[0]==='hw'&&hx&&hx.sub?' <i class="badge warn">'+hx.sub+'</i>':'';return '<button type="button" role="tab" data-tab="'+t[0]+'" class="'+(tab===t[0]?'on':'')+'" aria-selected="'+(tab===t[0])+'">'+t[1]+n+'</button>'}).join('')+'</div>';
+  h+='<div class="tp-pane" data-pane="over">'+quick+groupsCardT(grps)+'</div>'+
+    '<div class="tp-pane" data-pane="hw">'+hwCardT()+'</div>'+
+    '<div class="tp-pane" data-pane="words">'+tgCard()+vocabCard()+setsCard()+'</div>'+
+    '<div class="tp-pane" data-pane="prog"><div class="card"><h3>Прогресс и ответы</h3>'+lessonProgress(st)+materialsCard(st)+'</div></div>';
+  h+='<div class="tp-pane" data-pane="mat"><div class="card"><h3>Назначить материалы</h3><div class="opts" id="flt"><button data-f="all" class="'+(filt==='all'?'sel':'')+'">Все</button>'+Object.keys(SECTIONS).map(function(k){return '<button data-f="'+k+'" class="'+(filt===k?'sel':'')+'">'+esc(SECTIONS[k])+'</button>'}).join('')+'</div><div style="margin-top:8px;max-height:340px;overflow:auto">';
   MATERIALS.filter(function(m){return !have[m.id]&&(filt==='all'||m.section===filt)}).forEach(function(m){
     h+='<label class="line" style="align-items:center;cursor:pointer"><input type="checkbox" data-m="'+esc(m.id)+'" '+(sel[m.id]?'checked':'')+'><span style="flex:1">'+esc(m.title)+'<span class="muted"> · '+esc((window.KINDS||{})[m.kind]||'')+(m.level?' · '+esc(m.level):'')+'</span></span></label>'});
   h+='</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><input id="due" type="date" class="name" style="flex:1;min-width:150px;margin:0"><input id="note" class="name" placeholder="Комментарий (по желанию)" style="flex:2;min-width:180px;margin:0"></div><label class="line" style="margin-top:8px"><input type="checkbox" id="asgvoc"><span>Внести слова назначенных уроков в словарь ученика</span></label><div class="done-row"><span class="muted" id="cnt"></span><button class="pri" id="go">Назначить выбранные</button></div></div>';
-  $('#stud').innerHTML=h;count();hwSummary();
+  $('#stud').innerHTML=h+'</div>';if(goTo&&PANE_OF[goTo])tab=PANE_OF[goTo];setTab(tab);count();hwSummary();if(toMain){toMain=false;var sd=$('#stud');if(sd)sd.scrollIntoView({block:'start',behavior:'smooth'})}
   if(goTo){var gt=document.getElementById(goTo);goTo=null;if(gt&&gt.scrollIntoView)setTimeout(function(){gt.scrollIntoView({block:'start',behavior:'smooth'})},60)}
 }
 function count(){var n=Object.keys(sel).filter(function(k){return sel[k]}).length;var e=$('#cnt');if(e)e.textContent=n?('Выбрано: '+n):''}
@@ -790,7 +847,7 @@ document.addEventListener('click',async function(e){
     if(lg.length<2){msg('Логин получился слишком коротким, впиши свой');return}
     var pin=genPin();b.disabled=true;
     try{await KR.api('teacher_create_student',{p_login:lg,p_email:em,p_new_pin:pin});
-      students=await KR.api('teacher_students')||students;draw();showInvite('inv',lg,pin);msg('Ученик создан: '+lg,true)}
+      students=await KR.api('teacher_students')||students;draw();var ad=$('.tp-add');if(ad)ad.open=true;showInvite('inv',lg,pin);loadInbox();msg('Ученик создан: '+lg,true)}
     catch(x){b.disabled=false;msg(/exists/.test(x.message)?'Такой логин уже есть, впиши другой':/bad_input/.test(x.message)?'Некорректный логин или email':'Не получилось. Проверь, что supabase/invite-students.sql выполнен.')}
   }
   else if(b.id==='rst'){

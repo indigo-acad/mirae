@@ -1194,3 +1194,51 @@ details.tsplit{margin:16px 0 4px;padding-top:6px;border-top:1px solid var(--line
 details.tsplit>summary{font-size:17px;font-weight:500}
 details.tsplit .tfree{border-top:0;padding-top:4px}
 @media(prefers-reduced-motion:reduce){details.tguide>summary::after,details.tsplit>summary::after{transition:none}}
+
+/* ---------- панель преподавателя: список учеников слева, карточка ученика с вкладками справа ---------- */
+main.tmain{max-width:1240px}
+.tp>.card,.tp-main>.card:first-child{margin-top:0}
+.tp{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+.tp-side{position:sticky;top:calc(var(--nav-h) + 12px);max-height:calc(100vh - var(--nav-h) - 24px);display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.tp-sh{display:flex;align-items:baseline;justify-content:space-between}.tp-sh h3{margin:0}
+.tp-side input[type=search]{margin:0;width:100%;box-sizing:border-box}
+.tp-list{flex:1;min-height:80px;overflow:auto;margin:0 -8px;padding:0 8px;display:flex;flex-direction:column;gap:4px}
+.tp-st{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 10px;border-radius:14px;border:1px solid transparent;background:transparent;color:inherit;font:inherit;cursor:pointer;min-height:52px;transition:background-color .2s,border-color .2s}
+.tp-st:hover{background:var(--fill)}
+.tp-st.on{background:var(--fill);border-color:var(--gold)}
+.tp-av{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#0B1535;font-weight:600}
+.tp-nm{flex:1;min-width:0;display:flex;flex-direction:column}
+.tp-nm b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tp-nm small{color:var(--fg-2);font-size:12.5px}.tp-lead{display:block}
+.tp-bd{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}.tp-bd i{font-style:normal}
+.badge.bad{background:#f6d5d5;color:#8a2a2a}
+.tp-home{display:flex;align-items:center;gap:8px;width:100%;text-align:left;font:inherit;font-size:14px;padding:9px 12px;border-radius:12px;border:1px solid var(--rule,rgba(0,0,0,.1));background:transparent;color:inherit;cursor:pointer}
+.tp-home.on{border-color:var(--gold);background:var(--fill)}
+.tp-add summary{list-style:none;cursor:pointer;justify-content:center;display:flex;align-items:center;gap:6px}
+.tp-add summary::-webkit-details-marker{display:none}
+.tp-main{min-width:0}
+.tp-main>.card:first-child,#stud>.card:first-child{margin-top:0}
+.tp-tabs{position:sticky;top:calc(var(--nav-h) + 4px);z-index:5;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:14px 0;padding:6px;border-radius:999px;background:rgba(11,21,53,.82);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(212,175,124,.25)}
+.tp-tabs::-webkit-scrollbar{display:none}
+.tp-tabs button{flex:1 0 auto;border:0;background:transparent;color:var(--silver);font:inherit;font-size:14.5px;font-weight:500;padding:9px 16px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:40px;transition:background-color .2s,color .2s}
+.tp-tabs button:hover{color:var(--ivory)}
+.tp-tabs button.on{background:var(--gold);color:#0B1535}
+.tp-tabs .badge{margin-left:4px}
+.tp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:4px 0 14px}
+.tp-stats div{padding:12px 14px;border-radius:14px;background:var(--fill)}
+.tp-stats b{display:block;font-size:26px;font-weight:600;line-height:1.1}
+.tp-stats span{font-size:13px;color:var(--fg-2)}
+.tp-acts{display:flex;flex-wrap:wrap;gap:8px}
+.tp-acts button{display:inline-flex;align-items:center;gap:6px}
+.tp-ib{display:grid;grid-template-columns:minmax(90px,160px) 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;font:inherit;color:inherit;padding:10px 12px;margin:4px 0;border-radius:12px;border:1px solid var(--rule,rgba(0,0,0,.1));background:transparent;cursor:pointer}
+.tp-ib:hover{border-color:var(--gold);background:var(--fill)}
+.tp-ib small{color:var(--fg-2);white-space:nowrap}
+.tp-msg{position:sticky;bottom:12px}
+.tp-msg:empty{display:none}
+@media(max-width:900px){
+  .tp{grid-template-columns:1fr}
+  .tp-side{position:static;max-height:none}
+  .tp-list{max-height:260px}
+  .tp-ib{grid-template-columns:1fr;gap:2px}
+}
+body:has(main.tmain) header.band .in{max-width:1240px;padding:0 16px}
