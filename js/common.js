@@ -355,7 +355,7 @@ function tabbar(active){
   const cx=J("kr_ctx:"+u,null)||{};
   const t=(h,ic,tx,k)=>'<a href="'+h+'"'+(active===k?' class="on" aria-current="page"':"")+">"+icon(ic,22)+"<span>"+tx+"</span></a>";
   el.innerHTML=t("course.html","book","Курс","course")+t("words.html","abc","Слова","words")+t("practice.html","repeat","Упражнения","practice")+
-    (cx.teacher?t("teacher.html","users","Ученики","teacher"):"")+t("cabinet.html","user","Кабинет","cabinet");
+    (cx.teacher?t("teacher.html","users","Ученики",active==="library"?"library":"teacher"):"")+t("cabinet.html","user","Кабинет","cabinet");
   document.body.classList.add("has-tabs");
 }
 // падающие звёзды за страницей; на главной и на входе их рисует js/sky.js, там этот слой не нужен
@@ -474,12 +474,12 @@ window.KR={
       h='<div class="top guest">'+logo+'<nav aria-label="Разделы сайта">'+a("index.html#langs","Языки","")+a("index.html#how","Как учим","")+a("index.html#start","Как начать","")+"</nav>"+
         '<div class="top-r">'+acc+"</div></div>";
     }else{
-      const l=curLang(),cx=J("kr_ctx:"+u,null)||{},tl=cx.teacher?a("teacher.html","Ученики","teacher")+a("library.html","Библиотека","library"):"";
+      const l=curLang(),cx=J("kr_ctx:"+u,null)||{},tl=cx.teacher?a("teacher.html","Ученики","teacher"):"";
       if(l){
         const L=LANGS[l];
         h='<div class="top user school"><a class="logo brand" href="index.html" aria-label="MIRAÉ, школа: '+L.tag+', на главную"><i class="emb" aria-hidden="true"></i>'+
           '<span class="wm"><b lang="'+l+'">'+L.wm+'</b><small>MIRAÉ · '+L.tag+'</small></span></a>'+
-          '<nav aria-label="Разделы сайта">'+a("course.html",icon("book",17)+"Курс","course")+a("words.html",icon("cards",17)+"Слова","words")+a("practice.html",icon("pencil",17)+'<span class="xs-hide">Доп.&nbsp;</span>упражнения',"practice")+(cx.teacher?a("teacher.html",icon("users",17)+"Ученики","teacher")+a("library.html",icon("cards",17)+"Библиотека","library"):"")+"</nav>"+
+          '<nav aria-label="Разделы сайта">'+a("course.html",icon("book",17)+"Курс","course")+a("words.html",icon("cards",17)+"Слова","words")+a("practice.html",icon("pencil",17)+'<span class="xs-hide">Доп.&nbsp;</span>упражнения',"practice")+(cx.teacher?a("teacher.html",icon("users",17)+"Ученики","teacher"):"")+"</nav>"+
           '<div class="top-r">'+langSwitch()+acc+"</div></div>";
       }else{
         h='<div class="top user">'+logo+"<nav aria-label=\"Разделы сайта\">"+a("words.html",icon("cards",17)+"Слова","words")+a("practice.html",icon("pencil",17)+'<span class="xs-hide">Доп.&nbsp;</span>упражнения',"practice")+tl+"</nav><div class=\"top-r\">"+acc+"</div></div>";
