@@ -6,12 +6,12 @@
 /* ---------- токены ---------- */
 :root{
   --bg:#0B1535;--bg-deep:#070D24;--navy:#1E2A56;--indigo:#4254AD;
-  --card:#F8F7F2;--ivory:#F8F7F2;--ink:#161c3a;--muted:#686d86;
-  --gold:#D4AF7C;--gold-hi:#E6CDA3;--gold-ink:#8A6431;--silver:#C0C6D4;
+  --card:#F8F5EC;--ivory:#F4ECDD;--ink:#1A1F3C;--muted:#6F6A78;
+  --gold:#D4AF7C;--gold-hi:#E6CDA3;--gold-ink:#8A6431;--silver:#CEC5B3;
   --line:#e2dac7;--soft:#efead9;--ok:#3f8a5a;--bad:#b9473b;
   --green:#1E2A56;--green-d:#1E2A56;
-  --font-display:"Cormorant Garamond",Georgia,"Times New Roman",serif;
-  --font-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR","Malgun Gothic",sans-serif;
+  --font-display:"Playfair Display","Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --font-body:"Manrope","Inter",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR","Malgun Gothic",sans-serif;
   --font-ko-art:"Deogon Princess Classic","Song Myung","Noto Sans KR",serif;
   --font-ru-art:"Comforter Brush",var(--font-display);
   --font-en-art:"UnifrakturMaguntia",var(--font-display);
@@ -1295,3 +1295,9 @@ h2.sec{font-family:var(--font-ru-art);font-size:44px;font-weight:400;letter-spac
 h1 em:not(:lang(en)),h2 em:not(:lang(en)){font-family:var(--font-ru-art);font-style:normal;font-weight:400;font-size:1.12em}
 h1.hero-title em,h1.hero-title em:lang(en),h1 em:lang(en),.lc h3:lang(en),.langs div b:lang(en),.logo.brand .wm b:lang(en){font-family:var(--font-en-art);font-style:normal;font-weight:400;letter-spacing:0}
 .logo.brand .wm b:lang(ko),.lc h3.ko,.hero-title .wm-ko{font-weight:400;letter-spacing:.02em}
+
+/* «королевские» заголовки страниц: капитель Playfair Display SC */
+header.band h1:not(.ko){font-family:"Playfair Display SC",var(--font-display);font-weight:400;letter-spacing:.02em}
+body{letter-spacing:.005em}
+.top .logo .lt{padding-top:.3em;margin-top:-.3em}
+.steps b,.lcard .no,.ring b,.stat b{font-variant-numeric:lining-nums}
