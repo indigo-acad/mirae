@@ -1259,3 +1259,29 @@ html[data-lang=ko] header.band.course-hero::after{display:none}
 }
 /* луна уже нарисована в пейзаже img/scene-ko.webp: отдельный слой луны не нужен */
 html[data-lang=ko] .hero::after,html[data-lang=ko] header.band:not(.slim)::after{display:none}
+
+/* ---------- анимации шапки (js/topbar-fx.js): меню ---------- */
+.top-sweep{position:absolute;left:0;right:0;bottom:-1px;height:2px;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,transparent,var(--gold) 20%,#FFF1D6 50%,var(--gold) 80%,transparent);box-shadow:0 0 18px 2px rgba(212,175,124,.65);pointer-events:none}
+.top nav{perspective:600px}
+.top nav a .rl{position:relative;display:inline-block;overflow:hidden;vertical-align:top;line-height:1.25}
+.top nav a .rl-a,.top nav a .rl-b{display:block;transition:transform .45s cubic-bezier(.7,0,.2,1)}
+.top nav a .rl-b{position:absolute;left:0;top:0;transform:translateY(105%);color:var(--gold-hi)}
+.top nav a:hover .rl-a,.top nav a:focus-visible .rl-a{transform:translateY(-105%)}
+.top nav a:hover .rl-b,.top nav a:focus-visible .rl-b{transform:none}
+.top nav a .ic{transition:transform .45s var(--ease)}
+.top nav a:hover .ic{transform:translateY(-2px) rotate(-8deg) scale(1.12)}
+.top .nav-pill{transition:box-shadow .3s}
+.top .acc.enter.pulse::before{content:"";position:absolute;inset:-1px;border-radius:inherit;border:1px solid var(--gold);opacity:0;animation:accPulse 3.2s ease-out 2.5s infinite;pointer-events:none}
+@keyframes accPulse{0%{opacity:.8;transform:scale(1)}70%,100%{opacity:0;transform:scale(1.35,1.6)}}
+.top .acc{overflow:visible}
+
+/* ---------- анимации шапки: пейзаж, звёзды, горизонт ---------- */
+header.band{overflow:clip}
+html:is([data-lang=ko],[data-lang=en]) header.band:not(.slim)::before{transform:translate3d(var(--mx,0px),calc(var(--py,0px) + var(--rise,0px)),0) scale(1.03);opacity:var(--fade,1);will-change:transform}
+html:is([data-lang=ko],[data-lang=en]) .hero-art{transform:translate3d(var(--mx,0px),calc(var(--py,0px) * .6),0)}
+.band-stars{position:absolute;inset:0 0 40% 0;z-index:-1;pointer-events:none;transform:translateY(calc(var(--py,0px) * .5))}
+.band-stars i{position:absolute;width:var(--s);height:var(--s);border-radius:50%;background:#FFF1D6;box-shadow:0 0 6px 1px rgba(255,226,160,.8);opacity:.15}
+.band-glow{position:absolute;left:15%;right:15%;bottom:6%;height:38%;z-index:-1;pointer-events:none;opacity:.55;background:radial-gradient(50% 60% at 50% 100%,rgba(230,180,110,.35),rgba(230,180,110,0) 70%);mix-blend-mode:screen;transform:translateY(var(--py,0px))}
+header.band h1 .hw{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em}
+header.band h1 .hw>span{display:inline-block}
+@media(prefers-reduced-motion:reduce){.top nav a .rl-a,.top nav a .rl-b{transition:none}.top .acc.enter.pulse::before{animation:none}}
