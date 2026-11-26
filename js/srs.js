@@ -7,7 +7,8 @@
    due (когда показать, мс), ivl (интервал, дни), ef (лёгкость), step (шаг изучения), reps, lap (забывания),
    b (сколько раз слово добавляли повторно), fr / lr (первый и последний показ), a / u (добавлено / изменено),
    pe / pm (ошибок в упражнениях уроков и день последней такой ошибки), sh (интервал сокращён тренажёром, тестом или учителем:
-   следующее «Хорошо» растит его мягко, в полтора раза, а не в «лёгкость» раз), tc (сколько раз учитель возвращал слово).
+   следующее «Хорошо» растит его мягко, в полтора раза, а не в «лёгкость» раз), tc (сколько раз учитель возвращал слово),
+   cb (срок повторения после бонуса за сессию без ошибок, см. clean).
 
    Оценки: 1 «Снова», 2 «Трудно», 3 «Хорошо», 4 «Легко». */
 (function(root){
@@ -37,7 +38,9 @@ var DEF={
                   // с русским, с английским и в контексте вперемешку. Нет языка — берётся из ctxm
   lv:{},          // уровень ученика по языкам: {ko: "2급", en: "A2"}; нет языка — уровень подбирается сам (KR.mean.level)
   scope:["today","tom"],   // тренировка по выбору: какие слова отрабатывать в тренажёрах (см. SCOPES)
-  lw:"ask"        // слова нового урока: ask — спросить ученика, auto — добавить сразу, off — не добавлять
+  lw:"ask",       // слова нового урока: ask — спросить ученика, auto — добавить сразу, off — не добавлять
+  fuzz:1,         // разброс интервалов (±несколько дней), чтобы слова, выученные в один день, не возвращались все вместе
+  clean:1         // +1 день к следующему повторению, если слово отработано за сессию без единой ошибки (SRS.clean)
 };
 function num(v,d,lo,hi){v=parseFloat(v);return isFinite(v)?Math.max(lo,Math.min(hi,v)):d}
 function mins(a,d){
@@ -55,7 +58,17 @@ function cfg(s){
     ease:num(s.ease,DEF.ease,1.3,4),hard:num(s.hard,DEF.hard,1,2),bonus:num(s.bonus,DEF.bonus,1,2),
     lapse:num(s.lapse,DEF.lapse,0,1),mod:num(s.mod,DEF.mod,.5,2),maxIvl:Math.round(num(s.maxIvl,DEF.maxIvl,7,3650)),
     newDay:Math.round(num(s.newDay,DEF.newDay,0,200)),revDay:Math.round(num(s.revDay,DEF.revDay,1,2000)),games:g,
-    lw:s.lw==="auto"||s.lw==="off"?s.lw:DEF.lw,ctxm:ctxm(s.ctxm),gls:gls(s.gls),lv:lvs(s.lv),scope:scope(s.scope)};
+    lw:s.lw==="auto"||s.lw==="off"?s.lw:DEF.lw,ctxm:ctxm(s.ctxm),gls:gls(s.gls),lv:lvs(s.lv),scope:scope(s.scope),
+    fuzz:s.fuzz===0?0:1,clean:s.clean===0?0:1};
+}
+/* Разброс интервала, как в Anki: 200 слов, выученных за один день, расходятся на несколько соседних дней.
+   До 3 дней — без разброса, до недели — ±1 день, до месяца — ±15% (не меньше 2 дней), дальше ±5% (не меньше 4).
+   lo — меньше этого интервал не становится (правило «каждое “Хорошо” хотя бы на день дольше»). */
+function fuzz(n,lo,S){
+  if(!S.fuzz||n<3)return n;
+  var f=n<7?1:n<30?Math.max(2,Math.round(n*.15)):Math.max(4,Math.round(n*.05));
+  var r=n+Math.floor(root.SRS.rnd()*(2*f+1))-f;
+  return Math.min(S.maxIvl,Math.max(lo||1,r));
 }
 function scope(a){a=(Array.isArray(a)?a:[]).filter(function(x,i,arr){return SCOPES.indexOf(x)>=0&&arr.indexOf(x)===i});return a.length?a:DEF.scope.slice()}
 /* Слово пора отрабатывать по расписанию: изучаемое (шаги в минутах) или повторение на сегодня. */
@@ -108,13 +121,13 @@ function next(c,g,S,now){
       c.st=3;c.step=0;c.due=now+AGAIN;return c;
     }
     if(c.sh&&g<4){delete c.sh;                         // интервал недавно сократили за ошибку: растим осторожно
-      if(g===2){c.ef=Math.max(1.3,ef-.15);n=ivl}else n=Math.max(ivl+1,Math.round(ivl*1.5*S.mod));
+      if(g===2){c.ef=Math.max(1.3,ef-.15);n=ivl}else n=fuzz(Math.max(ivl+1,Math.round(ivl*1.5*S.mod)),ivl+1,S);
       c.ivl=Math.min(S.maxIvl,n);c.due=dayStart(now)+c.ivl*DAY;return c;
     }
     delete c.sh;
-    if(g===2){c.ef=Math.max(1.3,ef-.15);n=Math.max(ivl+1,Math.round(ivl*S.hard*S.mod))}
-    else if(g===3){n=Math.max(ivl+1,Math.round((ivl+late/2)*ef*S.mod))}
-    else{c.ef=ef+.15;n=Math.max(ivl+2,Math.round((ivl+late)*ef*S.bonus*S.mod))}
+    if(g===2){c.ef=Math.max(1.3,ef-.15);n=fuzz(Math.max(ivl+1,Math.round(ivl*S.hard*S.mod)),ivl+1,S)}
+    else if(g===3){n=fuzz(Math.max(ivl+1,Math.round((ivl+late/2)*ef*S.mod)),ivl+1,S)}
+    else{c.ef=ef+.15;n=fuzz(Math.max(ivl+2,Math.round((ivl+late)*ef*S.bonus*S.mod)),ivl+2,S)}
     c.ivl=Math.min(S.maxIvl,n);c.due=dayStart(now)+c.ivl*DAY;return c;
   }
   var steps=st===3?S.relearn:S.steps,i=st===0?0:Math.min(c.step||0,steps.length-1);
@@ -126,7 +139,7 @@ function next(c,g,S,now){
     c.step=i;c.due=now+Math.max(h*MIN,AGAIN+MIN);return c}
   if(g===3&&i+1<steps.length){c.step=i+1;c.due=now+steps[i+1]*MIN;return c}
   if(st===3){c.ivl=Math.max(1,c.ivl||1)+(g===4?1:0)}    // вернулось из переучивания
-  else{c.ivl=g===4?S.easy:S.grad;c.ef=c.ef||S.ease}     // выучено: переходит в повторения
+  else{c.ivl=g===4?fuzz(S.easy,2,S):S.grad;c.ef=c.ef||S.ease}     // выучено: переходит в повторения
   c.st=2;c.step=0;c.due=dayStart(now)+c.ivl*DAY;return c;
 }
 /* Слово добавили ещё раз (ученик выделил его снова или учитель добавил повторно): оно вернётся раньше. */
@@ -174,6 +187,16 @@ function send(c,when,S,now){
   else c.step=0;
   c.due=ds+DAY;return c;
 }
+/* Слово отработано за сессию (тренажёр, упражнения, тест по домашке) без единой ошибки: следующее повторение
+   на день позже. Только для слов в повторении (st 2), которые и так запланированы не на сегодня: слово «на сегодня»
+   сначала нужно повторить. Бонус даётся один раз за цикл повторения: cb — срок, который получился после бонуса;
+   пока срок тот же (слово ещё не повторяли), второй бонус не даётся, сколько бы тренажёров ни было за день.
+   Возвращает новую карточку или null. */
+function clean(c,S,now){
+  S=cfg(S);if(!S.clean||!c||c.st!==2||c.due<dayStart(now)+DAY||c.cb===c.due)return null;
+  c=Object.assign({},c);c.ivl=Math.min(S.maxIvl,Math.max(1,c.ivl||1)+1);c.due=c.due+DAY;c.cb=c.due;c.u=now;
+  return c;
+}
 function span(ms){
   if(ms<MIN)return "<1 мин";
   if(ms<60*MIN)return Math.round(ms/MIN)+" мин";
@@ -182,9 +205,10 @@ function span(ms){
   return d<30?d+" дн":d<365?Math.round(d/30)+" мес":(Math.round(d/36.5)/10)+" г";
 }
 /* Подпись на кнопке оценки: через сколько карточка вернётся. */
-function label(c,g,S,now){var n=next(c,g,S,now);return n.st===2?span(n.ivl*DAY):span(n.due-now)}
-/* Очередь на сейчас. revDone — сколько повторений уже сделано сегодня. */
-function plan(cards,S,now,revDone){
+function label(c,g,S,now){var R=root.SRS,r=R.rnd;R.rnd=function(){return .5};var n;try{n=next(c,g,S,now)}finally{R.rnd=r}return n.st===2?span(n.ivl*DAY):span(n.due-now)}
+/* Очередь на сейчас. revDone — сколько повторений уже сделано сегодня; extra — сколько новых слов ученик сам взял
+   сегодня сверх дневного лимита (после большого импорта можно выдать порцию или все сразу). */
+function plan(cards,S,now,revDone,extra){
   S=cfg(S);var ds=dayStart(now),learn=[],wait=[],rev=[],fresh=[],newDone=0;
   cards.forEach(function(c){
     if(c.fr&&c.fr>=ds)newDone++;
@@ -197,10 +221,12 @@ function plan(cards,S,now,revDone){
   learn.sort(byDue);wait.sort(byDue);rev.sort(byDue);
   fresh.sort(function(a,b){return (b.pri||0)-(a.pri||0)||(a.a||0)-(b.a||0)});
   var soon=wait.filter(function(c){return c.due<=now+AHEAD});
-  return {learn:learn,soon:soon,rev:rev.slice(0,Math.max(0,S.revDay-(revDone||0))),fresh:fresh.slice(0,Math.max(0,S.newDay-newDone)),
+  return {learn:learn,soon:soon,rev:rev.slice(0,Math.max(0,S.revDay-(revDone||0))),fresh:fresh.slice(0,Math.max(0,S.newDay+(extra||0)-newDone)),
     waiting:wait.length,nextAt:wait.length?wait[0].due:0,allNew:fresh.length,allRev:rev.length};
 }
 /* Следующая карточка: сначала то, что учим прямо сейчас, потом повторения, потом новые, потом ближайшие шаги. */
 function pick(p){return p.learn[0]||p.rev[0]||p.fresh[0]||p.soon[0]||null}
-root.SRS={DEF:DEF,GAMES:GAMES,MIN:MIN,DAY:DAY,cfg:cfg,norm:norm,id:makeId,make:make,next:next,bump:bump,practice:practice,train:train,send:send,isDue:isDue,inScope:inScope,SCOPES:SCOPES,label:label,span:span,plan:plan,pick:pick,dayStart:dayStart};
+root.SRS={DEF:DEF,GAMES:GAMES,MIN:MIN,DAY:DAY,cfg:cfg,norm:norm,id:makeId,make:make,next:next,bump:bump,practice:practice,train:train,send:send,clean:clean,fuzz:fuzz,
+  rnd:Math.random,   /* источник случайности для разброса; в проверках можно подменить */
+  isDue:isDue,inScope:inScope,SCOPES:SCOPES,label:label,span:span,plan:plan,pick:pick,dayStart:dayStart};
 })(typeof window!=="undefined"?window:globalThis);
