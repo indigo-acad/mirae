@@ -306,7 +306,7 @@ window.MATERIALS=[
   "section": "korean",
   "kind": "game",
   "title": "Рандомайзер грамматики · 1급–3B",
-  "path": "materials/korean/ko-grammar-randomizer/",
+  "path": "grammar.html",
   "level": "1급–3B"
  },
  {

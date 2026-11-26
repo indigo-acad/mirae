@@ -1327,3 +1327,75 @@ body{letter-spacing:.005em}
 /* меню прокручивается по горизонтали (overflow) и обрезало свечение подсветки прямоугольником: даём свечению место внутри */
 .top nav{padding:14px 18px;margin:-14px -18px}
 .top .nav-pill{box-shadow:0 0 14px -4px rgba(212,175,124,.45),inset 0 1px 0 rgba(255,241,214,.12)}
+
+/* ---------- рандомайзер грамматики (grammar.html, js/grammar-rand.js) ---------- */
+.gr-fhead{display:flex;align-items:baseline;justify-content:space-between;gap:6px 12px;flex-wrap:wrap}
+.gr-fhead h3{margin:0}
+.gr-books{margin-top:12px}
+.gr-books button{min-width:62px;min-height:42px}
+.gr-books button[lang=ko]{font-family:var(--font-ko)}
+.gr-books button.part{border-color:rgba(212,175,124,.45);color:var(--gold-hi);background:rgba(212,175,124,.06)}
+.gr-more{margin-top:14px;padding-top:6px;border-top:1px solid var(--rule)}
+.gr-more>summary{display:inline-flex;align-items:center;gap:8px;min-height:42px;cursor:pointer;list-style:none;color:var(--fg-2);font-size:14.5px}
+.gr-more>summary::-webkit-details-marker{display:none}
+.gr-more>summary:hover,.gr-more[open]>summary{color:var(--gold)}
+.gr-row{display:flex;gap:10px;align-items:flex-start;margin:8px 0}
+.gr-bk{flex:none;width:40px;padding-top:7px;font-family:var(--font-ko);font-weight:600;font-size:14px;color:var(--gold)}
+.gr-ls{display:flex;flex-wrap:wrap;gap:6px}
+.gr-ls button{min-width:40px;height:36px;padding:0 10px;font-size:14px}
+.gr-ls button.sel{background:rgba(212,175,124,.16);color:var(--gold);border-color:rgba(212,175,124,.55)}
+.gr-opts{display:grid;gap:10px;margin:14px 0 4px}
+.gr-opt{display:flex;gap:10px;align-items:center;font-size:14.5px;color:var(--fg-2);cursor:pointer}
+.gr-opt input{width:18px;height:18px;flex:none}
+
+.gr-stage{padding:22px 22px 16px}
+.gr-stage,.gr-ref,.gr-filter{word-break:keep-all;overflow-wrap:break-word}
+.gr-who{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.gr-av{--c:#D4AF7C;width:64px;height:64px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:32px;line-height:1;color:var(--gold);
+  background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--c) 34%,transparent),rgba(255,255,255,.03) 72%);
+  box-shadow:0 0 0 1.5px rgba(212,175,124,.7),0 0 0 7px rgba(212,175,124,.07)}
+.gr-nm{display:flex;flex-direction:column;min-width:0}
+.gr-nm b{font-family:var(--font-ko);font-size:19px;font-weight:600;color:var(--ivory)}
+.gr-nm small{color:var(--fg-2);font-size:13.5px;font-family:var(--font-ko)}
+.gr-badge{margin-left:auto;display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;border:1px solid rgba(212,175,124,.5);color:var(--gold);font-size:13px;font-family:var(--font-ko);white-space:nowrap}
+.gr-q{position:relative;padding:22px 60px 22px 22px;border-radius:20px;background:var(--fill);border:1px solid var(--rule)}
+.gr-q p{margin:0;font-size:clamp(22px,4.4vw,30px);line-height:1.45;font-weight:500;color:var(--ivory);transition:filter .2s,opacity .2s}
+.gr-q .say{position:absolute;right:12px;bottom:12px;margin:0}
+.gr-gram{display:table;margin-top:14px;padding:10px 18px;border-radius:16px;background:var(--gold);color:#0B1535;font-family:var(--font-ko);font-size:clamp(18px,3.6vw,22px);font-weight:700;line-height:1.35;box-shadow:0 14px 32px -16px rgba(212,175,124,.8)}
+.gr-gram small{display:block;font-family:var(--font-body);font-size:12px;font-weight:600;opacity:.72}
+.gr-box,.gr-rev{margin-top:12px;padding:12px 16px;border-radius:14px;font-size:15.5px;line-height:1.5}
+.gr-box small,.gr-rev small{display:block;margin-bottom:3px;color:var(--gold);font-size:11.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase}
+.gr-box b[lang=ko],.gr-sit,.gr-use{font-family:var(--font-ko)}
+.gr-sit{background:rgba(212,175,124,.07);border:1px dashed rgba(212,175,124,.45)}
+.gr-use{background:rgba(66,84,173,.2);border:1px solid rgba(130,150,225,.35)}
+.gr-use small{color:#AFC0F2}
+.gr-bonus{background:rgba(255,255,255,.04);border:1px solid var(--rule)}
+.gr-rev{background:rgba(255,255,255,.05);border:1px solid var(--rule);animation:rise .35s var(--ease) both}
+.gr-ans{background:rgba(143,211,166,.09);border-color:rgba(143,211,166,.35);font-size:19px;font-weight:600}
+.gr-ans small{color:var(--ok-fg)}
+.gr-ans [lang=ko],.gr-cheat [lang=ko]{font-family:var(--font-ko)}
+.gr-cheat .ex,.gr-ri .ex{display:block;margin-top:4px;color:var(--fg-2);font-family:var(--font-ko)}
+.gr-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.gr-next{flex:1 1 220px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;font-size:16.5px;box-shadow:0 14px 32px -16px rgba(212,175,124,.75)}
+.gr-tog{display:flex;flex-wrap:wrap;gap:8px;flex:1 1 300px}
+.gr-tog button{flex:1 1 auto;min-height:52px}
+.gr-tog button.sel{background:rgba(212,175,124,.16);color:var(--gold);border-color:rgba(212,175,124,.55)}
+.gr-cnt{margin-top:10px;text-align:right;font-size:13px;min-height:19px}
+.gr-stage.rolling .gr-q p{filter:blur(2px);opacity:.45}
+.gr-stage.rolling .gr-av{animation:grShake .17s infinite}
+@keyframes grShake{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+.gr-ref>summary{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap;cursor:pointer;list-style:none}
+.gr-ref>summary::-webkit-details-marker{display:none}
+.gr-ref>summary h3{margin:0}
+.gr-ref[open]>summary h3{color:var(--gold)}
+.gr-rb{margin:24px 0 2px;font-family:var(--font-ko);font-size:21px;font-weight:600;color:var(--gold)}
+.gr-rl{margin:14px 0 2px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg-2)}
+.gr-ri{display:flex;flex-direction:column;gap:2px;padding:9px 0;border-top:1px solid var(--rule);font-size:14.5px}
+.gr-ri b{font-family:var(--font-ko);font-size:15.5px;font-weight:600;color:var(--ivory)}
+.gr-foot{text-align:center;margin-top:4px}
+@media (max-width:560px){
+  .gr-stage{padding:18px 16px 14px}.gr-q{padding:18px 54px 18px 16px}
+  .gr-av{width:54px;height:54px;font-size:28px}.gr-badge{font-size:12px;padding:3px 9px}
+  .gr-tog button{min-height:46px;padding:8px 10px}
+}
+@media (prefers-reduced-motion:reduce){.gr-stage.rolling .gr-av{animation:none}}
