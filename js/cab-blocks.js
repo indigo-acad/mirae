@@ -115,9 +115,9 @@ function path(o){
   var st=o.stages||[],empty=!st.length;
   if(empty){st=[0,1,2,3,4,5].map(function(){return {name:"",done:false}});o.pct=0}
   var cur=empty?-1:st.findIndex(function(s){return !s.done});if(!empty&&cur<0)cur=st.length;
-  var n=st.length,YS=[56,26,50,22,46,24,52,28],pts=[],lit=[];
+  var n=st.length,YS=[70,32,62,28,58,30,66,34],pts=[],lit=[];
   st.forEach(function(s,i){var x=((i+.5)/n*1000).toFixed(0),y=YS[i%YS.length];pts.push(x+","+y);if(i<=cur&&i<n)lit.push(x+","+y)});
-  var stars=st.map(function(s,i){var state=i<cur?"done":i===cur?"cur":"todo",sz=state==="cur"?46:state==="done"?34:22;
+  var stars=st.map(function(s,i){var state=i<cur?"done":i===cur?"cur":"todo",sz=state==="cur"?60:state==="done"?44:30;
     return '<span class="cb-st '+state+'" style="left:'+((i+.5)/n*100).toFixed(2)+'%;top:'+YS[i%YS.length]+'px;--d:'+(i*.6).toFixed(1)+'s">'+mark(state,sz)+"</span>"}).join("");
   var labels=st.map(function(s,i){var state=i<cur?"done":i===cur?"cur":"todo";
     return '<div class="cb-lb '+state+'"><b>'+esc(s.name)+'</b><span>'+(state==="done"?"пройдено":state==="cur"?"сейчас":"впереди")+"</span></div>"}).join("");
@@ -126,7 +126,7 @@ function path(o){
   return '<section class="cb-path card glass'+(empty?" cb-empty":"")+'" aria-label="Путь по курсу: '+(empty?"курс ещё не открыт":esc(o.name)+", "+o.pct+" процентов")+'"><div class="cb-h"><div><span class="cb-k">Путь по курсу</span><h3>'+esc(empty?"Мой курс":o.name)+'</h3></div><span class="muted">'+esc(empty?"курс ещё не открыт":o.sub)+"</span></div>"+
     '<div class="cb-pw"><div class="cb-sun" aria-hidden="true"><svg viewBox="0 0 190 190"><g class="rays">'+rays+'</g><circle class="tr" cx="95" cy="95" r="72"/><circle class="arc" cx="95" cy="95" r="72" transform="rotate(-90 95 95)" stroke-dasharray="'+(452*o.pct/100).toFixed(0)+' 460"/><circle class="in" cx="95" cy="95" r="60"/></svg>'+
     '<span><b>'+o.pct+'%</b><small>прогресс курса</small></span></div>'+
-    '<div class="cb-trail"><div class="cb-sky" aria-hidden="true"><svg viewBox="0 0 1000 80" preserveAspectRatio="none"><polyline class="all" points="'+pts.join(" ")+'"/><polyline class="lit" points="'+lit.join(" ")+'"/></svg>'+stars+'</div>'+
+    '<div class="cb-trail"><div class="cb-sky" aria-hidden="true"><svg viewBox="0 0 1000 100" preserveAspectRatio="none"><polyline class="all" points="'+pts.join(" ")+'"/><polyline class="lit" points="'+lit.join(" ")+'"/></svg>'+stars+'</div>'+
     (empty?labels:'<div class="cb-lbs" style="grid-template-columns:repeat('+n+',minmax(0,1fr))">'+labels+"</div>")+"</div></div></section>";
 }
 function plan(o,W,HW){

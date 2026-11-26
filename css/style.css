@@ -1543,18 +1543,13 @@ html[data-theme=day] .sky-toggle{background:rgba(253,249,241,.85)}
 
 /* дневной фон: лучи, облака, лепестки (создаёт js/common.js → dayfx) */
 .dayfx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
-.dayfx .rays{position:absolute;right:-700px;top:-700px;width:1400px;height:1400px;border-radius:50%;
-  background:repeating-conic-gradient(from 0deg,rgba(255,226,170,.28) 0deg 6deg,rgba(255,226,170,0) 6deg 18deg);
-  -webkit-mask:radial-gradient(circle,#000 0 25%,transparent 68%);mask:radial-gradient(circle,#000 0 25%,transparent 68%);animation:rayspin 240s linear infinite}
 .dayfx .pt{position:absolute;top:-4%;z-index:2;animation:petal linear infinite}
 .dayfx .pt i{display:block;width:15px;height:10px;border-radius:85% 0 85% 0;background:linear-gradient(135deg,#FBD3C4,#EBA08E);opacity:.8;animation:sway 3.2s ease-in-out infinite alternate}
-.dayfx.still .rays{animation:none}
 .dayfx.still .pt{display:none}
-@keyframes rayspin{to{transform:rotate(360deg)}}
 @keyframes petal{from{top:-4%;transform:translateX(0)}to{top:104%;transform:translateX(var(--dx))}}
 @keyframes sway{from{transform:rotate(-35deg) translateX(-10px)}to{transform:rotate(45deg) translateX(10px)}}
 @media (prefers-reduced-motion:reduce){
-  .dayfx .rays{animation:none}.dayfx .pt{display:none}
+  .dayfx .pt{display:none}
   html[data-theme=day].m-school .hero-in::before,html[data-theme=day] .hero-title .wm-ko{animation:none}
 }
 
@@ -1640,7 +1635,8 @@ html[data-theme=day] .cb-mk .d,html[data-theme=day] .cb-bl .d{display:inline}
 .cb-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .cb-row>span{font-size:14px;color:var(--fg-2)}
 .cb-row em{font-style:normal;font-family:var(--font-display);font-size:26px;font-weight:600;color:var(--title)}
-.cb-ic{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 8px}
+.cb-ic{display:flex;flex-wrap:wrap;gap:6px 8px;margin:12px 0 10px}
+.cb-ic svg{width:30px;height:30px}
 .cb-leg{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;font-size:13px;color:var(--fg-2)}
 .cb-leg>span{display:inline-flex;align-items:center;gap:5px}
 .cb-leg svg{width:13px;height:13px}.cb-leg b{color:var(--fg)}
@@ -1664,7 +1660,7 @@ html[data-theme=day]{--cb-in:#FDF6EA}
 html[data-theme=day] .kh.c{background:#E3A65C}html[data-theme=day] .kh.r{background:#F6E1BD}
 /* путь по курсу */
 .cb-pw{display:flex;align-items:center;gap:32px;margin-top:14px}
-.cb-sun{position:relative;flex:none;width:180px;height:180px}
+.cb-sun{position:relative;flex:none;width:210px;height:210px}
 .cb-sun svg{display:block;width:100%;height:100%;overflow:visible}
 .cb-sun .rays{transform-origin:95px 95px}
 .cb-sun .tr{fill:none;stroke:var(--track);stroke-width:12}
@@ -1672,7 +1668,7 @@ html[data-theme=day] .kh.c{background:#E3A65C}html[data-theme=day] .kh.r{backgro
 .cb-sun>span{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .cb-sun b{font-family:var(--font-display);font-size:42px;line-height:1;color:var(--title)}.cb-sun small{font-size:12px;color:var(--fg-2)}
 .cb-trail{flex:1;min-width:0}
-.cb-sky{position:relative;height:80px}
+.cb-sky{position:relative;height:100px}
 .cb-sky>svg{position:absolute;inset:0;width:100%;height:80px}
 .cb-sky polyline{fill:none;vector-effect:non-scaling-stroke}
 .cb-sky .all{stroke:rgba(212,175,124,.45);stroke-width:1.5;stroke-dasharray:3 5}
@@ -1745,7 +1741,8 @@ html[data-theme=day] .cb-phrase button{color:#E6CDA3;border-color:rgba(212,175,1
   .cb-next::after{display:none}
   .cb-tx{max-width:none;padding:16px 18px 20px}
   .cb-pw{flex-direction:column;gap:14px}
-  .cb-sun{width:150px;height:150px}.cb-sun b{font-size:34px}
+  .cb-sun{width:180px;height:180px}.cb-sun b{font-size:38px}
+  .cb-ic svg{width:26px;height:26px}
   .cb-lb b{font-size:12px}.cb-lb span{font-size:11px}
   .cb-tt{flex-direction:column;align-items:flex-start}
   .cb-dn{width:46px}
@@ -1823,14 +1820,9 @@ html[data-theme=day]:not([data-lang]) .cb-hello{--hero2:url(../img/hero-ko-day.w
   header.band p{font-size:16px}
 }
 
-/* рассветное небо днём: живописные разводы в духе гравюры медленно плывут, поверх лёгкая кремовая вуаль для читаемости */
-.dayfx .marble{position:absolute;inset:-8%;background:url(../img/sky-day.webp) 50% 50%/cover no-repeat;animation:skydrift 120s ease-in-out infinite alternate;will-change:transform}
-.dayfx .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(251,244,232,.28),rgba(251,244,232,.5) 55%,rgba(251,244,232,.62))}
-.dayfx .rays{opacity:.55}
-@keyframes skydrift{0%{transform:translate(-3%,-2%) scale(1.02)}50%{transform:translate(2%,1%) scale(1.07)}100%{transform:translate(3%,-1%) scale(1.04)}}
-@media(max-width:719px){.dayfx .marble{background-image:url(../img/sky-day-sm.webp)}}
-.dayfx.still .marble{animation:none}
-@media (prefers-reduced-motion:reduce){.dayfx .marble{animation:none}}
+/* закатное небо днём рисует WebGL (js/common.js, daySky); без WebGL остаётся тёплый градиент страницы */
+.dayfx canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .8s ease}
+.dayfx canvas.on{opacity:1}
 
 /* карточки днём — запотевшее стекло: разводы неба просвечивают сквозь лёгкую матовую дымку */
 html[data-theme=day] .glass{background:linear-gradient(180deg,rgba(255,252,246,.62),rgba(253,247,238,.5));
@@ -1841,3 +1833,5 @@ html[data-theme=day] .cb-tip{background:rgba(255,252,246,.55);-webkit-backdrop-f
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){html[data-theme=day] .glass{background:linear-gradient(180deg,rgba(253,249,241,.94),rgba(251,245,234,.92))}}
 .cb-hello .cb-hart{-webkit-mask-image:linear-gradient(90deg,transparent,#000 38%);mask-image:linear-gradient(90deg,transparent,#000 38%)}
 @media(max-width:640px){.cb-hello .cb-hart{-webkit-mask-image:linear-gradient(180deg,#000 70%,transparent);mask-image:linear-gradient(180deg,#000 70%,transparent)}}
+
+@keyframes rayspin{to{transform:rotate(360deg)}}
