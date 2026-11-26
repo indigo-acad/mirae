@@ -24,7 +24,13 @@ function draw(){
   if(cur!=='all'&&!list.some(function(m){return m.section===cur||(cur==='korean'&&m.kind==='practice')}))cur='all';
   var secs=Object.keys(SECTIONS).filter(function(k){return k!=='course'});
   var h='';
-  if(!list.length){h='<div class="card glass"><h3>Пока пусто</h3><p class="muted">'+(KR.ctx.ok?'Преподаватель ещё не назначил тебе материалы этого раздела. Когда назначит, они появятся здесь.':'Нет связи с сервером: задания не загружены.')+'</p></div>';document.getElementById('box').innerHTML=h;return}
+  if(!list.length){   // пусто: рисунок, что здесь появится, и куда пойти сейчас
+    var ok=KR.ctx.ok,kinds=[['repeat','Тренажёры'],['spark','Игры'],['check','Проверочные'],['pin','Квесты']];
+    h='<section class="card glass px-empty"><img src="img/spot-hw-'+(lang==='en'?'en':'ko')+'.webp" alt="" width="360" height="'+(lang==='en'?288:276)+'" decoding="async">'+
+      '<div><span class="cb-k">'+(ok?'Скоро здесь':'Нет связи')+'</span><h3>'+(ok?'Тренажёры и игры от преподавателя':'Задания не загрузились')+'</h3>'+
+      '<p class="muted">'+(ok?'Когда преподаватель назначит упражнения, они появятся на этой странице. А пока можно повторить слова: это всегда полезно.':'Нет связи с сервером. Проверь интернет и обнови страницу.')+'</p>'+
+      '<div class="px-kinds">'+kinds.map(function(k){return '<span>'+KR.icon(k[0],16)+k[1]+'</span>'}).join('')+'</div>'+
+      '<div class="cb-acts"><a class="btn pri" href="words.html#day">Учить слова'+KR.icon('arrow',15)+'</a><a class="btn" href="cabinet.html">Мой кабинет</a></div></div></section>';document.getElementById('box').innerHTML=h;return}
   h+='<div class="card glass"><b>Раздел</b><div class="opts" style="margin-top:8px"><button data-f="all" class="'+(cur==='all'?'sel':'')+'" aria-pressed="'+(cur==='all')+'">Все</button>'+secs.filter(function(k){return list.some(function(m){return m.section===k||(k==='korean'&&m.kind==='practice')})}).map(function(k){return '<button data-f="'+k+'" class="'+(cur===k?'sel':'')+'" aria-pressed="'+(cur===k)+'">'+esc(SECTIONS[k])+'</button>'}).join('')+'</div>'+(KR.ctx.teacher?'<p class="note" style="margin-top:12px">Вы видите все материалы как преподаватель. Ученики видят только назначенные.</p>':'')+'</div>';
   var shown=list.filter(function(m){return cur==='all'||m.section===cur||(cur==='korean'&&m.kind==='practice')});
   h+='<div class="grid mats">'+shown.map(function(m){

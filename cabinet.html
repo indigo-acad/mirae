@@ -81,7 +81,7 @@ function dashEn(){
 function wordsCard(){return KR.cards.words()}
 function draw(){
   KR.topbar('cabinet');
-  var ctx=KR.ctx,lang=KR.lang(),D=KR.noCourses()?{h:KR.noCoursesCard(),hw:[]}:lang==='en'?dashEn():dashKo();
+  var ctx=KR.ctx,lang=KR.lang(),D=KR.noCourses()?{h:KR.noCoursesCard(),hw:[],o:{lang:KR.lang()||'ko',pct:0,name:'',sub:'',stages:[],hw:HW}}:lang==='en'?dashEn():dashKo();
   var items=(ctx.items||[]).filter(function(a){if(/^(lesson|practice)-/.test(a.id))return false;var l=KR.langOf(a.id);return !l||l===lang});
   var h='';
   if(ctx.teacher)h+='<div class="card glass"><h3>Вы вошли как преподаватель</h3><p class="muted">Назначайте ученикам материалы и домашку и смотрите их прогресс.</p><a class="btn pri" href="teacher.html">Ученики и задания'+KR.icon('arrow',16)+'</a></div>';
@@ -89,7 +89,7 @@ function draw(){
   if(!ctx.teacher&&D.o){
     // ученик: новые блоки (продолжить, слова и домашка, путь, план, фраза дня); кольцо и «Прогресс по урокам» они заменяют
     // домашка списком (с теорией и кнопкой «Сделать») стоит сразу под блоком «Слова и домашка»; отдельная карточка слов не нужна — её кнопки в новом блоке
-    D.o.hw=HW;D.o.hwCard=HW!==null?hwCard():'';h+=KR.cab.html(D.o);
+    D.o.hw=HW;D.o.who=KR.user();D.o.hwCard=HW!==null?hwCard():'';h+=KR.cab.html(D.o);
   }else{
     h+=wordsCard();   // словарь и отработка есть у каждого ученика, даже если курсы ещё не открыты
     if(!ctx.teacher&&HW!==null)h+=hwCard();
@@ -103,6 +103,7 @@ function draw(){
     '<div class="line" style="align-items:center;justify-content:space-between"><div><div>Голос озвучки и интервалы слов</div><div class="muted">Настраиваются в разделе «Слова»</div></div><a class="btn" href="words.html">Открыть'+KR.icon('arrow',15)+'</a></div></div>';
   var ok=KR.status()==='ok';
   h+='<div class="done-row"><span class="muted">'+KR.icon(ok?'cloud':'alert',16)+' '+(ok?'Прогресс сохраняется в облаке':'Нет связи с сервером: прогресс пока только на этом устройстве')+'</span><button id="out">Выйти</button></div>';
+  document.body.classList.toggle('cab-new',!ctx.teacher&&!!D.o);   // новый кабинет ученика: широкая сетка и приветствие вместо шапки
   document.getElementById('m').innerHTML=h;if(first)KR.count(document.getElementById('m'));first=false;
   document.getElementById('out').onclick=function(){KR.logout();location.href='index.html'};
   document.getElementById('anim').onclick=function(){
