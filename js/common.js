@@ -412,20 +412,85 @@ function shooting(){
   document.body.appendChild(d);
 }
 
-/* Дневной фон (пара к ночному звездопаду): медленные солнечные лучи из угла, облака с золотым контуром
-   и падающие лепестки. Включается только днём; «уменьшение движения» и кнопка паузы фона (kr_sky) его выключают. */
+/* Дневной фон — пара к ночному небу: закатное небо в WebGL (как Млечный Путь ночью, только днём).
+   Пара полупрозрачных разводов заката медленно переливаются (коралл, роза, золото, лаванда), по небу иногда
+   проходит мягкий перелив света, мерцают блики и редкие золотые искорки; поверх падают лепестки.
+   Включается только днём; «уменьшение движения» и кнопка паузы фона (kr_sky) останавливают движение —
+   остаётся один неподвижный кадр. Без WebGL остаётся тёплый градиент из CSS. */
+const DAY_FS=[
+"precision mediump float;",
+"uniform vec2 uR;uniform float uT;",
+"float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}",
+"float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);",
+"  return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}",
+"float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*noise(p);p=p*2.03+vec2(17.3,9.1);a*=.5;}return s;}",
+"vec3 sunset(float x){x=fract(x)*4.;",                // коралл → роза → золото → лаванда → коралл
+"  vec3 c0=vec3(.94,.55,.48),c1=vec3(.92,.57,.68),c2=vec3(.98,.74,.46),c3=vec3(.66,.64,.88);",
+"  return x<1.?mix(c0,c1,x):x<2.?mix(c1,c2,x-1.):x<3.?mix(c2,c3,x-2.):mix(c3,c0,x-3.);}",
+"float bokeh(vec2 q,float sc,float th){",            // блики: мягкие круглые пятна света, медленно мерцают
+"  vec2 g=q*sc,id=floor(g),f=fract(g)-.5;float h=hash(id);if(h<th)return 0.;",
+"  vec2 o=(vec2(hash(id+7.1),hash(id+13.7))-.5)*.5;float r=length(f-o),sz=mix(.05,.13,hash(id+3.3));",
+"  float tw=.5+.5*sin(uT*(.25+.5*hash(id+5.5))+h*40.);",
+"  return smoothstep(sz,sz*.35,r)*tw*tw;}",
+"float spark(vec2 q,float sc){",                       // редкие искорки: точка и четыре тонких луча
+"  vec2 g=q*sc,id=floor(g),f=fract(g)-.5;float h=hash(id+2.2);if(h<.93)return 0.;",
+"  vec2 d=f-(vec2(hash(id+4.1),hash(id+8.3))-.5)*.5;float r=length(d);",
+"  float tw=max(0.,sin(uT*(.4+.9*hash(id+1.9))+h*60.));tw=tw*tw*tw;",
+"  float ray=exp(-abs(d.x)*120.)*exp(-abs(d.y)*10.)+exp(-abs(d.y)*120.)*exp(-abs(d.x)*10.);",
+"  return (smoothstep(.05,0.,r)+exp(-r*26.)*.5+ray*.7)*tw;}",
+"void main(){",
+"  vec2 uv=gl_FragCoord.xy/uR,p=(gl_FragCoord.xy-.5*uR)/uR.y;float t=uT;",
+"  vec3 col=mix(vec3(.975,.945,.905),vec3(.985,.900,.840),smoothstep(.1,1.,uv.y));",   // тёплый кремовый фон, к верху персиковый
+"  vec2 sp=vec2(.5*uR.x/uR.y+.05,.62);",                                                  // солнце за правым верхним углом
+"  float sd=length(p-sp);col=mix(col,vec3(1.,.90,.76),exp(-sd*2.4)*.4);col+=vec3(1.,.82,.6)*exp(-sd*7.)*.12;",
+"  float w1=.035*sin(p.x*2.3+t*.05),w2=.04*sin(p.x*1.7-t*.04+2.);",
+"  float b1=exp(-pow((p.y-.18+p.x*.30+w1)*4.6,2.)),b2=exp(-pow((p.y+.28+p.x*.16+w2)*5.6,2.));",   // две полосы заката по диагонали
+"  float n=fbm(vec2((p.x+p.y*.5)*1.7+t*.012,(p.y-p.x*.3)*4.2-t*.007)+1.6*fbm(p*1.25+vec2(t*.006,-t*.004)));",
+"  float n2=fbm(vec2((p.x+p.y*.6)*3.2+t*.015,(p.y-p.x*.35)*10.)+n*1.3);float fil=pow(1.-abs(2.*n2-1.),7.);",   // тонкие волокна, как в Млечном Пути
+"  float str=smoothstep(.38,.8,n)*.7+fil*.32;",                                          // разводы внутри полос
+"  vec3 c1=sunset(t*.012+p.x*.18+n*.5),c2=sunset(t*.012+.45+p.x*.14-n*.4);",            // цвет медленно переливается
+"  col=mix(col,c1,clamp(b1*(.14+.42*str),0.,.55));col=mix(col,c2,clamp(b2*(.10+.34*str),0.,.45));",
+"  float sweep=mod(t*.035,3.4)-1.2,sh=exp(-pow((p.x*.9+p.y*.5-sweep*1.4)*2.6,2.));",    // мягкий перелив света проходит по небу
+"  col+=vec3(1.,.95,.88)*sh*(b1+b2*.7)*.10;",
+"  vec2 dr=vec2(t*.004,t*.006);",
+"  float bk=bokeh(p+dr,8.,.88)*.6+bokeh(p*1.4+dr*1.6+3.,11.,.92)*.45;",
+"  col+=vec3(1.,.93,.82)*bk*(.10+.18*(b1+b2));",
+"  float sk=spark(p+dr*.5,9.)+spark(p*1.3+vec2(5.,t*.003),12.)*.7;",
+"  col+=vec3(1.,.86,.6)*sk*(.25+.75*max(b1,b2))*.55;",
+"  col+=(hash(gl_FragCoord.xy+fract(t)*61.)-.5)/200.;",
+"  gl_FragColor=vec4(col,1.);",
+"}"].join("\n");
+function daySky(cv){
+  let gl=null;try{gl=cv.getContext("webgl",{antialias:false,alpha:false,powerPreference:"low-power"})}catch(e){}
+  if(!gl)return null;
+  const sh=(ty,src)=>{const x=gl.createShader(ty);gl.shaderSource(x,src);gl.compileShader(x);return gl.getShaderParameter(x,gl.COMPILE_STATUS)?x:null};
+  const v=sh(gl.VERTEX_SHADER,"attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}"),f=sh(gl.FRAGMENT_SHADER,DAY_FS);if(!v||!f)return null;
+  const pr=gl.createProgram();gl.attachShader(pr,v);gl.attachShader(pr,f);gl.linkProgram(pr);if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return null;
+  gl.useProgram(pr);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const a=gl.getAttribLocation(pr,"a");gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
+  const uR=gl.getUniformLocation(pr,"uR"),uT=gl.getUniformLocation(pr,"uT");
+  let t=40+(Date.now()/1000%600),last=0,raf=0,still=false;
+  function size(){const w=innerWidth,h=innerHeight,s=Math.min(.75,Math.sqrt(700000/(w*h)));   // мягкая картинка: хватает пониженного разрешения
+    const W=Math.max(1,Math.round(w*s)),H=Math.max(1,Math.round(h*s));if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;gl.viewport(0,0,W,H)}}
+  function draw(){gl.uniform2f(uR,cv.width,cv.height);gl.uniform1f(uT,t);gl.drawArrays(gl.TRIANGLES,0,3);cv.classList.add("on")}
+  const live=()=>!still&&!document.hidden&&cv.isConnected&&theme()==="day";
+  function frame(now){raf=0;if(!live())return;if(now-last>=33){t+=Math.min(.1,(now-last)/1000);last=now;draw()}raf=requestAnimationFrame(frame)}   // ~30 кадров в секунду
+  function kick(){if(!raf&&live()){last=performance.now();raf=requestAnimationFrame(frame)}}
+  addEventListener("resize",()=>{size();draw()});document.addEventListener("visibilitychange",kick);
+  size();draw();
+  return {set(st){still=st;draw();kick()}};
+}
 function dayfx(){
   let d=document.querySelector(".dayfx");
   if(theme()!=="day"){if(d)d.remove();return}
   const still=calm()||LS("kr_sky")==="off";
-  if(d){d.classList.toggle("still",still);return}
+  if(d){d.classList.toggle("still",still);if(d._sky)d._sky.set(still);return}
   d=document.createElement("div");d.className="dayfx"+(still?" still":"");d.setAttribute("aria-hidden","true");
-  const cloud=w=>'<svg viewBox="0 0 160 60" width="'+w+'"><path d="M18 46c-10 0-14-10-6-15 0-10 12-14 19-8 4-11 22-13 28-2 8-9 26-6 27 7 10-2 18 4 16 12 9 1 10 12 0 12H18z"/><path class="cl" d="M44 36c4-6 12-6 15 0M86 34c3-5 10-5 13 0"/></svg>';
-  let h='<i class="rays"></i>';
-  [[6,170,150,-20],[24,120,190,-110],[46,200,230,-60]].forEach(c=>{h+='<b class="cld" style="top:'+c[0]+'%;animation-duration:'+c[2]+'s;animation-delay:'+c[3]+'s">'+cloud(c[1])+"</b>"});
-  for(let i=0;i<14;i++){const L=(i*37+11)%96+2,dur=16+(i*7)%12,dl=-((i*5)%26),dx=[-120,-70,60,110][i%4];
+  let h='<canvas></canvas>';
+  for(let i=0;i<12;i++){const L=(i*37+11)%96+2,dur=18+(i*7)%12,dl=-((i*5)%26),dx=[-120,-70,60,110][i%4];
     h+='<span class="pt" style="left:'+L+'%;animation-duration:'+dur+'s;animation-delay:'+dl+'s;--dx:'+dx+'px"><i style="animation-delay:'+(-(i%3))+'s"></i></span>'}
   d.innerHTML=h;document.body.appendChild(d);
+  d._sky=daySky(d.querySelector("canvas"));if(d._sky)d._sky.set(still);
 }
 function setTheme(t){
   LS("kr_theme",t==="day"?"day":null);applyTheme();shooting();dayfx();
