@@ -305,9 +305,9 @@ window.MATERIALS=[
   "id": "ko-grammar-randomizer",
   "section": "korean",
   "kind": "game",
-  "title": "Рандомайзер грамматики · 1급–2B",
+  "title": "Рандомайзер грамматики · 1급–3B",
   "path": "materials/korean/ko-grammar-randomizer/",
-  "level": "1급–2B"
+  "level": "1급–3B"
  },
  {
   "id": "ko-g2724-lesson",
