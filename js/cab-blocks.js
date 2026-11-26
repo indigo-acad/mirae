@@ -3,7 +3,7 @@
    события вешает сам модуль. Ночью путь и слова рисуются звёздами, днём — солнцами и цветами (обе формы в разметке,
    нужную показывает css/style.css по теме). Подключать после common.js, srs.js и vocab.js.
 
-   KR.cab.html(o) → строка. o: {lang, pct, sub, name, stages:[{name, done}], next:{href, kicker, title, meta, pct}, hw:[…] | null}
+   KR.cab.html(o) → строка. o: {who, lang, pct, sub, name, stages:[{name, done}], next:{href, kicker, title, meta, pct}, hw:[…] | null}
    KR.cab.bind(root) — переключатели плана и перевода фразы. */
 (function(){
 "use strict";
@@ -124,11 +124,11 @@ function path(o){
 }
 function plan(o,W,HW){
   var tasks=[],lang=o.lang;
-  if(W&&W.total)tasks.push({k:"w",t:W.due?"Повторить слова":"Слова на сегодня",m:W.due?W.due+" "+plural(W.due,"карточка","карточки","карточек")+" · около "+Math.max(2,Math.round(W.due*.4))+" мин":"всё повторено",href:"words.html#day",done:!W.due});
+  if(W&&W.total)tasks.push({k:"w",cta:"Начать",t:W.due?"Повторить слова":"Слова на сегодня",m:W.due?W.due+" "+plural(W.due,"карточка","карточки","карточек")+" · около "+Math.max(2,Math.round(W.due*.4))+" мин":"всё повторено",href:"words.html#day",done:!W.due});
   (HW||[]).filter(function(r){return r.status==="active"}).slice(0,2).forEach(function(r){
-    tasks.push({k:"h",t:"Домашка «"+r.title+"»",m:r.due?"от преподавателя · срок "+new Date(r.due+"T00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long"}):"от преподавателя",href:"lesson.html?hw="+r.id,done:false})});
-  if(o.next)tasks.push({k:"c",t:o.next.plain||"Следующий урок",m:o.next.meta,href:o.next.href,done:false});
-  if(lang==="ko")tasks.push({k:"x",t:"История",m:"сюжетный диалог · по желанию",href:"story.html",done:false});
+    tasks.push({k:"h",cta:"Открыть",t:"Домашка «"+r.title+"»",m:r.due?"от преподавателя · срок "+new Date(r.due+"T00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long"}):"от преподавателя",href:"lesson.html?hw="+r.id,done:false})});
+  if(o.next)tasks.push({k:"c",cta:"Дальше",t:o.next.plain||"Следующий урок",m:o.next.meta,href:o.next.href,done:false});
+  if(lang==="ko")tasks.push({k:"x",cta:"Играть",t:"История",m:"сюжетный диалог · по желанию",href:"story.html",done:false});
   var dn=tasks.filter(function(t){return t.done}).length,s=streak();
   /* неделя: понедельник — воскресенье; слова из журнала повторений, сроки домашки по датам */
   var L=wlog(),now=day0(Date.now()),mon=new Date(now);mon.setDate(now.getDate()-((now.getDay()+6)%7));
@@ -143,7 +143,7 @@ function plan(o,W,HW){
   var week='<div class="cb-week" role="img" aria-label="Неделя: '+wd+" из "+wt+' дел">'+days.map(function(d){
     return '<span class="'+(d.today?"now":"")+'"><i style="--f:'+Math.round(d.f*100)+'%"></i>'+d.n+"</span>"}).join("")+"</div>";
   var list=tasks.map(function(t){return '<a class="cb-task'+(t.done?" ok":"")+'" href="'+esc(t.href)+'"><span class="cb-ck" aria-hidden="true">'+(t.done?KR.icon("check",15):"")+'</span><i class="cb-dot k-'+t.k+'" aria-hidden="true"></i>'+
-    '<span class="cb-tt"><b>'+esc(t.t)+'</b><span>'+esc(t.m)+'</span></span><span class="cb-tg">'+(t.done?"Готово":KR.icon("arrow",16))+"</span></a>"}).join("");
+    '<span class="cb-tt"><b>'+esc(t.t)+'</b><span>'+esc(t.m)+'</span></span><span class="cb-tg'+(t.done?"":" cb-btn")+'">'+(t.done?"Готово":t.cta)+"</span></a>"}).join("");
   var wl=days.map(function(d){return '<div class="cb-day'+(d.today?" now":"")+'"><div class="cb-dn"><b>'+d.n+'</b><span>'+d.d+'</span></div><div class="cb-chips">'+
     (d.it.length?d.it.map(function(t){return '<span class="'+(t.done?"ok":"")+'"><i class="cb-dot k-'+t.k+'"></i>'+esc(t.t)+"</span>"}).join(""):'<span class="cb-none">—</span>')+
     '</div><b class="cb-dc">'+(d.it.length?d.it.filter(function(t){return t.done}).length+" из "+d.it.length:"")+"</b></div>"}).join("");
@@ -164,10 +164,33 @@ function side(o,W){
   }
   return h;
 }
+var MOTTO=["Маленькие шаги ведут далеко.","Каждый день — немного ближе к цели.","Понемногу, но каждый день.","Сегодняшний урок — завтрашняя лёгкость.","Слово за словом складывается речь."];
+/* приветствие: дата, время на сегодня, серия дней (солнца днём, звёзды ночью) */
+function greet(o,W,HW){
+  var now=new Date(),hr=now.getHours(),hi=hr<5?"Доброй ночи":hr<12?"Доброе утро":hr<18?"Добрый день":"Добрый вечер";
+  var nm=String(o.who||"").trim();nm=nm?nm.charAt(0).toUpperCase()+nm.slice(1):"";
+  var act=(HW||[]).filter(function(r){return r.status==="active"}).length,min=(W&&W.due?Math.max(2,Math.round(W.due*.4)):0)+(o.next?10:0)+act*10;
+  var L=wlog(),d=day0(Date.now()),dots="";
+  for(var i=6;i>=0;i--){var x=new Date(d);x.setDate(d.getDate()-i);dots+=mark(L[key(x)]?"done":"todo",18)}
+  var s=streak(),date=now.toLocaleDateString("ru-RU",{weekday:"long",day:"numeric",month:"long"});
+  return '<section class="cb-hello card glass"><span class="cb-hart" aria-hidden="true"></span><div class="cb-htx">'+
+    '<span class="cb-k">'+mark("done",14)+esc(date)+'</span><h1>'+hi+(nm?", "+esc(nm):"")+'!</h1>'+
+    '<p>'+(min?"На сегодня около "+min+" "+plural(min,"минуты","минут","минут")+". ":"")+'<i>'+esc(MOTTO[doy()%MOTTO.length])+'</i></p>'+
+    '<span class="cb-streak2"><span class="cb-dots" aria-hidden="true">'+dots+'</span>'+(s?s+" "+plural(s,"день","дня","дней")+" подряд":"Начните серию сегодня")+"</span></div></section>";
+}
+/* три карточки быстрого доступа с рисунками */
+function tiles(o,W,HW){
+  var l=o.lang==="en"?"en":"ko",act=(HW||[]).filter(function(r){return r.status==="active"}).sort(function(a,b){return (a.due||"9999")<(b.due||"9999")?-1:1});
+  function t(cls,img,title,sub,href,cta){return '<a class="cb-tile card glass '+cls+'" href="'+esc(href)+'"><span class="cb-tl"><b>'+title+'</b><span>'+esc(sub)+'</span><em>'+cta+KR.icon("arrow",15)+'</em></span><img src="img/spot-'+img+"-"+l+'.webp" alt="" loading="lazy" decoding="async"></a>'}
+  var ws=W&&W.total?(W.due?W.due+" "+plural(W.due,"слово","слова","слов")+" повторить":"на сегодня всё повторено")+(W.fresh?" и "+W.fresh+" "+plural(W.fresh,"новое","новых","новых"):""):"слова появятся из уроков";
+  var h=act[0],hs=HW===null||HW===undefined?"задания от преподавателя":h?"«"+h.title+"»"+(h.due?", срок "+new Date(h.due+"T00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long"}):""):"заданий сейчас нет";
+  return '<div class="cb-tiles">'+t("tw","words","Слова",ws,"words.html#day","Тренировка")+t("th","hw","Домашка",hs,h?"lesson.html?hw="+h.id:"#hw",h?"Открыть":"Все задания")+
+    (l==="ko"?t("ts","story","Истории","сюжетные диалоги по-корейски","story.html","Играть"):t("ts","story","Курс","материалы программы","course.html","Открыть"))+"</div>";
+}
 function html(o){
   var W=words(o.lang),HW=o.hw;
-  return '<div class="cb-r2">'+nextCard(o)+wordsHw(o,W,HW)+"</div>"+(o.hwCard?'<div id="hw" class="cb-hwlist">'+o.hwCard+"</div>":"")+path(o)+'<div class="cb-r2 cb-r3">'+plan(o,W,HW)+'<div class="cb-col">'+side(o,W)+"</div></div>"+
-    '<p class="cb-tip">'+mark("done",18)+"<span><b>Совет.</b> "+esc(TIPS[doy()%TIPS.length])+"</span></p>";
+  return greet(o,W,HW)+'<div class="cb-r2">'+nextCard(o)+wordsHw(o,W,HW)+"</div>"+path(o)+tiles(o,W,HW)+'<div class="cb-r2 cb-r3">'+plan(o,W,HW)+'<div class="cb-col">'+side(o,W)+"</div></div>"+
+    '<p class="cb-tip">'+mark("done",18)+"<span><b>Совет.</b> "+esc(TIPS[doy()%TIPS.length])+"</span></p>"+(o.hwCard?'<div id="hw" class="cb-hwlist">'+o.hwCard+"</div>":"");
 }
 var last=null,redraw=null;
 function bind(root,again){
