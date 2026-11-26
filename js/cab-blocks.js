@@ -164,16 +164,9 @@ function side(o,W){
   }
   return h;
 }
-/* быстрый доступ на телефоне: словарь и домашка сразу под шапкой */
-function quick(W,HW){
-  var due=W?W.due:0,act=(HW||[]).filter(function(r){return r.status==="active"}).length;
-  return '<nav class="cb-quick" aria-label="Быстрый доступ">'+
-    '<a href="words.html#day">'+KR.icon("abc",22)+'<span><b>Словарь</b><small>'+(due?due+" "+plural(due,"слово","слова","слов")+" повторить":W&&W.total?"на сегодня всё":"открыть")+"</small></span></a>"+
-    '<a href="#hw">'+KR.icon("home",22)+'<span><b>Домашка</b><small>'+(HW===null||HW===undefined?"задания":act?act+" "+plural(act,"задание","задания","заданий"):"заданий нет")+"</small></span>"+(act?'<i class="cb-badge">'+act+"</i>":"")+"</a></nav>";
-}
 function html(o){
   var W=words(o.lang),HW=o.hw;
-  return quick(W,HW)+'<div class="cb-r2">'+nextCard(o)+wordsHw(o,W,HW)+"</div>"+(o.hwCard?'<div id="hw" class="cb-hwlist">'+o.hwCard+"</div>":"")+path(o)+'<div class="cb-r2 cb-r3">'+plan(o,W,HW)+'<div class="cb-col">'+side(o,W)+"</div></div>"+
+  return '<div class="cb-r2">'+nextCard(o)+wordsHw(o,W,HW)+"</div>"+(o.hwCard?'<div id="hw" class="cb-hwlist">'+o.hwCard+"</div>":"")+path(o)+'<div class="cb-r2 cb-r3">'+plan(o,W,HW)+'<div class="cb-col">'+side(o,W)+"</div></div>"+
     '<p class="cb-tip">'+mark("done",18)+"<span><b>Совет.</b> "+esc(TIPS[doy()%TIPS.length])+"</span></p>";
 }
 var last=null,redraw=null;
