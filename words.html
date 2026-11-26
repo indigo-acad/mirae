@@ -1,4 +1,4 @@
-[Resource from Git at repo://indigo-acad/mirae/sha/72bdee7b520e9950e7c4229a7b9a7c319a457468/contents/words.html] <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Playfair+Display+SC:wght@400;700&family=Manrope:wght@400;500;600;700&family=Comforter+Brush&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=4">
 <style>/* во время отработки список слов с переводами не виден: иначе перевод подсматривается прямо под карточкой */
 #play:not([hidden]) ~ #tabs,#play:not([hidden]) ~ #list,#play:not([hidden]) ~ #stats,#play:not([hidden]) ~ #prefs{display:none!important}</style>
 </head>
@@ -131,7 +131,20 @@ function pickCx(c){
 function promptHtml(c){
   var p=S&&S.cx?S.pr:null;
   if(!p)return S&&S.gx?'<div class="q-word q-cx"><small class="muted">'+esc(gname(S.gx))+'</small><div lang="'+S.gx+'"'+(S.gx==='ko'?' class="ko"':'')+'>'+esc(trOf(c))+' '+sayBtn(trOf(c),S.gx)+'</div></div>':'<div class="q-word q-ru">'+esc(trOf(c))+'</div>';
-  return '<div class="q-word q-cx"><small class="muted">'+PK[p.k]+'</small><div'+wcls(c)+' lang="'+c.l+'">'+esc(p.s)+(p.k==='def'||p.k==='syn'?' '+sayBtn(p.s,c.l):'')+'</div></div>';
+  return '<div class="q-word q-cx"><small class="muted">'+PK[p.k]+'</small><div'+wcls(c)+' lang="'+c.l+'">'+esc(p.s)+(p.k==='def'||p.k==='syn'?' '+sayBtn(p.s,c.l):'')+'</div></div>'+peekH(c,true);
+}
+/* «Не понятно? Показать перевод» — в режиме «в контексте», когда объяснение на изучаемом языке непонятно.
+   hint: до ответа это подсказка — верный ответ после неё засчитывается как «Трудно», как после «Подсказки».
+   После ответа и на обороте карточки — просто перевод. Открытый перевод запоминаем (S.peekId), чтобы не повторять кнопку. */
+function peekH(c,hint){
+  if(!S||!S.cx||!c)return '';
+  var t=M.trs(c,info(c)),et=c.ex&&c.et?c.et:'';
+  if(!t.length&&!et)return '';
+  if(S.peekId===c.id)return hint?peekBody(t,et,false):'';
+  return '<div class="peek"><button type="button" class="peek-b" data-x="peek"'+(hint?' data-hint="1"':'')+'>'+KR.icon('abc',16)+'<span>Не понятно? Показать перевод</span></button>'+peekBody(t,et,true)+'</div>';
+}
+function peekBody(t,et,hide){
+  return '<div class="peek-t"'+(hide?' hidden':'')+'>'+(t.length?'<div>'+t.map(esc).join('; ')+'</div>':'')+(et?'<div class="muted">'+esc(et)+'</div>':'')+'</div>';
 }
 /* значение слова в ответе: в контексте — на изучаемом языке */
 function gl(c){
@@ -140,9 +153,10 @@ function gl(c){
 }
 function glH(c){var g=gl(c);return g.l==='ru'?esc(g.s):'<span'+(g.l==='ko'?' class="ko"':'')+' lang="'+g.l+'">'+esc(g.s)+'</span>'}
 /* все значения слова — показать после ответа */
-function meaningsHtml(c,cx){
+function meaningsHtml(c,cx,skip){
   var I=info(c)||{},h='';
-  if(cx){var sy=M.syns(c,I),td=M.tdefs(c,I);
+  if(cx){var sy=M.syns(c,I),td=M.tdefs(c,I),sh=skip?gl(c).s:'';
+    td=td.filter(function(d){return d.s!==sh});if(/^≈ /.test(sh))sy=[];
     if(sy.length)h+='<div><span class="muted">Синонимы:</span> <span'+wcls(c)+' lang="'+c.l+'">'+sy.map(esc).join(', ')+'</span></div>';
     td.forEach(function(d){h+='<div'+wcls(c)+' lang="'+c.l+'">'+esc(d.s)+'</div>'});
     return h?'<div class="exbox">'+h+'</div>':'';
@@ -324,7 +338,7 @@ function start(mode,scoped,ids){
 function stop(soft){if(soft&&S&&S.mode==='day'&&S.done){KR.hush();EAR.stop();clearTimeout(S.timer);return finishDay()}   // крестик посреди занятия: предложить упражнения по пройденному
   V.sessEnd(false);KR.hush();EAR.stop();S=null;$('#play').hidden=true;$('#play').innerHTML='';drawAll()}
 function nextCard(){
-  if(!S)return;KR.hush();EAR.stop();clearTimeout(S.timer);S.tok=(S.tok||0)+1;S.hint=false;S.tries=0;S.gx=null;
+  if(!S)return;KR.hush();EAR.stop();clearTimeout(S.timer);S.tok=(S.tok||0)+1;S.hint=false;S.peekId=null;S.tries=0;S.gx=null;
   if(S.mode==='ear'){
     if(S.qi>=S.queue.length)return finishEar();
     var it=S.queue[S.qi],ce=V.get(it.id);if(!ce){S.queue.splice(S.qi,1);return nextCard()}
@@ -403,7 +417,7 @@ function gNew(c){
     (S.nopen===c.id?'':'<div class="done-row" id="nshowrow"><span class="muted">Догадайся, что значит слово, и открой</span><button type="button" class="btn pri" data-x="nshow">Показать перевод</button></div>')+
     '<div class="muted new-src">'+esc(src)+'</div></div>'+
     // оценка как у остальных карточек: та же сортировка по интервалам
-    '<div class="rate" id="nrate"'+(S.nopen===c.id?'':' hidden')+'>'+RATE.map(function(r){return '<button type="button" data-ng="'+r[0]+'"><b>'+r[1]+'</b><small>'+SRS.label(c,r[0],set,now)+'</small></button>'}).join('')+'</div>');
+    '<div class="rate-c"><div class="rate" id="nrate"'+(S.nopen===c.id?'':' hidden')+'>'+RATE.map(function(r){return '<button type="button" data-ng="'+r[0]+'"><b>'+r[1]+'</b><small>'+SRS.label(c,r[0],set,now)+'</small></button>'}).join('')+'</div></div>');
   var b=$('[data-x="nshow"]')||$('#nrate [data-ng="3"]');if(b)b.focus({preventScroll:true});
   if(KR.canSay())KR.say(c.w,c.l);
   if(!c.dq){var tk=S.tok;dictPull(c.id,function(n,r){if(r&&r.found&&S&&(S.mode==='new'||S.mode==='day')&&S.tok===tk&&!S.lock){S.card=n;if($('.newcard'))gNewRedraw(n)}}).catch(function(){})}
@@ -488,8 +502,9 @@ function grade(g,auto){
   if(auto)S.timer=setTimeout(nextCard,KR.calm()?600:1100);
   else{var b=$('#nextb');if(b){b.hidden=false;b.focus()}else nextCard()}
 }
-function more(c){   // пример после ответа
-  return c.ex?'<div class="exbox"><div'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+' '+sayBtn(c.ex,c.l)+'</div>'+(c.et&&!(S&&S.cx)?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>':'';
+function more(c){   // пример после ответа; «в контексте» — ещё и перевод по кнопке
+  return (c.ex?'<div class="exbox"><div'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+' '+sayBtn(c.ex,c.l)+'</div>'+(c.et&&!(S&&S.cx)?'<div class="muted">'+esc(c.et)+'</div>':'')+'</div>':'')+
+    (document.querySelector('#play [data-x="peek"][data-hint]')?'':peekH(c,false));   // кнопка уже есть под заданием — второй не нужно
 }
 // карточки: вспомнил — открыл — оценил сам
 function gCards(c){
@@ -507,15 +522,15 @@ function gCards(c){
     (ipa?'<div class="flash-ipa" lang="'+(c.l==='ko'?'ko':'en')+'">'+esc(ipa)+'</div>':'')+
     (c.ex?'<div class="flash-ex"><span'+wcls(c)+' lang="'+c.l+'">'+esc(c.ex)+'</span> '+sayBtn(c.ex,c.l)+'</div>':'')+
     '<div class="flash-back" id="back" hidden>'+(I.image?'<img class="flash-img" src="'+esc(I.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
-    '<div class="flash-t">'+(S.cx?glH(c):esc(trOf(c)||'перевод не указан'))+'</div>'+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+(c.et&&!S.cx?'<div class="muted">'+esc(c.et)+'</div>':'')+meaningsHtml(c,S.cx)+'</div></div>'+
+    '<div class="flash-t'+(S.cx?' flash-def':'')+'">'+(S.cx?glH(c):esc(trOf(c)||'перевод не указан'))+'</div>'+(I.pos?'<div class="flash-pos">'+esc(KR.W2.POS[I.pos]||I.pos)+'</div>':'')+(c.et&&!S.cx?'<div class="muted">'+esc(c.et)+'</div>':'')+meaningsHtml(c,S.cx,true)+peekH(c,false)+'</div></div>'+
     '<div id="fb" class="q-fb"></div>'+
     '<div class="done-row" id="showrow"><span class="muted">'+(S.cx?'Вспомни, что значит слово, и объясни его своими словами':c.st?'Вспомни перевод, потом открой':'Прочитай, послушай и открой перевод')+'</span><button type="button" class="btn pri" data-x="flip">'+(S.cx?'Показать значение':'Показать перевод')+'</button></div>'+
     rateRow(c,intro,set,now));
   if(c.l&&KR.canSay())KR.say(c.w,c.l);
 }
 function rateRow(c,intro,set,now){
-  return '<div class="rate" id="rate" hidden>'+(intro?'<button type="button" class="btn pri" data-g="3">Дальше'+KR.icon('arrow',16)+'</button>':(S.mode==='free'&&!SRS.isDue(c,now)?'<button type="button" data-g="1"><b>Не помню</b><small>вернётся сегодня</small></button><button type="button" data-g="3"><b>Помню</b><small>по плану: через '+SRS.span(Math.max(0,c.due-now))+'</small></button>'
-      :RATE.map(function(r){return '<button type="button" data-g="'+r[0]+'"><b>'+r[1]+'</b><small>'+SRS.label(c,r[0],set,now)+'</small></button>'}).join('')))+'</div>';
+  return '<div class="rate-c"><div class="rate" id="rate" hidden>'+(intro?'<button type="button" class="btn pri" data-g="3">Дальше'+KR.icon('arrow',16)+'</button>':(S.mode==='free'&&!SRS.isDue(c,now)?'<button type="button" data-g="1"><b>Не помню</b><small>вернётся сегодня</small></button><button type="button" data-g="3"><b>Помню</b><small>по плану: через '+SRS.span(Math.max(0,c.due-now))+'</small></button>'
+      :RATE.map(function(r){return '<button type="button" data-g="'+r[0]+'"><b>'+r[1]+'</b><small>'+SRS.label(c,r[0],set,now)+'</small></button>'}).join('')))+'</div></div>';
 }
 function flip(){var b=$('#back');if(!b||!b.hidden)return;b.hidden=false;$('#showrow').hidden=true;$('#rate').hidden=false;var f=$('#rate button[data-g="3"]');if(f)f.focus();
   if(S&&S.game==='rcards'&&S.card&&KR.canSay())KR.say(S.card.w,S.card.l)}
@@ -524,7 +539,7 @@ function gChoice(c){
   var ctx=S.game==='ctx',byw=ctx||S.cx,d=deck(c).filter(function(x){return x.id!==c.id&&!rel(c,x)&&(byw||trOf(x)&&trOf(x)!==trOf(c))}),pair=c.pair?d.filter(function(x){return x.w===c.pair}):[];
   var others=pair.concat(shuffle(d.filter(function(x){return pair.indexOf(x)<0}))).slice(0,3),opts=shuffle([c].concat(others)),cz=ctx?cloze(c):null;
   S.opts=opts;
-  frame(ctx?GAME.ctx[0]:S.cx?'Выбери слово':GAME.tr[0],(ctx?'<div class="q-word"><span'+wcls(c)+' lang="'+c.l+'">'+esc(cz.a)+'<b class="gap">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</b>'+esc(cz.b)+'</span></div>'+(c.et&&!S.cx?'<p class="muted q-sub">'+esc(c.et)+'</p>':'')
+  frame(ctx?GAME.ctx[0]:S.cx?'Выбери слово':GAME.tr[0],(ctx?'<div class="q-word"><span'+wcls(c)+' lang="'+c.l+'">'+esc(cz.a)+'<b class="gap">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</b>'+esc(cz.b)+'</span></div>'+(c.et&&!S.cx?'<p class="muted q-sub">'+esc(c.et)+'</p>':peekH(c,true))
       :S.cx?promptHtml(c):'<div class="q-word">'+word(c)+' '+sayBtn(c.w,c.l)+'</div>')+
     '<div class="opts q-opts">'+opts.map(function(o,i){return '<button type="button" data-o="'+i+'"'+(byw?wcls(o)+' lang="'+o.l+'"':'')+'>'+esc(byw?o.w:trOf(o))+'</button>'}).join('')+'</div>'+
     '<div id="fb" class="q-fb"></div><div class="done-row"><span></span><button type="button" class="btn pri" id="nextb" data-x="next" hidden>Дальше'+KR.icon('arrow',16)+'</button></div>');
@@ -535,7 +550,7 @@ function choosePick(i){
   [].forEach.call(document.querySelectorAll('.q-opts button'),function(b,k){b.disabled=true;if(S.opts[k].id===c.id)b.classList.add('ok');else if(k===i)b.classList.add('bad')});
   $('#fb').innerHTML='<div class="'+(ok?'ok':'bad')+'">'+(ok?'Верно':'Правильно так')+': '+word(c)+' — '+glH(c)+'</div>'+more(c);
   if(S.game==='ctx'&&c.ex)KR.say(c.ex,c.l);else if(!ok||S.cx)KR.say(c.w,c.l);
-  grade(ok?3:1,ok);
+  grade(ok?(S.hint?2:3):1,ok);
 }
 // письмо: перевод → слово; после ошибки слово нужно один раз перепечатать
 function gWrite(c){
@@ -1282,6 +1297,8 @@ document.addEventListener('click',function(e){
   if(d.x==='flip')return flip();
   if(d.x==='nshow'){if(S)S.nopen=S.card&&S.card.id;var nb=$('#nback'),nr=$('#nshowrow');if(nb)nb.hidden=false;if(nr)nr.remove();var nq=$('#nrate');if(nq)nq.hidden=false;var lb=$('#nrate [data-ng="3"]');if(lb)lb.focus({preventScroll:true});return}
   if(d.x==='next')return nextCard();
+  if(d.x==='peek'){var pk=b.closest('.peek'),pt=pk&&pk.querySelector('.peek-t');if(pt)pt.hidden=false;
+    if(S&&S.card){S.peekId=S.card.id;if(d.hint&&!S.lock)S.hint=true}b.remove();return}
   if(d.x==='hint'){S.hint=true;var c=S.card;$('#fb').innerHTML='<div class="muted">Начинается на: <b'+wcls(c)+'>'+esc(units(c)[0])+'…</b></div>';$('#win').focus();return}
   if(d.g&&S&&S.card){var r=$('#rate');if(r)[].forEach.call(r.children,function(x){x.disabled=true});return grade(+d.g,true)}
   if(d.o!==undefined)return choosePick(+d.o);

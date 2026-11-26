@@ -1399,3 +1399,29 @@ body{letter-spacing:.005em}
   .gr-tog button{min-height:46px;padding:8px 10px}
 }
 @media (prefers-reduced-motion:reduce){.gr-stage.rolling .gr-av{animation:none}}
+
+/* ---------- Слова: перевод по кнопке «в контексте», карточка и вкладки при крупном шрифте телефона ---------- */
+/* «Не понятно? Показать перевод» — под объяснением на изучаемом языке (words.html, peekH) */
+.peek{margin-top:12px;text-align:center}
+.peek-b{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:6px 14px;border-radius:999px;border:1px dashed rgba(212,175,124,.55);background:transparent;color:var(--gold);font-size:14.5px;line-height:1.25}
+.peek-b .ic{flex:none}
+.peek-t{margin-top:8px;padding:10px 14px;border-radius:14px;background:var(--fill);color:var(--fg);font-size:17px;line-height:1.45;text-align:center;animation:rise .3s var(--ease) both}
+.peek-t .muted{margin-top:4px;font-size:15px}
+.q-fb .peek{margin-top:10px}
+/* объяснение слова на обороте карточки — обычным шрифтом и мельче перевода: оно длиннее */
+.flash-t.flash-def{font-family:var(--font-body);font-size:22px;line-height:1.45;font-weight:500}
+/* оценки «Снова / Трудно / Хорошо / Легко» не вылезают за карточку: колонки сжимаются, а при крупном шрифте — две в ряд */
+.rate-c{container-type:inline-size}   /* обёртка: ширина ряда оценок для @container */
+.rate{grid-template-columns:repeat(4,minmax(0,1fr))}
+.rate button{min-width:0;padding:8px 2px}
+.rate button b,.rate button small{max-width:100%;overflow-wrap:break-word}
+@container (max-width:18.5em){.rate{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* новые слова на сегодня не прилипают к кнопке «Начать» */
+.done-row+.tb-prev{margin-top:14px}
+/* вкладки «Мои слова / Статистика / Настройки»: подписи переносятся, а не обрезаются */
+.wtabs{max-width:420px;overflow-x:auto;scrollbar-width:none}
+.wtabs button{flex:1 1 auto;padding:6px 10px;line-height:1.2}
+@media(max-width:640px){
+  .tb-h h3{font-size:22px}
+  .today .stat b{font-size:28px}
+}
