@@ -80,6 +80,7 @@ function wordsHw(o,W,HW){
     h+='<div class="cb-sub" role="img" aria-label="Слова: выучено '+W.L+', в работе '+W.W+', новых '+W.N+'"><div class="cb-row"><b>Слова</b><span><em>'+W.L+'</em> / '+W.total+' выучено</span></div>'+
       '<div class="cb-ic" aria-hidden="true">'+ic+'</div><div class="cb-leg" aria-hidden="true"><span>'+bloom("l")+'<b>'+W.L+'</b> выучено</span><span>'+bloom("w")+'<b>'+W.W+'</b> в работе</span><span>'+bloom("n")+'<b>'+W.N+'</b> новых</span>'+
       '<span class="cb-note">'+(per>1?'один значок ≈ '+per+' '+plural(per,"слово","слова","слов"):"один значок — одно слово")+'</span></div></div>';
+    h+='<div class="cb-acts"><a class="btn pri" href="words.html#day">'+(W.due?"Повторить "+W.due:"Учить слова")+KR.icon("arrow",15)+"</a>"+(KR.wexport?'<button type="button" class="btn" data-wexp>'+KR.icon("abc",15)+"Список слов</button>":"")+"</div>";
   }else h+='<p class="muted">Слов пока нет: они появятся из уроков, от преподавателя или по выделению в тексте.</p>';
   if(HW&&HW.length){
     var list=HW.slice().sort(function(a,b){return (a.created||0)-(b.created||0)}),n=list.length,C=2*Math.PI*52,seg=C/n,gap=n>1?4:0,
@@ -95,7 +96,7 @@ function wordsHw(o,W,HW){
     var soon=act.filter(function(r){return r.due}).sort(function(a,b){return a.due<b.due?-1:1})[0];
     var last=list.filter(function(r){return r.status==="checked"&&r.result&&r.result.max}).sort(function(a,b){return (b.checked_at||b.created||0)>(a.checked_at||a.created||0)?1:-1})[0];
     var rays="";for(i=0;i<36;i++)rays+='<path d="M70 3V'+(i%2?6:8)+'" transform="rotate('+(i*10)+' 70 70)"/>';
-    h+='<div class="cb-sub" role="img" aria-label="Домашка: сдано '+sent+' из '+n+(chk?", на проверке "+chk:"")+(act.length?", задано "+act.length:"")+'"><div class="cb-row"><b>Домашка</b></div>'+
+    h+='<div class="cb-sub" role="group" aria-label="Домашка: сдано '+sent+' из '+n+(chk?", на проверке "+chk:"")+(act.length?", задано "+act.length:"")+'"><div class="cb-row"><b>Домашка</b><a href="#hw">Все задания</a></div>'+
       '<div class="cb-hw" aria-hidden="true"><div class="cb-ring"><svg viewBox="0 0 140 140" width="140" height="140"><g class="rays">'+rays+'</g><circle class="tr" cx="70" cy="70" r="52"/>'+segs+
       '<circle class="in" cx="70" cy="70" r="40"/>'+(sent&&sent<n?'<g transform="translate('+sx+' '+sy+')"><svg x="-11" y="-11" width="22" height="22" viewBox="0 0 24 24" overflow="visible">'+mark("cur",22).replace(/^<svg[^>]*>|<\/svg>$/g,"")+"</svg></g>":"")+
       '</svg><span class="cb-c"><b>'+sent+'<small>/'+n+'</small></b><span>сдано</span></span></div>'+
@@ -163,9 +164,16 @@ function side(o,W){
   }
   return h;
 }
+/* быстрый доступ на телефоне: словарь и домашка сразу под шапкой */
+function quick(W,HW){
+  var due=W?W.due:0,act=(HW||[]).filter(function(r){return r.status==="active"}).length;
+  return '<nav class="cb-quick" aria-label="Быстрый доступ">'+
+    '<a href="words.html#day">'+KR.icon("abc",22)+'<span><b>Словарь</b><small>'+(due?due+" "+plural(due,"слово","слова","слов")+" повторить":W&&W.total?"на сегодня всё":"открыть")+"</small></span></a>"+
+    '<a href="#hw">'+KR.icon("home",22)+'<span><b>Домашка</b><small>'+(HW===null||HW===undefined?"задания":act?act+" "+plural(act,"задание","задания","заданий"):"заданий нет")+"</small></span>"+(act?'<i class="cb-badge">'+act+"</i>":"")+"</a></nav>";
+}
 function html(o){
   var W=words(o.lang),HW=o.hw;
-  return '<div class="cb-r2">'+nextCard(o)+wordsHw(o,W,HW)+"</div>"+path(o)+'<div class="cb-r2 cb-r3">'+plan(o,W,HW)+'<div class="cb-col">'+side(o,W)+"</div></div>"+
+  return quick(W,HW)+'<div class="cb-r2">'+nextCard(o)+wordsHw(o,W,HW)+"</div>"+(o.hwCard?'<div id="hw" class="cb-hwlist">'+o.hwCard+"</div>":"")+path(o)+'<div class="cb-r2 cb-r3">'+plan(o,W,HW)+'<div class="cb-col">'+side(o,W)+"</div></div>"+
     '<p class="cb-tip">'+mark("done",18)+"<span><b>Совет.</b> "+esc(TIPS[doy()%TIPS.length])+"</span></p>";
 }
 var last=null,redraw=null;
