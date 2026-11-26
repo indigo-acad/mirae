@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>예절과 규칙 · проверка слов</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#1f2430;--muted:#6b7280;--accent:#2f3e8f;--ok:#15803d;--okbg:#dcfce7;--bad:#b91c1c;--badbg:#fee2e2;--sel:#e3e7fb;--line:#e5e1d8;--gold:#b8924f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+.wrap{max-width:680px;margin:0 auto;padding:44px 12px 40px}
+h1{font-size:24px;margin:6px 0 4px}
+.muted{color:var(--muted);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px}
+button{font:inherit;cursor:pointer;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:11px 12px}
+button:disabled{opacity:.5;cursor:default}
+.main{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;width:100%;margin-top:12px}
+.task{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin-top:9px;padding:9px 10px}
+.task .n{width:30px;height:30px;border-radius:8px;border:2px solid var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;font-size:16px}
+.task.on .n{background:var(--accent)}
+.task:not(.on){opacity:.6}
+.task:not(.on) .n{color:transparent}
+.task.fixed{cursor:default}
+.task .t{flex:1} .task .r{font-size:14px;color:var(--muted);white-space:nowrap}
+.grp{margin-top:14px;font-size:13px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.04em}
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.presets button{font-size:14px;padding:8px 12px;border-radius:999px}
+.presets button.act{background:var(--sel);border-color:var(--accent)}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--muted);gap:8px}
+.bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin:8px 0 2px}
+.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.col{display:grid;gap:8px;align-content:start}
+.it{text-align:left;min-height:48px;font-size:15px;transition:all .15s}
+.it.ko{font-size:17px}
+.it.sel{background:var(--sel);border-color:var(--accent)}
+.it.bad{background:var(--badbg);border-color:var(--bad)}
+.it.gone{opacity:.25;pointer-events:none;background:var(--okbg);border-color:var(--ok)}
+.word{font-size:24px;font-weight:700;text-align:center;margin:18px 0 10px;line-height:1.35}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cats button{text-align:center;padding:14px 10px}
+.cats button.ok{background:var(--okbg);border-color:var(--ok)}
+.cats button.bad{background:var(--badbg);border-color:var(--bad)}
+.q{font-size:21px;font-weight:600;margin:10px 0 4px;line-height:1.5}
+.gap{border-bottom:2px solid var(--accent);padding:0 18px}
+.opts{display:grid;gap:8px;margin-top:10px}
+.opts button{text-align:left}
+.opts button.ok{background:var(--okbg);border-color:var(--ok)}
+.opts button.bad{background:var(--badbg);border-color:var(--bad)}
+.fb{margin-top:10px;padding:10px 12px;border-radius:12px;background:#faf8f3;border:1px solid var(--line);font-size:15px}
+.big{font-size:42px;font-weight:700;margin:4px 0}
+.mist{border-top:1px solid var(--line);padding:8px 0;font-size:15px}
+.mist b{font-size:17px}
+.say{border:none;background:none;padding:0 4px;font-size:18px}
+.hidden{display:none}
+</style>
+</head>
+<body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
+<div class="wrap">
+
+<div id="menu">
+  <h1>예절과 규칙 · проверка слов</h1>
+  <div class="muted" id="desc"></div>
+  <div class="card">
+    <div id="presetBox">
+      <b>Что проходим</b>
+      <div class="presets">
+        <button data-p="class" onclick="preset('class')">⚡ Начало урока · ≈12 мин</button>
+        <button data-p="all" onclick="preset('all')">📚 Все слова · ≈35 мин</button>
+      </div>
+      <div class="muted" style="margin-top:6px">Нажми на задание, чтобы включить или выключить его.</div>
+    </div>
+    <div id="taskList"></div>
+  </div>
+  <div class="card">
+    <div>Как тебя зовут?</div>
+    <input id="nameInput" placeholder="Имя" autocomplete="off" style="font:inherit;width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;margin-top:8px" onkeydown="if(event.key==='Enter')begin()">
+    <button class="main" id="goBtn" onclick="begin()">Начать →</button>
+  </div>
+</div>
+
+<div id="final" class="hidden">
+  <div class="card" id="summary"></div>
+  <div class="card">
+    <b>📨 Учителю</b>
+    <div id="sendFb" class="muted" style="margin-top:6px"></div>
+    <button class="main" id="sendBtn" onclick="sendResults()">Отправить ещё раз</button>
+    <textarea id="copyBox" class="hidden" readonly style="width:100%;height:170px;font:13px monospace;margin-top:8px"></textarea>
+    <button class="hidden" id="copyBtn" style="width:100%;margin-top:8px" onclick="copyReport()">Скопировать текст</button>
+  </div>
+  <button style="width:100%;margin-top:12px" onclick="location.reload()">Пройти заново</button>
+</div>
+
+<div id="play" class="hidden">
+  <div class="top"><span id="tInfo" style="font-weight:600;color:var(--accent)"></span><span id="pInfo"></span><span id="clock"></span></div>
+  <div class="bar"><i id="prog"></i></div>
+  <div class="card" id="stage"></div>
+</div>
+
+</div>
+<script>
+/* ============ СЛОВА: 예절 · 문화 차이 · 공공장소 규칙 ============
+   Слова из презентации урока (слайды 2–203): этикет со старшими, культурные различия, этикет за столом,
+   эмоции, правила в общественных местах, знаки, общежитие, библиотека, транспорт, спектакль.
+   Формат строки: корейское|перевод. Строка без | — заголовок темы (одна тема = одно задание «Пары»). */
+/*DATA-START*/
+const RAW=`Этикет со старшими
+어른|старший, взрослый
+예의|вежливость, этикет
+예절|правила приличия, манеры
+반말을 하다|говорить неформально, на «ты»
+높임말(존댓말)을 하다|говорить вежливо, уважительно
+이름을 부르다|называть по имени
+한 손으로 받다|брать одной рукой
+두 손으로 드리다|подавать (старшему) двумя руками
+손을 흔들면서 인사하다|здороваться, махая рукой
+고개를 숙여서 인사하다|здороваться с поклоном
+다리를 꼬고 앉다|сидеть нога на ногу
+고개를 돌리고 마시다|пить, отвернувшись (при старшем)
+웃어른이 말할 때 조용히 하다|молчать, когда говорит старший
+가방을 대신 들어주다|понести сумку за другого
+자리를 양보하다|уступать место
+머리를 쓰다듬다|гладить по голове
+Культурные различия
+문화 차이|культурные различия
+고개를 숙이다|наклонять голову, кланяться
+두 손을 모으다|сложить ладони вместе
+볼을 맞대다|соприкоснуться щеками (при встрече)
+악수하다|пожимать руку
+눈인사를 하다|здороваться взглядом, кивком
+좌식 생활을 하다|жить «на полу»: сидеть и спать на полу
+입식 생활을 하다|жить «на стульях»: стулья, столы, кровати
+신발을 벗고 집에 들어가다|входить в дом, сняв обувь
+낮잠을 자는 시간이 있다|есть время для дневного сна
+결혼 후에 성이 바뀌다|после свадьбы меняется фамилия
+욕실과 화장실이 분리되어 있다|ванная и туалет раздельные
+야단맞을 때 눈을 쳐다보다|смотреть в глаза, когда тебя ругают
+혼잣말을 하다|разговаривать с самим собой
+물과 반찬이 무료이다|вода и закуски бесплатные
+편하다|комфортный, спокойный
+갖다 주다|принести (кому-то)
+연기하다|играть роль; откладывать, переносить
+За столом
+식사 예절|правила поведения за едой
+수저|ложка и палочки
+숟가락|ложка
+젓가락|палочки
+반찬|закуски к рису (панчхан)
+수저를 들다|взять ложку и палочки
+수저를 동시에 들다|держать ложку и палочки одновременно
+밥그릇을 들고 먹다|есть, держа миску с рисом в руке
+국그릇을 들고 마시다|пить суп, подняв миску
+소리를 크게 내다|громко издавать звуки (чавкать)
+식탁에서 코를 풀다|сморкаться за столом
+Эмоции
+놀라다|удивляться, пугаться
+깜짝 놀라다|вздрогнуть от неожиданности
+당황하다|растеряться, смутиться
+황당하다|быть ошарашенным (нелепо, абсурдно)
+창피하다|позорно, стыдно перед людьми
+부끄럽다|стесняться, смущаться
+민망하다|неловко (за себя или за другого)
+긴장하다|нервничать, волноваться
+웃음이 나다|разбирает смех
+얼굴이 빨개지다|лицо краснеет
+손에 땀이 나다|потеют ладони
+가슴이 두근거리다|сердце колотится
+Нельзя в общественных местах
+공공장소|общественное место
+뛰다|бежать; прыгать
+뛰어다니다|носиться туда-сюда
+떠들다|шуметь, галдеть
+의자를 발로 차다|пинать стул ногой
+새치기를 하다|лезть без очереди
+쓰레기를 버리다|выбрасывать мусор
+담배를 피우다|курить
+큰소리로 통화하다|громко говорить по телефону
+낙서를 하다|писать или рисовать на стенах
+문에 기대다|прислоняться к двери
+발을 올리다|класть ноги (на сиденье)
+피해를 주다|причинять неудобства, вредить
+방해가 되다|мешать, быть помехой
+시끄럽다|шумный
+위험하다|опасный
+Правила, знаки и телефон
+줄을 서다|стоять в очереди
+차례를 기다리다|ждать своей очереди
+질서를 지키다|соблюдать порядок
+조용히 하다|вести себя тихо
+휴대폰을 끄다|выключать телефон
+휴대폰을 진동으로 하다|ставить телефон на вибрацию
+진동|вибрация
+무음|беззвучный режим
+금연|не курить (курение запрещено)
+금연 구역|зона для некурящих
+주차 금지|парковка запрещена
+출입 금지|вход воспрещён
+사진 촬영 금지|фотосъёмка запрещена
+휴대폰 사용 금지|пользоваться телефоном запрещено
+음식물 반입 금지|проносить еду и напитки запрещено
+여성 전용 주차|парковка только для женщин
+차를 세우다|остановить, поставить машину
+구역|зона, участок
+Общежитие и библиотека
+기숙사|общежитие
+늦게 들어오다|поздно возвращаться
+술을 마시다|пить алкоголь
+개를 키우다|держать собаку
+친구를 데리고 오다|приводить друга
+환영하다|радушно встречать, приветствовать
+미리|заранее
+냄새|запах
+개인|отдельный, индивидуальный; личный
+물건|вещь, предмет
+복도|коридор
+두다|класть, ставить, оставлять
+메모하다|делать заметки, записывать
+반납|возврат, сдача обратно
+반납 날짜를 지키다|сдавать (книгу) в срок
+찢다|рвать
+Транспорт
+열차|поезд
+음료|напиток
+노약자|пожилые и слабые люди
+노약자석|места для пожилых и слабых
+임산부|беременная женщина
+좌석|место, сиденье
+벨소리|звонок телефона, рингтон
+복잡하다|людный, переполненный; сложный
+Спектакль и музей
+관람 예절을 지키다|соблюдать правила для зрителей
+공연|выступление, представление (концерт, шоу)
+공연장|концертный зал, сцена
+미술관|художественный музей, галерея
+연극|спектакль, пьеса
+매표소|билетная касса
+배우|актёр
+연주자|исполнитель, музыкант
+자리를 바꾸다|меняться местами
+전화벨이 울리다|звонит телефон
+동영상을 찍다|снимать видео
+사진을 몰래 찍다|фотографировать тайком
+녹음하다|записывать звук
+박수를 치다|хлопать, аплодировать
+글씨|буквы, надпись; почерк
+앞자리|переднее место
+Новые слова из текстов
+정보|информация, сведения
+자꾸|постоянно, снова и снова
+불빛|свет, огонёк
+집중하다|сосредоточиться
+이어폰|наушники (вкладыши)
+끼다|надевать (наушники, кольцо); вставлять
+들리다|быть слышным, слышаться
+마침|как раз, кстати
+줄이다|уменьшать, сокращать
+연락처|контактный телефон
+남기다|оставлять
+문제가 생기다|возникает проблема
+편리하다|удобный (в пользовании)
+응원|поддержка, боление (за команду)
+시민 의식|гражданское сознание
+감동을 주다|трогать, впечатлять`;
+
+// Что с чем: начало → окончание → перевод (все окончания разные)
+const COLLO=[
+ ["고개를","숙이다","наклонить голову, поклониться"],["두 손으로","드리다","подать двумя руками"],["다리를 꼬고","앉다","сидеть нога на ногу"],
+ ["줄을","서다","встать в очередь"],["자리를","양보하다","уступить место"],["질서를","지키다","соблюдать порядок"],
+ ["차례를","기다리다","ждать своей очереди"],["담배를","피우다","курить"],["쓰레기를","버리다","выбросить мусор"],
+ ["박수를","치다","аплодировать"],["전화벨이","울리다","звонит телефон"],["휴대폰을","끄다","выключить телефон"],
+ ["코를","풀다","высморкаться"],["머리를","쓰다듬다","погладить по голове"],["피해를","주다","причинить неудобство"],
+ ["발을","올리다","положить ноги (на сиденье)"],["문에","기대다","прислониться к двери"],["얼굴이","빨개지다","покраснеть"],
+ ["가슴이","두근거리다","сердце колотится"],["볼을","맞대다","соприкоснуться щеками"],["신발을","벗다","снять обувь"],
+ ["이름을","부르다","назвать по имени"],["사진을 몰래","찍다","тайком сфотографировать"],["개를","키우다","держать собаку"],
+ ["손에 땀이","나다","ладони потеют"],["친구를","데리고 오다","привести друга"],["이어폰을","끼다","надеть наушники"],
+ ["소리를","줄이다","убавить звук"],["연락처를","남기다","оставить контактный телефон"],["두 손을","모으다","сложить ладони"]
+];
+
+// Вежливо или нельзя? 0 — так можно, вежливо; 1 — так нельзя, невежливо (в Корее)
+const CATS=["👍 Так можно, вежливо","🙅 Так нельзя, невежливо"];
+const SORT=[
+ ["어른께 물건을 두 손으로 드리다",0,"подать старшему вещь двумя руками"],
+ ["어른과 술을 마실 때 고개를 돌리고 마시다",0,"со старшим пить, отвернувшись"],
+ ["어른께 고개를 숙여서 인사하다",0,"поздороваться со старшим поклоном"],
+ ["선생님께 존댓말을 하다",0,"говорить с учителем вежливо"],
+ ["버스에서 노약자에게 자리를 양보하다",0,"уступить место пожилому в автобусе"],
+ ["줄을 서서 차례를 기다리다",0,"стоять в очереди и ждать своей очереди"],
+ ["공연 전에 휴대폰을 진동으로 하다",0,"перед спектаклем поставить телефон на вибрацию"],
+ ["공연이 끝난 후에 박수를 치다",0,"аплодировать после спектакля"],
+ ["어른이 수저를 든 다음에 수저를 들다",0,"взять ложку и палочки после старшего"],
+ ["웃어른이 말할 때 조용히 하다",0,"молчать, когда говорит старший"],
+ ["할머니의 가방을 대신 들어 드리다",0,"понести сумку за бабушку"],
+ ["도서관 책의 반납 날짜를 지키다",0,"сдать библиотечную книгу в срок"],
+ ["친구를 데리고 오기 전에 미리 이야기하다",0,"заранее предупредить, что приведёшь друга"],
+ ["선생님께 반말을 하다",1,"говорить с учителем на «ты»"],
+ ["선생님의 이름을 부르다",1,"называть учителя по имени"],
+ ["어른이 주신 물건을 한 손으로 받다",1,"брать у старшего вещь одной рукой"],
+ ["할아버지 앞에서 다리를 꼬고 앉다",1,"сидеть нога на ногу при дедушке"],
+ ["버스 정류장에서 새치기를 하다",1,"лезть без очереди на остановке"],
+ ["지하철에서 큰소리로 통화하다",1,"громко говорить по телефону в метро"],
+ ["미술관에서 뛰어다니다",1,"бегать по музею"],
+ ["영화관에서 앞 의자를 발로 차다",1,"пинать переднее кресло в кинотеатре"],
+ ["극장 의자에 발을 올리다",1,"класть ноги на кресло в театре"],
+ ["지하철 문에 기대다",1,"прислоняться к дверям метро"],
+ ["건물 벽에 낙서를 하다",1,"писать на стенах здания"],
+ ["공연 중에 사진을 몰래 찍다",1,"тайком фотографировать во время спектакля"],
+ ["밥그릇을 들고 먹다",1,"есть, держа миску с рисом в руке"],
+ ["식탁에서 코를 풀다",1,"сморкаться за столом"],
+ ["먹을 때 소리를 크게 내다",1,"громко чавкать во время еды"],
+ ["도서관에서 친구와 떠들다",1,"шуметь с другом в библиотеке"],
+ ["길에 쓰레기를 버리다",1,"бросать мусор на улице"]
+];
+
+// Вставь слово (новые предложения, не из учебника)
+const CONF=[
+ {s:"할머니께 물을 드릴 때는 ____ 드려요.", h:"Когда подаёшь воду бабушке, подаёшь двумя руками.", a:"두 손으로", d:["한 손으로","고개를 돌리고"], n:"두 손으로 드리다 — подать старшему двумя руками; 한 손으로 받다 — взять одной рукой (со старшими невежливо)."},
+ {s:"친구에게는 ____ 해도 되지만 선생님께는 존댓말을 해야 해요.", h:"С другом можно на «ты», а с учителем нужно говорить вежливо.", a:"반말을", d:["높임말을","눈인사를"], n:"반말 — неформальная речь; 존댓말(높임말) — вежливая."},
+ {s:"어른과 술을 마실 때는 ____ 마셔요.", h:"Когда пьёшь со старшими, пьёшь, отвернувшись.", a:"고개를 돌리고", d:["다리를 꼬고","볼을 맞대고"], n:"고개를 돌리고 마시다 — пить, отвернувшись от старшего."},
+ {s:"할아버지 앞에서 ____ 앉으면 예의가 없어 보여요.", h:"Если сидеть нога на ногу перед дедушкой, это выглядит невежливо.", a:"다리를 꼬고", d:["고개를 숙이고","두 손을 모으고"], n:"다리를 꼬고 앉다 — сидеть нога на ногу."},
+ {s:"한국 식당에서는 물과 반찬이 ____라서 더 달라고 해도 돼요.", h:"В корейском ресторане вода и закуски бесплатные, поэтому можно попросить ещё.", a:"무료", d:["예의","반말"], n:"무료 — бесплатно; 물과 반찬이 무료이다."},
+ {s:"한국 사람들은 보통 ____ 집에 들어가요.", h:"Корейцы обычно входят в дом, сняв обувь.", a:"신발을 벗고", d:["밥그릇을 들고","볼을 맞대고"], n:"신발을 벗고 집에 들어가다 — входить в дом, сняв обувь."},
+ {s:"침대나 의자 없이 바닥에 앉고 자는 생활을 ____ 생활이라고 해요.", h:"Жизнь, когда сидят и спят на полу, без кроватей и стульев, называют …", a:"좌식", d:["입식","개인"], n:"좌식 생활 — «на полу»; 입식 생활 — на стульях и кроватях."},
+ {s:"한국에서는 밥을 먹을 때 ____ 들고 먹지 않아요.", h:"В Корее во время еды миску с рисом в руке не держат.", a:"밥그릇을", d:["숟가락을","젓가락을"], n:"밥그릇을 들고 먹다 — есть, держа миску в руке (в Корее так не делают)."},
+ {s:"국은 ____으로 먹고 반찬은 젓가락으로 먹어요.", h:"Суп едят ложкой, а закуски — палочками.", a:"숟가락", d:["젓가락","그릇"], n:"숟가락 — ложка; 젓가락 — палочки; 수저 — ложка и палочки вместе."},
+ {s:"식탁에서 ____ 것은 예의가 아니에요. 화장실에 가서 하세요.", h:"Сморкаться за столом невежливо. Сходите в туалет.", a:"코를 푸는", d:["수저를 드는","고개를 숙이는"], n:"코를 풀다 — сморкаться (풀다 → 푸는)."},
+ {s:"발표할 때 너무 긴장해서 손에 땀이 ____.", h:"На выступлении я так нервничал, что вспотели ладони.", a:"났어요", d:["빨개졌어요","두근거렸어요"], n:"손에 땀이 나다 — потеют ладони; 얼굴이 빨개지다 — краснеть; 가슴이 두근거리다 — сердце колотится."},
+ {s:"좋아하는 가수를 처음 만나서 가슴이 ____.", h:"Впервые встретил любимого певца — сердце колотилось.", a:"두근거렸어요", d:["빨개졌어요","났어요"], n:"가슴이 두근거리다 — сердце колотится."},
+ {s:"사람들 앞에서 넘어져서 너무 ____.", h:"Упал при всех — было так стыдно.", a:"창피했어요", d:["편했어요","시끄러웠어요"], n:"창피하다 — стыдно, позорно перед людьми."},
+ {s:"갑자기 선생님이 제 이름을 불러서 ____ 아무 말도 못 했어요.", h:"Учитель вдруг назвал моё имя, я растерялся и ничего не смог сказать.", a:"당황해서", d:["환영해서","양보해서"], n:"당황하다 — растеряться, смутиться."},
+ {s:"버스에서 할머니께 자리를 ____.", h:"В автобусе я уступил место бабушке.", a:"양보했어요", d:["기댔어요","세웠어요"], n:"자리를 양보하다 — уступить место."},
+ {s:"버스를 탈 때는 ____ 기다려야 해요. 새치기를 하면 안 돼요.", h:"Садясь в автобус, нужно ждать в очереди. Лезть без очереди нельзя.", a:"줄을 서서", d:["발을 올리고","낙서를 하고"], n:"줄을 서다 — стоять в очереди; 새치기를 하다 — лезть без очереди."},
+ {s:"지하철 문에 ____ 문이 열릴 때 위험해요.", h:"Если прислоняться к дверям метро, это опасно, когда они открываются.", a:"기대면", d:["앉으면","양보하면"], n:"문에 기대다 — прислоняться к двери."},
+ {s:"공연이 시작되면 휴대폰을 ____ 진동으로 하세요.", h:"Когда начнётся спектакль, выключите телефон или поставьте на вибрацию.", a:"끄거나", d:["찍거나","울리거나"], n:"휴대폰을 끄다 — выключить телефон; 진동으로 하다 — поставить на вибрацию."},
+ {s:"공연 중에 누군가의 전화벨이 ____ 사람들이 모두 쳐다봤어요.", h:"Во время спектакля у кого-то зазвонил телефон, и все обернулись.", a:"울려서", d:["찍어서","세워서"], n:"전화벨이 울리다 — звонит телефон."},
+ {s:"공연이 끝나면 배우들에게 크게 박수를 ____.", h:"Когда спектакль закончится, громко поаплодируйте актёрам.", a:"치세요", d:["찍으세요","서세요"], n:"박수를 치다 — хлопать, аплодировать."},
+ {s:"여기에서는 차를 세울 수 없어요. ____ 구역이에요.", h:"Здесь нельзя ставить машину. Это зона, где парковка запрещена.", a:"주차 금지", d:["금연","출입 금지"], n:"주차 금지 — парковка запрещена; 금연 — курение запрещено; 출입 금지 — вход воспрещён."},
+ {s:"이 건물 안에서는 담배를 피울 수 없어요. 건물 전체가 ____ 구역이에요.", h:"В этом здании нельзя курить. Всё здание — зона для некурящих.", a:"금연", d:["주차 금지","사진 촬영 금지"], n:"금연 구역 — зона для некурящих."},
+ {s:"아이들이 도서관에서 ____ 다른 사람들이 공부할 수 없었어요.", h:"Дети шумели в библиотеке, и другие не могли заниматься.", a:"떠들어서", d:["메모해서","반납해서"], n:"떠들다 — шуметь, галдеть."},
+ {s:"도서관 책을 빌리면 반납 날짜를 꼭 ____.", h:"Если берёте книги в библиотеке, обязательно сдавайте их в срок.", a:"지키세요", d:["끄세요","세우세요"], n:"반납 날짜를 지키다 — соблюдать срок возврата."},
+ {s:"옆 사람의 이어폰에서 음악 소리가 ____ 집중할 수 없었어요.", h:"Из наушников соседа была слышна музыка, и я не мог сосредоточиться.", a:"들려서", d:["줄여서","남겨서"], n:"들리다 — быть слышным; 줄이다 — уменьшать."},
+ {s:"음악 소리 좀 ____ 주시겠어요?", h:"Не могли бы вы сделать музыку потише?", a:"줄여", d:["남겨","생겨"], n:"소리를 줄이다 — убавить звук."},
+ {s:"차 앞에 ____를 남겨 주세요. 문제가 생기면 연락드리겠습니다.", h:"Оставьте на машине контактный номер. Если возникнет проблема, мы свяжемся.", a:"연락처", d:["무음","진동"], n:"연락처 — контактный телефон; 남기다 — оставлять."},
+ {s:"앞자리 사람이 ____ 휴대폰을 봐서 불빛 때문에 영화에 집중할 수 없었어요.", h:"Человек впереди постоянно смотрел в телефон, и из-за света я не мог сосредоточиться на фильме.", a:"자꾸", d:["마침","미리"], n:"자꾸 — постоянно, снова и снова; 마침 — как раз; 미리 — заранее."},
+ {s:"친구를 데리고 오고 싶으면 방 친구에게 ____ 이야기해야 해요.", h:"Если хочешь привести друга, нужно заранее сказать соседу по комнате.", a:"미리", d:["자꾸","몰래"], n:"미리 — заранее."},
+ {s:"기숙사에서는 개나 고양이를 ____ 수 없어요.", h:"В общежитии нельзя держать собак и кошек.", a:"키울", d:["피울","끌"], n:"개/고양이를 키우다 — держать собаку или кошку."}
+];
+/*DATA-END*/
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const fmt=ms=>{const s=Math.floor(ms/1000);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};
+
+/* темы и слова */
+const GROUPS=[]; let g=null;
+RAW.split("\n").forEach(l=>{ l=l.trim(); if(!l) return;
+  if(!l.includes("|")){ g={name:l, words:[]}; GROUPS.push(g); return; }
+  const [ko,ru]=l.split("|"); g.words.push({ko,ru}); });
+const ALL=[...new Map(GROUPS.flatMap(x=>x.words).map(w=>[w.ko,w])).values()];
+const BY={}; ALL.forEach(w=>BY[w.ko]=w);
+
+/* озвучка */
+let voice=null;
+function pickVoice(){ try{const v=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang)); voice=v.find(x=>/Natural|Neural|Online|Google|Yuna|SunHi/i.test(x.name))||v[0]||null;}catch(e){} }
+if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
+function say(t){ try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang="ko-KR"; if(voice) u.voice=voice; u.rate=.9; speechSynthesis.speak(u);}catch(e){} }
+const sayBtn=t=>`<button class="say" onclick='event.stopPropagation();say(${JSON.stringify(t).replace(/'/g,"&#39;")})'>🔊</button>`;
+
+/* задания */
+const MIX_N=32;
+const mins=n=>"≈"+Math.max(1,Math.round(n*7/60))+" мин";
+const plural=(n,one,few,many)=>{const a=n%10,b=n%100;return a===1&&b!==11?one:a>=2&&a<=4&&(b<12||b>14)?few:many;};
+const TASKS=[
+ {id:"mix", grp:"Быстрая проверка", kind:"pairs", name:`Пары вперемешку: ${MIX_N} ${plural(MIX_N,"слово","слова","слов")}`, hint:"Случайные слова из всех тем.", min:mins(MIX_N), words:()=>shuffle(ALL).slice(0,MIX_N)},
+ ...GROUPS.map((x,i)=>({id:"p"+(i+1), grp:"Пары по темам", kind:"pairs", name:"Пары · "+x.name, hint:`${x.words.length} ${plural(x.words.length,"слово","слова","слов")} и выражений`, min:mins(x.words.length), words:()=>x.words})),
+ {id:"collo", grp:"Задания", kind:"collo", name:"Что с чем сочетается", hint:"Собери выражения: 박수를 + 치다.", min:"≈4 мин"},
+ {id:"sort",  grp:"Задания", kind:"sort",  name:"Вежливо или нельзя?", hint:"Как в Корее: так можно или это невежливо?", min:"≈3 мин"},
+ {id:"conf",  grp:"Задания", kind:"conf",  name:"Вставь слово в предложение", hint:"반말 или 높임말? 끄다 или 울리다? 자꾸 или 미리?", min:"≈6 мин"},
+];
+const PRESETS={class:["mix","sort","conf"], all:TASKS.filter(t=>t.id!=="mix").map(t=>t.id)};
+/* домашка: преподаватель может задать отдельные задания (см. js/bridge.js) */
+window.MIRAE_PARTS=[...new Set(TASKS.map(t=>t.grp))].map(gr=>({g:gr, t:TASKS.filter(t=>t.grp===gr).map(t=>({k:"q:"+t.id,n:t.name}))}));
+if(window.MIRAE_PICK) MIRAE_PICK.keep(TASKS,t=>"q:"+t.id);
+
+/* что выбрано: домашка с отдельными заданиями → всё оставшееся; ?t=mix,sort или ?set=class → эти; иначе все слова */
+const QS=new URLSearchParams(location.search), IN_HW=!!(QS.get("hw")||window.MIRAE_PICK);
+let SEL=new Set();
+(function(){
+  if(window.MIRAE_PICK && window.MIRAE_PICK.used){ TASKS.forEach(t=>SEL.add(t.id)); return; }
+  const want=(QS.get("t")||"").split(",").map(s=>s.trim()).filter(id=>TASKS.some(t=>t.id===id));
+  if(want.length){ want.forEach(id=>SEL.add(id)); return; }
+  const p=PRESETS[QS.get("set")]||PRESETS.all; p.forEach(id=>{ if(TASKS.some(t=>t.id===id)) SEL.add(id); });
+  if(!SEL.size) TASKS.forEach(t=>SEL.add(t.id));
+})();
+const chosen=()=>TASKS.filter(t=>SEL.has(t.id));
+let RES={}; // id → {ok, total, mist:[], time}
+
+/* ---------- меню ---------- */
+const TG_TOKEN="9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU", TG_CHAT_ID="347625701";
+let NAME="", T_START=0, PLAN=[];
+function drawMenu(){
+  const c=chosen(), wc=new Set(c.filter(t=>t.kind==="pairs"&&t.id!=="mix").flatMap(t=>t.words().map(w=>w.ko))).size;
+  $("desc").textContent=`Тема: этикет, культурные различия и правила в общественных местах · ${ALL.length} слов и выражений. Выбрано заданий: ${c.length}${wc?`, слов в парах: ${wc}`:""}. В конце результат уйдёт учителю.`;
+  let last="", h="";
+  TASKS.forEach(t=>{
+    if(t.grp!==last){ h+=`<div class="grp">${esc(t.grp)}</div>`; last=t.grp; }
+    const on=SEL.has(t.id);
+    h+=`<button class="task ${on?"on":""} ${IN_HW?"fixed":""}" ${IN_HW?"":`onclick="toggle('${t.id}')"`}><span class="n">✓</span><span class="t"><b>${esc(t.name)}</b><br><span class="muted">${esc(t.hint)}</span></span><span class="r">${t.min}</span></button>`;
+  });
+  $("taskList").innerHTML=h;
+  document.querySelectorAll(".presets button").forEach(b=>{ const p=PRESETS[b.dataset.p]; b.classList.toggle("act", p.length===SEL.size && p.every(id=>SEL.has(id))); });
+  $("goBtn").disabled=!c.length;
+}
+function toggle(id){ SEL.has(id)?SEL.delete(id):SEL.add(id); drawMenu(); }
+function preset(p){ SEL=new Set(PRESETS[p].filter(id=>TASKS.some(t=>t.id===id))); drawMenu(); }
+if(IN_HW) $("presetBox").classList.add("hidden");
+try{ $("nameInput").value=localStorage.getItem("yejeol_quiz_name")||""; }catch(e){}
+drawMenu();
+function begin(){
+  NAME=$("nameInput").value.trim(); if(!NAME){ $("nameInput").focus(); return; }
+  PLAN=chosen(); if(!PLAN.length) return;
+  try{ localStorage.setItem("yejeol_quiz_name",NAME); }catch(e){}
+  T_START=Date.now(); RES={}; run(0);
+}
+
+/* ---------- общий ход ---------- */
+let timer=null, t0=0, cur=null;
+function run(i){
+  $("menu").classList.add("hidden"); $("play").classList.remove("hidden");
+  const t=PLAN[i]; $("tInfo").textContent=`Задание ${i+1}/${PLAN.length}`;
+  t0=Date.now(); clearInterval(timer); timer=setInterval(()=>$("clock").textContent="⏱ "+fmt(Date.now()-t0),1000); $("clock").textContent="⏱ 0:00";
+  cur={i, t, ok:0, total:0, mist:[], seen:new Set()};
+  ({pairs:startPairs, collo:startCollo, sort:startSort, conf:startConf})[t.kind](t);
+  window.scrollTo(0,0);
+}
+function miss(key, item){ if(cur.seen.has(key)) return; cur.seen.add(key); cur.mist.push(item); }
+function finishTask(){
+  clearInterval(timer);
+  RES[cur.t.id]={ok:cur.total-cur.mist.length, total:cur.total, mist:cur.mist, time:Date.now()-t0};
+  const r=RES[cur.t.id], i=cur.i, nxt=PLAN[i+1];
+  $("prog").style.width="100%";
+  if(!nxt){ showFinal(); return; }
+  $("stage").innerHTML=`<div style="text-align:center"><div class="muted">Задание ${i+1} готово: ${esc(cur.t.name)}</div><div class="big">${r.ok} / ${r.total}</div><div class="muted">время ${fmt(r.time)}</div></div>
+   <button class="main" onclick="run(${i+1})">Задание ${i+2}: ${esc(nxt.name)} →</button>`;
+}
+function totals(){ const ok=PLAN.reduce((a,t)=>a+RES[t.id].ok,0), tot=PLAN.reduce((a,t)=>a+RES[t.id].total,0); return {ok,tot,pc:tot?Math.round(ok/tot*100):0}; }
+function showFinal(){
+  $("stage").innerHTML=""; $("play").classList.add("hidden"); $("final").classList.remove("hidden");
+  const {ok,tot,pc}=totals(), mist=PLAN.flatMap(t=>RES[t.id].mist);
+  $("summary").innerHTML=`<div style="text-align:center"><div class="muted">${esc(NAME)}, все задания сделаны 🎉</div>
+   <div class="big">${pc}%</div><div class="muted">${ok} из ${tot} с первой попытки · время ${fmt(Date.now()-T_START)}</div></div>
+   ${PLAN.map((t,i)=>`<div class="mist">${i+1}. ${esc(t.name)}: <b>${RES[t.id].ok}/${RES[t.id].total}</b> <span class="muted">· ${fmt(RES[t.id].time)}</span></div>`).join("")}
+   ${mist.length?`<div style="margin-top:10px"><b>Повторить (${mist.length}):</b></div>`+mist.map(m=>`<div class="mist"><b>${esc(m.ko)}</b> ${sayBtn(m.ko)} — ${esc(m.ru)}</div>`).join(""):"<div style='margin-top:8px'><b>Без ошибок!</b></div>"}`;
+  window.scrollTo(0,0);
+  sendResults();
+}
+function buildReport(){
+  const {ok,tot,pc}=totals();
+  const d=new Date(), dt=d.toLocaleDateString("ru-RU")+" "+d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
+  let t=`🧩 <b>예절과 규칙 · проверка слов</b>\n👤 ${esc(NAME)}\n📅 ${dt}\n\n✅ <b>${ok}/${tot} (${pc}%)</b> · ⏱ ${fmt(Date.now()-T_START)}\n`;
+  PLAN.forEach((x,i)=>{ const r=RES[x.id]; t+=`${i+1}. ${esc(x.name)}: ${r.ok}/${r.total} · ${fmt(r.time)}\n`; });
+  const mist=PLAN.flatMap(x=>RES[x.id].mist);
+  t+= mist.length? `\n❌ <b>Ошибки (${mist.length}):</b>\n`+mist.map(m=>`• ${esc(m.ko)} — ${esc(m.ru)}`).join("\n") : "\nБез ошибок 🎉";
+  return t;
+}
+let REPORT="";
+async function sendResults(){
+  REPORT=buildReport(); const fb=$("sendFb"), btn=$("sendBtn"); btn.disabled=true; fb.textContent="Отправляю учителю…";
+  try{
+    if(!TG_TOKEN || TG_TOKEN.indexOf("TOKEN")>=0) throw new Error("отправка здесь недоступна");
+    const parts=[]; let rest=REPORT; while(rest.length){ let cut=rest.length>3800?rest.lastIndexOf("\n",3800):rest.length; if(cut<=0) cut=3800; parts.push(rest.slice(0,cut)); rest=rest.slice(cut); }
+    for(const p of parts){ const r=await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{method:"POST",body:new URLSearchParams({chat_id:TG_CHAT_ID,text:p,parse_mode:"HTML"})}); const j=await r.json(); if(!j.ok) throw new Error(j.description||"ошибка"); }
+    fb.textContent="✅ Отправлено учителю! 잘했어요!"; btn.textContent="Отправить ещё раз";
+  }catch(e){
+    fb.textContent="Не получилось отправить ("+e.message+"). Скопируй текст и отправь учителю вручную:";
+    const b=$("copyBox"); b.value=REPORT.replace(/<[^>]+>/g,"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&").replace(/&quot;/g,'"'); b.classList.remove("hidden"); $("copyBtn").classList.remove("hidden");
+  }
+  btn.disabled=false;
+}
+function copyReport(){ const b=$("copyBox"); b.select(); try{ navigator.clipboard.writeText(b.value).then(()=>$("copyBtn").textContent="Скопировано ✓",()=>document.execCommand("copy")); }catch(e){ document.execCommand("copy"); } }
+
+/* ---------- пары и «что с чем» ---------- */
+let ROUNDS=[], ri=0, picked=null, left=0, pTitle="", pLeftKo=true;
+function chunk(arr, n){ const R=[]; for(let i=0;i<arr.length;i+=n) R.push(arr.slice(i,i+n));
+  if(R.length>1 && R.at(-1).length<5){ const t=R.pop(); R[R.length-1]=R.at(-1).concat(t); } return R; }
+function startPairs(t){
+  const ws=shuffle(t.words()); ROUNDS=chunk(ws,8).map(r=>r.map(w=>({l:w.ko,r:w.ru,w})));
+  cur.total=ws.length; ri=0; pTitle=t.id==="mix"?"Пары":t.name.replace("Пары · ",""); pLeftKo=true; drawRound();
+}
+function startCollo(){
+  const ps=shuffle(COLLO); ROUNDS=chunk(ps,6).map(r=>r.map(([a,b,ru])=>({l:a,r:b,w:{ko:a+" "+b,ru}})));
+  cur.total=COLLO.length; ri=0; pTitle="Что с чем"; pLeftKo=false; drawRound();
+}
+function drawRound(){
+  const R=ROUNDS[ri]; left=R.length; picked=null;
+  $("pInfo").textContent=`${pTitle} · ${ri+1}/${ROUNDS.length}`;
+  $("prog").style.width=(ri/ROUNDS.length*100)+"%";
+  const L=shuffle(R.map((p,k)=>({k,t:p.l}))), Rr=shuffle(R.map((p,k)=>({k,t:p.r})));
+  $("stage").innerHTML=`<div class="muted">${pLeftKo?"Найди пары: слово — перевод. Нажми на корейское слово, чтобы услышать.":"Собери выражения: что с чем сочетается."}</div>
+   <div class="cols"><div class="col">${L.map(x=>`<button class="it ko" data-s="L" data-k="${x.k}" onclick="pick(this)">${esc(x.t)}</button>`).join("")}</div>
+   <div class="col">${Rr.map(x=>`<button class="it ${pLeftKo?"":"ko"}" data-s="R" data-k="${x.k}" onclick="pick(this)">${esc(x.t)}</button>`).join("")}</div></div>`;
+}
+function pick(b){
+  if(b.dataset.s==="L") say(b.textContent);
+  if(!picked || picked.dataset.s===b.dataset.s){ if(picked) picked.classList.remove("sel"); picked=b; b.classList.add("sel"); return; }
+  const a=picked; picked=null; a.classList.remove("sel");
+  if(a.dataset.k===b.dataset.k){
+    if(!pLeftKo) say(ROUNDS[ri][+a.dataset.k].w.ko);
+    a.classList.add("gone"); b.classList.add("gone"); left--;
+    if(!left) setTimeout(()=>{ ri++; ri<ROUNDS.length?drawRound():finishTask(); },350);
+  } else {
+    const Lb=a.dataset.s==="L"?a:b, p=ROUNDS[ri][+Lb.dataset.k];
+    miss(p.l, {ko:p.w.ko, ru:p.w.ru||p.r});
+    [a,b].forEach(x=>{x.classList.add("bad"); setTimeout(()=>x.classList.remove("bad"),450);});
+  }
+}
+
+/* ---------- вежливо или нельзя ---------- */
+let SQ=[], si=0, sLock=false;
+function startSort(){ SQ=shuffle(SORT); si=0; cur.total=SQ.length; drawSort(); }
+function drawSort(){
+  sLock=false; const [ko]=SQ[si];
+  $("pInfo").textContent=`Вежливо? · ${si+1}/${SQ.length}`; $("prog").style.width=(si/SQ.length*100)+"%";
+  $("stage").innerHTML=`<div class="muted">В Корее так можно или это невежливо?</div><div class="word">${esc(ko)} ${sayBtn(ko)}</div>
+   <div class="cats">${CATS.map((c,k)=>`<button onclick="sortPick(${k},this)">${c}</button>`).join("")}</div><div id="sFb"></div>`;
+}
+function sortPick(k,b){
+  if(sLock) return; sLock=true; const [ko,c,ru]=SQ[si];
+  document.querySelectorAll(".cats button").forEach((x,j)=>{ if(j===c) x.classList.add("ok"); else if(j===k) x.classList.add("bad"); });
+  if(k===c){ setTimeout(nextSort,450); return; }
+  miss(ko,{ko,ru:ru+" — "+(c?"так нельзя":"так можно")});
+  $("sFb").innerHTML=`<div class="fb"><b>${esc(ko)}</b> — ${esc(ru)}<div class="muted">${c?"🙅 В Корее так не делают.":"👍 Это вежливо, так и надо."}</div></div><button class="main" onclick="nextSort()">Дальше →</button>`;
+}
+function nextSort(){ si++; si<SQ.length?drawSort():finishTask(); }
+
+/* ---------- вставь слово ---------- */
+let CQ=[], ci=0, cLock=false;
+function startConf(){ CQ=shuffle(CONF).map(c=>({...c,opts:shuffle([c.a,...c.d])})); ci=0; cur.total=CQ.length; drawConf(); }
+function drawConf(){
+  cLock=false; const c=CQ[ci];
+  $("pInfo").textContent=`Предложения · ${ci+1}/${CQ.length}`; $("prog").style.width=(ci/CQ.length*100)+"%";
+  $("stage").innerHTML=`<div class="q">${esc(c.s).replace("____",'<span class="gap">&nbsp;</span>')}</div><div class="muted">${esc(c.h)}</div>
+   <div class="opts">${c.opts.map((o,k)=>`<button onclick="confPick(${k},this)">${esc(o)}</button>`).join("")}</div><div id="cFb"></div>`;
+}
+function confPick(k,b){
+  if(cLock) return; cLock=true; const c=CQ[ci], ok=c.opts[k]===c.a;
+  document.querySelectorAll(".opts button").forEach((x,j)=>{ if(c.opts[j]===c.a) x.classList.add("ok"); else if(j===k) x.classList.add("bad"); });
+  const full=c.s.replace("____",c.a);
+  if(ok){ say(full); setTimeout(nextConf,600); return; }
+  miss(ci,{ko:full, ru:c.n});
+  $("cFb").innerHTML=`<div class="fb">${esc(full)} ${sayBtn(full)}<div class="muted">${esc(c.n)}</div></div><button class="main" onclick="nextConf()">Дальше →</button>`;
+}
+function nextConf(){ ci++; ci<CQ.length?drawConf():finishTask(); }
+</script>
+</body>
+</html>

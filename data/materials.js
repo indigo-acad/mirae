@@ -382,6 +382,14 @@ window.MATERIALS=[
   "level": "3급"
  },
  {
+  "id": "ko-yejeol-quiz",
+  "section": "korean",
+  "kind": "trainer",
+  "title": "예절과 규칙 · проверка слов (этикет, культурные различия, общественные места)",
+  "path": "materials/korean/ko-yejeol-quiz/",
+  "level": "3급"
+ },
+ {
   "id": "ko-g2724-class",
   "section": "korean",
   "kind": "class",
