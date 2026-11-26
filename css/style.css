@@ -352,7 +352,7 @@ h2.sec.orn-h::after{transform:scaleX(-1)}
 .home h2.sec.orn-h+.tiles,.home h2.sec.orn-h+.steps{margin-top:22px}
 /* карточки языков */
 .lcards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
-.lc{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;padding:30px 32px 136px;border-radius:26px}
+.lc{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;padding:30px 32px 158px;border-radius:26px}
 .lc[data-l=ko]{--la:#7CC4B5;--scene:url(../img/scene-ko.webp);--emblem:url(../img/emblem-ko.svg);--frame:url(../img/frame-ko.svg)}
 .lc[data-l=en]{--la:#DC97A0;--scene:url(../img/scene-en.webp);--emblem:url(../img/emblem-en.svg);--frame:url(../img/frame-en.svg)}
 .lc-art{position:absolute;left:0;right:0;bottom:0;height:150px;z-index:-1;background:var(--scene) 50% 100%/760px auto no-repeat,radial-gradient(60% 90px at 50% 100%,rgba(226,186,128,.34),rgba(11,21,53,0) 75%)}
@@ -614,7 +614,7 @@ html[data-lang=ko] .hero::after{right:max(7%,calc(50% - 600px));top:clamp(84px,1
 @media(max-width:900px){
   .tiles{grid-template-columns:1fr}
   .lcards,.steps{grid-template-columns:1fr}
-  .lc{padding:26px 24px 128px}.lc.soon{padding:16px 20px}
+  .lc{padding:26px 24px 156px}.lc.soon{padding:16px 20px}
   .tile{min-height:0;flex-direction:row;align-items:center;gap:16px;padding:18px 20px;border-radius:24px}
   .tile-top{display:contents}
   .tile-tx{flex:1;min-width:0;order:1;margin:0;padding:0}
@@ -1835,3 +1835,13 @@ html[data-theme=day] .cb-tip{background:rgba(255,252,246,.55);-webkit-backdrop-f
 @media(max-width:640px){.cb-hello .cb-hart{-webkit-mask-image:linear-gradient(180deg,#000 70%,transparent);mask-image:linear-gradient(180deg,#000 70%,transparent)}}
 
 @keyframes rayspin{to{transform:rotate(360deg)}}
+
+/* карточки языков, дневная тема: у дневных пейзажей внизу прозрачная полоса (≈47–55px при ширине 760px),
+   из-за неё картинка поднималась на текст, а под ней оставалась пустота. Опускаем пейзаж до низа карточки. */
+html[data-theme=day] .lc[data-l=ko] .lc-art{background-position:50% calc(100% + 47px),50% 100%}
+html[data-theme=day] .lc[data-l=en] .lc-art{background-position:50% calc(100% + 55px),50% 100%}
+/* карточка слова: длинный перевод не вылезает за край */
+.flash-t{font-size:clamp(22px,6.4vw,28px);overflow-wrap:break-word;hyphens:auto;text-wrap:balance}
+.flash-w{overflow-wrap:break-word}
+/* фокус на кнопках оценки не прячется под нижнее меню телефона */
+html:has(body.has-tabs){scroll-padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}

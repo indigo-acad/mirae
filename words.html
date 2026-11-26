@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Playfair+Display+SC:wght@400;700&family=Jost:wght@400;500;600;700&family=Comforter+Brush&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=4">
+<link rel="stylesheet" href="css/style.css?v=5">
 <style>/* во время отработки список слов с переводами не виден: иначе перевод подсматривается прямо под карточкой */
 #play:not([hidden]) ~ #tabs,#play:not([hidden]) ~ #list,#play:not([hidden]) ~ #stats,#play:not([hidden]) ~ #prefs{display:none!important}</style>
 </head>
@@ -162,6 +162,8 @@ function meaningsHtml(c,cx,skip){
     return h?'<div class="exbox">'+h+'</div>':'';
   }
   var t=M.trs(c,I),od=M.defs(c,I);
+  if(skip){var shown=String(trOf(c)||'').toLowerCase().split(/;|\n/).map(function(x){return x.trim()});   // уже крупно над блоком — не повторяем
+    t=t.filter(function(x){return shown.indexOf(String(x).trim().toLowerCase())<0});od=od.filter(function(d){return shown.indexOf(String(d.s).trim().toLowerCase())<0})}
   if(t.length)h+='<div>'+t.map(esc).join('; ')+'</div>';
   od.forEach(function(d){h+='<div><small class="muted">'+esc(M.NAMES[d.l]||d.l)+'</small> <span lang="'+d.l+'"'+(d.l==='ko'?' class="ko"':'')+'>'+esc(d.s)+'</span></div>'});
   return h?'<div class="exbox">'+h+'</div>':'';
