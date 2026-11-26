@@ -302,7 +302,9 @@ function finish(){
 // самостоятельно: интервалы слов ученика и результат домашки
 function saveSelf(ok,bad){
   if(KR.vocab&&!(KR.ctx&&KR.ctx.teacher)){var res={};QS.forEach(function(q,i){qWords(q).forEach(function(x){var c=KR.vocab.find(wl(x),x.w);if(c)res[c.id]=res[c.id]===false?false:wordOk(q,i,x.w)})});
-    try{var pr=KR.vocab.practice(res),pt=[];if(pr.back.length)pt.push("вернутся на повторение сегодня: "+pr.back.length);if(pr.done.length)pt.push("засчитано как повторение: "+pr.done.length);
+    /* тест — одна сессия: слова без единой ошибки получают +1 день к повторению (KR.vocab.sessEnd) */
+    try{if(KR.vocab.sessStart)KR.vocab.sessStart();var pr=KR.vocab.practice(res),pb=KR.vocab.sessEnd?KR.vocab.sessEnd():[],pt=[];if(pr.back.length)pt.push("вернутся на повторение сегодня: "+pr.back.length);if(pr.done.length)pt.push("засчитано как повторение: "+pr.done.length);
+      if(pb.length)pt.push("без ошибок, повторение на день позже: "+pb.length);
       SUM=pt.length?"В словаре: "+pt.join(" · ")+".":""}catch(e){}}
   if(!HWC)return;
   var k="kr_progress:"+KR.user()+":hw-"+HWC.rec.id,P={};try{P=JSON.parse(localStorage.getItem(k)||"{}")}catch(e){}

@@ -15,6 +15,12 @@ function load(){
 function save(){try{localStorage.setItem(key(),JSON.stringify(D))}catch(e){}}
 function put(c){D.w[c.id]=c;D.d[c.id]=1;delete D.x[c.id];save();push()}
 function revToday(){var ds=SRS.dayStart(Date.now());return D.rv&&D.rv.d===ds?D.rv.n:0}
+/* Сессия занятия (тренажёр, упражнения, тест): ответы по словам. 1 — пока без ошибок, 0 — была ошибка.
+   В конце сессии (V.sessEnd) словам без единой ошибки добавляется день к следующему повторению (SRS.clean). */
+var SESS=null;
+function mark(id,ok){if(!SESS||!id)return;if(!ok)SESS[id]=0;else if(SESS[id]!==0)SESS[id]=1}
+/* Новые слова сверх дневного лимита, взятые сегодня (после большого импорта): {d: начало дня, n: сколько} */
+function extraToday(){var ds=SRS.dayStart(Date.now());return D.xn&&D.xn.d===ds?D.xn.n:0}
 function changed(){if(typeof V.onchange==="function")try{V.onchange()}catch(e){}}
 /* Журнал занятий словами по дням (kr_wlog:<ученик>): n — новых слов начато, r — повторений и шагов изучения,
    ok — верных ответов, t — время последнего ответа. Уходит в облако вместе с прогрессом ученика (js/common.js, ключ wl),
@@ -101,14 +107,14 @@ var V={
   answer:function(id,grade){
     var c=D.w[id];if(!c)return null;var now=Date.now(),wasNew=!c.st;
     if(c.st===2){var ds=SRS.dayStart(now);D.rv=D.rv&&D.rv.d===ds?{d:ds,n:D.rv.n+1}:{d:ds,n:1}}
-    c=SRS.next(c,grade,D.s,now);put(c);logAnswer(wasNew,grade>=3,now);return c;
+    mark(id,grade>1);c=SRS.next(c,grade,D.s,now);put(c);logAnswer(wasNew,grade>=3,now);return c;
   },
   /* Ответ в упражнении вне тренажёра (см. SRS.practice). res: {id карточки: верно ли}; если слово было в двух заданиях
      и в одном из них ошибка, передавайте false. Возвращает {back: вернулись на повторение, done: засчитаны как повторение}. */
   practice:function(res){
     var now=Date.now(),ds=SRS.dayStart(now),out={back:[],done:[]};
     Object.keys(res||{}).forEach(function(id){
-      var c=D.w[id];if(!c)return;var n=SRS.practice(c,!!res[id],D.s,now);if(!n)return;
+      var c=D.w[id];if(!c)return;mark(id,!!res[id]);var n=SRS.practice(c,!!res[id],D.s,now);if(!n)return;
       if(res[id]){if(c.st===2)D.rv=D.rv&&D.rv.d===ds?{d:ds,n:D.rv.n+1}:{d:ds,n:1};out.done.push(n)}else out.back.push(n);
       D.w[id]=n;D.d[id]=1;delete D.x[id];
     });
@@ -118,7 +124,7 @@ var V={
   /* Ответ в тренировке по выбору (см. SRS.train): слово «на сегодня» получает обычную оценку, слово «на потом» от ошибки
      возвращается раньше. Возвращает {c, k} или null, если расписание не изменилось. */
   train:function(id,grade){
-    var c=D.w[id];if(!c)return null;var now=Date.now(),r=SRS.train(c,grade,D.s,now);
+    var c=D.w[id];if(!c)return null;mark(id,grade>1);var now=Date.now(),r=SRS.train(c,grade,D.s,now);
     if(!r)return null;
     if(r.k==="rev"){if(c.st===2){var ds=SRS.dayStart(now);D.rv=D.rv&&D.rv.d===ds?{d:ds,n:D.rv.n+1}:{d:ds,n:1}}logAnswer(!c.st,grade>=3,now)}
     put(r.c);changed();return r;
@@ -167,7 +173,22 @@ var V={
       });
     }).map(function(c){return c.id});
   },
-  plan:function(lang){return SRS.plan(V.all(lang),D.s,Date.now(),revToday())},
+  plan:function(lang){return SRS.plan(V.all(lang),D.s,Date.now(),revToday(),extraToday())},
+  /* Взять сегодня ещё n новых слов сверх дневного лимита (n = Infinity — все новые слова сразу). Только на этот день
+     и только на этом устройстве: завтра снова обычный лимит из настроек. */
+  takeNew:function(lang,n){
+    var p=V.plan(lang),left=p.allNew-p.fresh.length;if(left<=0)return 0;n=Math.min(left,n>0?n:left);
+    var ds=SRS.dayStart(Date.now());D.xn={d:ds,n:extraToday()+n};save();changed();return n;
+  },
+  /* Начать сессию: дальше все ответы (answer, practice, train) запоминаются по словам. */
+  sessStart:function(){SESS={}},
+  /* Закончить сессию. apply = false — сессия брошена на середине, бонуса нет. Возвращает карточки, получившие бонус. */
+  sessEnd:function(apply){var s=SESS;SESS=null;if(!s||apply===false)return [];return V.bonus(Object.keys(s).filter(function(id){return s[id]===1}))},
+  /* Бонус +1 день словам, отработанным без ошибок (SRS.clean). Возвращает изменённые карточки. */
+  bonus:function(ids){
+    var now=Date.now(),out=[];(ids||[]).forEach(function(id){var c=D.w[id];if(!c)return;var n=SRS.clean(c,D.s,now);if(!n)return;D.w[id]=n;D.d[id]=1;delete D.x[id];out.push(n)});
+    if(out.length){save();push();changed()}return out;
+  },
   stats:function(lang){
     var p=V.plan(lang),all=V.all(lang),known=all.filter(function(c){return c.st===2}).length;
     return {total:all.length,known:known,fresh:p.fresh.length,learn:p.learn.length+p.soon.length,rev:p.rev.length,
