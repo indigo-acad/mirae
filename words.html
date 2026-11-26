@@ -51,7 +51,7 @@ var CT={mix:['Вперемешку','игры, отмеченные в наст�
   type:['Ввести ответ','печатаешь слово по переводу или перевод по слову'],cloze:['Пропуск в предложении','слова без примера придут обычной карточкой']};
 function ctNow(){return S&&S.exmix?'mix':ctype()}
 function ctype(){var v='';try{v=localStorage.getItem('kr_ct')||''}catch(e){}return CT[v]?v:'mix'}
-function setCt(k){try{localStorage.setItem('kr_ct',k)}catch(e){}drawToday();var b=$('[data-ct="'+k+'"]');if(b)b.focus()}
+function setCt(k){try{localStorage.setItem('kr_ct',k)}catch(e){}drawToday();if($('#ctcfg'))drawPrefs();var b=$('#ctcfg [data-ct="'+k+'"]')||$('[data-ct="'+k+'"]');if(b)b.focus()}
 function ctBox(){var cur=ctype();
   return '<div class="tct"><p class="muted tb-sub">Тип карточек: <b>'+CT[cur][0]+'</b> · '+CT[cur][1]+'</p><div class="opts tf-sc" role="group" aria-label="Тип карточек">'+
     Object.keys(CT).map(function(k){var on=k===cur;return '<button type="button" data-ct="'+k+'" aria-pressed="'+on+'" class="'+(on?'sel':'')+'">'+(on?'✓ ':'')+CT[k][0]+'</button>'}).join('')+'</div></div>'}
@@ -226,13 +226,13 @@ function drawToday(){
   if(!busy&&nNew)h+='<div class="tb-prev">'+p.fresh.slice(0,8).map(function(c){var t=trOf(c);return '<span class="chip"><b'+wcls(c)+' lang="'+c.l+'">'+esc(c.w)+'</b>'+(t?'&nbsp;· '+esc(t):'')+'</span>'}).join('')+(nNew>8?'<span class="chip">ещё '+(nNew-8)+'</span>':'')+'</div>';
   if(st.total&&KR.canSay())h+='<div class="tb-more"><button type="button" data-x="to-ear">'+KR.icon('headphones',17)+'Тренировка на слух</button>'+
     '<button type="button" data-x="pod-today">'+KR.icon('play',16)+'Подкаст на сегодня</button></div>';
-  // по желанию: раздельно новые и упражнения, тип карточек, свой набор слов
+  if(st.total&&!busy)h+=ctBox();
+  // по желанию: раздельно новые и упражнения, свой набор слов
   if(st.total&&!busy){
     h+='<details class="tsplit" data-open="split"'+(OPEN.split?' open':'')+'><summary>Раздельно и по выбору</summary>'+
       '<p class="muted tb-sub">Если хочется заниматься по частям: только знакомство с новыми словами или только упражнения без карточек.</p>'+
       '<div class="tb-more"><button type="button" id="gonew"'+(nNew?'':' disabled')+'>'+KR.icon('spark',16)+'Только новые слова · '+nNew+'</button>'+
       '<button type="button" id="go"'+(inWork+rev?'':' disabled')+'>'+KR.icon('repeat',16)+'Только упражнения · '+(inWork+rev)+'</button></div>'+
-      (st.total>p.allNew?ctBox():'')+
       (KR.canSay()?'<p class="muted tb-sub">На слух: диктант по клеточкам, «что прозвучало»'+(EAR.canHear()?', скажи слово в микрофон':'')+'. Подкаст читает слова с паузой, чтобы успеть ответить.</p>':'')+
       (st.total>p.allNew?freeBox():'')+'</details>';
   }
@@ -1126,6 +1126,7 @@ function drawPrefs(){
     '<h3>Игры</h3><p class="hint">Отметь игры для отработки. Новые слова сначала разбираются в своём блоке, вверху страницы.</p><div class="games">'+
     SRS.GAMES.map(function(g){return '<label><input type="checkbox" name="g" value="'+g+'"'+(s.games[g]?' checked':'')+'><span><b>'+GAME[g][0]+'</b><small>'+GAME[g][1]+'</small></span></label>'}).join('')+'</div>'+
     '<div class="done-row"><button type="button" data-x="reset">Вернуть как было</button><button type="submit" class="btn pri">Сохранить</button></div><p class="msg" id="pmsg" role="status"></p></form>';
+  h+='<div class="card glass prefs" id="ctcfg"><h3>Карточки: какой стороной показывать</h3><p class="hint">«Слово → перевод»: видишь слово, вспоминаешь перевод. «Перевод → слово»: видишь перевод, вспоминаешь слово. «В обе стороны»: карточки чередуются. «Вперемешку»: игры, отмеченные выше. Сохраняется сразу, на этом устройстве.</p>'+ctBox()+'</div>';
   var cmv=cm(),lvl=lang==='ko'?'2급':'A2',ln=lang==='ko'?'корейском':'английском';
   var gs=gls(),LN=KR.LANGS[lang].name;if(MIXL)h+='<p class="msg">Сейчас открыты все языки. Направления ниже — для слов «'+LN+'». Для другого языка выбери его кнопкой вверху страницы и настрой там: в «Все языки» каждое слово отрабатывается по настройкам своего языка.</p>';
   h+='<div class="card glass prefs" id="cxcfg"><h3>Как отрабатывать слова · '+LN+'</h3><p class="hint">Отметь, на каком языке давать значение слова. Можно несколько: тогда направления чередуются, например '+LN+' ↔ русский и '+LN+' ↔ '+gname(lang==='en'?'ko':'en')+' вперемешку.</p><div class="opts" role="group" aria-label="Направления перевода">'+
