@@ -1822,3 +1822,9 @@ html[data-theme=day]:not([data-lang]) .cb-hello{--hero2:url(../img/hero-ko-day.w
 .px-kinds span{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--fill);border:1px solid var(--rule);font-size:13px;color:var(--fg-2)}
 .px-kinds svg{color:var(--gold-t,var(--gold))}
 @media(max-width:640px){.px-empty{grid-template-columns:1fr;gap:12px;padding:20px}.px-empty img{max-width:200px;margin:0 auto}}
+/* телефон: облака не ложатся на заголовки (лучи и лепестки остаются), заголовок страницы не упирается в край */
+@media(max-width:640px){
+  .dayfx .cld{display:none}
+  header.band h1:not(.ko){font-size:clamp(28px,8.4vw,38px);line-height:1.1}
+  header.band p{font-size:16px}
+}
