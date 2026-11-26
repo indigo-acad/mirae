@@ -244,7 +244,7 @@ var sky=window.Sky&&Sky.mount($("#sky"),{horizon:horizon,flat:mode()==="school"}
 if(!sky)window.addEventListener("resize",horizon);
 if(sky){
   var paint=function(){sb.innerHTML=KR.icon(sky.paused?"play":"pause",16);sb.setAttribute("aria-label",sky.paused?"Запустить анимацию фона":"Остановить анимацию фона")};
-  sb.hidden=false;sb.onclick=function(){sky.toggle();paint()};paint();
+  sb.hidden=false;sb.onclick=function(){sky.toggle();paint();KR.fx()};paint();
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(sky.refresh);
 }
 KR.onLang=render;

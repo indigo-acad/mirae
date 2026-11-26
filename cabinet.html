@@ -14,7 +14,7 @@
 <div id="topbar"></div>
 <header class="band"><div class="in"><small>Личный кабинет</small><h1 id="who"></h1><p id="role">Прогресс, задания от преподавателя и домашка</p></div></header>
 <main id="m"></main>
-<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/l10-banmal.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/q2a-yuki.js"></script><script src="data/r2a-review2.js"></script><script src="data/sw5-l4.js"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/wexport.js"></script><script src="js/vocab.js"></script><script src="js/home-cards.js"></script><script src="js/assistant.js"></script>
+<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/l10-banmal.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/q2a-yuki.js"></script><script src="data/r2a-review2.js"></script><script src="data/sw5-l4.js"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/wexport.js"></script><script src="js/vocab.js"></script><script src="js/home-cards.js"></script><script src="js/cab-blocks.js"></script><script src="js/assistant.js"></script>
 <script>
 /* Кабинет показывает раздел текущего языка (переключатель в шапке): корейский — уроки курса, английский — материалы программы. */
 var MAP={};MATERIALS.forEach(function(m){MAP[m.id]=m});
@@ -50,7 +50,19 @@ function dashKo(){
   // ученику — только открытые преподавателем уроки, преподавателю — вся программа
   var rows=KR.ctx.teacher?ALL:real;
   h+='<div class="card glass"><h3>Прогресс по урокам</h3>'+(rows.length?rows.map(lessonRow).join(''):'<p class="muted">Уроки появятся здесь, когда преподаватель их откроет.</p>')+'<div class="done-row"><span></span><a class="btn" href="course.html">Весь путь'+KR.icon('arrow',15)+'</a></div></div>';
-  return {h:h};
+  // данные для новых блоков кабинета ученика (js/cab-blocks.js)
+  var C=[window.COURSE0,window.COURSE3,window.COURSE,window.COURSE2,window.COURSE4].filter(Boolean),own=next&&C.filter(function(c){return c.lessons.some(function(l){return l.id===next.id})})[0];
+  var o={lang:'ko',pct:pct,name:(own||C[0]||{}).title||'Корейский язык',sub:n+' из '+t+' блоков пройдено',
+    stages:stages(real.map(function(l){return {name:l.tag||l.no+'과',done:KR.progress(l.id).pct>=100}})),hw:HW};
+  if(next){var np2=KR.progress(next.id);o.next={href:'lesson.html?l='+next.id,kicker:next.tag||next.no+'과',title:'<span class="ko">'+esc(next.title)+'</span>',plain:(next.tag||next.no+'과')+' · '+next.title,meta:np2.n+' из '+np2.tot+' блоков',pct:np2.pct}}
+  return {h:h,o:o};
+}
+// не больше восьми звёзд на пути: длинную программу собираем в главы
+function stages(a){
+  if(a.length<=8)return a;
+  var k=Math.ceil(a.length/6),out=[];
+  for(var i=0;i<a.length;i+=k){var g=a.slice(i,i+k);out.push({name:g.length>1?g[0].name+'–'+g[g.length-1].name:g[0].name,done:g.every(function(x){return x.done})})}
+  return out;
 }
 // сводка английского раздела: материалы программы, пройденное ученик отмечает сам
 function dashEn(){
@@ -61,7 +73,10 @@ function dashEn(){
     '<div class="stat"><div>'+num(items.length)+'<span class="muted">материалов назначено</span></div><div>'+num(n)+'<span class="muted">пройдено</span></div><div>'+num(vs.total)+'<span class="muted">слов в словаре</span></div></div></section>';
   if(next)h+='<a class="next card glass lessonlink" href="'+esc(next.path)+'">'+KR.ring(0,58,KR.icon('spark',18))+'<div class="mid"><span class="tag">Продолжить · '+esc((window.KINDS||{})[next.kind]||'')+'</span><h3>'+esc(next.title)+'</h3></div><span class="tile-go">'+KR.icon('arrow',18)+'</span></a>';
   h+='<div class="card glass"><h3>Программа</h3><p class="muted">Все материалы раздела собраны на странице курса: там же отмечается пройденное.</p><div class="done-row"><span></span><a class="btn" href="course.html">Весь путь'+KR.icon('arrow',15)+'</a></div></div>';
-  return {h:h};
+  var o={lang:'en',pct:pct,name:'English',sub:n+' из '+items.length+' материалов пройдено',
+    stages:stages(items.map(function(m){return {name:String(m.title).replace(/^IELTS[^·]*·\s*/,'').split(' · ')[0].slice(0,22),done:done.indexOf(m.id)>=0}})),hw:HW};
+  if(next)o.next={href:next.path,kicker:(window.KINDS||{})[next.kind]||'материал',title:esc(next.title),plain:next.title,meta:'материал программы',pct:null};
+  return {h:h,o:o};
 }
 function wordsCard(){return KR.cards.words()}
 function draw(){
@@ -71,9 +86,16 @@ function draw(){
   var h='';
   if(ctx.teacher)h+='<div class="card glass"><h3>Вы вошли как преподаватель</h3><p class="muted">Назначайте ученикам материалы и домашку и смотрите их прогресс.</p><a class="btn pri" href="teacher.html">Ученики и задания'+KR.icon('arrow',16)+'</a></div>';
   // ученик: сверху слова на сегодня, ниже домашка от преподавателя, потом курс
-  h+=wordsCard();   // словарь и отработка есть у каждого ученика, даже если курсы ещё не открыты
-  if(!ctx.teacher&&HW!==null)h+=hwCard();
-  h+=D.h;
+  if(!ctx.teacher&&D.o){
+    // ученик: новые блоки (продолжить, слова и домашка, путь, план, фраза дня); кольцо и «Прогресс по урокам» они заменяют
+    D.o.hw=HW;h+=KR.cab.html(D.o);
+    if(HW!==null)h+=hwCard();
+    h+=wordsCard();
+  }else{
+    h+=wordsCard();   // словарь и отработка есть у каждого ученика, даже если курсы ещё не открыты
+    if(!ctx.teacher&&HW!==null)h+=hwCard();
+    h+=D.h;
+  }
   if(!ctx.teacher&&(items.length||!KR.noCourses())){
     h+='<div class="card glass"><h3>'+KR.icon('pin',20)+'Назначено преподавателем</h3>'+(items.length?items.map(assignedRow).join(''):'<p class="muted">'+(ctx.ok?'В этом разделе пока ничего не назначено. Преподаватель откроет тебе задания, и они появятся здесь.':'Нет связи с сервером: задания не загружены.')+'</p>')+'</div>';
   }
@@ -97,6 +119,7 @@ document.addEventListener('click',function(e){
 });
 if(KR.vocab)KR.vocab.onchange=draw;
 if(KR.require()){
+  if(KR.cab)KR.cab.bind(document.getElementById('m'),draw);
   document.getElementById('who').textContent=KR.user();KR.topbar('cabinet');
   KR.load().then(draw).then(function(){return KR.ctx.teacher?null:KR.homework()}).then(function(l){if(l){HW=l;draw()}});
 }

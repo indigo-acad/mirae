@@ -124,7 +124,7 @@ function mount(cv,opts){
     gl.uniform1f(uFlat,opts.flat?1:0);mx+=(tx-mx)*.06;my+=(ty-my)*.06;gl.uniform2f(uM,mx,my);gl.uniform1f(uLive,paused&&!peek?0:1);   // на паузе падающие звёзды не «застывают» в кадре
     gl.drawArrays(gl.TRIANGLES,0,3);cv.classList.add("on");
   }
-  function running(){return !paused&&visible&&!lost&&!document.hidden}
+  function running(){return !paused&&visible&&!lost&&!document.hidden&&document.documentElement.getAttribute("data-theme")!=="day"}   // днём неба нет (css/style.css, тема «день»)
   function frame(now){
     raf=0;if(!running())return;
     if(now-last>=16){t+=Math.min(.1,(now-last)/1000);last=now;draw()}   // ~30 кадров в секунду достаточно
@@ -136,6 +136,7 @@ function mount(cv,opts){
   if("ResizeObserver" in window)new ResizeObserver(refresh).observe(cv);else window.addEventListener("resize",refresh);
   if("IntersectionObserver" in window)new IntersectionObserver(function(es){visible=es[es.length-1].isIntersecting;kick()}).observe(cv);
   document.addEventListener("visibilitychange",kick);
+  document.addEventListener("kr-theme",refresh);
   cv.addEventListener("webglcontextlost",function(e){e.preventDefault();lost=true});
   cv.addEventListener("webglcontextrestored",function(){lost=!init();refresh()});
   // курсор и прокрутка сдвигают слои звёзд (без «уменьшения движения»)
