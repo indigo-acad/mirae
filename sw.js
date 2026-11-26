@@ -2,7 +2,7 @@
    страницы — «сначала сеть» (свежая версия, без сети — сохранённая), остальное — из кэша с фоновым обновлением.
    Запросы к серверу (Supabase, озвучка, перевод) не кэшируются: прогресс без сети пишется на устройство (localStorage)
    и уходит в облако, когда связь вернётся (js/common.js, js/vocab.js). Поменять VER — сбросить старый кэш. */
-const VER = "mirae-v1";
+const VER = "mirae-v2";
 const CORE = ["./", "index.html", "auth.html", "cabinet.html", "course.html", "words.html", "lesson.html", "practice.html", "test.html", "css/style.css", "js/config.js", "js/common.js", "js/srs.js", "js/vocab.js", "js/lesson.js", "js/wtest.js"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VER).then(c => Promise.all(CORE.map(u => c.add(u).catch(() => null)))).then(() => self.skipWaiting()));

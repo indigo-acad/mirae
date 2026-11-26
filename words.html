@@ -28,7 +28,7 @@
   <section id="stats" hidden></section>
   <section id="prefs" hidden></section>
 </main>
-<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/wexport.js"></script><script src="js/vocab.js"></script><script src="js/words2.js"></script><script src="js/meaning.js"></script><script src="js/dict.js"></script><script src="js/ear.js"></script><script src="js/assistant.js"></script>
+<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/wexport.js"></script><script src="js/vocab.js"></script><script src="js/words2.js"></script><script src="js/meaning.js"></script><script src="js/dict.js"></script><script src="js/ear.js"></script><script src="js/assistant.js"></script><script src="js/lookup.js?v=2"></script>
 <script>
 /* Тренажёр слов. Расписание как в Anki (js/srs.js), игры взяты из тренажёра группы 2724:
    карточки, выбор перевода на слух, слово в предложении, письмо, сборка слова, поиск пары.
@@ -1005,39 +1005,58 @@ function badge(c){
   if(c.st===2)return '<span class="badge ok" title="Следующее повторение">'+(c.due<=Date.now()?'сегодня':SRS.span(c.due-Date.now()))+'</span>';
   return '<span class="badge warn">учу</span>';
 }
+var LF={all:['Все',function(){return true}],new:['Новые',function(c){return !c.st}],learn:['Учу',function(c){return c.st===1||c.st===3}],known:['Знаю',function(c){return c.st===2}],star:['Сложные',function(c){return c.star}]};
+/* результаты поиска и фильтра — отдельно от поля поиска: поле не перерисовывается,
+   поэтому корейский (и любой) ввод через IME не сбивается на середине слога */
+function listRes(all){
+  var F=LF,h='';
+  var qq=SRS.norm(q),rows=all.filter(F[filt][1]).filter(passV2).filter(function(c){return !qq||SRS.norm(c.w).indexOf(qq)>=0||SRS.norm(trOf(c)+' '+((info(c)||{}).tr_ru||[]).join(' ')+' '+(c.d||[]).map(function(x){return x.s}).join(' ')+' '+(c.syn||[]).join(' ')).indexOf(qq)>=0});
+  LISTROWS=rows.slice(0,200).map(function(c){return c.id});EXPROWS=rows;
+  if(rows.length&&KR.wexport)h+='<div class="done-row wexp-row"><span class="muted">'+(rows.length<all.length?'В списке '+rows.length+' из '+all.length+' (по фильтру)':'Все слова: '+all.length)+'</span><button type="button" data-x="export">'+KR.icon('abc',15)+' Скачать или скопировать</button></div>';
+  if(rows.length&&KR.canSay())h+='<div class="listen" id="listen">'+listenBar()+'</div>';
+  var nodq=all.filter(function(c){return !c.dq}).length;
+  if(KR.cloud.on&&nodq)h+='<div class="done-row"><span class="muted" id="dallmsg" role="status">Слов без статьи из словаря: '+nodq+'</span><button type="button" data-x="dict-all">'+KR.icon('book',15)+' Заполнить из словаря</button></div>';
+  h+=rows.length?'<div class="wl">'+rows.slice(0,shown).map(function(c){
+    if(editing===c.id)return '<form class="wrow wedit" data-id="'+esc(c.id)+'"><div class="mid">'+
+      '<span class="field">Слово</span><input class="name'+(c.l==='ko'?' ko':'')+'" name="w" lang="'+c.l+'" value="'+esc(c.w)+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false" required>'+
+      '<span class="field">Переводы по-русски</span><input class="name" name="t" value="'+esc(c.t)+'" placeholder="Несколько переводов — через «;»" aria-label="Переводы по-русски" maxlength="300">'+
+      '<span class="field">Определения и переводы на других языках</span><textarea class="name" name="d" rows="3" aria-label="Определения, по одному в строке" placeholder="'+(c.l==='ko'?'사람이 머무는 곳\nen: a place to stay':'a place where you live\nko: 사는 곳\nja: 住まい')+'">'+esc(M.fmtDefs(c.d))+'</textarea>'+
+      '<p class="hint">По одному в строке. Язык узнаётся по буквам; немецкий, французский и другие на латинице — напиши в начале «de:», «fr:».</p>'+
+      '<span class="field">Синонимы</span><input class="name'+(c.l==='ko'?' ko':'')+'" name="syn" lang="'+c.l+'" value="'+esc((c.syn||[]).join(', '))+'" placeholder="Через запятую" aria-label="Синонимы" maxlength="300">'+
+      '<span class="field">Устойчивые выражения</span><textarea class="name'+(c.l==='ko'?' ko':'')+'" name="col" lang="'+c.l+'" rows="2" aria-label="Устойчивые выражения, по одному в строке" placeholder="'+(c.l==='ko'?'결정을 내리다 | принять решение':'make a decision | принять решение')+'">'+esc(M.fmtCols(c.col))+'</textarea>'+
+      (KR.cloud.on?'<div class="done-row"><span class="muted" id="emsg" role="status"></span><button type="button" data-dfill="'+esc(c.id)+'">'+KR.icon('book',15)+' Заполнить из словаря</button></div>':'')+
+      '<span class="field">Пример</span><input class="name'+(c.l==='ko'?' ko':'')+'" name="ex" lang="'+c.l+'" value="'+esc(c.ex||'')+'" placeholder="Пример (по желанию)" aria-label="Пример" maxlength="240"><input class="name" name="et" value="'+esc(c.et||'')+'" placeholder="Перевод примера" aria-label="Перевод примера" maxlength="240"></div><div class="wact"><button type="submit" class="btn pri">Сохранить</button><button type="button" data-x="cancel">Отмена</button><button type="button" data-del="'+esc(c.id)+'">'+KR.icon('trash',15)+' Удалить</button></div></form>';
+    var I=info(c)||{},meta=[I.pos?KR.W2.POS[I.pos]:'',I.level].filter(Boolean).join(' · ');
+    return '<div class="wrow" data-id="'+esc(c.id)+'">'+sayBtn(c.w,c.l)+'<button type="button" class="mid wopen" data-open="'+esc(c.id)+'" aria-haspopup="dialog"><b>'+word(c)+'</b><span class="muted">'+esc(trOf(c)||'без перевода')+(meta?' · '+esc(meta):'')+'</span></button>'+badge(c)+
+      '<button type="button" class="icb'+(c.star?' on':'')+'" data-star="'+esc(c.id)+'" aria-pressed="'+(!!c.star)+'" aria-label="Сложное слово">'+KR.icon('star',17)+'</button><button type="button" class="icb" data-edit="'+esc(c.id)+'" aria-label="Изменить слово">'+KR.icon('pencil',16)+'</button></div>'}).join('')+'</div>'+
+    (rows.length>shown?'<div class="done-row"><span class="muted">Показано '+shown+' из '+rows.length+'</span><button type="button" data-x="more">Показать ещё</button></div>':'')
+    :'<p class="muted">Ничего не найдено.</p>'+(String(q||'').trim()&&KR.W2.langOf(q.trim())?'<div class="done-row"><span class="muted">Такого слова в словаре нет</span><button type="button" class="btn pri" data-x="qadd">'+KR.icon('plus',16)+' Перевести и добавить</button></div>':'');
+  return h;
+}
+function drawRes(){var r=$('#wres');if(!r)return drawList();r.innerHTML=listRes(V.all(DL()).sort(function(a,b){return (b.a||0)-(a.a||0)}))}
+/* слова нет в словаре — перевести то, что ищут, и подставить в «Добавить слово» */
+async function qAdd(){
+  var w=String(q||'').normalize('NFC').trim(),aw=$('#aw'),at=$('#at'),m=$('#amsg');if(!w||!aw)return;
+  aw.value=w;if(at)at.value='';if(m){m.textContent='Ищу перевод…';m.className='msg'}
+  aw.closest('.card').scrollIntoView({block:'center',behavior:'smooth'});
+  var l=KR.W2.langOf(w)||lang,r=null;try{r=KR.dict&&await KR.dict.translate(w,l)}catch(x){}
+  if(r&&r.t){if(at)at.value=r.t;if(m){m.textContent='Перевод: '+(KR.dict.SRC[r.src]||r.src)+'. Проверь и нажми «Добавить».';m.className='msg ok'}}
+  else if(m){m.textContent='Перевод не нашёлся — впиши его сам и нажми «Добавить».';m.className='msg bad'}
+  (at&&r&&r.t?aw:at||aw).focus();
+}
 function drawList(){
   var all=V.all(DL()).sort(function(a,b){return (b.a||0)-(a.a||0)}),G=KR.LANGS[lang];
-  var F={all:['Все',function(){return true}],new:['Новые',function(c){return !c.st}],learn:['Учу',function(c){return c.st===1||c.st===3}],known:['Знаю',function(c){return c.st===2}],star:['Сложные',function(c){return c.star}]};
+  var F=LF;
   var h='<div class="card glass"><h3>Добавить слово</h3><form id="addf" class="addw" autocomplete="off"><input class="name'+(lang==='ko'?' ko':'')+'" id="aw" lang="'+lang+'" placeholder="Слово: '+G.name+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false"><input class="name" id="at" placeholder="Перевод или определение" aria-label="Перевод или определение" maxlength="300"><button type="submit" class="btn pri">'+KR.icon('plus',16)+'Добавить</button></form><p class="msg" id="amsg" role="status"></p>'+
     '<p class="hint">Несколько значений — через «;». Подойдёт и определение на любом языке: «a place to live», «사는 곳». Синонимы и устойчивые выражения добавляются в карточке слова (карандаш). Слова попадают сюда из уроков, по выделению в тексте урока и от преподавателя. Если добавить слово, которое уже есть, оно вернётся на повторение раньше.</p></div>'+
     '<div class="card glass"><h3>Добавить список слов</h3><p class="hint">Корейские и английские слова можно вперемешку: по одному в строке, через запятую или парами «слово — перевод» (также «=», «:», Tab из Quizlet и Excel). Перевод может стоять и слева. Несколько значений — через «;», можно определение на любом языке. Пример: «слово — перевод | пример | перевод примера». Слова без перевода ищем в базе слов школы, потом в словаре (한국어기초사전, Free Dictionary), и только потом переводит DeepL.</p><textarea class="name" id="bulk-input" rows="5" maxlength="8000" placeholder="runny nose, sore throat\naccommodation — жильё\n식욕 — аппетит\n선생님" aria-label="Список слов"></textarea><div class="done-row"><span></span><button type="button" class="btn pri" data-x="bulk-translate">Разобрать и перевести</button></div><p class="msg" id="bulk-msg" role="status"></p><div id="bulk-preview"></div></div>';
   h=setsCard()+h;
   if(all.length){
     h+='<div class="card glass" id="wlist"><div class="opts">'+Object.keys(F).map(function(k){var n=all.filter(F[k][1]).length;return '<button type="button" data-f="'+k+'" class="'+(filt===k?'sel':'')+'" aria-pressed="'+(filt===k)+'">'+F[k][0]+' · '+n+'</button>'}).join('')+'</div>'+
-      '<input class="name" id="q" type="search" placeholder="Найти слово или перевод" aria-label="Поиск по словарю" value="'+esc(q)+'">'+selects(all);
-    var qq=SRS.norm(q),rows=all.filter(F[filt][1]).filter(passV2).filter(function(c){return !qq||SRS.norm(c.w).indexOf(qq)>=0||SRS.norm(trOf(c)+' '+((info(c)||{}).tr_ru||[]).join(' ')+' '+(c.d||[]).map(function(x){return x.s}).join(' ')+' '+(c.syn||[]).join(' ')).indexOf(qq)>=0});
-    LISTROWS=rows.slice(0,200).map(function(c){return c.id});EXPROWS=rows;
-    if(rows.length&&KR.wexport)h+='<div class="done-row wexp-row"><span class="muted">'+(rows.length<all.length?'В списке '+rows.length+' из '+all.length+' (по фильтру)':'Все слова: '+all.length)+'</span><button type="button" data-x="export">'+KR.icon('abc',15)+' Скачать или скопировать</button></div>';
-    if(rows.length&&KR.canSay())h+='<div class="listen" id="listen">'+listenBar()+'</div>';
-    var nodq=all.filter(function(c){return !c.dq}).length;
-    if(KR.cloud.on&&nodq)h+='<div class="done-row"><span class="muted" id="dallmsg" role="status">Слов без статьи из словаря: '+nodq+'</span><button type="button" data-x="dict-all">'+KR.icon('book',15)+' Заполнить из словаря</button></div>';
-    h+=rows.length?'<div class="wl">'+rows.slice(0,shown).map(function(c){
-      if(editing===c.id)return '<form class="wrow wedit" data-id="'+esc(c.id)+'"><div class="mid">'+
-        '<span class="field">Слово</span><input class="name'+(c.l==='ko'?' ko':'')+'" name="w" lang="'+c.l+'" value="'+esc(c.w)+'" aria-label="Слово" maxlength="80" autocapitalize="off" spellcheck="false" required>'+
-        '<span class="field">Переводы по-русски</span><input class="name" name="t" value="'+esc(c.t)+'" placeholder="Несколько переводов — через «;»" aria-label="Переводы по-русски" maxlength="300">'+
-        '<span class="field">Определения и переводы на других языках</span><textarea class="name" name="d" rows="3" aria-label="Определения, по одному в строке" placeholder="'+(c.l==='ko'?'사람이 머무는 곳\nen: a place to stay':'a place where you live\nko: 사는 곳\nja: 住まい')+'">'+esc(M.fmtDefs(c.d))+'</textarea>'+
-        '<p class="hint">По одному в строке. Язык узнаётся по буквам; немецкий, французский и другие на латинице — напиши в начале «de:», «fr:».</p>'+
-        '<span class="field">Синонимы</span><input class="name'+(c.l==='ko'?' ko':'')+'" name="syn" lang="'+c.l+'" value="'+esc((c.syn||[]).join(', '))+'" placeholder="Через запятую" aria-label="Синонимы" maxlength="300">'+
-        '<span class="field">Устойчивые выражения</span><textarea class="name'+(c.l==='ko'?' ko':'')+'" name="col" lang="'+c.l+'" rows="2" aria-label="Устойчивые выражения, по одному в строке" placeholder="'+(c.l==='ko'?'결정을 내리다 | принять решение':'make a decision | принять решение')+'">'+esc(M.fmtCols(c.col))+'</textarea>'+
-        (KR.cloud.on?'<div class="done-row"><span class="muted" id="emsg" role="status"></span><button type="button" data-dfill="'+esc(c.id)+'">'+KR.icon('book',15)+' Заполнить из словаря</button></div>':'')+
-        '<span class="field">Пример</span><input class="name'+(c.l==='ko'?' ko':'')+'" name="ex" lang="'+c.l+'" value="'+esc(c.ex||'')+'" placeholder="Пример (по желанию)" aria-label="Пример" maxlength="240"><input class="name" name="et" value="'+esc(c.et||'')+'" placeholder="Перевод примера" aria-label="Перевод примера" maxlength="240"></div><div class="wact"><button type="submit" class="btn pri">Сохранить</button><button type="button" data-x="cancel">Отмена</button><button type="button" data-del="'+esc(c.id)+'">'+KR.icon('trash',15)+' Удалить</button></div></form>';
-      var I=info(c)||{},meta=[I.pos?KR.W2.POS[I.pos]:'',I.level].filter(Boolean).join(' · ');
-      return '<div class="wrow" data-id="'+esc(c.id)+'">'+sayBtn(c.w,c.l)+'<button type="button" class="mid wopen" data-open="'+esc(c.id)+'" aria-haspopup="dialog"><b>'+word(c)+'</b><span class="muted">'+esc(trOf(c)||'без перевода')+(meta?' · '+esc(meta):'')+'</span></button>'+badge(c)+
-        '<button type="button" class="icb'+(c.star?' on':'')+'" data-star="'+esc(c.id)+'" aria-pressed="'+(!!c.star)+'" aria-label="Сложное слово">'+KR.icon('star',17)+'</button><button type="button" class="icb" data-edit="'+esc(c.id)+'" aria-label="Изменить слово">'+KR.icon('pencil',16)+'</button></div>'}).join('')+'</div>'+
-      (rows.length>shown?'<div class="done-row"><span class="muted">Показано '+shown+' из '+rows.length+'</span><button type="button" data-x="more">Показать ещё</button></div>':'')
-      :'<p class="muted">Ничего не найдено.</p>';
+      '<input class="name'+(lang==='ko'?' ko':'')+'" id="q" type="search" lang="'+lang+'" placeholder="Найти слово или перевод" aria-label="Поиск по словарю" value="'+esc(q)+'" autocomplete="off" autocapitalize="off" spellcheck="false">'+selects(all)+'<div id="wres">'+listRes(all)+'</div>';
     h+='</div>';
   }
+
   $('#list').innerHTML=h;
   if(POD&&POD.c&&!POD.end)markRow(POD.c.id);
 }
@@ -1288,6 +1307,7 @@ document.addEventListener('click',function(e){
   if(d.x==='cancel'){editing=null;return drawList()}
   if(d.del){if(confirm('Удалить слово из словаря? Его история повторений тоже удалится.')){V.remove(d.del);editing=null;drawAll()}return}
   if(d.x==='more'){shown+=60;return drawList()}
+  if(d.x==='qadd')return qAdd();
   if(d.x==='export'){var et=MIXL?'Мои слова':'Мои слова · '+KR.LANGS[lang].name;return KR.wexport.open(EXPROWS.map(function(c){return {l:c.l,w:c.w,t:trRu(c),ex:c.ex,et:c.et}}),{title:et,file:'moi-slova'+(MIXL?'':'-'+lang)})}
   if(d.x==='reset')return savePrefs(true);
   if(d.x==='voice')return KR.say(lang==='ko'?'안녕하세요! 같이 공부해요.':'Hello! Let’s learn together.',lang);
@@ -1323,7 +1343,7 @@ document.addEventListener('submit',function(e){
     if(S_DF[c.id]){if(S_DF[c.id].dsrc)c.dsrc=S_DF[c.id].dsrc;if(S_DF[c.id].ipa&&!c.ipa)c.ipa=S_DF[c.id].ipa;c.dq=1;delete S_DF[c.id]}if(!c.ex){delete c.ex;delete c.et;delete c.f}else if(c.f&&c.ex.indexOf(c.f)<0)delete c.f;V.update(c)}editing=null;drawAll()}
 });
 document.addEventListener('input',function(e){
-  if(e.target.id==='q'){q=e.target.value;shown=60;var pos=e.target.selectionStart;drawList();var n=$('#q');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}}}
+  if(e.target.id==='q'){q=e.target.value;shown=60;drawRes()}
   if(e.target.id==='p-rate'){KR.setRate(e.target.value);$('#p-ratev').textContent=(+e.target.value).toFixed(2)}
   if(e.target.id==='din')dictFill();
 });
@@ -1345,6 +1365,8 @@ document.addEventListener('toggle',function(e){var t=e.target;if(!t.dataset||!t.
 function typing(){var a=document.activeElement;return !!a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)}
 V.onchange=function(){if((wlang()!==lang||wmix()!==MIXL)&&!S){drawAll();return}   // слова пришли из облака: язык словаря мог смениться
   drawToday();if(!S&&!typing()&&!editing)drawList()};
+KR.lookupOff=function(){return !!S};   // во время занятия выделение не переводим — это была бы подсказка
+KR.onVocab=function(){drawToday();if(!S&&!typing()&&!editing)drawList()};
 KR.onLang=function(l){try{sessionStorage.setItem(wkey(),l)}catch(e){}stopListen();if(S)stop();else drawAll()};
 if(window.speechSynthesis)speechSynthesis.onvoiceschanged=function(){if(!$('#prefs').hidden&&!typing())drawPrefs()};
 if(KR.require()){KR.topbar('words');drawAll();KR.load().then(function(){

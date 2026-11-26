@@ -1,4 +1,4 @@
-/* MIRAÉ · перевод по выделению. Ученик выделяет слово или фразу в уроке: рядом всплывает перевод,
+/* MIRAÉ · перевод по выделению. Ученик выделяет слово или фразу в уроке, в словаре, в материале или тренажёре (фрейм того же сайта): рядом всплывает перевод,
    кнопка «послушать» и кнопка «В словарь» (слово попадает в интервальное повторение, js/vocab.js).
    Откуда берётся перевод, по порядку:
    1) слова уроков и словарь ученика (точно и сразу; у корейских слов узнаём основу: 지내지요 → 지내다);
@@ -60,10 +60,12 @@ async function online(text,from){
 // ---------- всплывающее окно ----------
 function close(){if(pop){pop.remove();pop=null}cur=null}
 function place(rect){
-  var w=pop.offsetWidth,vw=document.documentElement.clientWidth;
-  var left=Math.max(8,Math.min(vw-w-8,rect.left+rect.width/2-w/2))+window.scrollX;
-  var top=rect.bottom+window.scrollY+10;
-  if(rect.bottom+pop.offsetHeight+16>window.innerHeight&&rect.top>pop.offsetHeight+20)top=rect.top+window.scrollY-pop.offsetHeight-10;   // не помещается снизу — показываем сверху
+  var w=pop.offsetWidth,vw=document.documentElement.clientWidth,host=pop.parentNode,ox=window.scrollX,oy=window.scrollY;
+  // окно внутри открытого <dialog> (карточка слова): координаты считаем от самого диалога
+  if(host&&host!==document.body){var hr=host.getBoundingClientRect();ox=host.scrollLeft-hr.left;oy=host.scrollTop-hr.top}
+  var left=Math.max(8,Math.min(vw-w-8,rect.left+rect.width/2-w/2))+ox;
+  var top=rect.bottom+oy+10;
+  if(rect.bottom+pop.offsetHeight+16>window.innerHeight&&rect.top>pop.offsetHeight+20)top=rect.top+oy-pop.offsetHeight-10;   // не помещается снизу — показываем сверху
   pop.style.left=left+"px";pop.style.top=top+"px";
 }
 function render(){
@@ -90,7 +92,8 @@ async function show(text,lang,rect,node){
   close();var my=++seq;
   cur={text:text,lang:lang,state:"wait",ctx:context(node,text)};
   pop=document.createElement("div");pop.className="lookup glass frost";pop.setAttribute("role","dialog");pop.setAttribute("aria-label","Перевод");
-  document.body.appendChild(pop);
+  var el=node&&(node.nodeType===1?node:node.parentElement),dlg=el&&el.ownerDocument===document&&el.closest("dialog[open]");
+  (dlg||document.body).appendChild(pop);
   var l=local(text,lang);
   if(l){cur.state="ok";cur.t=l.t;cur.word=l.w;cur.form=!!l.form}
   render();place(rect);
@@ -100,21 +103,42 @@ async function show(text,lang,rect,node){
   if(r){cur.state="ok";cur.t=r.t;cur.mt=!!r.mt;cur.src=r.src||"";cur.entry=r.entry||null}else cur.state="none";
   render();place(rect);
 }
-function check(){
-  var s=window.getSelection();if(!s||s.isCollapsed||!s.rangeCount)return;
+/* doc — документ страницы или тренажёра во фрейме (material.html); frame — сам iframe, чтобы поставить окно рядом */
+function check(doc,frame){
+  doc=doc||document;
+  if(typeof KR.lookupOff==="function"&&KR.lookupOff())return;   // например, идёт занятие с карточками: перевод был бы подсказкой
+  var s=doc.getSelection&&doc.getSelection();if(!s||s.isCollapsed||!s.rangeCount)return;
   var node=s.anchorNode,el=node&&(node.nodeType===1?node:node.parentElement);
-  if(!el||!el.closest("main")||el.closest(".lookup,input,textarea,button,.subnav"))return;
+  if(!el||(!frame&&!el.closest("main,.wdlg,dialog"))||el.closest(".lookup,input,textarea,select,button,[contenteditable],.subnav,nav,#topbar"))return;
   var text=clean(s.toString());
   if(text.length<1||text.length>80||text.split(" ").length>8)return;
   var lang=langOf(text);if(!lang)return;
   if(cur&&cur.text===text)return;
-  var rect=s.getRangeAt(0).getBoundingClientRect();if(!rect.width&&!rect.height)return;
+  var r=s.getRangeAt(0).getBoundingClientRect();if(!r.width&&!r.height)return;
+  var rect={left:r.left,top:r.top,bottom:r.bottom,width:r.width,height:r.height};
+  if(frame){var f=frame.getBoundingClientRect();rect.left+=f.left;rect.top+=f.top;rect.bottom+=f.top}
   show(text,lang,rect,node);
 }
-document.addEventListener("selectionchange",function(){clearTimeout(timer);timer=setTimeout(check,450)});
-document.addEventListener("mouseup",function(e){if(e.target.closest&&e.target.closest(".lookup"))return;clearTimeout(timer);timer=setTimeout(check,60)});
-document.addEventListener("mousedown",function(e){if(pop&&!(e.target.closest&&e.target.closest(".lookup")))close()});
-document.addEventListener("keydown",function(e){if(e.key==="Escape")close()});
+function bind(doc,frame){
+  if(!doc||doc.__mlk)return;doc.__mlk=1;
+  var later=function(ms){clearTimeout(timer);timer=setTimeout(function(){check(doc,frame)},ms)};
+  doc.addEventListener("selectionchange",function(){later(450)});
+  doc.addEventListener("mouseup",function(e){if(e.target.closest&&e.target.closest(".lookup"))return;later(60)});
+  doc.addEventListener("touchend",function(e){if(e.target.closest&&e.target.closest(".lookup"))return;later(350)},{passive:true});
+  doc.addEventListener("mousedown",function(e){if(pop&&!(e.target.closest&&e.target.closest(".lookup")))close()});
+  doc.addEventListener("keydown",function(e){if(e.key==="Escape")close()});
+  if(frame)doc.addEventListener("scroll",close,{passive:true});
+}
+bind(document,null);
+/* тренажёры во фреймах (материалы того же сайта): выделение в них тоже переводится */
+function watch(fr){
+  if(!fr||fr.__mlkw)return;fr.__mlkw=1;
+  var hook=function(){try{var d=fr.contentDocument;if(d)bind(d,fr)}catch(e){}};   // чужой сайт во фрейме — не трогаем
+  fr.addEventListener("load",hook);hook();
+}
+function scan(){document.querySelectorAll("iframe").forEach(watch)}
+scan();
+if(window.MutationObserver)new MutationObserver(scan).observe(document.documentElement,{childList:true,subtree:true});
 document.addEventListener("click",function(e){
   var b=e.target.closest&&e.target.closest("[data-lk]");if(!b||!cur)return;var a=b.getAttribute("data-lk");
   if(a==="x")return close();
@@ -128,5 +152,5 @@ document.addEventListener("click",function(e){
     if(typeof KR.onVocab==="function")KR.onVocab();
   }
 });
-KR.lookup={close:close,local:local};
+KR.lookup={close:close,local:local,watch:watch};
 })();
