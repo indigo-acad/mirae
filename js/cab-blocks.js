@@ -73,7 +73,7 @@ function nextCard(o){
     '<span class="cb-go">'+(n.pct?"Продолжить":"Начать")+KR.icon("arrow",17)+"</span></span></a>";
 }
 function wordsHw(o,W,HW){
-  var h='<section class="cb-wh card glass" aria-label="Слова и домашка"><div class="cb-h"><h3>Слова и <em>домашка</em></h3><a href="words.html">Словарь</a></div>';
+  var h='<section class="cb-wh card glass" aria-label="Слова и домашка"><div class="cb-h"><h3>Слова и домашка</h3><a href="words.html">Словарь</a></div>';
   if(W&&W.total){
     var per=Math.max(1,Math.ceil(W.total/15)),nL=Math.round(W.L/per),nW=Math.round(W.W/per),nN=Math.max(0,Math.min(15,Math.ceil(W.total/per))-nL-nW),ic="";
     for(var i=0;i<nL;i++)ic+=bloom("l");for(i=0;i<nW;i++)ic+=bloom("w");for(i=0;i<nN;i++)ic+=bloom("n");
@@ -147,7 +147,7 @@ function plan(o,W,HW){
   var wl=days.map(function(d){return '<div class="cb-day'+(d.today?" now":"")+'"><div class="cb-dn"><b>'+d.n+'</b><span>'+d.d+'</span></div><div class="cb-chips">'+
     (d.it.length?d.it.map(function(t){return '<span class="'+(t.done?"ok":"")+'"><i class="cb-dot k-'+t.k+'"></i>'+esc(t.t)+"</span>"}).join(""):'<span class="cb-none">—</span>')+
     '</div><b class="cb-dc">'+(d.it.length?d.it.filter(function(t){return t.done}).length+" из "+d.it.length:"")+"</b></div>"}).join("");
-  return '<section class="cb-plan card glass" aria-label="План"><div class="cb-h"><h3><em>Мой</em> план</h3>'+(s?'<span class="cb-streak">'+mark("done",16)+s+" "+plural(s,"день","дня","дней")+" подряд</span>":"")+
+  return '<section class="cb-plan card glass" aria-label="План"><div class="cb-h"><h3>Мой план</h3>'+(s?'<span class="cb-streak">'+mark("done",16)+s+" "+plural(s,"день","дня","дней")+" подряд</span>":"")+
     '<div class="cb-seg" role="group" aria-label="Период"><button type="button" data-cbp="day" aria-pressed="'+(view.period==="day")+'">Сегодня</button><button type="button" data-cbp="week" aria-pressed="'+(view.period==="week")+'">Неделя</button></div></div>'+
     week+'<p class="muted cb-cnt"><b>'+(view.period==="day"?dn:wd)+"</b> из "+(view.period==="day"?tasks.length:wt)+(view.period==="day"?" на сегодня":" за неделю")+"</p>"+
     (view.period==="day"?'<div class="cb-tasks">'+(list||'<p class="muted">На сегодня дел нет.</p>')+"</div>":'<div class="cb-days">'+wl+"</div>")+
@@ -159,7 +159,7 @@ function side(o,W){
     '<p class="cb-ph" lang="'+o.lang+'">'+esc(ph[0])+"</p>"+(view.tr?'<p class="cb-pt">'+esc(ph[1])+"</p>":"")+
     '<button type="button" data-cbtr>'+(view.tr?"Скрыть перевод":"Показать перевод")+"</button></section>";
   if(W&&W.hard.length){
-    h+='<section class="cb-hard card glass" aria-label="Сложные слова"><div class="cb-h"><h3>Сложные <em>слова</em></h3><a href="words.html">Повторить</a></div>'+
+    h+='<section class="cb-hard card glass" aria-label="Сложные слова"><div class="cb-h"><h3>Сложные слова</h3><a href="words.html">Повторить</a></div>'+
       W.hard.map(function(x){return '<div class="cb-hw-row"><b lang="'+o.lang+'">'+esc(x.w)+"</b><span>"+esc(x.t)+"</span><em>"+x.e+" "+plural(x.e,"ошибка","ошибки","ошибок")+"</em></div>"}).join("")+"</section>";
   }
   return h;

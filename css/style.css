@@ -1765,5 +1765,3 @@ html[data-theme=day] .cb-phrase button{color:#E6CDA3;border-color:rgba(212,175,1
 .cb-row a:hover{text-decoration:underline}
 #hw{scroll-margin-top:84px}
 
-/* кабинет: в заголовках блоков одно слово кистью, как в заголовках главной */
-.cb-h h3 em{font-family:var(--font-ru-art);font-style:normal;font-weight:400;font-size:1.32em;line-height:.8;color:var(--gold-hi-t,var(--gold-hi,var(--gold)))}
