@@ -420,9 +420,8 @@ function dayfx(){
   const still=calm()||LS("kr_sky")==="off";
   if(d){d.classList.toggle("still",still);return}
   d=document.createElement("div");d.className="dayfx"+(still?" still":"");d.setAttribute("aria-hidden","true");
-  const cloud=w=>'<svg viewBox="0 0 160 60" width="'+w+'"><path d="M18 46c-10 0-14-10-6-15 0-10 12-14 19-8 4-11 22-13 28-2 8-9 26-6 27 7 10-2 18 4 16 12 9 1 10 12 0 12H18z"/><path class="cl" d="M44 36c4-6 12-6 15 0M86 34c3-5 10-5 13 0"/></svg>';
-  let h='<i class="rays"></i>';
-  [[6,170,150,-20],[24,120,190,-110],[46,200,230,-60]].forEach(c=>{h+='<b class="cld" style="top:'+c[0]+'%;animation-duration:'+c[2]+'s;animation-delay:'+c[3]+'s">'+cloud(c[1])+"</b>"});
+  // рассветное небо: три слоя мягкого света медленно перетекают; поверх — лучи солнца и лепестки
+  let h='<i class="dawn d1"></i><i class="dawn d2"></i><i class="dawn d3"></i><i class="rays"></i>';
   for(let i=0;i<14;i++){const L=(i*37+11)%96+2,dur=16+(i*7)%12,dl=-((i*5)%26),dx=[-120,-70,60,110][i%4];
     h+='<span class="pt" style="left:'+L+'%;animation-duration:'+dur+'s;animation-delay:'+dl+'s;--dx:'+dx+'px"><i style="animation-delay:'+(-(i%3))+'s"></i></span>'}
   d.innerHTML=h;document.body.appendChild(d);

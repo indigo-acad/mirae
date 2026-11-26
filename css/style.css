@@ -1546,20 +1546,15 @@ html[data-theme=day] .sky-toggle{background:rgba(253,249,241,.85)}
 .dayfx .rays{position:absolute;right:-700px;top:-700px;width:1400px;height:1400px;border-radius:50%;
   background:repeating-conic-gradient(from 0deg,rgba(255,226,170,.28) 0deg 6deg,rgba(255,226,170,0) 6deg 18deg);
   -webkit-mask:radial-gradient(circle,#000 0 25%,transparent 68%);mask:radial-gradient(circle,#000 0 25%,transparent 68%);animation:rayspin 240s linear infinite}
-.dayfx .cld{position:absolute;left:0;animation:cloudgo linear infinite}
-.dayfx .cld svg{display:block;height:auto}
-.dayfx .cld path{fill:rgba(255,250,240,.7);stroke:#D4AF7C;stroke-width:1.2}
-.dayfx .cld path.cl{fill:none;stroke-width:1}
 .dayfx .pt{position:absolute;top:-4%;z-index:2;animation:petal linear infinite}
 .dayfx .pt i{display:block;width:15px;height:10px;border-radius:85% 0 85% 0;background:linear-gradient(135deg,#FBD3C4,#EBA08E);opacity:.8;animation:sway 3.2s ease-in-out infinite alternate}
-.dayfx.still .rays,.dayfx.still .cld{animation:none}
+.dayfx.still .rays,.dayfx.still .dawn{animation:none}
 .dayfx.still .pt{display:none}
 @keyframes rayspin{to{transform:rotate(360deg)}}
-@keyframes cloudgo{from{transform:translateX(-30vw)}to{transform:translateX(130vw)}}
 @keyframes petal{from{top:-4%;transform:translateX(0)}to{top:104%;transform:translateX(var(--dx))}}
 @keyframes sway{from{transform:rotate(-35deg) translateX(-10px)}to{transform:rotate(45deg) translateX(10px)}}
 @media (prefers-reduced-motion:reduce){
-  .dayfx .rays,.dayfx .cld{animation:none}.dayfx .pt{display:none}
+  .dayfx .rays,.dayfx .dawn{animation:none}.dayfx .pt{display:none}
   html[data-theme=day].m-school .hero-in::before,html[data-theme=day] .hero-title .wm-ko{animation:none}
 }
 
@@ -1824,7 +1819,16 @@ html[data-theme=day]:not([data-lang]) .cb-hello{--hero2:url(../img/hero-ko-day.w
 @media(max-width:640px){.px-empty{grid-template-columns:1fr;gap:12px;padding:20px}.px-empty img{max-width:200px;margin:0 auto}}
 /* телефон: облака не ложатся на заголовки (лучи и лепестки остаются), заголовок страницы не упирается в край */
 @media(max-width:640px){
-  .dayfx .cld{display:none}
   header.band h1:not(.ko){font-size:clamp(28px,8.4vw,38px);line-height:1.1}
   header.band p{font-size:16px}
 }
+
+/* рассветное небо днём: персиковый, розовый, лавандовый и золотой свет медленно дышат и перетекают (вместо облаков) */
+.dayfx .dawn{position:absolute;border-radius:50%;filter:blur(40px);opacity:.75;will-change:transform,opacity}
+.dayfx .d1{width:75vmax;height:60vmax;left:-20vmax;top:-22vmax;background:radial-gradient(closest-side,rgba(251,196,160,.85),rgba(251,196,160,0));animation:dawn1 38s ease-in-out infinite alternate}
+.dayfx .d2{width:70vmax;height:55vmax;right:-22vmax;top:-12vmax;background:radial-gradient(closest-side,rgba(246,180,196,.7),rgba(246,180,196,0));animation:dawn2 46s ease-in-out infinite alternate}
+.dayfx .d3{width:80vmax;height:50vmax;left:10vmax;bottom:-26vmax;background:radial-gradient(closest-side,rgba(200,196,236,.6),rgba(246,214,142,.35) 55%,rgba(246,214,142,0));animation:dawn3 54s ease-in-out infinite alternate}
+@keyframes dawn1{0%{transform:translate(0,0) scale(1);opacity:.6}50%{opacity:.9}100%{transform:translate(18vw,10vh) scale(1.18);opacity:.7}}
+@keyframes dawn2{0%{transform:translate(0,0) scale(1.1);opacity:.75}50%{opacity:.5}100%{transform:translate(-16vw,14vh) scale(.95);opacity:.85}}
+@keyframes dawn3{0%{transform:translate(0,0) scale(1);opacity:.55}50%{opacity:.85}100%{transform:translate(-10vw,-14vh) scale(1.15);opacity:.6}}
+@media(max-width:640px){.dayfx .dawn{filter:blur(28px)}}
