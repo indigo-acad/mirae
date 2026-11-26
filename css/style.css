@@ -1805,3 +1805,20 @@ html[data-theme=day] .cb-hello::after{background:linear-gradient(90deg,#FCF6EC 3
   .cb-htx{padding:18px 20px 20px}
   .cb-tiles{gap:12px}
 }
+/* кабинет: пустые состояния — шкала и слова видны всегда, только ещё не зажжены */
+.cb-n{display:inline}.cb-d{display:none}
+html[data-theme=day] .cb-n{display:none}html[data-theme=day] .cb-d{display:inline}
+.cb-pnone{margin:10px 0 0;font-size:14px;color:var(--fg-2);text-align:center}
+.cb-empty .cb-sun b{color:var(--fg-2)}
+/* ученик без открытого языка: картинка школы по умолчанию */
+html:not([data-lang]) .cb-hello{--hero2:url(../img/hero-ko.webp)}
+html[data-theme=day]:not([data-lang]) .cb-hello{--hero2:url(../img/hero-ko-day.webp)}
+@media(max-width:719px){html:not([data-lang]) .cb-hello{--hero2:url(../img/hero-ko-sm.webp)}html[data-theme=day]:not([data-lang]) .cb-hello{--hero2:url(../img/hero-ko-day-sm.webp)}}
+/* пустая страница упражнений: рисунок, что здесь будет, и куда пойти сейчас */
+.px-empty{display:grid;grid-template-columns:minmax(0,220px) 1fr;gap:24px;align-items:center;padding:26px}
+.px-empty img{width:100%;height:auto}
+.px-empty h3{margin:8px 0 6px;font-size:26px}
+.px-kinds{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+.px-kinds span{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--fill);border:1px solid var(--rule);font-size:13px;color:var(--fg-2)}
+.px-kinds svg{color:var(--gold-t,var(--gold))}
+@media(max-width:640px){.px-empty{grid-template-columns:1fr;gap:12px;padding:20px}.px-empty img{max-width:200px;margin:0 auto}}

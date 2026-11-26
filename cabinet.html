@@ -81,7 +81,7 @@ function dashEn(){
 function wordsCard(){return KR.cards.words()}
 function draw(){
   KR.topbar('cabinet');
-  var ctx=KR.ctx,lang=KR.lang(),D=KR.noCourses()?{h:KR.noCoursesCard(),hw:[]}:lang==='en'?dashEn():dashKo();
+  var ctx=KR.ctx,lang=KR.lang(),D=KR.noCourses()?{h:KR.noCoursesCard(),hw:[],o:{lang:KR.lang()||'ko',pct:0,name:'',sub:'',stages:[],hw:HW}}:lang==='en'?dashEn():dashKo();
   var items=(ctx.items||[]).filter(function(a){if(/^(lesson|practice)-/.test(a.id))return false;var l=KR.langOf(a.id);return !l||l===lang});
   var h='';
   if(ctx.teacher)h+='<div class="card glass"><h3>Вы вошли как преподаватель</h3><p class="muted">Назначайте ученикам материалы и домашку и смотрите их прогресс.</p><a class="btn pri" href="teacher.html">Ученики и задания'+KR.icon('arrow',16)+'</a></div>';
