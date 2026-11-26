@@ -1514,7 +1514,7 @@ html[data-theme=day].m-school[data-lang=en] .hero-art{--scene:url(../img/scene-e
   html[data-theme=day].m-school[data-lang=en] .hero-art{--scene:url(../img/scene-en-day-ns-sm.webp)}
 }
 html[data-theme=day] .sky{display:none}
-html[data-theme=day] .hero::before{background:radial-gradient(70% 40% at 50% 30%,rgba(246,194,122,.35),rgba(246,194,122,0) 70%),linear-gradient(180deg,#F5E7D2 0%,#F7EEE0 40%,#ECEDE4 74%,#E2EAE7 100%)}
+html[data-theme=day] .hero::before{background:radial-gradient(60% 42% at 50% 30%,rgba(252,240,222,.85),rgba(252,240,222,.4) 60%,rgba(252,240,222,0) 85%),linear-gradient(180deg,rgba(247,238,224,.45) 0%,rgba(247,238,224,.2) 50%,rgba(247,238,224,.5) 100%)}
 html[data-theme=day].m-school .hero-in::before{content:"";position:absolute;z-index:-1;left:50%;top:0;width:min(420px,80vw);aspect-ratio:1;transform:translate(-50%,-25%);border-radius:50%;pointer-events:none;
   background:radial-gradient(circle,rgba(247,180,120,.45) 0 34%,rgba(246,194,122,.25) 35% 46%,rgba(246,194,122,0) 47%),
     repeating-conic-gradient(from 0deg,rgba(227,166,92,.35) 0deg 1.4deg,rgba(227,166,92,0) 1.4deg 7.5deg);
@@ -1548,13 +1548,13 @@ html[data-theme=day] .sky-toggle{background:rgba(253,249,241,.85)}
   -webkit-mask:radial-gradient(circle,#000 0 25%,transparent 68%);mask:radial-gradient(circle,#000 0 25%,transparent 68%);animation:rayspin 240s linear infinite}
 .dayfx .pt{position:absolute;top:-4%;z-index:2;animation:petal linear infinite}
 .dayfx .pt i{display:block;width:15px;height:10px;border-radius:85% 0 85% 0;background:linear-gradient(135deg,#FBD3C4,#EBA08E);opacity:.8;animation:sway 3.2s ease-in-out infinite alternate}
-.dayfx.still .rays,.dayfx.still .dawn{animation:none}
+.dayfx.still .rays{animation:none}
 .dayfx.still .pt{display:none}
 @keyframes rayspin{to{transform:rotate(360deg)}}
 @keyframes petal{from{top:-4%;transform:translateX(0)}to{top:104%;transform:translateX(var(--dx))}}
 @keyframes sway{from{transform:rotate(-35deg) translateX(-10px)}to{transform:rotate(45deg) translateX(10px)}}
 @media (prefers-reduced-motion:reduce){
-  .dayfx .rays,.dayfx .dawn{animation:none}.dayfx .pt{display:none}
+  .dayfx .rays{animation:none}.dayfx .pt{display:none}
   html[data-theme=day].m-school .hero-in::before,html[data-theme=day] .hero-title .wm-ko{animation:none}
 }
 
@@ -1721,7 +1721,7 @@ html[data-theme=day] .k-c{background:#1E2A56}html[data-theme=day] .k-h{backgroun
 .cb-ph:lang(ko){font-family:var(--font-ko-art);font-weight:400;font-size:30px;letter-spacing:-.08em;word-spacing:.3em;line-height:1.3}.cb-ph:lang(en){font-family:var(--font-en-art);font-weight:400;font-size:28px;line-height:1.25}
 .cb-pt{margin:0 0 4px;color:var(--fg-2)}
 .cb-phrase [data-cbtr]{margin-top:10px}
-html[data-theme=day] .cb-phrase{--fg:#F4ECDD;--fg-2:#CEC5B3;--title:#F4ECDD;--rule:rgba(212,175,124,.35);--fill:rgba(255,255,255,.06);background:url(../img/seigaiha.svg) 0 100%/44px 22px repeat-x,#1E2A56;padding-bottom:34px}
+html[data-theme=day] .cb-phrase,html[data-theme=day] .cb-phrase.glass{--fg:#F4ECDD;--fg-2:#CEC5B3;--title:#F4ECDD;--rule:rgba(212,175,124,.35);--fill:rgba(255,255,255,.06);background:url(../img/seigaiha.svg) 0 100%/44px 22px repeat-x,#1E2A56;padding-bottom:34px}
 html[data-theme=day] .cb-phrase .cb-k{color:#D4AF7C}
 html[data-theme=day] .cb-phrase button{color:#E6CDA3;border-color:rgba(212,175,124,.5);background:transparent}
 .cb-hw-row{display:flex;align-items:center;gap:10px;min-height:48px;border-top:1px solid var(--rule)}
@@ -1823,12 +1823,21 @@ html[data-theme=day]:not([data-lang]) .cb-hello{--hero2:url(../img/hero-ko-day.w
   header.band p{font-size:16px}
 }
 
-/* рассветное небо днём: персиковый, розовый, лавандовый и золотой свет медленно дышат и перетекают (вместо облаков) */
-.dayfx .dawn{position:absolute;border-radius:50%;filter:blur(40px);opacity:.75;will-change:transform,opacity}
-.dayfx .d1{width:75vmax;height:60vmax;left:-20vmax;top:-22vmax;background:radial-gradient(closest-side,rgba(251,196,160,.85),rgba(251,196,160,0));animation:dawn1 38s ease-in-out infinite alternate}
-.dayfx .d2{width:70vmax;height:55vmax;right:-22vmax;top:-12vmax;background:radial-gradient(closest-side,rgba(246,180,196,.7),rgba(246,180,196,0));animation:dawn2 46s ease-in-out infinite alternate}
-.dayfx .d3{width:80vmax;height:50vmax;left:10vmax;bottom:-26vmax;background:radial-gradient(closest-side,rgba(200,196,236,.6),rgba(246,214,142,.35) 55%,rgba(246,214,142,0));animation:dawn3 54s ease-in-out infinite alternate}
-@keyframes dawn1{0%{transform:translate(0,0) scale(1);opacity:.6}50%{opacity:.9}100%{transform:translate(18vw,10vh) scale(1.18);opacity:.7}}
-@keyframes dawn2{0%{transform:translate(0,0) scale(1.1);opacity:.75}50%{opacity:.5}100%{transform:translate(-16vw,14vh) scale(.95);opacity:.85}}
-@keyframes dawn3{0%{transform:translate(0,0) scale(1);opacity:.55}50%{opacity:.85}100%{transform:translate(-10vw,-14vh) scale(1.15);opacity:.6}}
-@media(max-width:640px){.dayfx .dawn{filter:blur(28px)}}
+/* рассветное небо днём: живописные разводы в духе гравюры медленно плывут, поверх лёгкая кремовая вуаль для читаемости */
+.dayfx .marble{position:absolute;inset:-8%;background:url(../img/sky-day.webp) 50% 50%/cover no-repeat;animation:skydrift 120s ease-in-out infinite alternate;will-change:transform}
+.dayfx .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(251,244,232,.28),rgba(251,244,232,.5) 55%,rgba(251,244,232,.62))}
+.dayfx .rays{opacity:.55}
+@keyframes skydrift{0%{transform:translate(-3%,-2%) scale(1.02)}50%{transform:translate(2%,1%) scale(1.07)}100%{transform:translate(3%,-1%) scale(1.04)}}
+@media(max-width:719px){.dayfx .marble{background-image:url(../img/sky-day-sm.webp)}}
+.dayfx.still .marble{animation:none}
+@media (prefers-reduced-motion:reduce){.dayfx .marble{animation:none}}
+
+/* карточки днём — запотевшее стекло: разводы неба просвечивают сквозь лёгкую матовую дымку */
+html[data-theme=day] .glass{background:linear-gradient(180deg,rgba(255,252,246,.62),rgba(253,247,238,.5));
+  -webkit-backdrop-filter:blur(16px) saturate(1.15);backdrop-filter:blur(16px) saturate(1.15);
+  box-shadow:0 1px 0 rgba(255,255,255,.75) inset,0 0 0 1px rgba(255,255,255,.35) inset,0 18px 40px -28px rgba(120,70,60,.35)}
+html[data-theme=day] .cb-hello::after{background:linear-gradient(90deg,rgba(252,246,236,.92) 30%,rgba(252,246,236,.55) 50%,rgba(252,246,236,0) 72%)}
+html[data-theme=day] .cb-tip{background:rgba(255,252,246,.55);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){html[data-theme=day] .glass{background:linear-gradient(180deg,rgba(253,249,241,.94),rgba(251,245,234,.92))}}
+.cb-hello .cb-hart{-webkit-mask-image:linear-gradient(90deg,transparent,#000 38%);mask-image:linear-gradient(90deg,transparent,#000 38%)}
+@media(max-width:640px){.cb-hello .cb-hart{-webkit-mask-image:linear-gradient(180deg,#000 70%,transparent);mask-image:linear-gradient(180deg,#000 70%,transparent)}}

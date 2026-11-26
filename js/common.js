@@ -420,8 +420,8 @@ function dayfx(){
   const still=calm()||LS("kr_sky")==="off";
   if(d){d.classList.toggle("still",still);return}
   d=document.createElement("div");d.className="dayfx"+(still?" still":"");d.setAttribute("aria-hidden","true");
-  // рассветное небо: три слоя мягкого света медленно перетекают; поверх — лучи солнца и лепестки
-  let h='<i class="dawn d1"></i><i class="dawn d2"></i><i class="dawn d3"></i><i class="rays"></i>';
+  // рассветное небо: живописные разводы (img/sky-day*.webp) медленно плывут; поверх — мягкий свет солнца и лепестки
+  let h='<i class="marble"></i><i class="veil"></i><i class="rays"></i>';
   for(let i=0;i<14;i++){const L=(i*37+11)%96+2,dur=16+(i*7)%12,dl=-((i*5)%26),dx=[-120,-70,60,110][i%4];
     h+='<span class="pt" style="left:'+L+'%;animation-duration:'+dur+'s;animation-delay:'+dl+'s;--dx:'+dx+'px"><i style="animation-delay:'+(-(i%3))+'s"></i></span>'}
   d.innerHTML=h;document.body.appendChild(d);
