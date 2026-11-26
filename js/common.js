@@ -6,6 +6,15 @@ const CFG=window.CONFIG||{};
 const U=()=>localStorage.getItem("kr_user");
 const J=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k)||"");return v==null?d:v}catch(e){return d}};
 const LS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){}return null};
+/* Тема оформления: «ночь» (по умолчанию) или «день». Выбор хранится на устройстве (kr_theme) и ставится
+   атрибутом <html data-theme="day">, все дневные правила — в конце css/style.css. */
+const theme=()=>LS("kr_theme")==="day"?"day":"night";
+function applyTheme(){
+  const t=theme(),el=document.documentElement;
+  if(t==="day")el.setAttribute("data-theme","day");else el.removeAttribute("data-theme");
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t==="day"?"#F7F0E3":"#0B1535");
+}
+applyTheme();
 const setStatus=s=>{try{sessionStorage.setItem("kr_cloud",s)}catch(e){}};
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const calm=()=>{try{return matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false}};
@@ -259,6 +268,9 @@ function unlockAudio(){
 
 // ---------- иконки: контурные, одного семейства (вместо эмодзи) ----------
 const IC={
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+  cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-6 8-6s7 1.5 8 6"/>',
   users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
   book:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
@@ -363,21 +375,69 @@ function langSwitch(){
 }
 function tabbar(active){
   let el=document.querySelector(".tabbar");const u=U();
-  if(!u){if(el)el.remove();document.body.classList.remove("has-tabs");return}
+  if(!u){if(el)el.remove();document.body.classList.remove("has-tabs");rail(active);return}
   if(!el){el=document.createElement("nav");el.className="tabbar";el.setAttribute("aria-label","Разделы");document.body.appendChild(el)}
   const cx=J("kr_ctx:"+u,null)||{};
   const t=(h,ic,tx,k)=>'<a href="'+h+'"'+(active===k?' class="on" aria-current="page"':"")+">"+icon(ic,22)+"<span>"+tx+"</span></a>";
   el.innerHTML=t("course.html","book","Курс","course")+t("words.html","abc","Слова","words")+t("practice.html","repeat","Упражнения","practice")+
-    (cx.teacher?t("teacher.html","users","Ученики","teacher"):"")+t("cabinet.html","user","Кабинет","cabinet");
+    (stories()?t("story.html","chat","Истории","story"):"")+(cx.teacher?t("teacher.html","users","Ученики","teacher"):"")+t("cabinet.html","user","Кабинет","cabinet");
+  el.classList.toggle("six",el.children.length>5);
   document.body.classList.add("has-tabs");
+  rail(active);
+}
+// «Истории» — сюжетные диалоги на корейском: в меню, если открыт корейский раздел (у преподавателя — всегда)
+function stories(){const c=window.KR&&window.KR.ctx,x=(c&&c.langs)||(J("kr_ctx:"+U(),null)||{}).langs||[];return !!(c&&c.teacher)||(J("kr_ctx:"+U(),null)||{}).teacher||x.indexOf("ko")>=0}
+/* Боковая полоса разделов на компьютере (шире 900px): разделы переезжают из шапки в узкую полосу слева,
+   в шапке остаются логотип, тема, язык и кабинет. На телефоне — нижняя панель (tabbar). */
+function rail(active){
+  let el=document.querySelector(".rail");const u=U();
+  if(!u){if(el)el.remove();document.body.classList.remove("has-rail");return}
+  if(!el){el=document.createElement("nav");el.className="rail";el.setAttribute("aria-label","Разделы сайта");document.body.appendChild(el)}
+  const cx=J("kr_ctx:"+u,null)||{};
+  const r=(h,ic,tx,k)=>'<a href="'+h+'" data-tip="'+tx+'" aria-label="'+tx+'"'+(active===k?' class="on" aria-current="page"':"")+">"+icon(ic,22)+"</a>";
+  el.innerHTML='<a class="rail-logo" href="index.html" aria-label="MIRAÉ, на главную" data-tip="Главная"><i class="emb" aria-hidden="true"></i></a>'+
+    r("index.html","home","Главная","home")+r("course.html","book","Курс","course")+r("words.html","abc","Слова","words")+r("practice.html","repeat","Упражнения","practice")+
+    (stories()?r("story.html","chat","Истории","story"):"")+
+    (cx.teacher?'<i class="rail-sep" aria-hidden="true"></i>'+r("teacher.html","users","Ученики","teacher")+r("library.html","cards","Библиотека","library"):"")+
+    '<i class="rail-sep" aria-hidden="true"></i>'+r("cabinet.html","user","Кабинет","cabinet");
+  document.body.classList.add("has-rail");
 }
 // падающие звёзды за страницей; на главной и на входе их рисует js/sky.js, там этот слой не нужен
 function shooting(){
-  if(document.querySelector(".shoot")||document.querySelector("canvas.sky")||calm()||LS("kr_sky")==="off")return;
+  const off=theme()==="day"||calm()||LS("kr_sky")==="off";
+  const ex=document.querySelector(".shoot");if(off){if(ex)ex.remove();return}
+  if(ex||document.querySelector("canvas.sky"))return;
   const d=document.createElement("div");d.className="shoot";d.setAttribute("aria-hidden","true");
   d.innerHTML='<i style="--x:72%;--y:6%;--d:9s;--w:1.5s"></i><i style="--x:36%;--y:13%;--d:13s;--w:5s"></i><i style="--x:96%;--y:30%;--d:17s;--w:9s"></i>';
   document.body.appendChild(d);
 }
+
+/* Дневной фон (пара к ночному звездопаду): медленные солнечные лучи из угла, облака с золотым контуром
+   и падающие лепестки. Включается только днём; «уменьшение движения» и кнопка паузы фона (kr_sky) его выключают. */
+function dayfx(){
+  let d=document.querySelector(".dayfx");
+  if(theme()!=="day"){if(d)d.remove();return}
+  const still=calm()||LS("kr_sky")==="off";
+  if(d){d.classList.toggle("still",still);return}
+  d=document.createElement("div");d.className="dayfx"+(still?" still":"");d.setAttribute("aria-hidden","true");
+  const cloud=w=>'<svg viewBox="0 0 160 60" width="'+w+'"><path d="M18 46c-10 0-14-10-6-15 0-10 12-14 19-8 4-11 22-13 28-2 8-9 26-6 27 7 10-2 18 4 16 12 9 1 10 12 0 12H18z"/><path class="cl" d="M44 36c4-6 12-6 15 0M86 34c3-5 10-5 13 0"/></svg>';
+  let h='<i class="rays"></i>';
+  [[6,170,150,-20],[24,120,190,-110],[46,200,230,-60]].forEach(c=>{h+='<b class="cld" style="top:'+c[0]+'%;animation-duration:'+c[2]+'s;animation-delay:'+c[3]+'s">'+cloud(c[1])+"</b>"});
+  for(let i=0;i<14;i++){const L=(i*37+11)%96+2,dur=16+(i*7)%12,dl=-((i*5)%26),dx=[-120,-70,60,110][i%4];
+    h+='<span class="pt" style="left:'+L+'%;animation-duration:'+dur+'s;animation-delay:'+dl+'s;--dx:'+dx+'px"><i style="animation-delay:'+(-(i%3))+'s"></i></span>'}
+  d.innerHTML=h;document.body.appendChild(d);
+}
+function setTheme(t){
+  LS("kr_theme",t==="day"?"day":null);applyTheme();shooting();dayfx();
+  document.querySelectorAll("[data-theme-set]").forEach(b=>b.setAttribute("aria-pressed",String(b.getAttribute("data-theme-set")===theme())));
+  try{document.dispatchEvent(new CustomEvent("kr-theme",{detail:theme()}))}catch(e){}
+}
+function themeSwitch(){
+  const t=theme();
+  return '<div class="theme-t" role="group" aria-label="Тема оформления"><button type="button" data-theme-set="day" aria-pressed="'+(t==="day")+'" aria-label="Дневная тема" title="День">'+icon("sun",17)+'</button><button type="button" data-theme-set="night" aria-pressed="'+(t!=="day")+'" aria-label="Ночная тема" title="Ночь">'+icon("moon",16)+"</button></div>";
+}
+// нажатие на уже выбранную тему переключает на другую: на телефоне видна только одна кнопка
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-theme-set]");if(!b)return;const t=b.getAttribute("data-theme-set");setTheme(b.getAttribute("aria-pressed")==="true"?(t==="day"?"night":"day"):t)});
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-lang-set]");if(b)window.KR.setLang(b.getAttribute("data-lang-set"))});
 // пока ученик печатает ответ, нижняя панель не должна вставать над клавиатурой
 const typing=e=>{const t=e.target;return t&&(t.tagName==="TEXTAREA"||(t.tagName==="INPUT"&&!/^(checkbox|radio|range|button|submit)$/.test(t.type)))};
@@ -485,7 +545,7 @@ window.KR={
     let h;
     if(!u){
       h='<div class="top guest">'+logo+'<nav aria-label="Разделы сайта">'+a("index.html#langs","Языки","")+a("index.html#how","Как учим","")+a("index.html#start","Как начать","")+"</nav>"+
-        '<div class="top-r">'+acc+"</div></div>";
+        '<div class="top-r">'+themeSwitch()+acc+"</div></div>";
     }else{
       const l=curLang(),cx=J("kr_ctx:"+u,null)||{},tl=cx.teacher?a("teacher.html","Ученики","teacher")+a("library.html","Библиотека","library"):"";
       if(l){
@@ -493,15 +553,16 @@ window.KR={
         h='<div class="top user school"><a class="logo brand" href="index.html" aria-label="MIRAÉ, школа: '+L.tag+', на главную"><i class="emb" aria-hidden="true"></i>'+
           '<span class="wm"><b lang="'+l+'">'+L.wm+'</b><small>MIRAÉ · '+L.tag+'</small></span></a>'+
           '<nav aria-label="Разделы сайта">'+a("course.html",icon("book",17)+"Курс","course")+a("words.html",icon("cards",17)+"Слова","words")+a("practice.html",icon("pencil",17)+'<span class="xs-hide">Доп.&nbsp;</span>упражнения',"practice")+(cx.teacher?a("teacher.html",icon("users",17)+"Ученики","teacher")+a("library.html",icon("cards",17)+"Библиотека","library"):"")+"</nav>"+
-          '<div class="top-r">'+langSwitch()+acc+"</div></div>";
+          '<div class="top-r">'+themeSwitch()+langSwitch()+acc+"</div></div>";
       }else{
-        h='<div class="top user">'+logo+"<nav aria-label=\"Разделы сайта\">"+a("words.html",icon("cards",17)+"Слова","words")+a("practice.html",icon("pencil",17)+'<span class="xs-hide">Доп.&nbsp;</span>упражнения',"practice")+tl+"</nav><div class=\"top-r\">"+acc+"</div></div>";
+        h='<div class="top user">'+logo+"<nav aria-label=\"Разделы сайта\">"+a("words.html",icon("cards",17)+"Слова","words")+a("practice.html",icon("pencil",17)+'<span class="xs-hide">Доп.&nbsp;</span>упражнения',"practice")+tl+"</nav><div class=\"top-r\">"+themeSwitch()+acc+"</div></div>";
       }
     }
     el.innerHTML=h;
-    tabbar(active);shooting();onScroll();topfx();
+    tabbar(active);shooting();dayfx();onScroll();topfx();
   },
-  esc,icon,icons,emo,bar,ring,count,reveal,calm
+  esc,icon,icons,emo,bar,ring,count,reveal,calm,
+  theme,setTheme,fx(){shooting();dayfx()}
 };
 if(hasTTS())try{speechSynthesis.getVoices()}catch(e){}   // голоса подгружаются не сразу: просим список заранее
 icons();

@@ -166,6 +166,6 @@
       try { recognition.start(); } catch (error) { button.disabled = false; note.textContent = "Не удалось запустить микрофон. Проверь разрешение браузера или ответь текстом."; }
     });
   }
-  if (window.KR) { KR.topbar("home"); if (KR.user()) KR.load().then(render).catch(render); else render(); }
+  if (window.KR) { KR.topbar("story"); if (KR.user()) KR.load().then(render).catch(render); else render(); }
   initSpeech(); window.addEventListener("pageshow", render);
 })();
