@@ -47,8 +47,7 @@ var GAME={cards:['Карточки','вспомни перевод и оцени
 GAME.rcards=['Обратная карточка','видишь перевод, вспомни слово и оцени себя сам'];
 /* Тип карточек, как в Anki: выбирается перед тренировкой (отработка и «по выбору»). mix — как раньше, игры из настроек */
 var CT={mix:['Вперемешку','игры, отмеченные в настройках'],basic:['Слово → перевод','карточка: вспомни перевод, открой, оцени'],
-  rev:['Перевод → слово','обратная карточка: по переводу вспомни слово'],both:['В обе стороны','слово то прямой, то обратной карточкой'],
-  type:['Ввести ответ','печатаешь слово по переводу или перевод по слову'],cloze:['Пропуск в предложении','слова без примера придут обычной карточкой']};
+  rev:['Перевод → слово','обратная карточка: по переводу вспомни слово'],both:['В обе стороны','слово то прямой, то обратной карточкой']};
 function ctNow(){return S&&S.exmix?'mix':ctype()}
 function ctype(){var v='';try{v=localStorage.getItem('kr_ct')||''}catch(e){}return CT[v]?v:'mix'}
 function setCt(k){try{localStorage.setItem('kr_ct',k)}catch(e){}drawToday();if($('#ctcfg'))drawPrefs();var b=$('#ctcfg [data-ct="'+k+'"]')||$('[data-ct="'+k+'"]');if(b)b.focus()}
@@ -308,9 +307,6 @@ function choose(c,d){
     if(ct==='basic')return 'cards';
     if(ct==='rev')return 'rcards';
     if(ct==='both'){S.flipN=(S.flipN||0)+1;return S.flipN%2?'cards':'rcards'}
-    if(ct==='type'){var ty=['wr','mean'].filter(function(g){return f.indexOf(g)>=0});
-      if(ty.length>1&&ty.indexOf(S.lastGame)>=0)ty=ty.filter(function(g){return g!==S.lastGame});return ty.length?ty[Math.floor(Math.random()*ty.length)]:'cards'}
-    if(ct==='cloze')return f.indexOf('ctx')>=0?'ctx':'cards';
   }
   // сначала узнавание (в том числе на слух), потом вспоминание: написать, сказать вслух, записать на слух
   var pref=(c.st===1||c.st===3)?['tr','hear','mean','ctx','build','dict','cards','wr']:(c.ivl||0)<7?['ctx','mean','dict','tr','say','hear','build','wr','cards']:['wr','say','mean','dict','build','ctx','tr','cards'];
