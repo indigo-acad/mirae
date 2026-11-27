@@ -512,8 +512,16 @@ let typingOff=0;
 document.addEventListener("focusin",e=>{if(typing(e)){clearTimeout(typingOff);document.body.classList.add("typing")}});
 document.addEventListener("focusout",e=>{if(typing(e)){clearTimeout(typingOff);typingOff=setTimeout(()=>document.body.classList.remove("typing"),400)}});
 
+/* Пометка «в России может не работать»: распознавание речи в Chrome и Edge идёт через серверы Google и Microsoft,
+   из России оно бывает недоступно. Видят ученики с часовым поясом России и всегда — преподаватели (чтобы знали). */
+const RU_TZ=/^(Europe\/(Moscow|Kaliningrad|Samara|Volgograd|Kirov|Astrakhan|Saratov|Ulyanovsk|Simferopol)|Asia\/(Yekaterinburg|Omsk|Novosibirsk|Barnaul|Tomsk|Novokuznetsk|Krasnoyarsk|Irkutsk|Chita|Yakutsk|Khandyga|Vladivostok|Ust-Nera|Magadan|Sakhalin|Srednekolymsk|Kamchatka|Anadyr))$/;
+function inRu(){try{return RU_TZ.test(Intl.DateTimeFormat().resolvedOptions().timeZone||"")}catch(e){return false}}
+const RUN_T={mic:"Распознавание речи в Chrome и Edge работает через серверы Google и Microsoft — из России оно может быть недоступно. Если микрофон не отвечает, ответь текстом: на оценку это не влияет."};
+function ruNote(k){const t=window.KR&&window.KR.ctx&&window.KR.ctx.teacher;if(!inRu()&&!t)return "";
+  return '<p class="ru-note">'+icon("alert",14)+(t&&!inRu()?"Для учеников из России: ":"")+esc(RUN_T[k]||k)+'</p>'}
 window.KR={
   user:U,
+  inRu,ruNote,
   users:()=>J("kr_users",{}),
   cloud,
   status:()=>{try{return sessionStorage.getItem("kr_cloud")||""}catch(e){return ""}},

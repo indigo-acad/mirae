@@ -164,7 +164,7 @@ function promptHtml(q){
   if(q.k==="ctc")return '<div class="wt-p wt-ctx"><span'+wcls(q.w.ex)+'>'+esc(q.before)+'<b class="wt-blank">＿＿＿</b>'+esc(q.after)+'</span></div>'+(q.w.et?'<p class="muted wt-et">'+esc(q.w.et)+'</p>':'');
   if(q.k==="fl"){var u=unitsOf(q.w.w);return '<div class="wt-p wt-tr">'+esc(q.w.t)+'</div><div class="wt-cells'+(isKo(q.w.w)?' ko':'')+'" aria-label="Первая буква '+esc(u[0])+', всего '+u.length+'">'+u.map(function(c,i){return '<i>'+(i===0?esc(c):'')+'</i>'}).join("")+'</div>'}
   if(q.k==="bld")return '<div class="wt-p wt-tr">'+esc(q.w.t)+'</div><div class="wt-cells'+(isKo(q.w.w)?' ko':'')+'" id="wtslots">'+q.tiles.map(function(c,i){return '<i>'+(q.pick[i]!=null?esc(q.tiles[q.pick[i]]):'')+'</i>'}).join("")+'</div>';
-  if(q.k==="say")return '<div class="wt-p wt-tr">'+esc(q.w.t)+'</div><p class="muted wt-et">Скажи '+(isKo(q.w.w)?'по-корейски':'по-английски')+(isKo(q.w.w)?' · слогов: '+unitsOf(q.w.w).length:'')+'</p>';
+  if(q.k==="say")return '<div class="wt-p wt-tr">'+esc(q.w.t)+'</div><p class="muted wt-et">Скажи '+(isKo(q.w.w)?'по-корейски':'по-английски')+(isKo(q.w.w)?' · слогов: '+unitsOf(q.w.w).length:'')+'</p>'+(KR.ruNote?KR.ruNote('mic'):'');
   if(q.k==="mch")return '';
   return '<div class="wt-p wt-tr">'+esc(q.w.t)+'</div>';
 }

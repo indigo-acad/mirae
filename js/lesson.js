@@ -279,6 +279,7 @@ function block(b){
       b.prompts.map((q,i)=>`<div class="ex wr"><label class="q ko" for="wr-${b._key}-${i}">${esc(q)}</label>`+
         (b.hints&&b.hints[i]?`<details class="wr-hint"><summary>${ic("spark",14)} Подсказка</summary><div>${esc(b.hints[i]).replace(/\n/g,"<br>")}</div></details>`:"")+
         `<textarea class="wr-in ko" id="wr-${b._key}-${i}" data-wb="${b._key}" data-i="${i}" rows="${b.rows||2}" placeholder="${esc(b.ph||(vo?"Скажи в микрофон или напиши…":"한국어로 쓰세요…"))}" spellcheck="false">${esc(v[i]||"")}</textarea>`+
+        (vo&&i===0&&window.KR&&KR.ruNote?KR.ruNote("mic"):"")+
         (vo?`<div class="vrow"><button type="button" class="btn vbtn" data-vrec="${b._key}" data-i="${i}">${ic("mic",16)} Сказать</button><span class="vtm muted" id="vt-${b._key}-${i}"></span></div><div class="vres" id="vr-${b._key}-${i}" aria-live="polite">${voiceRes(b._key,i)}</div>`:"")+
         (b.model&&b.model[i]?`<details class="wr-model"${sv?"":" hidden"}><summary>Образец ответа</summary><p class="ko">${esc(b.model[i])}</p></details>`:"")+`</div>`).join("")+
       `<div class="done-row"><span class="muted" id="sc-${b._key}"></span><button type="button" class="pri" data-wsave="${b._key}">${sv?"Сохранено ✓":vo?"Сохранить и отправить":"Сохранить ответы"}</button></div>`;
@@ -286,7 +287,7 @@ function block(b){
     const p=P[b._key]||{},v=p.v||{},role=p.role||"",can=window.KR&&KR.ear&&KR.ear.canHear();
     h+=`<p class="muted">${esc(b.instr||"Послушай реплику, нажми микрофон и прочитай её вслух.")}</p>`+
       (b.roles?`<div class="seg sp-roles" role="group" aria-label="Роль">${b.roles.map(r=>`<button type="button" data-spr="${b._key}" data-r="${esc(r)}" aria-pressed="${role===r}" class="${role===r?"on":""}">Я — ${esc(r)}</button>`).join("")}<button type="button" data-spr="${b._key}" data-r="" aria-pressed="${!role}" class="${role?"":"on"}">Все реплики</button></div>`:"")+
-      (can?"":`<p class="note">Проверка произношения работает в Chrome, Edge и Safari с микрофоном. Здесь можно послушать и прочитать вслух самостоятельно.</p>`)+
+      (can&&KR.ruNote?KR.ruNote("mic"):"")+(can?"":`<p class="note">Проверка произношения работает в Chrome, Edge и Safari с микрофоном. Здесь можно послушать и прочитать вслух самостоятельно.</p>`)+
       b.lines.map((l,i)=>{const mine=!role||l[0]===role,r=v[i];
         return `<div class="line sp${mine?"":" sp-other"}"><span class="sp ko">${esc(l[0])}</span><div><div class="kolg ko">${esc(l[1])} ${sayBtn(l[1])}${mine&&can?`<button type="button" class="say mic" data-spm="${b._key}" data-i="${i}" title="Прочитать вслух" aria-label="Прочитать вслух">${ic("mic",16)}</button>`:""}</div>${l[2]?`<div class="ru">${esc(l[2])}</div>`:""}<div class="micfb ${r?r.c:""}" id="sp-${b._key}-${i}" aria-live="polite">${r?esc(r.m):""}</div></div></div>`}).join("")+
       `<div class="done-row"><span class="score" id="sc-${b._key}"></span>${b.rec&&can?`<button type="button" data-vsend="${b._key}">${ic("send",15)} Отправить записи</button>`:""}<button data-done="${b._key}">${doneLabel(!!p.done)}</button></div>`;

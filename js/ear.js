@@ -149,7 +149,8 @@ function recognize(lang,opt){
 function stopHear(){try{if(cur)cur.abort()}catch(e){}cur=null}
 var ERR={"not-allowed":"Нет доступа к микрофону. Разреши его в настройках браузера (значок замка у адреса сайта).","service-not-allowed":"Браузер не дал распознавать речь. Попробуй Chrome или Safari.",
   "no-speech":"Ничего не услышали. Нажми и скажи слово чуть громче.","audio-capture":"Микрофон не найден.","network":"Для распознавания речи нужен интернет.","unsupported":"В этом браузере нет распознавания речи. Подойдут Chrome, Edge или Safari.","start":"Микрофон занят. Попробуй ещё раз через секунду.","aborted":""};
-function errText(e){var k=e&&e.error||"";return k in ERR?ERR[k]:"Не получилось распознать. Попробуй ещё раз."}
+function errText(e){var k=e&&e.error||"",t=k in ERR?ERR[k]:"Не получилось распознать. Попробуй ещё раз.";
+  if(t&&/network|service-not-allowed|error/.test(k)&&KR.inRu&&KR.inRu())t+=" Из России распознавание речи может быть недоступно — ответь текстом.";return t}
 
 KR.ear={jamo:jamo,clean:clean,lev:lev,sim:sim,heard:heard,koVariants:koVariants,enVariants:enVariants,alikes:alikes,
   cells:cells,typed:typed,check:check,hint:hint,count:count,canHear:canHear,recognize:recognize,stop:stopHear,errText:errText};
