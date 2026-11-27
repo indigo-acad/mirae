@@ -173,6 +173,41 @@ function train(c,g,S,now){
   if(g>1)return null;
   var n=practice(c,false,S,now);return n?{c:n,k:"back"}:null;
 }
+/* Тренировка без карточек («Тренировать») и любые упражнения вместо карточек: ученик не оценивает себя сам,
+   оценку ставит упражнение (gameGrade). Правила, по порядку:
+   1. Исход упражнения: ошибка — «Снова»; верно с подсказкой, с опечаткой, со второй попытки или после «послушать» — «Трудно»;
+      верно сразу — «Хорошо».
+   2. Вид упражнения. Вспоминание (RECALL: написать слово, сказать вслух, объяснить значение, карточки) — полноценная проверка.
+      Узнавание (выбрать перевод, слово в предложении, на слух, пара, собрать слово, диктант) — слабее: правильный вариант
+      можно угадать или узнать «по виду».
+   3. Время на ответ (x.ms — от показа задания до ответа). Долго думал — «Трудно»: вспоминание дольше 30 с, узнавание дольше 20 с.
+      Быстро и без ошибок — «Легко», но только для вспоминания, только слову в повторении (не новому и не изучаемому) и только
+      если в этом занятии в нём не ошибались (x.clean): написать — за 4 с + 0,5 с на букву или слог, сказать — за 5 с,
+      объяснить значение — за 6 с + 0,3 с на знак.
+   4. Шаги изучения (1 мин → 10 мин → 1 день) те же, что в карточках, но в повторение слово выходит только после
+      вспоминания: верное узнавание на последнем шаге — «Трудно», шаг повторяется.
+   5. Слово с интервалом от недели: верное узнавание растит интервал медленно (×1.2) и не снижает лёгкость.
+   Возвращает {g: итоговая оценка 1–4, why: почему (для подписи ученику)}. */
+var RECALL=["wr","say","mean","cards","rcards"];
+var FAST={wr:[4000,500],say:[5000,0],mean:[6000,300]};
+function gameGrade(c,gm,g,S,x){
+  x=x||{};var st=c.st||0,rc=RECALL.indexOf(gm)>=0,ms=+x.ms||0,why="";g=Math.min(3,Math.max(1,g));
+  if(g===1)return {g:1,why:"ошибка"};
+  if(g===2)why="с подсказкой или со второй попытки";
+  if(g===3&&ms&&ms>(rc?30000:20000)){g=2;why="ответ после долгого раздумья"}
+  if(g===3&&rc&&st===2&&x.clean!==false&&FAST[gm]&&ms&&ms<=FAST[gm][0]+FAST[gm][1]*(+x.len||0)&&!c.sh)return {g:4,why:"быстро и без подсказок"};
+  if(!rc&&g===3&&st!==2&&st!==0){var C=cfg(S),steps=st===3?C.relearn:C.steps,i=Math.min(c.step||0,steps.length-1);
+    if(i+1>=steps.length)return {g:2,why:"узнал(а); чтобы слово перешло в повторение, его нужно вспомнить"}}
+  if(!rc&&g===3&&st===2&&(c.ivl||0)>=7)return {g:3,soft:1,why:"узнал(а) — интервал растёт медленнее, чем за вспоминание"};
+  return {g:g,why:why};
+}
+function game(c,gm,g,S,now,x){
+  var r=gameGrade(c,gm,g,S,x);
+  if(!r.soft)return next(c,r.g,S,now);
+  var n=next(c,2,S,now);n.ef=c.ef||cfg(S).ease;return n;   // зрелое слово, узнавание: как «Трудно», но лёгкость не снижается
+}
+/* слово на последнем шаге изучения: следующий верный ответ (вспоминание) выпустит его в повторение */
+function lastStep(c,S){var st=c.st||0;if(st!==1&&st!==3)return false;var C=cfg(S),steps=st===3?C.relearn:C.steps;return Math.min(c.step||0,steps.length-1)+1>=steps.length}
 /* Учитель (или сам ученик) решил, когда слово показать снова: today — сегодня, заново, как после «Снова»; tom — завтра.
    Ошибки в упражнениях в этот день слово больше не сдвигают (pm). */
 function send(c,when,S,now){
@@ -226,7 +261,7 @@ function plan(cards,S,now,revDone,extra){
 }
 /* Следующая карточка: сначала то, что учим прямо сейчас, потом повторения, потом новые, потом ближайшие шаги. */
 function pick(p){return p.learn[0]||p.rev[0]||p.fresh[0]||p.soon[0]||null}
-root.SRS={DEF:DEF,GAMES:GAMES,MIN:MIN,DAY:DAY,cfg:cfg,norm:norm,id:makeId,make:make,next:next,bump:bump,practice:practice,train:train,send:send,clean:clean,fuzz:fuzz,
+root.SRS={DEF:DEF,GAMES:GAMES,MIN:MIN,DAY:DAY,cfg:cfg,norm:norm,id:makeId,make:make,next:next,bump:bump,practice:practice,train:train,game:game,gameGrade:gameGrade,lastStep:lastStep,RECALL:RECALL,send:send,clean:clean,fuzz:fuzz,
   rnd:Math.random,   /* источник случайности для разброса; в проверках можно подменить */
   isDue:isDue,inScope:inScope,SCOPES:SCOPES,label:label,span:span,plan:plan,pick:pick,dayStart:dayStart};
 })(typeof window!=="undefined"?window:globalThis);

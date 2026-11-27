@@ -19,5 +19,8 @@ window.CONFIG = {
   // Тот же бот, что у материалов сайта (materials/…/index.html).
   TG_TOKEN: "9252730022:AAGhfn1DzR05foOHV6zFiTirJlRqSoUCgTU",
   TG_CHAT_ID: "347625701",
-  TTS_URL: "https://nusfkwtmnbhnbnckhrfk.supabase.co/functions/v1/tts"
+  TTS_URL: "https://nusfkwtmnbhnbnckhrfk.supabase.co/functions/v1/tts",
+  // Генерация текстов и заданий для «Слова» → «Практика» (функция supabase/functions/gen, секрет OPENAI_API_KEY).
+  // Пусто — берётся SUPABASE_URL + /functions/v1/gen.
+  GEN_URL: ""
 };

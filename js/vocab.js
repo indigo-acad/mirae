@@ -104,10 +104,11 @@ var V={
   },
   star:function(id){var c=D.w[id];if(!c)return null;c=Object.assign({},c,{u:Date.now()});if(c.star)delete c.star;else{c.star=1;c=SRS.bump(c,Date.now())}put(c);return c},
   remove:function(id){delete D.w[id];delete D.d[id];D.x[id]=1;save();push()},
-  answer:function(id,grade){
+  /* game — код игры: тогда оценку ставит игра по правилам тренировки без карточек (SRS.game) */
+  answer:function(id,grade,game,x){
     var c=D.w[id];if(!c)return null;var now=Date.now(),wasNew=!c.st;
     if(c.st===2){var ds=SRS.dayStart(now);D.rv=D.rv&&D.rv.d===ds?{d:ds,n:D.rv.n+1}:{d:ds,n:1}}
-    mark(id,grade>1);c=SRS.next(c,grade,D.s,now);put(c);logAnswer(wasNew,grade>=3,now);return c;
+    mark(id,grade>1);c=game?SRS.game(c,game,grade,D.s,now,x):SRS.next(c,grade,D.s,now);put(c);logAnswer(wasNew,grade>=3,now);return c;
   },
   /* Ответ в упражнении вне тренажёра (см. SRS.practice). res: {id карточки: верно ли}; если слово было в двух заданиях
      и в одном из них ошибка, передавайте false. Возвращает {back: вернулись на повторение, done: засчитаны как повторение}. */

@@ -512,8 +512,13 @@ let typingOff=0;
 document.addEventListener("focusin",e=>{if(typing(e)){clearTimeout(typingOff);document.body.classList.add("typing")}});
 document.addEventListener("focusout",e=>{if(typing(e)){clearTimeout(typingOff);typingOff=setTimeout(()=>document.body.classList.remove("typing"),400)}});
 
+/* Часовой пояс России: там распознавание речи браузера (Chrome и Edge — через Google и Microsoft) бывает недоступно,
+   поэтому речь сразу распознаёт наш сервер (js/ear.js, функция stt). */
+const RU_TZ=/^(Europe\/(Moscow|Kaliningrad|Samara|Volgograd|Kirov|Astrakhan|Saratov|Ulyanovsk|Simferopol)|Asia\/(Yekaterinburg|Omsk|Novosibirsk|Barnaul|Tomsk|Novokuznetsk|Krasnoyarsk|Irkutsk|Chita|Yakutsk|Khandyga|Vladivostok|Ust-Nera|Magadan|Sakhalin|Srednekolymsk|Kamchatka|Anadyr))$/;
+function inRu(){try{return RU_TZ.test(Intl.DateTimeFormat().resolvedOptions().timeZone||"")}catch(e){return false}}
 window.KR={
   user:U,
+  inRu,
   users:()=>J("kr_users",{}),
   cloud,
   status:()=>{try{return sessionStorage.getItem("kr_cloud")||""}catch(e){return ""}},

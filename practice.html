@@ -12,9 +12,16 @@
 </head>
 <body>
 <div id="topbar"></div>
-<header class="band"><div class="in"><small>Отработка</small><h1>Доп. упражнения</h1><p>Тренажёры, игры, проверочные и квесты, которые назначил преподаватель</p></div></header>
-<main><div id="box"></div></main>
-<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/l10-banmal.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/q2a-yuki.js"></script><script src="data/r2a-review2.js"></script><script src="data/sw5-l4.js"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/assistant.js"></script>
+<header class="band"><div class="in"><small>Отработка</small><h1>Упражнения</h1><p>Своя практика по словам и уровню, а ещё тренажёры, игры и квесты от преподавателя</p></div></header>
+<main>
+  <div class="seg wtabs" id="ptabs" role="tablist" aria-label="Упражнения">
+    <button type="button" role="tab" data-pt="lab" aria-selected="true">Практика</button>
+    <button type="button" role="tab" data-pt="box" aria-selected="false">От преподавателя</button>
+  </div>
+  <section id="lab" class="card glass lab" aria-labelledby="lab-h"></section>
+  <div id="box" hidden></div>
+</main>
+<script src="data/course.js"></script><script src="data/materials.js"></script><script src="data/hangul.js"></script><script src="data/clt-a1.js"></script><script src="data/l12-jiyo.js"></script><script src="data/l11-adaju.js"></script><script src="data/l10-banmal.js"></script><script src="data/v2-invite.js?v=1"></script><script src="data/q2a-yuki.js"></script><script src="data/r2a-review2.js"></script><script src="data/sw5-l4.js"></script><script src="data/l3-pidong.js?v=3"></script><script src="data/p12-jiyo-1.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/vocab.js"></script><script src="js/meaning.js"></script><script src="js/ear.js"></script><script src="js/assistant.js"></script>
 <script>
 var cur='all',esc=KR.esc;
 function draw(){
@@ -40,8 +47,17 @@ function draw(){
   document.getElementById('box').innerHTML=h;
 }
 document.addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(b){cur=b.dataset.f;draw()}});
-KR.onLang=draw;
-if(KR.require()){KR.topbar('practice');KR.load().then(draw)}
+/* вкладки: «Практика» (js/wlab.js) и «От преподавателя». Открывается «Практика»; practice.html#mats — материалы преподавателя */
+var TAB=location.hash==='#mats'||new URLSearchParams(location.search).get('l')?'box':'lab';
+function setTab(t){TAB=t;[].forEach.call(document.querySelectorAll('#ptabs [data-pt]'),function(b){b.setAttribute('aria-selected',String(b.dataset.pt===t))});
+  document.getElementById('lab').hidden=t!=='lab';document.getElementById('box').hidden=t!=='box';
+  try{history.replaceState(null,'',location.pathname+(t==='box'?'#mats':'#lab'))}catch(e){}}
+document.addEventListener('click',function(e){var b=e.target.closest('#ptabs [data-pt]');if(b)setTab(b.dataset.pt)});
+setTab(TAB);
+KR.onLang=function(){draw();if(KR.lab)KR.lab.draw()};
+KR.onVocab=function(){if(KR.lab)KR.lab.draw()};
+if(KR.require()){KR.topbar('practice');KR.load().then(function(){draw();if(KR.lab)KR.lab.draw()})}
 </script>
+<script src="js/wlab.js"></script>
 </body>
 </html>
