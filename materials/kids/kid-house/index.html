@@ -24,6 +24,14 @@
   .modes .btn { flex: 1 1 230px; max-width: 290px; }
   .note { font-size: 14px; opacity: .75; text-align: center; max-width: 640px; }
   .bigfox { font-size: clamp(80px, 18vw, 140px); line-height: 1; animation: bob 2s ease-in-out infinite; }
+  img.ai { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; -webkit-user-drag: none; }
+  img.ai.hero { width: clamp(150px, 30vw, 240px); height: auto; }
+  img.ai.mini { display: inline-block; width: 1.15em; height: 1.15em; margin: 0 -.05em; }
+  .fox { width: clamp(64px, 12vw, 104px); height: clamp(64px, 12vw, 104px); }
+  .pick .em { width: clamp(78px, 17vw, 140px); height: clamp(78px, 17vw, 140px); }
+  .win img.ai { width: 92%; height: 92%; }
+  .door img.ai { width: 86%; height: 86%; }
+  #winPic img.ai.mini { width: .62em; height: .62em; }
 
   .top { width: 100%; margin-top: 30px; display: flex; justify-content: space-between; align-items: center; gap: 10px; z-index: 5; }
   .iconbtn { border: none; background: #fff; border-radius: 50%; width: 56px; height: 56px; flex: none; font-size: 28px; box-shadow: 0 4px 0 #d9a066; cursor: pointer; }
@@ -104,7 +112,7 @@
 <body><!--mirae-inject--><script src="../../../js/bridge.js"></script><a href="../../../cabinet.html" style="position:fixed;top:8px;left:8px;z-index:99999;background:#0B1535;color:#D4AF7C;padding:6px 12px;border-radius:999px;font:600 13px system-ui;text-decoration:none;opacity:.92">← MIRAÉ</a><script>try{var u=localStorage.getItem("kr_user"),p=localStorage.getItem("kr_pin");var f=function(){var n=document.getElementById("nameInput"),q=document.getElementById("pinInput");if(n&&u&&!n.value){n.value=u}if(q&&p&&!q.value){q.value=p}};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}</script>
 
 <div id="menu" class="screen on">
-  <div class="bigfox" id="peek">🦊🏠</div>
+  <div class="bigfox" id="peek"><img class="ai hero" src="img/fox.webp" alt=""></div>
   <h1>Домик лисички<br><span style="font-size:.65em">똑똑! 누구야?</span></h1>
   <div class="modes" id="modes"></div>
   <label class="note"><input type="checkbox" id="showWords" checked> показывать корейские слова под зверями</label>
@@ -114,7 +122,7 @@
 <!-- mode 1 -->
 <div id="house" class="screen">
   <div class="top"><button class="iconbtn home">🏠</button>
-    <div class="foxrow"><div class="fox" id="fox1">🦊</div><div class="bubble" id="bub1"></div></div>
+    <div class="foxrow"><div class="fox" id="fox1"><img class="ai " src="img/fox.webp" alt=""></div><div class="bubble" id="bub1"></div></div>
     <button class="iconbtn again">🔊</button></div>
   <div class="stage">
     <div class="house" id="hs">
@@ -131,7 +139,7 @@
 <!-- mode 2 -->
 <div id="magic" class="screen">
   <div class="top"><button class="iconbtn home">🏠</button>
-    <div class="foxrow"><div class="fox" id="fox2">🦊</div><div class="bubble" id="bub2"></div></div>
+    <div class="foxrow"><div class="fox" id="fox2"><img class="ai " src="img/fox.webp" alt=""></div><div class="bubble" id="bub2"></div></div>
     <button class="iconbtn again">🔊</button></div>
   <div class="wins" id="wins2"></div>
   <div class="builder" id="builder">
@@ -164,7 +172,7 @@
 <script>
 /* ---------- MIRAÉ: задания для домашки (каждый режим — отдельное задание) ---------- */
 const MODES = [
-  { k: "house", em: "🐶🐱🦆", ko: "똑똑! 누구야?", ru: "Кто стучится?" },
+  { k: "house", em: ["gangaji", "goyangi", "ori"].map(k => `<img class="ai mini" src="img/${k}.webp" alt="">`).join(""), ko: "똑똑! 누구야?", ru: "Кто стучится?" },
   { k: "magic", em: "✨", ko: "ㅁ + ㅏ = 마", ru: "Волшебная ㅁ" },
   { k: "gap",   em: "🌳🍅", ko: "나_", ru: "Пропавший слог" }
 ];
@@ -200,7 +208,7 @@ function start(m) {
   show(m); ({ house: startHouse, magic: startMagic, gap: startGap })[m]();
 }
 function win(pic, text, word) {
-  show("win"); $("winPic").textContent = pic; $("winText").textContent = text;
+  show("win"); $("winPic").innerHTML = pic; $("winText").textContent = text;
   const w = $("winWord"); w.style.display = word ? "block" : "none"; w.textContent = word ? word.ko : "";
   w.onclick = () => word && play([word.id]);
   play(word ? ["wa", word.id] : ["wa"]);
@@ -213,14 +221,17 @@ function win(pic, text, word) {
 }
 
 /* ---------- mode 1: who is knocking? ---------- */
+const IMG = k => `<img class="ai" src="img/${k}.webp" alt="" draggable="false">`;
+/* картинки заранее, чтобы зверь появлялся сразу */
+["fox", "gangaji", "goyangi", "ori", "so", "gaeguri", "gom"].forEach(k => { const i = new Image(); i.src = "img/" + k + ".webp"; });
 const ANIMALS = [
-  { id: "gangaji", em: "🐶", ko: "강아지", snd: "멍멍!" },
-  { id: "goyangi", em: "🐱", ko: "고양이", snd: "야옹!" },
-  { id: "ori",     em: "🦆", ko: "오리",   snd: "꽥꽥!" },
-  { id: "so",      em: "🐮", ko: "소",     snd: "음매!" },
-  { id: "gaeguri", em: "🐸", ko: "개구리", snd: "개굴개굴!" }
+  { id: "gangaji", em: IMG("gangaji"), ko: "강아지", snd: "멍멍!" },
+  { id: "goyangi", em: IMG("goyangi"), ko: "고양이", snd: "야옹!" },
+  { id: "ori",     em: IMG("ori"), ko: "오리",   snd: "꽥꽥!" },
+  { id: "so",      em: IMG("so"), ko: "소",     snd: "음매!" },
+  { id: "gaeguri", em: IMG("gaeguri"), ko: "개구리", snd: "개굴개굴!" }
 ];
-const BEAR = { id: "gom", em: "🐻", ko: "곰", snd: "쿵쿵!" };
+const BEAR = { id: "gom", em: IMG("gom"), ko: "곰", snd: "쿵쿵!" };
 const SOUND = { gangaji: "s_meong", goyangi: "s_yaong", ori: "s_kkwaek", so: "s_eumme", gaeguri: "s_gaegul", gom: "s_kungkung" };
 let order1 = [], step1 = 0, target1 = null, busy1 = false;
 function startHouse() {
@@ -232,7 +243,7 @@ function startHouse() {
 function roundHouse() {
   busy1 = false; target1 = order1[step1];
   $("bub1").innerHTML = "똑똑!<small>누구야?</small>";
-  $("door").textContent = "?";
+  $("door").innerHTML = "?";
   const d = $("door"); d.classList.remove("knock"); void d.offsetWidth; d.classList.add("knock");
   /* the bear is never a wrong option before he comes — he is the surprise at the end */
   const pool = target1 === BEAR ? ANIMALS : ANIMALS.filter(a => a !== target1);
@@ -250,16 +261,16 @@ function pickHouse(a, el) {
   if (busy1) return;
   if (a !== target1) { shake(el); shake($("fox1")); play(["w_" + a.id, "aniya", SOUND[target1.id]]); return; }
   busy1 = true; el.classList.add("right"); yes("fox1");
-  $("door").textContent = a.em; $("bub1").innerHTML = a.ko + (a === BEAR ? "이야!" : "야!") + "<small>나야!</small>";
+  $("door").innerHTML = a.em; $("bub1").innerHTML = a.ko + (a === BEAR ? "이야!" : "야!") + "<small>나야!</small>";
   if (a === BEAR) {
     play(["a_gom", "s_kungkung", "kung", "wahaha"]);
-    later(() => { const w = $("wgrid").children[step1]; w.textContent = a.em; w.classList.add("in"); $("hs").classList.add("shake"); }, 1600);
+    later(() => { const w = $("wgrid").children[step1]; w.innerHTML = a.em; w.classList.add("in"); $("hs").classList.add("shake"); }, 1600);
     later(() => { $("hs").classList.remove("shake"); $("hs").classList.add("fall"); $("bub1").innerHTML = "쿵!<small>와하하!</small>"; }, 2700);
-    later(() => win("🐻🦊🐶🐱🦆🐮🐸", "곰 не поместился, и домик упал — 쿵! Все смеются: 와하하! Построим новый? Нажмите 또!"), 4800);
+    later(() => win(["gom", "fox", "gangaji", "goyangi", "ori", "so", "gaeguri"].map(k => `<img class="ai mini" src="img/${k}.webp" alt="">`).join(""), "곰 не поместился, и домик упал — 쿵! Все смеются: 와하하! Построим новый? Нажмите 또!"), 4800);
     return;
   }
   play(["a_" + a.id, "deureowa"]);
-  later(() => { const w = $("wgrid").children[step1]; w.textContent = a.em; w.classList.add("in"); step1++; roundHouse(); }, 2600);
+  later(() => { const w = $("wgrid").children[step1]; w.innerHTML = a.em; w.classList.add("in"); step1++; roundHouse(); }, 2600);
 }
 
 /* ---------- mode 2: magic ㅁ ---------- */
