@@ -1845,3 +1845,15 @@ html[data-theme=day] .lc[data-l=en] .lc-art{background-position:50% calc(100% + 
 .flash-w{overflow-wrap:break-word}
 /* фокус на кнопках оценки не прячется под нижнее меню телефона */
 html:has(body.has-tabs){scroll-padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+/* полоса меню слева: шапки страниц (небо главной, пейзаж и орнамент разделов) тянутся под неё до края экрана,
+   иначе под меню оставалась ровная полоса другого цвета с заметной границей; содержимое шапок стоит на прежнем месте */
+@media(min-width:900px){
+  body.has-rail .hero{margin-left:-108px;padding-left:calc(24px + 108px)}
+  body.has-rail header.band{margin-left:-108px;padding-left:calc(16px + 108px)}
+}
+/* страница курса днём: как ночью — большая картинка справа (дневная hero-*-day), а не общий пейзаж по центру под текстом */
+html[data-theme=day]:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{background:var(--hero2) 100% calc(100% - 16px)/auto calc(100% - 16px) no-repeat;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 calc(100% - 30px),transparent calc(100% - 16px)),linear-gradient(90deg,transparent 22%,#000 56%);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 calc(100% - 30px),transparent calc(100% - 16px)),linear-gradient(90deg,transparent 22%,#000 56%);mask-composite:intersect}
+@media(max-width:720px){html[data-theme=day]:is([data-lang=ko],[data-lang=en]) header.band.course-hero::before{background-size:auto calc(100% - 16px);background-position:80% calc(100% - 16px);
+  -webkit-mask-image:linear-gradient(180deg,transparent 14%,rgba(0,0,0,.6) 42%,#000 66%,#000 calc(100% - 30px),transparent calc(100% - 16px));mask-image:linear-gradient(180deg,transparent 14%,rgba(0,0,0,.6) 42%,#000 66%,#000 calc(100% - 30px),transparent calc(100% - 16px))}}
