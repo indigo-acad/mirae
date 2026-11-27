@@ -279,7 +279,6 @@ function block(b){
       b.prompts.map((q,i)=>`<div class="ex wr"><label class="q ko" for="wr-${b._key}-${i}">${esc(q)}</label>`+
         (b.hints&&b.hints[i]?`<details class="wr-hint"><summary>${ic("spark",14)} Подсказка</summary><div>${esc(b.hints[i]).replace(/\n/g,"<br>")}</div></details>`:"")+
         `<textarea class="wr-in ko" id="wr-${b._key}-${i}" data-wb="${b._key}" data-i="${i}" rows="${b.rows||2}" placeholder="${esc(b.ph||(vo?"Скажи в микрофон или напиши…":"한국어로 쓰세요…"))}" spellcheck="false">${esc(v[i]||"")}</textarea>`+
-        (vo&&i===0&&window.KR&&KR.ruNote?KR.ruNote("mic"):"")+
         (vo?`<div class="vrow"><button type="button" class="btn vbtn" data-vrec="${b._key}" data-i="${i}">${ic("mic",16)} Сказать</button><span class="vtm muted" id="vt-${b._key}-${i}"></span></div><div class="vres" id="vr-${b._key}-${i}" aria-live="polite">${voiceRes(b._key,i)}</div>`:"")+
         (b.model&&b.model[i]?`<details class="wr-model"${sv?"":" hidden"}><summary>Образец ответа</summary><p class="ko">${esc(b.model[i])}</p></details>`:"")+`</div>`).join("")+
       `<div class="done-row"><span class="muted" id="sc-${b._key}"></span><button type="button" class="pri" data-wsave="${b._key}">${sv?"Сохранено ✓":vo?"Сохранить и отправить":"Сохранить ответы"}</button></div>`;
@@ -287,7 +286,7 @@ function block(b){
     const p=P[b._key]||{},v=p.v||{},role=p.role||"",can=window.KR&&KR.ear&&KR.ear.canHear();
     h+=`<p class="muted">${esc(b.instr||"Послушай реплику, нажми микрофон и прочитай её вслух.")}</p>`+
       (b.roles?`<div class="seg sp-roles" role="group" aria-label="Роль">${b.roles.map(r=>`<button type="button" data-spr="${b._key}" data-r="${esc(r)}" aria-pressed="${role===r}" class="${role===r?"on":""}">Я — ${esc(r)}</button>`).join("")}<button type="button" data-spr="${b._key}" data-r="" aria-pressed="${!role}" class="${role?"":"on"}">Все реплики</button></div>`:"")+
-      (can&&KR.ruNote?KR.ruNote("mic"):"")+(can?"":`<p class="note">Проверка произношения работает в Chrome, Edge и Safari с микрофоном. Здесь можно послушать и прочитать вслух самостоятельно.</p>`)+
+      (can?"":`<p class="note">Проверка произношения работает в Chrome, Edge и Safari с микрофоном. Здесь можно послушать и прочитать вслух самостоятельно.</p>`)+
       b.lines.map((l,i)=>{const mine=!role||l[0]===role,r=v[i];
         return `<div class="line sp${mine?"":" sp-other"}"><span class="sp ko">${esc(l[0])}</span><div><div class="kolg ko">${esc(l[1])} ${sayBtn(l[1])}${mine&&can?`<button type="button" class="say mic" data-spm="${b._key}" data-i="${i}" title="Прочитать вслух" aria-label="Прочитать вслух">${ic("mic",16)}</button>`:""}</div>${l[2]?`<div class="ru">${esc(l[2])}</div>`:""}<div class="micfb ${r?r.c:""}" id="sp-${b._key}-${i}" aria-live="polite">${r?esc(r.m):""}</div></div></div>`}).join("")+
       `<div class="done-row"><span class="score" id="sc-${b._key}"></span>${b.rec&&can?`<button type="button" data-vsend="${b._key}">${ic("send",15)} Отправить записи</button>`:""}<button data-done="${b._key}">${doneLabel(!!p.done)}</button></div>`;
@@ -325,13 +324,15 @@ const voiceOk=()=>canRec()||!!SRc;
 const VREC={};let VCUR=null;
 const fmtS=x=>Math.floor(x/60)+":"+String(Math.floor(x%60)).padStart(2,"0");
 async function voiceStart(opt){
+  // распознавание браузера; где его нет или оно недоступно (Россия, Firefox) — запись расшифровывает сервер (KR.ear.transcribe)
+  const E=window.KR&&KR.ear,useSR=!!SRc&&!(E&&E.useCloud&&E.useCloud());
   let stream=null,mr=null,mime="";const parts=[];
-  if(canRec()){try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){if(!SRc)throw {error:"not-allowed"}}}
+  if(canRec()){try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){if(!useSR)throw {error:"not-allowed"}}}
   if(stream){mime=["audio/ogg;codecs=opus","audio/webm;codecs=opus","audio/mp4","audio/webm"].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||"";
     try{mr=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);mr.ondataavailable=e=>{if(e.data&&e.data.size)parts.push(e.data)};mr.start(1000)}catch(e){mr=null}}
   let fin="",on=true,r=null,err=null,stopped=false,fails=0,resolve;const alts=[],t0=Date.now(),done=new Promise(x=>resolve=x);
   function mk(){
-    if(!SRc)return;r=new SRc();r.lang=opt.lang==="ko"?"ko-KR":"en-GB";r.continuous=!opt.auto;r.interimResults=true;r.maxAlternatives=opt.auto?5:1;
+    if(!useSR)return;r=new SRc();r.lang=opt.lang==="ko"?"ko-KR":"en-GB";r.continuous=!opt.auto;r.interimResults=true;r.maxAlternatives=opt.auto?5:1;
     r.onresult=e=>{let tmp="";for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i];if(x.isFinal){fin+=x[0].transcript.trim()+" ";if(opt.auto)for(let j=0;j<x.length;j++)alts.push(x[j].transcript)}else tmp+=x[0].transcript}
       if(opt.onText)opt.onText((fin+tmp).trim())};
     r.onerror=e=>{err=e.error||"error";if(err!=="no-speech"&&err!=="aborted")fails++;if(fails>2||/not-allowed|service-not-allowed|audio-capture|language-not-supported/.test(err))r=null};
@@ -343,9 +344,13 @@ async function voiceStart(opt){
   const tick=setInterval(()=>{const x=(Date.now()-t0)/1000;if(opt.onTick)opt.onTick(x);if(x>=(opt.max||90))stop()},250);
   function stop(){
     if(stopped)return;stopped=true;on=false;clearInterval(tick);try{r&&r.stop()}catch(e){}
-    const end=()=>{if(stream)stream.getTracks().forEach(t=>t.stop());const type=(mr&&mr.mimeType)||mime||"audio/webm";
-      resolve({blob:parts.length?new Blob(parts,{type}):null,mime:type,dur:(Date.now()-t0)/1000,text:fin.trim(),alts,err})};
-    setTimeout(()=>{if(mr&&mr.state!=="inactive"){mr.onstop=end;try{mr.stop()}catch(e){end()}}else end()},SRc?900:50);   // ждём последние слова распознавания
+    const end=async()=>{if(stream)stream.getTracks().forEach(t=>t.stop());const type=(mr&&mr.mimeType)||mime||"audio/webm",blob=parts.length?new Blob(parts,{type}):null;
+      let text=fin.trim(),e2=err;
+      if(!text&&blob&&E&&E.cloudOk&&E.cloudOk()){if(opt.onText)opt.onText("Распознаю…");
+        try{text=await E.transcribe(blob,opt.lang||"ko");e2=text?null:"no-speech";if(text&&opt.auto)alts.push(text)}catch(x){e2=x&&x.error||"network"}
+        if(opt.onText)opt.onText(text)}
+      resolve({blob,mime:type,dur:(Date.now()-t0)/1000,text,alts,err:e2})};
+    setTimeout(()=>{if(mr&&mr.state!=="inactive"){mr.onstop=end;try{mr.stop()}catch(e){end()}}else end()},useSR?900:50);   // ждём последние слова распознавания
   }
   return {stop,done};
 }

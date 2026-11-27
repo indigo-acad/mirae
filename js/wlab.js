@@ -129,7 +129,7 @@ function draw(){
     tile("read","book",l==="ko"?"읽기 · Чтение":"Reading","рассказ, статья, письмо… + вопросы и словарик")+
     (ex?tile("exam","target","Как на экзамене",exList().map(function(e){return e[1]}).join(", ")):"")+
     tile("write","pencil",l==="ko"?"쓰기 · Письмо":"Writing","лёгкое задание, чек-лист, подсказки, проверка")+
-    tile("talk","speak","Разговор","диалог с собеседником голосом или текстом, цели и оценка"+(KR.inRu()?" · голос из России может не работать, текстом — всегда":""))+
+    tile("talk","speak","Разговор","диалог с собеседником голосом или текстом, цели и оценка")+
     tile("trans","chat","Перевод: "+BNI[BASE()]+" → "+(LG()==="ko"?"корейский":"английский"),"переведи предложения, проверка по смыслу")+'</div>';
   // настройки сгенерированных: формат и длина
   h+='<details class="lab-more"><summary>Формат текстов и экзамена</summary>'+
@@ -343,7 +343,7 @@ function vTalk(r){
   if(r.ph&&(d.phrases||[]).length)o+='<div class="lab-gl">'+d.phrases.map(function(x){return '<div><span'+L2()+'>'+esc(x.s)+'</span> — '+esc(x.t||"")+'</div>'}).join("")+'</div>';
   o+='<div class="lab-in"><input class="name"'+L2()+' id="ttin" autocomplete="off" placeholder="'+(can?"Скажи в микрофон или напиши":"Напиши ответ")+'"'+(r.wait?" disabled":"")+'>'+
     (can?'<button type="button" class="say mic'+(r.listen?" on":"")+'" data-lab="tmic" aria-label="Сказать">'+ic("mic",16)+'</button>':"")+'<button type="button" class="btn pri" data-lab="tsend"'+(r.wait?" disabled":"")+'>Ответить</button></div>'+
-    (can?KR.ruNote("mic"):"")+(r.msg?'<p class="muted">'+esc(r.msg)+'</p>':"")+(r.err?'<p class="msg bad">'+esc(r.err)+'</p>':"")+
+    (r.msg?'<p class="muted">'+esc(r.msg)+'</p>':"")+(r.err?'<p class="msg bad">'+esc(r.err)+'</p>':"")+
     '<div class="tb-more">'+((d.phrases||[]).length?'<button type="button" data-lab="tph">'+(r.ph?"Скрыть фразы":"Полезные фразы")+'</button>':"")+
     '<button type="button"'+(h.filter(function(m){return m.r==="S"}).length?' class="btn pri"':"")+' data-lab="tend"'+(r.wait||!h.some(function(m){return m.r==="S"})?" disabled":"")+'>'+(r.done?"Цели выполнены — получить оценку":"Закончить и получить оценку")+'</button></div>';
   return o;

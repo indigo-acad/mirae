@@ -730,7 +730,7 @@ function gSay(c){
   S.ear={text:c.w,l:c.l};S.tries=0;S.peek=false;
   frame(GAME.say[0],promptHtml(c)+'<p class="muted q-sub">Скажи '+(c.l==='ko'?'по-корейски':'по-английски')+(c.l==='ko'&&units(c).length>1?' · слогов: '+units(c).length:'')+'</p>'+
     '<div class="ear-ctl"><button type="button" class="ear-play mic-big" data-x="mic" aria-label="Нажми и скажи слово">'+KR.icon('mic',30)+'</button></div>'+
-    '<p class="muted q-sub" id="micst" aria-live="polite">Нажми на микрофон и скажи слово</p>'+KR.ruNote('mic')+
+    '<p class="muted q-sub" id="micst" aria-live="polite">Нажми на микрофон и скажи слово</p>'+
     '<div class="opts say-alt"><button type="button" data-x="say-peek">'+KR.icon('volume',15)+' Послушать, как правильно</button><button type="button" data-x="say-type">Ответить текстом</button></div>'+
     '<div id="fb" class="q-fb"></div>'+nextRow());
 }
