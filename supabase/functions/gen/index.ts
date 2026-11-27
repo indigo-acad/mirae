@@ -6,7 +6,8 @@
 //        kind: listen | read | exam | write | check | sent | trcheck | talk | talk_turn | talk_end
 //        base: "ru" | "en" | "ko" — язык переводов, пояснений и подсказок (корейский через английский и наоборот); по умолчанию ru
 // Выход: JSON задания (формат — в SPEC ниже) или { error, message }.
-// Секреты: OPENAI_API_KEY; по желанию OPENAI_BASE_URL (OpenAI-совместимый шлюз, как у tts) и GEN_MODEL (по умолчанию gpt-4o-mini).
+// Секреты (один из): GEMINI_API_KEY — бесплатный ключ Google AI Studio (gemini-2.5-flash, лимиты бесплатного тарифа);
+//   OPENAI_API_KEY — платный OpenAI (gpt-4o-mini) или ключ OpenAI-совместимого шлюза с OPENAI_BASE_URL. GEN_MODEL — своя модель.
 // SUPABASE_URL и SUPABASE_ANON_KEY функция получает сама: вход проверяется функцией is_teacher (логин и PIN).
 
 const cors = {
@@ -117,7 +118,7 @@ JSON: {"task": "task in ${B}", "topic": "...", "must": ["target words to use"], 
 Student's text: """${clip(o.text, 3000)}"""
 Scoring: ${RUBRIC[String(o.exam || "easy")] || RUBRIC.easy} Be fair for level ${level}: an easy task is judged against this level, an exam task against the real exam standard.
 Be kind and specific. Mark each checklist item. List real mistakes only (spelling, grammar, word choice, ${lang === "ko" ? "spacing 띄어쓰기, endings and politeness" : "articles, tenses, prepositions"}). Give a corrected version that keeps the student's ideas.
-JSON: {"score": total, "max": max total (10 for easy, 9 for IELTS, 5 for TOEFL, 14 for ЕГЭ, 10 for ОГЭ, task max for TOPIK), "scale": "points"|"band", "criteria": [{"name": "criterion", "score": number, "max": number, "note": "1 sentence in ${B}"}], "level_hint": "what level this text shows, e.g. 2급 / B1", "checks": [{"text": "criterion", "ok": true|false, "note": "ru"}], "errors": [{"bad": "fragment", "good": "fix", "why": "ru"}], "corrected": "${L} text", "comment": "2–3 sentences in ${B}: what is good and what to work on"}`;
+JSON: {"score": total, "max": max total (10 for easy, 9 for IELTS, 5 for TOEFL, 14 for ЕГЭ, 10 for ОГЭ, task max for TOPIK), "scale": "points"|"band", "criteria": [{"name": "criterion", "score": number, "max": number, "note": "1 sentence in ${B}"}], "level_hint": "what level this text shows, e.g. 2급 / B1", "checks": [{"text": "criterion", "ok": true|false, "note": "in ${B}"}], "errors": [{"bad": "fragment", "good": "fix", "why": "in ${B}"}], "corrected": "${L} text", "comment": "2–3 sentences in ${B}: what is good and what to work on"}`;
   }
   if (kind === "sent") {
     const n = Math.max(3, Math.min(12, Number(o.n) || 6));
@@ -150,28 +151,41 @@ JSON: {"res": [{"v": "ok"|"part"|"no", "fix": "corrected translation", "why": "s
   return "";
 }
 
+/* Модель: OpenAI или любой OpenAI-совместимый адрес (OPENAI_BASE_URL). Бесплатно — Gemini:
+   секрет GEMINI_API_KEY (ключ из aistudio.google.com) — тогда адрес и модель (gemini-2.5-flash) подставляются сами. */
+function provider() {
+  if (env("GEMINI_API_KEY") && !env("OPENAI_API_KEY"))
+    return { url: "https://generativelanguage.googleapis.com/v1beta/openai", key: env("GEMINI_API_KEY"), model: env("GEN_MODEL") || "gemini-2.5-flash" };
+  let url = (env("OPENAI_BASE_URL") || "https://api.openai.com/v1").replace(/\/+$/, "");
+  if (!/\/v\d[^/]*(\/openai)?$/.test(url) && !/\/openai$/.test(url)) url += "/v1";   // https://host → https://host/v1
+  return { url, key: env("OPENAI_API_KEY"), model: env("GEN_MODEL") || "gpt-4o-mini" };
+}
+function parseJson(txt: string) {
+  try { return JSON.parse(txt); } catch { const m = txt.match(/\{[\s\S]*\}/); if (m) return JSON.parse(m[0]); throw new Error("not json"); }
+}
 async function llm(system: string, user: string, temp: number) {
-  const base = (env("OPENAI_BASE_URL") || "https://api.openai.com").replace(/\/+$/, "").replace(/\/v1$/, "");
-  const r = await fetch(`${base}/v1/chat/completions`, {
+  const P = provider();
+  const call = (fmt: boolean) => fetch(`${P.url}/chat/completions`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${env("OPENAI_API_KEY")}`, "Content-Type": "application/json" },
+    headers: { Authorization: `Bearer ${P.key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: env("GEN_MODEL") || "gpt-4o-mini", temperature: temp, response_format: { type: "json_object" },
+      model: P.model, temperature: temp, ...(fmt ? { response_format: { type: "json_object" } } : {}),
       messages: [{ role: "system", content: system }, { role: "user", content: user }],
     }),
     signal: AbortSignal.timeout(90000),
   });
+  let r = await call(true);
+  if (r.status === 400) r = await call(false);   // шлюз не знает response_format: просим JSON словами
   if (!r.ok) throw new Error(`llm ${r.status}: ${(await r.text()).slice(0, 200)}`);
   const j = await r.json();
-  const txt = j?.choices?.[0]?.message?.content || "{}";
-  return JSON.parse(txt);
+  return parseJson(j?.choices?.[0]?.message?.content || "{}");
 }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "method" }, 405);
-  if (!env("OPENAI_API_KEY"))
-    return json({ error: "not_configured", message: "Генерация заданий пока не настроена: в Supabase нужен секрет OPENAI_API_KEY для функции gen." }, 503);
+  if (!env("OPENAI_API_KEY") && !env("GEMINI_API_KEY"))
+    return json({ error: "not_configured", message: "Генерация заданий пока не настроена: преподавателю нужно добавить ключ модели (GEMINI_API_KEY или OPENAI_API_KEY) в Supabase." }, 503);
   try {
     const body = await req.json();
     const name = String(body.p_name || "").trim().toLowerCase(), pin = String(body.p_pin || "");
