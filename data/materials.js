@@ -510,6 +510,14 @@ window.MATERIALS=[
   "level": "дошкольник"
  },
  {
+  "id": "kid-house",
+  "section": "kids",
+  "kind": "game",
+  "title": "Домик лисички",
+  "path": "materials/kids/kid-house/",
+  "level": "дошкольник"
+ },
+ {
   "id": "lesson-l12-jiyo",
   "section": "course",
   "kind": "lesson",
