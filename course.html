@@ -50,7 +50,7 @@ function programKo(){
     var p=KR.progress(l.id);x.n=p.n;x.tot=p.tot;x.pct=p.pct;x.P=p.P;x.state=p.pct>=100?'done':'open';
     x.meta=p.n+' из '+p.tot+' блоков';x.href='lesson.html?l='+l.id;x.go=p.pct>=100?'Повторить':p.n?'Продолжить':'Начать';
     gmark(x,'lesson-'+l.id);
-    x.extra=l.hangul?'<a class="btn" href="materials/korean/ko-hangul-games/">'+KR.icon('spark',16)+'Игры</a>':'<a class="btn" href="practice.html">'+KR.icon('repeat',16)+'Доп. упражнения</a>';
+    x.extra=l.hangul?'<a class="btn" href="materials/korean/ko-hangul-games/">'+KR.icon('spark',16)+'Игры</a>':'<a class="btn" href="practice.html#mats">'+KR.icon('repeat',16)+'Доп. упражнения</a>';
     return x;
   };
   var parts=[{t:C.title.split(' · ')[1]||'',ko:true,items:C.lessons.map(ch)}];

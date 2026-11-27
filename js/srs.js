@@ -173,6 +173,29 @@ function train(c,g,S,now){
   if(g>1)return null;
   var n=practice(c,false,S,now);return n?{c:n,k:"back"}:null;
 }
+/* Тренировка без карточек («Тренировать»): ученик не оценивает себя сам, оценку ставит игра. Правила:
+   - ошибка — «Снова»; верно с подсказкой или со второй попытки — «Трудно»; верно сразу — «Хорошо». «Легко» игра не ставит
+     (слово без ошибок за занятие получает свой день сверху — бонус за чистую сессию, см. clean);
+   - игры делятся на вспоминание (RECALL: написать слово, сказать вслух, объяснить значение, карточки) и узнавание
+     (выбрать перевод, слово в предложении, на слух, найти пару, собрать слово, диктант);
+   - новое и изучаемое слово идёт по тем же шагам, что в карточках (1 мин → 10 мин → 1 день), но последний шаг
+     (выпуск в повторение) засчитывается только за вспоминание: верное узнавание на последнем шаге — «Трудно», шаг повторяется;
+   - слово в повторении с интервалом до недели — как обычно. С интервалом от недели верное узнавание растит интервал
+     медленно (×«Трудно», 1.2), но лёгкость не снижает: узнать слово проще, чем вспомнить. Полный рост — за вспоминание.
+   game — код игры из GAMES, g — оценка игры (1–3). Возвращает новую карточку, как next. */
+var RECALL=["wr","say","mean","cards","rcards"];
+function game(c,gm,g,S,now){
+  var st=c.st||0,rc=RECALL.indexOf(gm)>=0;g=Math.min(3,g);
+  if(g===1||rc)return next(c,g,S,now);
+  var C=cfg(S);
+  if(st!==2){var steps=st===3?C.relearn:C.steps,i=st===0?0:Math.min(c.step||0,steps.length-1);
+    if(g===3&&st!==0&&i+1>=steps.length)g=2;
+    return next(c,g,S,now)}
+  if((c.ivl||0)<7)return next(c,g,S,now);
+  var n=next(c,2,S,now);if(g===3)n.ef=c.ef||C.ease;return n;
+}
+/* слово на последнем шаге изучения: следующий верный ответ (вспоминание) выпустит его в повторение */
+function lastStep(c,S){var st=c.st||0;if(st!==1&&st!==3)return false;var C=cfg(S),steps=st===3?C.relearn:C.steps;return Math.min(c.step||0,steps.length-1)+1>=steps.length}
 /* Учитель (или сам ученик) решил, когда слово показать снова: today — сегодня, заново, как после «Снова»; tom — завтра.
    Ошибки в упражнениях в этот день слово больше не сдвигают (pm). */
 function send(c,when,S,now){
@@ -226,7 +249,7 @@ function plan(cards,S,now,revDone,extra){
 }
 /* Следующая карточка: сначала то, что учим прямо сейчас, потом повторения, потом новые, потом ближайшие шаги. */
 function pick(p){return p.learn[0]||p.rev[0]||p.fresh[0]||p.soon[0]||null}
-root.SRS={DEF:DEF,GAMES:GAMES,MIN:MIN,DAY:DAY,cfg:cfg,norm:norm,id:makeId,make:make,next:next,bump:bump,practice:practice,train:train,send:send,clean:clean,fuzz:fuzz,
+root.SRS={DEF:DEF,GAMES:GAMES,MIN:MIN,DAY:DAY,cfg:cfg,norm:norm,id:makeId,make:make,next:next,bump:bump,practice:practice,train:train,game:game,lastStep:lastStep,RECALL:RECALL,send:send,clean:clean,fuzz:fuzz,
   rnd:Math.random,   /* источник случайности для разброса; в проверках можно подменить */
   isDue:isDue,inScope:inScope,SCOPES:SCOPES,label:label,span:span,plan:plan,pick:pick,dayStart:dayStart};
 })(typeof window!=="undefined"?window:globalThis);

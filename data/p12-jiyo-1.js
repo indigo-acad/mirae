@@ -1,7 +1,7 @@
 window.LESSONS = window.LESSONS || {};
 window.LESSONS["p12-jiyo-1"] = {
   id: "p12-jiyo-1", course: "Доп. упражнения · 12과", title: "-지요: формы и времена",
-  subtitle: "Отработка к уроку 12과", back: "practice.html",
+  subtitle: "Отработка к уроку 12과", back: "practice.html#mats",
   sections: [{ id: "drill", title: "Отработка", icon: "🔁", blocks: [
     { type: "fill", id: "d1", title: "Формы с -지요?", instr: "Поставь слово в форму с -지요?",
       items: [

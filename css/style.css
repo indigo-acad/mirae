@@ -1845,3 +1845,42 @@ html[data-theme=day] .lc[data-l=en] .lc-art{background-position:50% calc(100% + 
 .flash-w{overflow-wrap:break-word}
 /* фокус на кнопках оценки не прячется под нижнее меню телефона */
 html:has(body.has-tabs){scroll-padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+
+/* «Слова»: «Учить» / «Тренировать» и блок «Практика» (js/wlab.js) */
+.tmodes{display:grid;gap:10px;margin:14px 0 4px}
+.tmode{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border:1px solid var(--rule);border-radius:18px;background:var(--fill)}
+.tmode.rec{border-color:var(--gold);box-shadow:0 0 0 1px rgba(212,175,124,.35) inset}
+.tmode b{display:inline-flex;align-items:center;gap:7px;font-size:17px}
+.tmode p{margin:4px 0 0;font-size:14px}
+.tmode .chip{font-size:12px;margin-left:4px}
+@media (max-width:560px){.tmode{flex-direction:column;align-items:stretch}.tmode>button{justify-content:center}}
+.lab{margin-top:18px}
+.lab-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:10px 0}
+.lab-row .opts{margin:0}
+.lab-k{min-width:104px;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-2)}
+.lab-h4{margin:20px 0 8px;font-size:16px;display:flex;align-items:center;gap:6px}
+.lab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.lab-t{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:14px;border-radius:16px;border:1px solid var(--rule);background:var(--fill);color:var(--fg);cursor:pointer;font:inherit}
+.lab-t:hover:not([disabled]){background:var(--fill-hi);border-color:var(--gold)}
+.lab-t[disabled]{opacity:.5;cursor:default}
+.lab-t b{font-size:16px}.lab-t small{font-size:13px;line-height:1.35}
+.lab-more{margin-top:16px}.lab-more summary{cursor:pointer;color:var(--fg-2)}
+.lab-wait{display:flex;align-items:center;gap:8px;padding:24px 0}
+.lab-text{margin:12px 0;padding:14px 16px;border-radius:14px;background:var(--fill);line-height:1.7}
+.lab-text p{margin:0 0 10px}
+.lab-line{border-radius:10px;padding:2px 6px}.lab-line.on{background:rgba(212,175,124,.22)}
+.lab-sp{color:var(--accent)}
+.lab-q,.lab-task{margin:14px 0;padding-top:12px;border-top:1px solid var(--rule)}
+.lab-q p{margin:0 0 8px}
+.lab-score{font-weight:600;font-size:17px}
+.lab-gl{display:grid;gap:4px;margin:8px 0}
+.lab-in{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.lab-in input{flex:1;min-width:0}
+.lab-ta{width:100%;box-sizing:border-box;margin:10px 0;padding:12px;border-radius:14px;border:1px solid var(--field-line);background:var(--field);color:var(--fg);font:inherit;font-size:16px;line-height:1.6;resize:vertical}
+.lab-check{display:grid;gap:6px;margin:10px 0}
+.lab-check .chip.sel{border-color:var(--gold)}
+.lab-cl{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+.lab-hints{margin:6px 0;padding-left:20px;color:var(--fg-2)}
+.lab-res{margin-top:14px;padding:14px 16px;border-radius:14px;border:1px solid var(--rule)}
+.lab-ok,.lab-err{margin:6px 0;padding-left:18px}
+.lab .ok{color:var(--ok-fg)}.lab .bad{color:var(--bad-fg)}
+.lab .opts button.ok{color:var(--ink)}.lab .opts button.bad{color:var(--ink)}
