@@ -108,7 +108,7 @@ var V={
   answer:function(id,grade,game,x){
     var c=D.w[id];if(!c)return null;var now=Date.now(),wasNew=!c.st;
     if(c.st===2){var ds=SRS.dayStart(now);D.rv=D.rv&&D.rv.d===ds?{d:ds,n:D.rv.n+1}:{d:ds,n:1}}
-    mark(id,grade>1);c=game?SRS.game(c,game,grade,D.s,now,x):SRS.next(c,grade,D.s,now);put(c);logAnswer(wasNew,grade>=3,now);return c;
+    mark(id,grade>1);c=game&&SRS.game?SRS.game(c,game,grade,D.s,now,x):SRS.next(c,grade,D.s,now);put(c);logAnswer(wasNew,grade>=3,now);return c;
   },
   /* Ответ в упражнении вне тренажёра (см. SRS.practice). res: {id карточки: верно ли}; если слово было в двух заданиях
      и в одном из них ошибка, передавайте false. Возвращает {back: вернулись на повторение, done: засчитаны как повторение}. */
