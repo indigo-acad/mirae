@@ -50,7 +50,7 @@ async function gemini(b64: string, mime: string, lang: string, prompt: string) {
   const call = (m: string, think: boolean) => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
     method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": env("GEMINI_API_KEY") },
     body: JSON.stringify({ contents: [{ parts: [{ text: ask }, { inline_data: { mime_type: mime.split(";")[0] || "audio/wav", data: b64 } }] }],
-      generationConfig: think ? { temperature: 0, thinkingConfig: { thinkingBudget: 0 } } : { temperature: 0 } }),
+      generationConfig: think ? { temperature: 0, thinkingConfig: { thinkingLevel: "minimal" } } : { temperature: 0 } }),
     signal: AbortSignal.timeout(30000),
   });
   let r = await call(model, true);
@@ -58,7 +58,7 @@ async function gemini(b64: string, mime: string, lang: string, prompt: string) {
   if (r.status === 400) r = await call(model, false);   // модель не знает настройку «размышлений»
   if (!r.ok) throw new Error(`gemini ${r.status}: ${(await r.text()).slice(0, 300)}`);
   const j = await r.json();
-  return String((j?.candidates?.[0]?.content?.parts || []).map((x: any) => x.text || "").join("")).trim().replace(/^["«]|["»]$/g, "");
+  return String((j?.candidates?.[0]?.content?.parts || []).filter((x: any) => !x.thought).map((x: any) => x.text || "").join("")).trim().replace(/^["«]|["»]$/g, "");
 }
 async function transcribe(bytes: Uint8Array, mime: string, lang: string, prompt: string, model: string) {
   const type = mime.split(";")[0] || "audio/webm";

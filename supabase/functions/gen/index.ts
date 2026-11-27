@@ -182,7 +182,35 @@ async function provider(force = false) {
 function parseJson(txt: string) {
   try { return JSON.parse(txt); } catch { const m = txt.match(/\{[\s\S]*\}/); if (m) return JSON.parse(m[0]); throw new Error("not json"); }
 }
+/* Gemini напрямую (не через совместимый с OpenAI адрес): так можно выключить «размышления» модели — с ними
+   задание готовится больше минуты — и попросить ответ сразу в JSON. Какой способ выключения примет модель, узнаём
+   по ошибке 400 и запоминаем: thinkingLevel (новые модели) → thinkingBudget 0 → без настройки. */
+const THINK = [{ thinkingLevel: "minimal" }, { thinkingLevel: "low" }, { thinkingBudget: 0 }, null];
+let thinkAt = 0;
+async function geminiCall(system: string, user: string, temp: number, force = false): Promise<any> {
+  const model = env("GEN_MODEL") || await geminiModel(force);
+  for (let i = thinkAt; i < THINK.length; i++) {
+    const tc = THINK[i];
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": env("GEMINI_API_KEY") },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: system }] },
+        contents: [{ role: "user", parts: [{ text: user }] }],
+        generationConfig: { temperature: temp, responseMimeType: "application/json", ...(tc ? { thinkingConfig: tc } : {}) },
+      }),
+      signal: AbortSignal.timeout(75000),
+    });
+    if (r.status === 400 && tc) { console.log("thinking config refused", JSON.stringify(tc)); continue; }
+    if (r.status === 404 && !force && !env("GEN_MODEL")) return geminiCall(system, user, temp, true);   // модель закрыли: берём новую
+    if (!r.ok) throw new Error(`gemini ${r.status}: ${(await r.text()).slice(0, 300)}`);
+    thinkAt = i;
+    const j = await r.json();
+    return parseJson((j?.candidates?.[0]?.content?.parts || []).filter((x: any) => !x.thought).map((x: any) => x.text || "").join("") || "{}");
+  }
+  throw new Error("gemini: no config accepted");
+}
 async function llm(system: string, user: string, temp: number) {
+  if (env("GEMINI_API_KEY") && !env("OPENAI_API_KEY")) return geminiCall(system, user, temp);
   let P = await provider();
   const call = (fmt: boolean) => fetch(`${P.url}/chat/completions`, {
     method: "POST",
@@ -194,7 +222,6 @@ async function llm(system: string, user: string, temp: number) {
     signal: AbortSignal.timeout(90000),
   });
   let r = await call(true);
-  if (r.status === 404 && P.gemini && !env("GEN_MODEL")) { P = await provider(true); r = await call(true); }   // модель закрыли: берём новую из списка
   if (r.status === 400) r = await call(false);   // шлюз не знает response_format: просим JSON словами
   if (!r.ok) throw new Error(`llm ${r.status}: ${(await r.text()).slice(0, 200)}`);
   const j = await r.json();

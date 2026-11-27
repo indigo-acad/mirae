@@ -175,7 +175,7 @@ function L2(){return LG()==="ko"?' class="ko" lang="ko"':' lang="en"'}
 function drawRun(){
   var box=$("#lab"),r=RUN,t={listen:LG()==="ko"?"듣기 · Аудирование":"Listening",read:LG()==="ko"?"읽기 · Чтение":"Reading",exam:"Как на экзамене · "+(curEx()||[])[1],write:LG()==="ko"?"쓰기 · Письмо":"Writing",trans:"Перевод",dict:"Диктант предложений",talk:LG()==="ko"?"말하기 · Разговор":"Speaking · Разговор",week:"Итог недели"}[r.k];
   var h=head(t);
-  if(r.busy)h+='<p class="muted lab-wait">'+ic("spark",18)+' Готовлю задание под уровень '+esc(level())+'…</p>';
+  if(r.busy)h+='<p class="muted lab-wait">'+ic("spark",18)+' Готовлю задание под уровень '+esc(level())+'… обычно это 10–30 секунд.</p>';
   else if(r.err)h+='<p class="msg bad">'+esc(r.err)+'</p><div class="fin-acts"><button type="button" class="btn pri" data-lab="'+r.k+'">Ещё раз</button><button type="button" data-lab="back">К выбору</button></div>';
   else h+=({listen:vListen,read:vRead,exam:vExam,write:vWrite,trans:vTrans,dict:vDict,talk:vTalk,week:vWeek})[r.k](r);
   box.innerHTML=h;
