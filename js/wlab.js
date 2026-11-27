@@ -29,7 +29,7 @@ var GEN=(window.CONFIG||{}).GEN_URL||((window.CONFIG||{}).SUPABASE_URL?window.CO
 var KEY=function(){return "kr_lab:"+(KR.user()||"")};
 var L=load(),RUN=null;   // RUN — открытое занятие из сгенерированных (или диктант)
 
-function load(){var d={l:"",dir:"both",gl:[],sc:["today"],n:20,lf:"podcast",ll:"s",rf:"story",rl:"s",ex:"",sec:"",ws:"s"};
+function load(){var d={l:"",dir:"both",gl:[],sc:["today"],n:20,lf:"podcast",ll:"s",rf:"story",rl:"s",ex:"",sec:"",ws:"s",base:{},topic:""};
   try{var x=JSON.parse(localStorage.getItem("kr_lab:"+(KR.user()||""))||"null");if(x)Object.keys(d).forEach(function(k){if(x[k]!==undefined)d[k]=x[k]})}catch(e){}return d}
 function save(){try{localStorage.setItem(KEY(),JSON.stringify(L))}catch(e){}}
 
@@ -56,14 +56,24 @@ function words(all){
   return all?out:out.slice(0,L.n||20);
 }
 function level(){return M.level(LG())}
-function wl(list){return list.slice(0,30).map(function(c){return {w:c.w,t:trRu(c)}})}
+/* язык переводов и подсказок: русский или другой изучаемый язык (корейский через английский, английский через корейский) */
+var BN={ru:"Русский",en:"English",ko:"한국어"},BNI={ru:"русский",en:"английский",ko:"корейский"};
+function BASE(){var b=(L.base||{})[LG()];return b&&b!==LG()&&BN[b]?b:"ru"}
+function bases(){return ["ru"].concat(["en","ko"].filter(function(x){return x!==LG()}))}
+function glossB(c){var b=BASE();if(b==="ru")return trRu(c);if(W.glossOf){var g=W.glossOf(c,b);if(g)return g}
+  var d=(c.d||[]).filter(function(x){return x.l===b})[0];if(d)return d.s;var a=(INF()[c.id]||{})["tr_"+b];return (Array.isArray(a)?a[0]:a)||trRu(c)}
+/* журнал «Практики» для итога недели: что делали и с каким результатом */
+function logLab(k,sc,max,t){var key="kr_labstat:"+KR.user(),a=[];try{a=JSON.parse(localStorage.getItem(key)||"[]")||[]}catch(e){}
+  a.unshift({t:Date.now(),k:k,s:sc,m:max,x:t||""});a=a.filter(function(x){return x.t>Date.now()-60*DAY}).slice(0,300);try{localStorage.setItem(key,JSON.stringify(a))}catch(e){}}
+function labLog(){try{return JSON.parse(localStorage.getItem("kr_labstat:"+KR.user())||"[]")||[]}catch(e){return []}}
+function wl(list){return list.slice(0,30).map(function(c){return {w:c.w,t:glossB(c)}})}
 
 /* ---------- генерация ---------- */
 async function gen(kind,opts,list){
   if(!GEN)throw new Error("Генерация не настроена: нет адреса функции.");
   if(!KR.user())throw new Error("Войдите на сайт, чтобы создавать задания.");
   var r;try{r=await fetch(GEN,{method:"POST",headers:{"Content-Type":"application/json",apikey:CONFIG.SUPABASE_ANON_KEY,Authorization:"Bearer "+CONFIG.SUPABASE_ANON_KEY},
-    body:JSON.stringify({p_name:KR.user(),p_pin:localStorage.getItem("kr_pin")||"",kind:kind,lang:LG(),level:level(),words:list?wl(list):[],opts:opts||{}})})}catch(e){throw new Error("Нет связи с сервером заданий. Проверь интернет и попробуй ещё раз.")}
+    body:JSON.stringify({p_name:KR.user(),p_pin:localStorage.getItem("kr_pin")||"",kind:kind,lang:LG(),base:BASE(),level:level(),words:list?wl(list):[],opts:opts||{}})})}catch(e){throw new Error("Нет связи с сервером заданий. Проверь интернет и попробуй ещё раз.")}
   var j=await r.json().catch(function(){return {}});
   if(!r.ok||!j.ok)throw new Error(j.message||("Функция генерации не ответила ("+r.status+")."));
   return j.data||{};
@@ -90,7 +100,7 @@ var EXAMS={ko:[["topik1","TOPIK I",[["listen","듣기"],["read","읽기"]]],["to
 var LF={lecture:"Лекция",podcast:"Подкаст",dialog:"Диалог",news:"Новости"},RF={story:"Рассказ",article:"Статья",letter:"Письмо",dialog:"Переписка",notice:"Объявление",blog:"Блог",news:"Новости"},LN={s:"Коротко",m:"Средне",l:"Длинно"};
 function glOpts(l){return ["ru"].concat(["ko","en"].filter(function(x){return x!==l}),["ctx"])}
 function gname2(g){return g==="ru"?"Русский":g==="ctx"?"В контексте":(KR.LANGS[g]||{}).name||g}
-function curGl(){var l=LG(),g=(L.gl||[]).filter(function(x){return glOpts(l).indexOf(x)>=0});return g.length?g:gls(l)}
+function curGl(){var l=LG(),g=(L.gl||[]).filter(function(x){return glOpts(l).indexOf(x)>=0});return g.length?g:BASE()!=="ru"?[BASE()]:gls(l)}
 function exList(){return EXAMS[LG()]||[]}
 function curEx(){var a=exList(),e=a.filter(function(x){return x[0]===L.ex})[0]||a[0];return e}
 
@@ -99,8 +109,11 @@ function draw(){
   if(!V.all().length){box.innerHTML='<div class="tb-h"><h3 id="lab-h">'+ic("sliders",20)+'Практика</h3></div><p class="muted">В словаре пока нет слов. Добавь их на странице <a href="words.html">«Слова»</a> — и здесь можно будет собрать занятие: упражнения, тест, тексты на слух и для чтения, задания как на экзамене, письмо.</p>';return}
   if(RUN)return drawRun();
   var l=LG(),ls=langs(),all=words(true),pick=all.slice(0,L.n||20),studied=pick.filter(function(c){return c.st}).length,lv=level(),ex=curEx();
-  var h='<div class="tb-h"><h3 id="lab-h">'+ic("sliders",20)+'Практика</h3></div><p class="muted tb-sub">Собери занятие сам: язык, направление, слова — и что делать. Тексты и задания подстраиваются под уровень: <b>'+esc(lv)+'</b> · <button type="button" class="linkish" data-x="cx-cfg">сменить</button></p>';
+  var wk=weekStats();
+  var h='<div class="tb-h"><h3 id="lab-h">'+ic("sliders",20)+'Практика</h3></div>'+
+    '<button type="button" class="lab-week" data-lab="week">'+ic("cal",18)+'<span><b>Итог недели</b><small class="muted">'+wk.days+' '+plural(wk.days,"день","дня","дней")+' занятий · '+wk.ans+' ответов'+(wk.ans?' · '+wk.acc+'% верно':'')+'</small></span>'+ic("arrow",16)+'</button>'+'<p class="muted tb-sub">Собери занятие сам: язык, направление, слова — и что делать. Тексты и задания подстраиваются под уровень: <b>'+esc(lv)+'</b> · <button type="button" class="linkish" data-x="cx-cfg">сменить</button></p>';
   if(ls.length>1)h+='<div class="lab-row"><span class="lab-k">Язык</span><div class="opts">'+ls.map(function(x){return chip("data-ll",x,esc(KR.LANGS[x].name),x===l)}).join("")+'</div></div>';
+  h+='<div class="lab-row"><span class="lab-k">Перевод и подсказки</span><div class="opts">'+bases().map(function(b){return chip("data-lb",b,BN[b],BASE()===b)}).join("")+'</div><span class="muted">'+(BASE()==="ru"?"":esc(KR.LANGS[LG()].name)+" через "+BNI[BASE()])+'</span></div>';
   h+='<div class="lab-row"><span class="lab-k">Направление</span><div class="opts">'+chip("data-ld","fw","Слово → значение",L.dir==="fw")+chip("data-ld","bw","Значение → слово",L.dir==="bw")+chip("data-ld","both","В обе стороны",L.dir==="both")+'</div></div>';
   h+='<div class="lab-row"><span class="lab-k">Значение</span><div class="opts">'+glOpts(l).map(function(g){return chip("data-lg",g,gname2(g),curGl().indexOf(g)>=0)}).join("")+'</div></div>';
   h+='<div class="lab-row"><span class="lab-k">Слова</span><div class="opts">'+scopes().map(function(k){var n=V.all(l).filter(function(c){return inSc(c,k,Date.now())}).length;return chip("data-ls",k,esc(scName(k))+" · "+n,L.sc.indexOf(k)>=0)}).join("")+'</div></div>';
@@ -116,11 +129,13 @@ function draw(){
     tile("read","book",l==="ko"?"읽기 · Чтение":"Reading","рассказ, статья, письмо… + вопросы и словарик")+
     (ex?tile("exam","target","Как на экзамене",exList().map(function(e){return e[1]}).join(", ")):"")+
     tile("write","pencil",l==="ko"?"쓰기 · Письмо":"Writing","лёгкое задание, чек-лист, подсказки, проверка")+
-    tile("trans","chat","Перевод с русского","переведи предложения, проверка по смыслу")+'</div>';
+    tile("talk","speak","Разговор","диалог с собеседником голосом или текстом, цели и оценка")+
+    tile("trans","chat","Перевод: "+BNI[BASE()]+" → "+(LG()==="ko"?"корейский":"английский"),"переведи предложения, проверка по смыслу")+'</div>';
   // настройки сгенерированных: формат и длина
   h+='<details class="lab-more"><summary>Формат текстов и экзамена</summary>'+
     '<div class="lab-row"><span class="lab-k">Аудио</span><div class="opts">'+Object.keys(LF).map(function(k){return chip("data-lf",k,LF[k],L.lf===k)}).join("")+'</div></div>'+
     '<div class="lab-row"><span class="lab-k">Чтение</span><div class="opts">'+Object.keys(RF).map(function(k){return chip("data-rf",k,RF[k],L.rf===k)}).join("")+'</div></div>'+
+    '<div class="lab-row"><span class="lab-k">Тема</span><input class="name lab-topic" data-ltopic placeholder="своя тема разговора и текстов (необязательно)" value="'+esc(L.topic||"")+'"></div>'+
     '<div class="lab-row"><span class="lab-k">Длина</span><div class="opts">'+Object.keys(LN).map(function(k){return chip("data-lz",k,LN[k],L.ll===k)}).join("")+'</div></div>'+
     (ex?'<div class="lab-row"><span class="lab-k">Экзамен</span><div class="opts">'+exList().map(function(e){return chip("data-le",e[0],e[1],e===ex)}).join("")+'</div></div>'+
       '<div class="lab-row"><span class="lab-k">Раздел</span><div class="opts">'+ex[2].map(function(s){return chip("data-lc",s[0],s[1],(L.sec||ex[2][0][0])===s[0])}).join("")+'</div></div>':"")+
@@ -132,7 +147,7 @@ function draw(){
 function testSpec(list){
   var k=L.dir==="fw"?["tr","tf","mch"].concat(KR.canSay()?["aud"]:[]):L.dir==="bw"?["rev","wr","fl","bld","ctx"]:["tr","rev","ctx","wr"];
   return {title:"Практика · "+KR.LANGS[LG()].name,sub:L.sc.map(scName).join(", "),lang:LG(),kinds:k,n:Math.min(15,list.length),back:"words.html",backT:"слова",
-    words:list.map(function(c){var e=exOf(c)||{};return {w:c.w,t:trRu(c),l:c.l,ex:e.s||"",et:e.t||"",f:c.f}})};
+    words:list.map(function(c){var e=exOf(c)||{};return {w:c.w,t:glossB(c),l:c.l,ex:e.s||"",et:BASE()==="ru"?e.t||"":"",f:c.f}})};
 }
 function go(k){
   var list=words(),l=LG();
@@ -144,22 +159,25 @@ function go(k){
     location.href="test.html?mode=self&id=lab";return}
   if(k==="pod")return podStart(list.map(function(c){return c.id}),"практика");
   if(k==="dict")return dictStart(list);
+  if(k==="week"){RUN={k:"week",w:{}};return drawRun()}
   RUN={k:k,busy:true,list:list,w:{}};drawRun();
-  var o=k==="listen"?{format:L.lf,len:L.ll}:k==="read"?{format:L.rf,len:L.ll}:k==="exam"?{exam:curEx()[0],section:L.sec||curEx()[2][0][0],n:4}:k==="write"?{size:L.ws}:k==="trans"?{n:6}:{};
-  gen(k==="trans"?"sent":k,o,list).then(function(d){if(!RUN||RUN.k!==k)return;RUN.busy=false;RUN.d=d;RUN.ans={};drawRun()},
+  var o=k==="listen"?{format:L.lf,len:L.ll}:k==="read"?{format:L.rf,len:L.ll}:k==="exam"?{exam:curEx()[0],section:L.sec||curEx()[2][0][0],n:4}:k==="write"?{size:L.ws}:k==="trans"?{n:6}:k==="talk"?{topic:L.topic||""}:{};
+  if(L.topic&&(k==="listen"||k==="read"))o.topic=L.topic;
+  gen(k==="trans"?"sent":k,o,list).then(function(d){if(!RUN||RUN.k!==k)return;RUN.busy=false;RUN.d=d;RUN.ans={};
+    if(k==="talk"){RUN.h=d.first?[{r:"P",s:d.first.s,t:d.first.t}]:[];RUN.reached=[];drawRun();if(d.first)KR.say(d.first.s,LG());return}drawRun()},
     function(e){if(!RUN||RUN.k!==k)return;RUN.busy=false;RUN.err=e.message;drawRun()});
 }
 function back(){KR.hush();RUN=null;draw();var b=$("#lab");if(b)b.scrollIntoView({block:"start"})}
 
 /* ---------- открытое занятие ---------- */
-function head(t){return '<div class="play-top"><span class="tag">'+t+'</span><span class="muted">'+esc(KR.LANGS[LG()].name)+' · '+esc(level())+'</span><button type="button" class="round" data-lab="back" aria-label="К выбору">'+ic("x",16)+'</button></div>'}
+function head(t){return '<div class="play-top"><span class="tag">'+t+'</span><span class="muted">'+esc(KR.LANGS[LG()].name)+' · '+esc(level())+(BASE()!=="ru"?' · через '+BNI[BASE()]:"")+'</span><button type="button" class="round" data-lab="back" aria-label="К выбору">'+ic("x",16)+'</button></div>'}
 function L2(){return LG()==="ko"?' class="ko" lang="ko"':' lang="en"'}
 function drawRun(){
-  var box=$("#lab"),r=RUN,t={listen:LG()==="ko"?"듣기 · Аудирование":"Listening",read:LG()==="ko"?"읽기 · Чтение":"Reading",exam:"Как на экзамене · "+(curEx()||[])[1],write:LG()==="ko"?"쓰기 · Письмо":"Writing",trans:"Перевод с русского",dict:"Диктант предложений"}[r.k];
+  var box=$("#lab"),r=RUN,t={listen:LG()==="ko"?"듣기 · Аудирование":"Listening",read:LG()==="ko"?"읽기 · Чтение":"Reading",exam:"Как на экзамене · "+(curEx()||[])[1],write:LG()==="ko"?"쓰기 · Письмо":"Writing",trans:"Перевод",dict:"Диктант предложений",talk:LG()==="ko"?"말하기 · Разговор":"Speaking · Разговор",week:"Итог недели"}[r.k];
   var h=head(t);
   if(r.busy)h+='<p class="muted lab-wait">'+ic("spark",18)+' Готовлю задание под уровень '+esc(level())+'…</p>';
   else if(r.err)h+='<p class="msg bad">'+esc(r.err)+'</p><div class="fin-acts"><button type="button" class="btn pri" data-lab="'+r.k+'">Ещё раз</button><button type="button" data-lab="back">К выбору</button></div>';
-  else h+=({listen:vListen,read:vRead,exam:vExam,write:vWrite,trans:vTrans,dict:vDict})[r.k](r);
+  else h+=({listen:vListen,read:vRead,exam:vExam,write:vWrite,trans:vTrans,dict:vDict,talk:vTalk,week:vWeek})[r.k](r);
   box.innerHTML=h;
 }
 /* вопросы с вариантами: общий вид для аудио, чтения, экзамена */
@@ -170,7 +188,8 @@ function qs(list,pre){
       return '<button type="button" data-qa="'+pre+i+'" data-j="'+j+'" class="'+cls+'"'+(a!==undefined?" disabled":"")+'>'+esc(o)+'</button>'}).join("")+'</div>'+
       (a!==undefined&&q.why?'<p class="muted">'+esc(q.why)+'</p>':"")+'</div>'}).join("");
 }
-function score(list,pre){var n=0,k=0;(list||[]).forEach(function(q,i){var a=RUN.ans[pre+i];if(a!==undefined){n++;if(a===+q.a)k++}});return n?'<p class="lab-score">Верно: '+k+' из '+(list||[]).length+'</p>':""}
+function score(list,pre){var n=0,k=0;(list||[]).forEach(function(q,i){var a=RUN.ans[pre+i];if(a!==undefined){n++;if(a===+q.a)k++}});
+  if(n&&n===(list||[]).length&&!RUN.logged){RUN.logged=1;logLab(RUN.k,k,n,(RUN.d||{}).title)}return n?'<p class="lab-score">Верно: '+k+' из '+(list||[]).length+'</p>':""}
 function voice(sp){return LG()==="en"?(sp==="B"?"en-us":"en-gb"):LG()}
 function playLines(lines,from,rate){
   KR.hush();var i=from||0,tok=(RUN.tok=(RUN.tok||0)+1);
@@ -231,28 +250,35 @@ function writeBox(t,id){
     (canSend()?'<button type="button" data-wsend="'+id+'"'+(w.sent||!w.text.trim()?" disabled":"")+'>'+(w.sent?"Отправлено":"Отправить преподавателю")+'</button>':"")+'</div>';
   if(w.err)h+='<p class="msg bad">'+esc(w.err)+'</p>';
   var r=w.res;
-  if(r)h+='<div class="lab-res"><p class="lab-score">Оценка: '+(+r.score||0)+' из 10</p>'+(r.comment?'<p>'+esc(r.comment)+'</p>':"")+
+  if(r)h+='<div class="lab-res">'+resHead(r)+
     ((r.checks||[]).length?'<ul class="lab-ok">'+r.checks.map(function(c){return '<li class="'+(c.ok?"ok":"bad")+'">'+(c.ok?"✓ ":"✗ ")+esc(c.text)+(c.note?' <span class="muted">— '+esc(c.note)+'</span>':"")+'</li>'}).join("")+'</ul>':"")+
     ((r.errors||[]).length?'<h4 class="lab-h4">Ошибки</h4><ul class="lab-err">'+r.errors.map(function(e){return '<li><s'+L2()+'>'+esc(e.bad)+'</s> → <b'+L2()+'>'+esc(e.good)+'</b>'+(e.why?' <span class="muted">— '+esc(e.why)+'</span>':"")+'</li>'}).join("")+'</ul>':"")+
     (r.corrected?'<h4 class="lab-h4">Исправленный вариант</h4><p'+L2()+'>'+esc(r.corrected)+'</p>':"")+'</div>';
   return h;
 }
+/* итог проверки: общий балл, критерии (как на экзамене), уровень текста */
+function resHead(r){var mx=+r.max||10;
+  return '<p class="lab-score">'+(r.scale==="band"?"Band ":"Оценка: ")+(+r.score||0)+' из '+mx+(r.level_hint?' <small class="muted">· уровень текста: '+esc(r.level_hint)+'</small>':"")+'</p>'+
+    ((r.criteria||[]).length?'<div class="lab-crit">'+r.criteria.map(function(c){var p=c.max?Math.round(100*(+c.score||0)/c.max):0;
+      return '<div><span>'+esc(c.name)+'</span><b>'+(+c.score||0)+' / '+(+c.max||0)+'</b><i style="--p:'+p+'%"></i>'+(c.note?'<small class="muted">'+esc(c.note)+'</small>':"")+'</div>'}).join("")+'</div>':"")+
+    (r.comment?'<p>'+esc(r.comment)+'</p>':"")}
 function vWrite(r){r.w=r.w||{};return writeBox(r.d,"w")+again()}
 function wTask(id){return id==="w"?RUN.d:(RUN.d.tasks||[])[+id.slice(1)]||{}}
 async function wCheck(id){
   var t=wTask(id),w=RUN.w[id];if(!w||!w.text.trim()){w.err="Сначала напиши текст.";return drawRun()}
   w.busy=true;w.err="";drawRun();
-  try{w.res=await gen("check",{task:t.task||t.prompt,checklist:t.checklist||[],must:t.must||[],text:w.text})}catch(e){w.err=e.message}
+  var ex=id==="w"?"easy":curEx()[0];
+  try{w.res=await gen("check",{exam:ex,task:t.task||t.prompt,checklist:t.checklist||[],must:t.must||[],text:w.text});logLab(id==="w"?"write":"exam-write",+w.res.score||0,+w.res.max||10,t.task||t.prompt)}catch(e){w.err=e.message}
   w.busy=false;drawRun();
 }
 async function wSend(id){
-  var t=wTask(id),w=RUN.w[id],r=w.res,txt="Задание: "+(t.task||t.prompt||"")+"\n\nТекст ученика:\n"+w.text+(r?"\n\nАвтопроверка: "+(r.score||0)+"/10"+(r.errors||[]).map(function(e){return "\n• "+e.bad+" → "+e.good}).join(""):"");
+  var t=wTask(id),w=RUN.w[id],r=w.res,txt="Задание: "+(t.task||t.prompt||"")+"\n\nТекст ученика:\n"+w.text+(r?"\n\nАвтопроверка: "+(r.score||0)+"/"+(r.max||10)+(r.criteria||[]).map(function(c){return "\n"+c.name+": "+c.score+"/"+c.max}).join("")+(r.errors||[]).map(function(e){return "\n• "+e.bad+" → "+e.good}).join(""):"");
   var ok=await toTeacher((LG()==="ko"?"쓰기":"Writing")+" · "+level(),txt);w.sent=ok;w.err=ok?"":"Не получилось отправить. Проверь связь и попробуй ещё раз.";drawRun();
 }
 /* ---------- перевод с русского ---------- */
 function vTrans(r){
   var it=r.d.items||[],res=r.res;
-  return '<p class="muted">Переведи на '+(LG()==="ko"?"корейский":"английский")+'. Проверка — по смыслу, разные верные варианты засчитываются.</p>'+it.map(function(x,i){var v=(res||[])[i];
+  return '<p class="muted">Переведи с языка «'+BNI[BASE()]+'» на '+(LG()==="ko"?"корейский":"английский")+'. Проверка — по смыслу, разные верные варианты засчитываются.</p>'+it.map(function(x,i){var v=(res||[])[i];
     return '<div class="lab-task"><p><b>'+(i+1)+'.</b> '+esc(x.t)+'</p><div class="lab-in"><input class="name"'+L2()+' data-tr="'+i+'" value="'+esc((r.tv||{})[i]||"")+'"'+(res?" disabled":"")+'></div>'+
       (v?'<p class="'+(v.v==="ok"?"ok":v.v==="part"?"muted":"bad")+'">'+(v.v==="ok"?"✓ Верно":v.v==="part"?"Почти":"✗ Не так")+(v.why?" — "+esc(v.why):"")+'</p><p>'+(v.fix?'<span'+L2()+'>'+esc(v.fix)+'</span>':"")+' <small class="muted">пример: <span'+L2()+'>'+esc(x.s)+'</span></small></p>':"")+'</div>'}).join("")+
     (res?"":'<div class="tb-more"><button type="button" class="btn pri" data-lab="trcheck"'+(r.busy2?" disabled":"")+'>'+(r.busy2?"Проверяю…":"Проверить")+'</button></div>')+(r.err2?'<p class="msg bad">'+esc(r.err2)+'</p>':"")+again();
@@ -260,13 +286,14 @@ function vTrans(r){
 async function trCheck(){
   var r=RUN,it=r.d.items||[];r.busy2=true;r.err2="";drawRun();
   try{var d=await gen("trcheck",{items:it.map(function(x,i){return {src:x.t,ans:(r.tv||{})[i]||"",ref:x.s,dir:"from_ru"}})});r.res=d.res||[];
+    logLab("trans",r.res.filter(function(v){return v.v==="ok"}).length,it.length);
     var pr={};it.forEach(function(x,i){var c=x.w&&V.get(SRS.id(LG(),x.w));if(c&&c.st)pr[c.id]=(r.res[i]||{}).v!=="no"});if(Object.keys(pr).length)V.practice(pr)}
   catch(e){r.err2=e.message}
   r.busy2=false;drawRun();
 }
 /* ---------- диктант предложений и перевод ---------- */
 function dictStart(list){
-  var items=[];list.forEach(function(c){var e=exOf(c);if(e&&e.s&&e.s.length<=90)items.push({s:e.s,t:e.t||"",id:c.id})});
+  var items=[];list.forEach(function(c){var e=exOf(c);if(e&&e.s&&e.s.length<=90)items.push({s:e.s,t:BASE()==="ru"?e.t||"":"",id:c.id})});
   RUN={k:"dict",items:items.slice(0,8),i:0,ans:{},list:list};drawRun();
 }
 function lev(a,b){var m=a.length,n=b.length,d=[];for(var i=0;i<=m;i++){d[i]=[i]}for(var j=1;j<=n;j++)d[0][j]=j;
@@ -275,13 +302,14 @@ function nrm(s){return SRS.norm(s).replace(/[\s.,!?·~'’"«»:;()-]/g,"")}
 function vDict(r){
   if(!r.items.length)return '<p class="muted">У выбранных слов пока нет примеров. Можно взять предложения, созданные под твой уровень.</p><div class="fin-acts"><button type="button" class="btn pri" data-lab="dgen">Создать предложения</button><button type="button" data-lab="back">К выбору</button></div>';
   if(r.i>=r.items.length){var ok=r.items.filter(function(x){return x.ok}).length;
+    if(!r.logged){r.logged=1;logLab("dict",ok,r.items.length)}
     return '<div class="fin"><h3>Диктант закончен</h3><p class="muted">Записано верно: '+ok+' из '+r.items.length+'.</p>'+r.items.map(function(x){return '<p'+L2()+'>'+(x.ok?"✓ ":"✗ ")+esc(x.s)+'<br><small class="muted">'+esc(x.t)+'</small></p>'}).join("")+
       '<div class="fin-acts"><button type="button" class="btn pri" data-lab="dict">Ещё раз</button><button type="button" data-lab="dgen">Новые предложения</button><button type="button" data-lab="back">К выбору</button></div></div>';}
   var x=r.items[r.i],st=x.stage||"w";
   var h='<p class="muted">Предложение '+(r.i+1)+' из '+r.items.length+'. Послушай и запиши, потом переведи на русский.</p><div class="tb-more"><button type="button" class="btn pri" data-lab="dsay">'+ic("play",16)+'Слушать</button><button type="button" data-lab="dslow">Медленно</button></div>';
   h+='<div class="lab-in"><input class="name"'+L2()+' id="ldin" autocomplete="off" value="'+esc(x.v||"")+'"'+(st!=="w"?" disabled":"")+'>'+(st==="w"?'<button type="button" data-lab="dchk">Проверить</button>':"")+'</div>';
   if(st!=="w")h+='<p class="'+(x.ok?"ok":"bad")+'">'+(x.ok?(x.typo?"Почти верно: ":"Верно: "):"Правильно: ")+'<span'+L2()+'>'+esc(x.s)+'</span></p>';
-  if(st==="t"||st==="d"){h+='<p>Переведи на русский:</p><div class="lab-in"><input class="name" id="ltin" value="'+esc(x.tv||"")+'"'+(st==="d"?" disabled":"")+'>'+(st==="t"?'<button type="button" data-lab="tchk">Сравнить</button>':"")+'</div>'}
+  if(st==="t"||st==="d"){h+='<p>Переведи ('+BNI[BASE()]+'):</p><div class="lab-in"><input class="name" id="ltin" value="'+esc(x.tv||"")+'"'+(st==="d"?" disabled":"")+'>'+(st==="t"?'<button type="button" data-lab="tchk">Сравнить</button>':"")+'</div>'}
   if(st==="d")h+='<p class="muted">Перевод: '+esc(x.t||"—")+'</p><div class="tb-more"><button type="button" class="btn pri" data-lab="dnext">Дальше'+ic("arrow",16)+'</button></div>';
   return h;
 }
@@ -293,11 +321,114 @@ function dCheck(){
   drawRun();var t=$("#ltin");if(t)t.focus();if(!x.ok)dSay();
 }
 
+/* ---------- разговор ----------
+   Собеседник (генерация) задаёт сцену, цели и первую реплику. Ученик отвечает голосом (распознавание браузера, KR.ear)
+   или текстом; на каждую реплику — ответ собеседника, мягкая поправка и отметка выполненных целей.
+   «Закончить» — оценка по четырём критериям (задача, беглость, лексика, грамматика, по 5 баллов), исправления и фразы. */
+function vTalk(r){
+  var d=r.d,h=r.h||[],res=r.res,can=KR.ear&&KR.ear.canHear&&KR.ear.canHear();
+  var o='<h3>'+esc(d.title||"")+'</h3><p class="muted">'+esc(d.scene||"")+(d.partner?' · Собеседник: '+esc(d.partner):"")+'</p>';
+  o+='<ul class="lab-goals">'+(d.goals||[]).map(function(g,i){var ok=(r.reached||[]).indexOf(i)>=0;return '<li class="'+(ok?"ok":"")+'">'+(ok?"✓ ":"○ ")+esc(g)+'</li>'}).join("")+'</ul>';
+  o+='<div class="lab-chat">'+h.map(function(m,i){
+    if(m.r==="P")return '<div class="lab-msg p"><span'+L2()+'>'+esc(m.s)+'</span> <button type="button" class="say" data-tsay="'+i+'" aria-label="Послушать">'+ic("volume",14)+'</button>'+
+      (m.t?'<button type="button" class="linkish" data-ttr="'+i+'">перевод</button>'+(m.open?'<br><small class="muted">'+esc(m.t)+'</small>':""):"")+'</div>';
+    return '<div class="lab-msg s"><span'+L2()+'>'+esc(m.s)+'</span>'+(m.fix?'<small class="lab-fix"><s>'+esc(m.fix.bad)+'</s> → <b'+L2()+'>'+esc(m.fix.good)+'</b>'+(m.fix.why?' — '+esc(m.fix.why):"")+'</small>':"")+'</div>'}).join("")+
+    (r.wait?'<div class="lab-msg p muted">…</div>':"")+'</div>';
+  if(res){
+    o+='<div class="lab-res">'+resHead(res)+((res.fixes||[]).length?'<h4 class="lab-h4">Как сказать лучше</h4><ul class="lab-err">'+res.fixes.map(function(e){return '<li><s'+L2()+'>'+esc(e.bad)+'</s> → <b'+L2()+'>'+esc(e.good)+'</b>'+(e.why?' <span class="muted">— '+esc(e.why)+'</span>':"")+'</li>'}).join("")+'</ul>':"")+
+      ((res.learn||[]).length?'<h4 class="lab-h4">Фразы, которые стоит выучить</h4><div class="lab-gl">'+res.learn.map(function(x,i){return '<div><span'+L2()+'>'+esc(x.s)+'</span> — '+esc(x.t||"")+' '+(V.get(SRS.id(LG(),x.s))?'<small class="muted">в словаре</small>':'<button type="button" class="linkish" data-tadd="'+i+'">в словарь</button>')+'</div>'}).join("")+'</div>':"")+
+      '<div class="tb-more">'+(canSend()?'<button type="button" data-lab="tteach"'+(r.sent?" disabled":"")+'>'+(r.sent?"Отправлено":"Отправить преподавателю")+'</button>':"")+'</div></div>'+again();
+    return o;
+  }
+  if(r.ph&&(d.phrases||[]).length)o+='<div class="lab-gl">'+d.phrases.map(function(x){return '<div><span'+L2()+'>'+esc(x.s)+'</span> — '+esc(x.t||"")+'</div>'}).join("")+'</div>';
+  o+='<div class="lab-in"><input class="name"'+L2()+' id="ttin" autocomplete="off" placeholder="'+(can?"Скажи в микрофон или напиши":"Напиши ответ")+'"'+(r.wait?" disabled":"")+'>'+
+    (can?'<button type="button" class="say mic'+(r.listen?" on":"")+'" data-lab="tmic" aria-label="Сказать">'+ic("mic",16)+'</button>':"")+'<button type="button" class="btn pri" data-lab="tsend"'+(r.wait?" disabled":"")+'>Ответить</button></div>'+
+    (r.msg?'<p class="muted">'+esc(r.msg)+'</p>':"")+(r.err?'<p class="msg bad">'+esc(r.err)+'</p>':"")+
+    '<div class="tb-more">'+((d.phrases||[]).length?'<button type="button" data-lab="tph">'+(r.ph?"Скрыть фразы":"Полезные фразы")+'</button>':"")+
+    '<button type="button"'+(h.filter(function(m){return m.r==="S"}).length?' class="btn pri"':"")+' data-lab="tend"'+(r.wait||!h.some(function(m){return m.r==="S"})?" disabled":"")+'>'+(r.done?"Цели выполнены — получить оценку":"Закончить и получить оценку")+'</button></div>';
+  return o;
+}
+function hist(r){return (r.h||[]).slice(-16).map(function(m){return {who:m.r,s:m.s}})}
+async function talkSend(){
+  var r=RUN;if(!r||r.k!=="talk"||r.wait||r.res)return;var inp=$("#ttin"),v=(inp&&inp.value||"").trim();if(!v)return;
+  r.h.push({r:"S",s:v});r.wait=true;r.err="";r.msg="";drawRun();
+  try{var d=await gen("talk_turn",{scene:r.d.scene,partner:r.d.partner,goals:r.d.goals||[],history:hist(r)});
+    if(RUN!==r)return;var last=r.h[r.h.length-1];if(d.fix&&d.fix.bad&&d.fix.good)last.fix=d.fix;
+    (d.reached||[]).forEach(function(i){if(r.reached.indexOf(+i)<0)r.reached.push(+i)});
+    if(d.s){r.h.push({r:"P",s:d.s,t:d.t});KR.say(d.s,LG())}r.done=!!d.done||r.h.filter(function(m){return m.r==="S"}).length>=10}
+  catch(e){r.err=e.message}
+  r.wait=false;drawRun();var i2=$("#ttin");if(i2)i2.focus();
+}
+async function talkMic(){
+  var r=RUN;if(!r||r.listen||r.wait)return;KR.hush();r.listen=true;r.msg="Слушаю…";drawRun();
+  try{var alts=await KR.ear.recognize(LG(),{accent:KR.accent&&KR.accent(),max:12000});var inp=$("#ttin");r.listen=false;r.msg="";drawRun();inp=$("#ttin");if(inp){inp.value=alts[0]||"";inp.focus()}}
+  catch(e){r.listen=false;r.msg=KR.ear.errText(e);drawRun()}
+}
+async function talkEnd(){
+  var r=RUN;if(!r||r.wait)return;r.wait=true;r.err="";drawRun();
+  try{r.res=await gen("talk_end",{scene:r.d.scene,goals:r.d.goals||[],history:hist(r)});logLab("talk",+r.res.score||0,+r.res.max||20,r.d.title)}catch(e){r.err=e.message}
+  r.wait=false;drawRun();
+}
+async function talkTeach(){
+  var r=RUN,res=r.res||{},txt="Разговор: "+(r.d.title||"")+"\n"+(r.d.scene||"")+"\n\n"+(r.h||[]).map(function(m){return (m.r==="P"?"Собеседник: ":"Ученик: ")+m.s}).join("\n")+
+    "\n\nОценка: "+(res.score||0)+"/"+(res.max||20)+(res.criteria||[]).map(function(c){return "\n"+c.name+": "+c.score+"/"+c.max}).join("")+(res.fixes||[]).map(function(e){return "\n• "+e.bad+" → "+e.good}).join("");
+  r.sent=await toTeacher((LG()==="ko"?"말하기":"Speaking")+" · "+level(),txt);drawRun();
+}
+
+/* ---------- итог недели ----------
+   Из журнала ответов (kr_wlog, js/vocab.js), словаря и журнала «Практики» (kr_labstat): дни занятий, ответы и точность,
+   новые слова, что ждёт на следующей неделе, трудные слова, тексты, письмо и разговор с оценками, советы. */
+function plural(n,a,b,c){n=Math.abs(n)%100;var m=n%10;return n>10&&n<20?c:m===1?a:m>=2&&m<=4?b:c}
+function dk(t){var d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function weekStats(){
+  var now=Date.now(),from=SRS.dayStart(now)-6*DAY,log={};try{log=JSON.parse(localStorage.getItem("kr_wlog:"+KR.user())||"{}")||{}}catch(e){}
+  var days=[],n=0,r=0,ok=0;for(var i=6;i>=0;i--){var k=dk(now-i*DAY),x=log[k]||{n:0,r:0,ok:0};days.push({k:k,a:x.n+x.r});n+=x.n;r+=x.r;ok+=x.ok}
+  var lab=labLog().filter(function(x){return x.t>=from}),all=V.all(),l=LG();
+  var act=days.filter(function(d){return d.a}).length;lab.forEach(function(x){var k=dk(x.t);if(!days.some(function(d){return d.k===k&&d.a}))act++});
+  var hard=all.filter(function(c){return c.lr&&c.lr>=from&&((c.lap||0)+(c.pe||0)+(c.tc||0))>0}).sort(function(a,b){return (b.lap||0)+(b.pe||0)-(a.lap||0)-(a.pe||0)}).slice(0,10);
+  var next=all.filter(function(c){return c.st&&c.due<SRS.dayStart(now)+8*DAY}).length;
+  var added=all.filter(function(c){return (c.a||0)>=from}).length,learned=all.filter(function(c){return c.st===2&&(c.fr||0)>=from}).length;
+  return {days:Math.min(7,act),bars:days,ans:n+r,acc:n+r?Math.round(ok/(n+r)*100):0,fresh:n,rev:r,lab:lab,hard:hard,next:next,added:added,learned:learned,total:all.length};
+}
+var LK={listen:"аудирование",read:"чтение",exam:"экзамен",write:"письмо","exam-write":"письмо (экзамен)",trans:"перевод",dict:"диктант",talk:"разговор"};
+function advice(w){var a=[];
+  if(w.days<4)a.push("Занимайся понемногу, но чаще: 10 минут каждый день работают лучше, чем час раз в неделю.");
+  if(w.ans>=20&&w.acc<70)a.push("Точность ниже 70%: возьми меньше новых слов в день («Слова» → «Настройки») и повтори трудные.");
+  if(w.ans>=20&&w.acc>=90)a.push("Отличная точность. Можно брать больше новых слов или перейти к текстам и разговору.");
+  if(!w.lab.some(function(x){return x.k==="talk"}))a.push("Попробуй «Разговор»: так слова переходят в речь.");
+  if(!w.lab.some(function(x){return x.k==="write"||x.k==="exam-write"}))a.push("Напиши короткий текст в «Письме» — с чек-листом и проверкой это 10 минут.");
+  if(w.hard.length)a.push("Трудных слов на этой неделе: "+w.hard.length+". Повтори их отдельно — кнопка ниже.");
+  return a.slice(0,4)}
+function vWeek(){
+  var w=weekStats(),mx=Math.max(1,Math.max.apply(null,w.bars.map(function(b){return b.a}))),DN=["вс","пн","вт","ср","чт","пт","сб"];
+  var by={};w.lab.forEach(function(x){(by[x.k]=by[x.k]||[]).push(x)});
+  var h='<div class="lab-stat">'+[[w.days+"/7","дней занятий"],[w.ans,"ответов"],[w.ans?w.acc+"%":"—","верно"],[w.learned,"слов выучено"],[w.added,"слов добавлено"],[w.next,"повторений на неделю вперёд"]].map(function(x){return '<div><b>'+x[0]+'</b><span class="muted">'+x[1]+'</span></div>'}).join("")+'</div>';
+  h+='<div class="lab-bars">'+w.bars.map(function(b){return '<div><i style="--h:'+Math.round(b.a/mx*100)+'%"'+(b.a?"":' class="z"')+'></i><small>'+DN[new Date(b.k+"T00:00").getDay()]+'</small></div>'}).join("")+'</div>';
+  if(Object.keys(by).length)h+='<h4 class="lab-h4">Практика</h4><ul class="lab-ok">'+Object.keys(by).map(function(k){var a=by[k],sc=a.filter(function(x){return x.m}),p=sc.length?Math.round(sc.reduce(function(s,x){return s+x.s/x.m},0)/sc.length*100):null;
+    return '<li>'+esc(LK[k]||k)+': '+a.length+(p!==null?' · в среднем '+p+'%':"")+'</li>'}).join("")+'</ul>';
+  if(w.hard.length)h+='<h4 class="lab-h4">Трудные слова недели</h4><div class="tb-prev">'+w.hard.map(function(c){return '<span class="chip"><b'+(c.l==="ko"?' class="ko"':"")+' lang="'+c.l+'">'+esc(c.w)+'</b>&nbsp;· '+esc(glossB(c))+'</span>'}).join("")+'</div>';
+  var ad=advice(w);if(ad.length)h+='<h4 class="lab-h4">Советы</h4><ul class="lab-hints">'+ad.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul>';
+  h+='<div class="fin-acts">'+(w.hard.length?'<button type="button" class="btn pri" data-lab="whard">Повторить трудные</button>':"")+(canSend()?'<button type="button" data-lab="wsend"'+(RUN.sent?" disabled":"")+'>'+(RUN.sent?"Отправлено":"Отправить преподавателю")+'</button>':"")+'<button type="button" data-lab="back">К выбору</button></div>';
+  return h;
+}
+async function weekSend(){
+  var w=weekStats(),by={};w.lab.forEach(function(x){(by[x.k]=by[x.k]||[]).push(x)});
+  var t="Дней занятий: "+w.days+" из 7\nОтветов в словах: "+w.ans+(w.ans?" ("+w.acc+"% верно)":"")+"\nВыучено слов: "+w.learned+", добавлено: "+w.added+"\nПовторений на следующую неделю: "+w.next+
+    (Object.keys(by).length?"\nПрактика: "+Object.keys(by).map(function(k){return (LK[k]||k)+" ×"+by[k].length}).join(", "):"")+
+    (w.hard.length?"\nТрудные слова: "+w.hard.map(function(c){return c.w}).join(", "):"");
+  RUN.sent=await toTeacher("Итог недели",t);drawRun();
+}
+
 /* ---------- события ---------- */
 document.addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b||!b.closest("#lab"))return;var d=b.dataset;
+  if(d.x==="cx-cfg"&&!ONW){location.href="words.html?tab=prefs";return}
   if(d.ll){L.l=d.ll;L.sc=L.sc.filter(function(k){return k.indexOf("set:")<0});save();return draw()}
   if(d.ld){L.dir=d.ld;save();return draw()}
+  if(d.lb){L.base=Object.assign({},L.base);L.base[LG()]=d.lb;L.gl=[];save();return draw()}
+  if(d.tadd!==undefined){var ta3=((RUN.res||{}).learn||[])[+d.tadd]||((RUN.d||{}).phrases||[])[+d.tadd];if(ta3){addW(LG(),ta3.s,ta3.t||"",{src:"lab"});drawRun()}return}
+  if(d.tsay!==undefined){var hl=(RUN.h||[])[+d.tsay];if(hl)KR.say(hl.s,LG());return}
+  if(d.ttr!==undefined){var ht=(RUN.h||[])[+d.ttr];if(ht){ht.open=!ht.open;drawRun()}return}
   if(d.lg){var g=curGl().slice(),i=g.indexOf(d.lg);if(i>=0){if(g.length>1)g.splice(i,1)}else g.push(d.lg);L.gl=g;save();return draw()}
   if(d.ls){var a=L.sc.slice(),j=a.indexOf(d.ls);if(j>=0){if(a.length>1)a.splice(j,1)}else a.push(d.ls);L.sc=a;save();return draw()}
   if(d.ln){L.n=+d.ln;save();return draw()}
@@ -320,6 +451,13 @@ document.addEventListener("click",function(e){
   if(d.wsend)return wSend(d.wsend);
   var k=d.lab;if(!k)return;
   if(k==="back")return back();
+  if(k==="tsend")return talkSend();
+  if(k==="tmic")return talkMic();
+  if(k==="tph"){RUN.ph=!RUN.ph;return drawRun()}
+  if(k==="tend")return talkEnd();
+  if(k==="tteach")return talkTeach();
+  if(k==="wsend")return weekSend();
+  if(k==="whard"){L.sc=["hard"];save();RUN=null;draw();return go("train")}
   if(k==="play"){KR.hush();return playLines(RUN.d.lines||[],0)}
   if(k==="slow"){KR.hush();return playLines(RUN.d.lines||[],0,.7)}
   if(k==="pause"){RUN.tok++;KR.hush();RUN.playing=-1;return mark()}
@@ -343,7 +481,9 @@ document.addEventListener("input",function(e){
     var sb=document.querySelector('[data-wsend="'+t.dataset.wt+'"]');if(sb&&!w.sent)sb.disabled=!w.text.trim()}
 });
 document.addEventListener("change",function(e){var t=e.target;if(t.dataset&&t.dataset.cl){var p=t.dataset.cl.split(":"),w=RUN.w[p[0]];w.cl=w.cl||{};w.cl[p[1]]=t.checked}});
+document.addEventListener("change",function(e){var t=e.target;if(t.dataset&&t.dataset.ltopic!==undefined){L.topic=t.value.trim().slice(0,120);save()}});
 document.addEventListener("keydown",function(e){
+  if(e.key==="Enter"&&!e.shiftKey&&e.target&&e.target.id==="ttin"){e.preventDefault();return talkSend()}
   if(e.key!=="Enter"||!RUN||RUN.k!=="dict")return;var id=e.target&&e.target.id;
   if(id==="ldin"){e.preventDefault();dCheck()}else if(id==="ltin"){e.preventDefault();var x=RUN.items[RUN.i];x.tv=e.target.value;x.stage="d";drawRun();var nb=$('[data-lab="dnext"]');if(nb)nb.focus()}
 });

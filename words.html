@@ -340,7 +340,7 @@ function start(mode,scoped,ids,lab){
 function stop(soft){if(soft&&S&&S.mode==='day'&&S.done){KR.hush();EAR.stop();clearTimeout(S.timer);return finishDay()}   // крестик посреди занятия: предложить упражнения по пройденному
   V.sessEnd(false);KR.hush();EAR.stop();S=null;$('#play').hidden=true;$('#play').innerHTML='';drawAll()}
 function nextCard(){
-  if(!S)return;KR.hush();EAR.stop();clearTimeout(S.timer);S.tok=(S.tok||0)+1;S.hint=false;S.peekId=null;S.tries=0;S.gx=null;
+  if(!S)return;KR.hush();EAR.stop();clearTimeout(S.timer);S.tok=(S.tok||0)+1;S.t0=Date.now();S.hint=false;S.peekId=null;S.tries=0;S.gx=null;
   if(S.mode==='ear'){
     if(S.qi>=S.queue.length)return finishEar();
     var it=S.queue[S.qi],ce=V.get(it.id);if(!ce){S.queue.splice(S.qi,1);return nextCard()}
@@ -511,9 +511,11 @@ function finishNew(){
 function grade(g,auto){
   if(S.mode==='ear')return earGrade(g>1,auto);
   if(S.mode==='free')return freeGrade(g,auto);
-  var c=V.answer(S.card.id,g,S.mode==='train'?S.game:undefined);S.done++;if(g>1)S.right++;else S.wrong++;
+  var tx=null,tg=null,c0=S.card;
+  if(S.mode==='train'){tx={ms:Date.now()-(S.t0||Date.now()),len:units(c0).length,clean:S.missed.indexOf(c0.id)<0};tg=SRS.gameGrade(V.get(c0.id)||c0,S.game,g,V.settings(),tx)}
+  var c=V.answer(S.card.id,g,S.mode==='train'?S.game:undefined,tx);S.done++;if(g>1)S.right++;else{S.wrong++;if(S.missed.indexOf(c.id)<0)S.missed.push(c.id)}
   if(S.mode==='day'){S.qi++;if(S.seen.indexOf(c.id)<0)S.seen.push(c.id);if(g===1&&!S.rq[c.id]){S.rq[c.id]=1;S.queue.push(c.id)}}   // «Снова» — ещё раз в конце карточек
-  var fb=$('#fb');if(fb)fb.insertAdjacentHTML('beforeend','<div class="muted back-in">Вернётся через '+(c.st===2?SRS.span(c.ivl*SRS.DAY):SRS.span(Math.max(0,c.due-Date.now())))+'</div>');
+  var fb=$('#fb');if(fb)fb.insertAdjacentHTML('beforeend','<div class="muted back-in">'+(tg?'Оценка: <b>'+RATE[tg.g-1][1]+'</b>'+(tg.why?' — '+esc(tg.why):'')+'. ':'')+'Вернётся через '+(c.st===2?SRS.span(c.ivl*SRS.DAY):SRS.span(Math.max(0,c.due-Date.now())))+'</div>');
   drawToday();
   if(auto)S.timer=setTimeout(nextCard,KR.calm()?600:1100);
   else{var b=$('#nextb');if(b){b.hidden=false;b.focus()}else nextCard()}
@@ -1425,6 +1427,7 @@ if(KR.require()){KR.topbar('words');drawAll();KR.load().then(function(){
   var hs=location.hash,pl=V.plan(DL());
   if(hs==='#day'||hs==='#new'||hs==='#rev'){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
     if(pl.fresh.length+pl.learn.length+pl.rev.length)start('day');else if(pl.soon.length)start('rev')}
+  if(URLP.get('tab')==='prefs'){try{history.replaceState(null,'',location.pathname)}catch(e){}setTab('prefs');var cxp=$('#cxcfg');if(cxp)cxp.scrollIntoView({block:'start'})}
   if(hs==='#export'){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}var xb=document.querySelector('[data-x="export"]');if(xb)xb.click()}
 })}
 </script>

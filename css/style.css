@@ -1884,3 +1884,25 @@ html:has(body.has-tabs){scroll-padding-bottom:calc(100px + env(safe-area-inset-b
 .lab-ok,.lab-err{margin:6px 0;padding-left:18px}
 .lab .ok{color:var(--ok-fg)}.lab .bad{color:var(--bad-fg)}
 .lab .opts button.ok{color:var(--ink)}.lab .opts button.bad{color:var(--ink)}
+.lab-week{display:flex;align-items:center;gap:12px;width:100%;margin:4px 0 12px;padding:12px 16px;border-radius:16px;border:1px solid var(--rule);background:var(--fill);color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.lab-week span{flex:1;display:flex;flex-direction:column}.lab-week small{font-size:13px}
+.lab-topic{flex:1;min-width:200px}
+.lab-crit{display:grid;gap:8px;margin:10px 0}
+.lab-crit div{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.lab-crit i{grid-column:1/-1;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--accent) var(--p),var(--track) var(--p))}
+.lab-crit small{grid-column:1/-1}
+.lab-goals{list-style:none;padding:0;margin:8px 0;display:grid;gap:4px;font-size:14px}
+.lab-chat{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.lab-msg{max-width:85%;padding:10px 14px;border-radius:16px;line-height:1.5}
+.lab-msg.p{align-self:flex-start;background:var(--fill);border:1px solid var(--rule)}
+.lab-msg.s{align-self:flex-end;background:rgba(212,175,124,.16);border:1px solid rgba(212,175,124,.4)}
+.lab-fix{display:block;margin-top:4px;font-size:13px;color:var(--fg-2)}
+.lab-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:110px;margin:14px 0}
+.lab-bars div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
+.lab-bars i{display:block;width:70%;height:var(--h);min-height:3px;border-radius:6px 6px 2px 2px;background:var(--accent)}
+.lab-bars i.z{background:var(--track)}
+.lab-bars small{font-size:12px;color:var(--fg-2)}
+.lab-stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.lab-stat div{display:flex;flex-direction:column;gap:2px;padding:10px;border-radius:14px;background:var(--fill);border:1px solid var(--rule);min-width:0}
+.lab-stat b{font-family:var(--font-display);font-size:24px;line-height:1.1}
+.lab-stat span{font-size:12.5px;line-height:1.3}
