@@ -6,7 +6,7 @@
 //        kind: listen | read | exam | write | check | sent | trcheck | talk | talk_turn | talk_end
 //        base: "ru" | "en" | "ko" — язык переводов, пояснений и подсказок (корейский через английский и наоборот); по умолчанию ru
 // Выход: JSON задания (формат — в SPEC ниже) или { error, message }.
-// Секреты (один из): GEMINI_API_KEY — бесплатный ключ Google AI Studio (gemini-2.5-flash, лимиты бесплатного тарифа);
+// Секреты (один из): GEMINI_API_KEY — бесплатный ключ Google AI Studio (самая новая Flash из списка моделей ключа, лимиты бесплатного тарифа);
 //   OPENAI_API_KEY — платный OpenAI (gpt-4o-mini) или ключ OpenAI-совместимого шлюза с OPENAI_BASE_URL. GEN_MODEL — своя модель.
 // SUPABASE_URL и SUPABASE_ANON_KEY функция получает сама: вход проверяется функцией is_teacher (логин и PIN).
 
@@ -151,20 +151,39 @@ JSON: {"res": [{"v": "ok"|"part"|"no", "fix": "corrected translation", "why": "s
   return "";
 }
 
-/* Модель: OpenAI или любой OpenAI-совместимый адрес (OPENAI_BASE_URL). Бесплатно — Gemini:
-   секрет GEMINI_API_KEY (ключ из aistudio.google.com) — тогда адрес и модель (gemini-2.5-flash) подставляются сами. */
-function provider() {
+/* Модель: OpenAI или любой OpenAI-совместимый адрес (OPENAI_BASE_URL). Бесплатно — Gemini (секрет GEMINI_API_KEY):
+   адрес подставляется сам, модель — см. geminiModel. */
+/* Модель Gemini: своя (секрет GEN_MODEL / STT_MODEL) или самая новая стабильная Flash из списка моделей ключа.
+   Google меняет модели (старые закрывает для новых ключей), поэтому название не зашито: список берётся один раз
+   на запуск функции, при ответе 404 — заново. */
+let PICKED = "";
+async function geminiModel(force = false) {
+  if (PICKED && !force) return PICKED;
+  try {
+    const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200", { headers: { "x-goog-api-key": env("GEMINI_API_KEY") }, signal: AbortSignal.timeout(10000) });
+    const j = await r.json();
+    const names: string[] = (j.models || []).filter((m: any) => (m.supportedGenerationMethods || []).includes("generateContent")).map((m: any) => String(m.name).replace(/^models\//, ""));
+    const ver = (n: string) => (n.match(/gemini-(\d+(?:\.\d+)?)/) || [])[1] || "0";
+    const flash = names.filter((n) => /^gemini-\d+(\.\d+)?-flash$/.test(n));
+    const loose = names.filter((n) => /flash/.test(n) && !/lite|image|tts|live|audio|thinking|exp|preview|embed/.test(n));
+    const pool = flash.length ? flash : loose;
+    pool.sort((a, b) => parseFloat(ver(b)) - parseFloat(ver(a)));
+    PICKED = pool[0] || (names.includes("gemini-flash-latest") ? "gemini-flash-latest" : "");
+  } catch (e) { console.error("models", e); }
+  return PICKED || "gemini-flash-latest";
+}
+async function provider(force = false) {
   if (env("GEMINI_API_KEY") && !env("OPENAI_API_KEY"))
-    return { url: "https://generativelanguage.googleapis.com/v1beta/openai", key: env("GEMINI_API_KEY"), model: env("GEN_MODEL") || "gemini-2.5-flash" };
+    return { url: "https://generativelanguage.googleapis.com/v1beta/openai", key: env("GEMINI_API_KEY"), model: env("GEN_MODEL") || await geminiModel(force), gemini: true };
   let url = (env("OPENAI_BASE_URL") || "https://api.openai.com/v1").replace(/\/+$/, "");
   if (!/\/v\d[^/]*(\/openai)?$/.test(url) && !/\/openai$/.test(url)) url += "/v1";   // https://host → https://host/v1
-  return { url, key: env("OPENAI_API_KEY"), model: env("GEN_MODEL") || "gpt-4o-mini" };
+  return { url, key: env("OPENAI_API_KEY"), model: env("GEN_MODEL") || "gpt-4o-mini", gemini: false };
 }
 function parseJson(txt: string) {
   try { return JSON.parse(txt); } catch { const m = txt.match(/\{[\s\S]*\}/); if (m) return JSON.parse(m[0]); throw new Error("not json"); }
 }
 async function llm(system: string, user: string, temp: number) {
-  const P = provider();
+  let P = await provider();
   const call = (fmt: boolean) => fetch(`${P.url}/chat/completions`, {
     method: "POST",
     headers: { Authorization: `Bearer ${P.key}`, "Content-Type": "application/json" },
@@ -175,6 +194,7 @@ async function llm(system: string, user: string, temp: number) {
     signal: AbortSignal.timeout(90000),
   });
   let r = await call(true);
+  if (r.status === 404 && P.gemini && !env("GEN_MODEL")) { P = await provider(true); r = await call(true); }   // модель закрыли: берём новую из списка
   if (r.status === 400) r = await call(false);   // шлюз не знает response_format: просим JSON словами
   if (!r.ok) throw new Error(`llm ${r.status}: ${(await r.text()).slice(0, 200)}`);
   const j = await r.json();

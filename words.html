@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Playfair+Display+SC:wght@400;700&family=Jost:wght@400;500;600;700&family=Comforter+Brush&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=5">
+<link rel="stylesheet" href="css/style.css?v=8">
 <style>/* во время отработки список слов с переводами не виден: иначе перевод подсматривается прямо под карточкой */
 #play:not([hidden]) ~ #tabs,#play:not([hidden]) ~ #list,#play:not([hidden]) ~ #stats,#play:not([hidden]) ~ #prefs{display:none!important}</style>
 </head>
@@ -28,7 +28,7 @@
   <section id="stats" hidden></section>
   <section id="prefs" hidden></section>
 </main>
-<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/srs.js"></script><script src="js/wexport.js"></script><script src="js/vocab.js"></script><script src="js/words2.js"></script><script src="js/meaning.js"></script><script src="js/dict.js"></script><script src="js/ear.js"></script><script src="js/assistant.js"></script><script src="js/lookup.js?v=2"></script>
+<script src="data/materials.js"></script><script src="js/config.js"></script><script src="js/common.js?v=8"></script><script src="js/srs.js?v=8"></script><script src="js/wexport.js"></script><script src="js/vocab.js?v=8"></script><script src="js/words2.js"></script><script src="js/meaning.js"></script><script src="js/dict.js"></script><script src="js/ear.js?v=8"></script><script src="js/assistant.js"></script><script src="js/lookup.js?v=2"></script>
 <script>
 /* Тренажёр слов. Расписание как в Anki (js/srs.js), игры взяты из тренажёра группы 2724:
    карточки, выбор перевода на слух, слово в предложении, письмо, сборка слова, поиск пары.
@@ -302,8 +302,8 @@ function choose(c,d){
   if(!c.st&&S&&S.mode==='train'){   // после знакомства — узнавание, если его нет — что получится
     var fr=['tr','build','ctx','hear','wr','mean','dict','say','cards'].filter(function(g){return f.indexOf(g)>=0});return fr[0]||'cards'}
   if(!c.st)return f.indexOf('cards')>=0?'cards':'intro';                 // новое слово сначала показываем
-  if(S&&S.mode==='train'&&SRS.lastStep(c,V.settings())){   // выпуск в повторение — только за вспоминание (SRS.game)
-    var rc=SRS.RECALL.filter(function(g){return f.indexOf(g)>=0&&g!=='cards'&&g!=='rcards'});if(rc.length)return rc[Math.floor(Math.random()*rc.length)]}
+  if(S&&S.mode==='train'&&SRS.lastStep&&SRS.lastStep(c,V.settings())){   // выпуск в повторение — только за вспоминание (SRS.game)
+    var rc=(SRS.RECALL||['wr','say','mean']).filter(function(g){return f.indexOf(g)>=0&&g!=='cards'&&g!=='rcards'});if(rc.length)return rc[Math.floor(Math.random()*rc.length)]}
   var ct=ctNow();
   if(ct!=='mix'){
     if(ct==='basic')return 'cards';
@@ -512,7 +512,7 @@ function grade(g,auto){
   if(S.mode==='ear')return earGrade(g>1,auto);
   if(S.mode==='free')return freeGrade(g,auto);
   var tx=null,tg=null,c0=S.card;
-  if(S.mode==='train'){tx={ms:Date.now()-(S.t0||Date.now()),len:units(c0).length,clean:S.missed.indexOf(c0.id)<0};tg=SRS.gameGrade(V.get(c0.id)||c0,S.game,g,V.settings(),tx)}
+  if(S.mode==='train'){tx={ms:Date.now()-(S.t0||Date.now()),len:units(c0).length,clean:S.missed.indexOf(c0.id)<0};tg=SRS.gameGrade?SRS.gameGrade(V.get(c0.id)||c0,S.game,g,V.settings(),tx):null}
   var c=V.answer(S.card.id,g,S.mode==='train'?S.game:undefined,tx);S.done++;if(g>1)S.right++;else{S.wrong++;if(S.missed.indexOf(c.id)<0)S.missed.push(c.id)}
   if(S.mode==='day'){S.qi++;if(S.seen.indexOf(c.id)<0)S.seen.push(c.id);if(g===1&&!S.rq[c.id]){S.rq[c.id]=1;S.queue.push(c.id)}}   // «Снова» — ещё раз в конце карточек
   var fb=$('#fb');if(fb)fb.insertAdjacentHTML('beforeend','<div class="muted back-in">'+(tg?'Оценка: <b>'+RATE[tg.g-1][1]+'</b>'+(tg.why?' — '+esc(tg.why):'')+'. ':'')+'Вернётся через '+(c.st===2?SRS.span(c.ivl*SRS.DAY):SRS.span(Math.max(0,c.due-Date.now())))+'</div>');
@@ -1431,6 +1431,6 @@ if(KR.require()){KR.topbar('words');drawAll();KR.load().then(function(){
   if(hs==='#export'){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}var xb=document.querySelector('[data-x="export"]');if(xb)xb.click()}
 })}
 </script>
-<script src="js/wlab.js"></script>
+<script src="js/wlab.js?v=8"></script>
 </body>
 </html>
