@@ -1500,7 +1500,7 @@ html[data-theme=day][data-lang=en],html[data-theme=day] .lc[data-l=en]{--scene:u
 html[data-theme=day]:is([data-lang=ko],[data-lang=en]) header.band:not(.slim)::before{
   background:var(--scene) 50% calc(100% - 15px)/var(--sw) auto no-repeat,
     radial-gradient(calc(var(--sw)*.46) 120px at 50% calc(100% - 64px),rgba(246,194,122,.35),rgba(170,190,215,.2) 44%,rgba(247,240,227,0) 76%)}
-html[data-theme=day] .lc-art{background:var(--scene) 50% 100%/760px auto no-repeat,radial-gradient(60% 90px at 50% 100%,rgba(246,194,122,.3),rgba(247,240,227,0) 75%)}
+html[data-theme=day] .lc-art{background:var(--scene) 50% calc(100% + var(--lcy,0px))/760px auto no-repeat,radial-gradient(60% 90px at 50% 100%,rgba(246,194,122,.3),rgba(247,240,227,0) 75%)}
 html[data-theme=day] header.band .hero-cta a.pri{background:#1E2A56;color:#E6CDA3;box-shadow:0 14px 30px -14px rgba(30,42,86,.55)}
 html[data-theme=day] header.band .hero-cta a.pri:hover{background:#27356B;color:#F4DDB0}
 html[data-theme=day] header.band .hero-cta a.ghost{background:rgba(253,249,241,.75);color:#1E2A56;border-color:rgba(30,42,86,.4)}
@@ -1835,3 +1835,7 @@ html[data-theme=day] .cb-tip{background:rgba(255,252,246,.55);-webkit-backdrop-f
 @media(max-width:640px){.cb-hello .cb-hart{-webkit-mask-image:linear-gradient(180deg,#000 70%,transparent);mask-image:linear-gradient(180deg,#000 70%,transparent)}}
 
 @keyframes rayspin{to{transform:rotate(360deg)}}
+
+/* карточки языков днём: у дневных пейзажей внизу пустое поле (≈20% высоты) — опускаем рисунок, чтобы вода стояла у края карточки, а не наезжала на текст */
+html[data-theme=day] .lc[data-l=ko]{--lcy:44px}
+html[data-theme=day] .lc[data-l=en]{--lcy:52px}
